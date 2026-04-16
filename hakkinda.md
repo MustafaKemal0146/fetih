@@ -26,8 +26,9 @@ Proje, kullanıcıya dosya işlemleri, terminal komut çalıştırma (`shell`) v
 * `src/config/settings.ts`: Konfigürasyon yönetimi. Configler `~/.seth/settings.json` lokasyonunda tutulur.
 * `src/renderer.ts`: Renklendirme ve spinnner modülüdür. *Son haldeki "çift yazdırma" hataları burada onarıldı.*
 
-## 4. Mevcut Araçlar (Tools) — v1.1
-SETH şu an **8 adet yerleşik araç** ile geliyor:
+## 4. Mevcut Araçlar (Tools)
+SETH artık **40+ yerleşik araç** ile geliyor (dosya, arama, web, git, bellek, alt-ajan, MCP, siber araçlar ve browser otomasyonu dahil).
+Aşağıdaki tablo yalnızca temel çekirdek araçları örneklemek içindir:
 
 | Araç | Açıklama |
 |------|----------|

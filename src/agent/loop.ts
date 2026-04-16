@@ -172,9 +172,8 @@ export async function runAgentLoop(
       break;
     }
 
-    // Execute tools
-    const toolResults: ContentBlock[] = [];
-    for (const toolBlock of toolUseBlocks) {
+    // Execute tools in parallel (same-turn bağımsız çağrılar)
+    const executed = await Promise.all(toolUseBlocks.map(async (toolBlock) => {
       if (options.onToolCall) options.onToolCall(toolBlock.name, toolBlock.input);
 
       if (toolBlock.name === 'sethEngine') {
@@ -196,15 +195,19 @@ export async function runAgentLoop(
         options.cwd,
       );
 
-      allToolCalls.push(record);
-
       if (options.onToolResult) options.onToolResult(toolBlock.name, result.output, result.isError ?? false, result.data);
 
+      return { toolBlock, result, record };
+    }));
+
+    const toolResults: ContentBlock[] = [];
+    for (const item of executed) {
+      allToolCalls.push(item.record);
       toolResults.push({
         type: 'tool_result',
-        tool_use_id: toolBlock.id,
-        content: result.output,
-        is_error: result.isError,
+        tool_use_id: item.toolBlock.id,
+        content: item.result.output,
+        is_error: item.result.isError,
       });
     }
 
