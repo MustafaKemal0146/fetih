@@ -56,16 +56,22 @@ async function run(toolName: string, args: string[], cwd: string): Promise<ToolR
     let out = '', err = '';
     let timedOut = false;
     let settled = false;
+    let forceKillTimer: NodeJS.Timeout | null = null;
 
     const timer = setTimeout(() => {
       timedOut = true;
-      try { child.kill('SIGKILL'); } catch {}
+      try { child.kill('SIGTERM'); } catch {}
+      forceKillTimer = setTimeout(() => {
+        if (settled) return;
+        try { child.kill('SIGKILL'); } catch {}
+      }, 1_500);
     }, DEFAULT_EXTERNAL_TIMEOUT_MS);
 
     const finish = (code: number | null) => {
       if (settled) return;
       settled = true;
       clearTimeout(timer);
+      if (forceKillTimer) clearTimeout(forceKillTimer);
       const merged = (out + (err ? `\n[STDERR]\n${err}` : '')).trim();
       const timeoutText = timedOut ? `\n\n(zaman aşımı: ${DEFAULT_EXTERNAL_TIMEOUT_MS}ms)` : '';
       resolve({
@@ -81,6 +87,7 @@ async function run(toolName: string, args: string[], cwd: string): Promise<ToolR
       if (settled) return;
       settled = true;
       clearTimeout(timer);
+      if (forceKillTimer) clearTimeout(forceKillTimer);
       resolve({ output: `${t.name} çalıştırılamadı: ${e.message}`, isError: true });
     });
   });

@@ -5,6 +5,9 @@ on:
     branches:
       - '**'
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -35,4 +38,3 @@ jobs:
 
       - name: Linux release dry-run
         run: npm run release:linux:dry-run
-

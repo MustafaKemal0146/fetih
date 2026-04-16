@@ -33,6 +33,7 @@ interface ToolMetricsSummary {
 const METRICS_DIR = join(homedir(), '.seth', 'metrics');
 const EVENTS_FILE = join(METRICS_DIR, 'tool-events.jsonl');
 const SUMMARY_FILE = join(METRICS_DIR, 'tool-metrics-summary.json');
+let summaryWriteQueue: Promise<void> = Promise.resolve();
 
 function makeBucket(): MetricBucket {
   return {
@@ -66,27 +67,29 @@ export async function logToolMetric(event: ToolMetricEvent): Promise<void> {
   try {
     await mkdir(METRICS_DIR, { recursive: true });
     await appendFile(EVENTS_FILE, JSON.stringify(event) + '\n', 'utf8');
-
-    let summary: ToolMetricsSummary = {
-      updatedAt: event.timestamp,
-      totals: makeBucket(),
-      tools: {},
-    };
-
-    try {
-      const raw = await readFile(SUMMARY_FILE, 'utf8');
-      summary = JSON.parse(raw) as ToolMetricsSummary;
-    } catch {
-      // no summary yet
-    }
-
-    summary.updatedAt = event.timestamp;
-    summary.totals = updateBucket(summary.totals ?? makeBucket(), event);
-    summary.tools[event.toolName] = updateBucket(summary.tools[event.toolName] ?? makeBucket(), event);
-
-    await writeFile(SUMMARY_FILE, JSON.stringify(summary, null, 2), 'utf8');
+    summaryWriteQueue = summaryWriteQueue
+      .then(async () => {
+        let summary: ToolMetricsSummary = {
+          updatedAt: event.timestamp,
+          totals: makeBucket(),
+          tools: {},
+        };
+        try {
+          const raw = await readFile(SUMMARY_FILE, 'utf8');
+          summary = JSON.parse(raw) as ToolMetricsSummary;
+        } catch {
+          // no summary yet
+        }
+        summary.updatedAt = event.timestamp;
+        summary.totals = updateBucket(summary.totals ?? makeBucket(), event);
+        summary.tools[event.toolName] = updateBucket(summary.tools[event.toolName] ?? makeBucket(), event);
+        await writeFile(SUMMARY_FILE, JSON.stringify(summary, null, 2), 'utf8');
+      })
+      .catch(() => {
+        // keep queue alive
+      });
+    await summaryWriteQueue;
   } catch {
     // telemetry should never break the tool path
   }
 }
-
