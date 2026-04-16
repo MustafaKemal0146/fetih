@@ -65,13 +65,15 @@ class SETHWorker:
     # --- 2. Sızıntı Verisi (Breach-Feeder) ---
     def execute_breach_query(self, domain):
         self.log_json(f"Sızıntı Veritabanı Sorgulanıyor (OSINT): {domain}", "WARNING")
-        # Simülasyon: HaveIBeenPwned / Local DB entegrasyonu
-        mock_leaks = [
-            {"user": f"admin@{domain}", "pass": "123456", "source": "2023_Global_Leak"},
-            {"user": f"it_support@{domain}", "pass": "Spring2024!", "source": "Combo_List_v4"}
-        ]
-        self.state["leaks"].extend(mock_leaks)
-        return mock_leaks
+        # Simülasyon: Gerçek kullanıcı/parola üretmez, yalnızca yüksek seviye OSINT özeti döner.
+        summary = {
+            "domain": domain,
+            "breach_hits": 0,
+            "sources_checked": ["public_breach_index_sim"],
+            "note": "Bu çıktı gerçek kimlik bilgisi içermez. Ayrıntı için yetkili resmi servislerle doğrulama gerekir."
+        }
+        self.state["leaks"].append(summary)
+        return summary
 
     # --- 3. Operasyon Haritası (Get State) ---
     def get_operation_map(self):
