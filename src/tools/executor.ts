@@ -5,6 +5,7 @@
 import type { ToolDefinition, ToolResult, ToolPermissionConfig, ToolCallRecord, PermissionLevel } from '../types.js';
 import type { ToolRegistry } from './registry.js';
 import { isToolAllowed } from './permission.js';
+import { EXTERNAL_TIMEOUT_OUTPUT_FRAGMENT } from './external-tool.js';
 import * as readline from 'readline';
 import chalk from 'chalk';
 import { cmd } from '../theme.js';
@@ -58,7 +59,7 @@ export class ToolExecutor {
     const finalize = async (result: ToolResult): Promise<{ result: ToolResult; record: ToolCallRecord }> => {
       const durationMs = Date.now() - startTime;
       const isError = result.isError ?? false;
-      const isTimeout = /zaman aşımı:\s*\d+ms/i.test(result.output);
+      const isTimeout = result.output.includes(EXTERNAL_TIMEOUT_OUTPUT_FRAGMENT);
       await logToolMetric({
         timestamp: new Date().toISOString(),
         toolName,

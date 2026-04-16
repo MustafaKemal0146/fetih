@@ -33,7 +33,8 @@ interface ToolMetricsSummary {
 const METRICS_DIR = join(homedir(), '.seth', 'metrics');
 const EVENTS_FILE = join(METRICS_DIR, 'tool-events.jsonl');
 const SUMMARY_FILE = join(METRICS_DIR, 'tool-metrics-summary.json');
-let summaryWriteQueue: Promise<void> = Promise.resolve();
+let pendingSummaryEvents: ToolMetricEvent[] = [];
+let summaryFlushInFlight: Promise<void> | null = null;
 
 function makeBucket(): MetricBucket {
   return {
@@ -67,29 +68,50 @@ export async function logToolMetric(event: ToolMetricEvent): Promise<void> {
   try {
     await mkdir(METRICS_DIR, { recursive: true });
     await appendFile(EVENTS_FILE, JSON.stringify(event) + '\n', 'utf8');
-    summaryWriteQueue = summaryWriteQueue
-      .then(async () => {
-        let summary: ToolMetricsSummary = {
-          updatedAt: event.timestamp,
-          totals: makeBucket(),
-          tools: {},
-        };
-        try {
-          const raw = await readFile(SUMMARY_FILE, 'utf8');
-          summary = JSON.parse(raw) as ToolMetricsSummary;
-        } catch {
-          // no summary yet
-        }
-        summary.updatedAt = event.timestamp;
-        summary.totals = updateBucket(summary.totals ?? makeBucket(), event);
-        summary.tools[event.toolName] = updateBucket(summary.tools[event.toolName] ?? makeBucket(), event);
-        await writeFile(SUMMARY_FILE, JSON.stringify(summary, null, 2), 'utf8');
-      })
-      .catch(() => {
-        // keep queue alive
-      });
-    await summaryWriteQueue;
+    pendingSummaryEvents.push(event);
+    scheduleSummaryFlush();
   } catch {
     // telemetry should never break the tool path
   }
+}
+
+function scheduleSummaryFlush(): void {
+  if (summaryFlushInFlight) return;
+  summaryFlushInFlight = flushSummaryEvents()
+    .catch(() => {
+      // ignore summary write errors
+    })
+    .finally(() => {
+      summaryFlushInFlight = null;
+      if (pendingSummaryEvents.length > 0) {
+        scheduleSummaryFlush();
+      }
+    });
+}
+
+async function flushSummaryEvents(): Promise<void> {
+  const batch = pendingSummaryEvents;
+  pendingSummaryEvents = [];
+  if (batch.length === 0) return;
+
+  let summary: ToolMetricsSummary = {
+    updatedAt: batch[batch.length - 1].timestamp,
+    totals: makeBucket(),
+    tools: {},
+  };
+
+  try {
+    const raw = await readFile(SUMMARY_FILE, 'utf8');
+    summary = JSON.parse(raw) as ToolMetricsSummary;
+  } catch {
+    // no summary yet
+  }
+
+  for (const event of batch) {
+    summary.updatedAt = event.timestamp;
+    summary.totals = updateBucket(summary.totals ?? makeBucket(), event);
+    summary.tools[event.toolName] = updateBucket(summary.tools[event.toolName] ?? makeBucket(), event);
+  }
+
+  await writeFile(SUMMARY_FILE, JSON.stringify(summary, null, 2), 'utf8');
 }

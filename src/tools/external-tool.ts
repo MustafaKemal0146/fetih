@@ -8,6 +8,7 @@ import { platform } from 'os';
 import type { ToolDefinition, ToolResult } from '../types.js';
 
 const DEFAULT_EXTERNAL_TIMEOUT_MS = 120_000;
+export const EXTERNAL_TIMEOUT_OUTPUT_FRAGMENT = '(zaman aşımı:';
 
 interface ExternalToolConfig {
   name: string;
@@ -73,7 +74,7 @@ async function run(toolName: string, args: string[], cwd: string): Promise<ToolR
       clearTimeout(timer);
       if (forceKillTimer) clearTimeout(forceKillTimer);
       const merged = (out + (err ? `\n[STDERR]\n${err}` : '')).trim();
-      const timeoutText = timedOut ? `\n\n(zaman aşımı: ${DEFAULT_EXTERNAL_TIMEOUT_MS}ms)` : '';
+      const timeoutText = timedOut ? `\n\n${EXTERNAL_TIMEOUT_OUTPUT_FRAGMENT} ${DEFAULT_EXTERNAL_TIMEOUT_MS}ms)` : '';
       resolve({
         output: (merged || `${t.name} tamamlandı (kod: ${code})`) + timeoutText,
         isError: timedOut || (code !== 0 && code !== null),

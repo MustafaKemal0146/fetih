@@ -9,7 +9,7 @@ if [[ "${1:-}" == "--dry-run" ]]; then
   DRY_RUN=true
 fi
 
-VERSION="$(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json','utf8')).version)")"
+VERSION="$(npm pkg get version --workspaces=false | tr -d '"')"
 
 echo "🚀 Linux release hazırlanıyor..."
 if [[ "$DRY_RUN" == "true" ]]; then
