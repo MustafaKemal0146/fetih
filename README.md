@@ -5,14 +5,14 @@
 <h1 align="center">SETH</h1>
 
 <p align="center">
-  <strong>Terminalinizde çalışan Türkçe yapay zeka kodlama ajanı.</strong><br/>
-  Claude, Gemini, OpenAI ve Ollama desteğiyle güçlü bir geliştirici asistanı.
+  <strong>Terminalinizde çalışan Türkçe yapay zeka kodlama ve siber güvenlik ajanı.</strong><br/>
+  10 AI sağlayıcısı, 40+ araç, CTF motoru, kalıcı bellek ve çok daha fazlası.
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Node.js-%3E%3D18-green?style=flat-square&logo=node.js"/>
   <img src="https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript"/>
-  <img src="https://img.shields.io/badge/Version-3.7.4-purple?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Version-3.8.1-purple?style=flat-square"/>
   <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square"/>
   <img src="https://img.shields.io/badge/Dil-Türkçe-red?style=flat-square"/>
 </p>
@@ -23,37 +23,31 @@
 
 ```bash
 npm install -g seth
-# veya
-npx seth
 ```
 
 ```bash
-# Etkileşimli REPL başlat
-seth
-
-# Belirli sağlayıcı ile başlat
-seth --provider claude
-seth --provider gemini
-seth --provider ollama
-
-# Tek seferlik (headless) mod
-seth -p "bu projeyi özetle"
-seth -p "src/index.ts dosyasındaki hataları düzelt"
+seth                          # Etkileşimli REPL
+seth --provider groq          # Belirli sağlayıcı ile başlat
+seth -p "bu projeyi özetle"   # Tek seferlik (headless) mod
+seth --auto -p "testleri çalıştır"  # Araç onaylarını atla
 ```
 
-### Linux Release (Yerel Paket)
+---
 
-```bash
-npm install
-npm run release:linux
-npm install -g ./release/seth-3.7.4.tgz
-```
+## 🤖 Desteklenen AI Sağlayıcıları
 
-İsteğe bağlı doğrulama:
-
-```bash
-sha256sum -c ./release/seth-3.7.4.tgz.sha256
-```
+| Sağlayıcı | Komut | API Key |
+|-----------|-------|---------|
+| **Ollama** (Yerel) | `--provider ollama` | Gerekmez |
+| **LM Studio** (Yerel) | `--provider lmstudio` | Gerekmez |
+| **Groq** (Hızlı, Ücretsiz Tier) | `--provider groq` | `GROQ_API_KEY` |
+| **DeepSeek** (Ucuz, Güçlü) | `--provider deepseek` | `DEEPSEEK_API_KEY` |
+| **Mistral** | `--provider mistral` | `MISTRAL_API_KEY` |
+| **xAI (Grok)** | `--provider xai` | `XAI_API_KEY` |
+| **OpenRouter** (300+ Model) | `--provider openrouter` | `OPENROUTER_API_KEY` |
+| **Anthropic Claude** | `--provider claude` | `ANTHROPIC_API_KEY` |
+| **OpenAI** | `--provider openai` | `OPENAI_API_KEY` |
+| **Google Gemini** | `--provider gemini` | `GEMINI_API_KEY` |
 
 ---
 
@@ -62,119 +56,74 @@ sha256sum -c ./release/seth-3.7.4.tgz.sha256
 ### Ortam Değişkenleri
 
 ```bash
-export ANTHROPIC_API_KEY=sk-ant-xxxxx     # Claude için
-export OPENAI_API_KEY=sk-xxxxx            # OpenAI için
-export GEMINI_API_KEY=AIzaxxxxx           # Gemini için
-# Ollama için API anahtarı gerekmez — ollama serve yeterli
+export ANTHROPIC_API_KEY=sk-ant-xxxxx
+export OPENAI_API_KEY=sk-xxxxx
+export GEMINI_API_KEY=AIzaxxxxx
+export GROQ_API_KEY=gsk_xxxxx
+export DEEPSEEK_API_KEY=sk-xxxxx
+export MISTRAL_API_KEY=xxxxx
+export XAI_API_KEY=xai-xxxxx
+export OPENROUTER_API_KEY=sk-or-xxxxx
+# Ollama ve LM Studio için API anahtarı gerekmez
 ```
 
-### Ayar Dosyası
-
-`~/.seth/settings.json` oluşturarak varsayılan sağlayıcı ve model ayarlayabilirsiniz:
+### Ayar Dosyası (`~/.seth/settings.json`)
 
 ```json
 {
   "defaultProvider": "ollama",
-  "defaultModel": "minimax-m2.7:cloud",
+  "defaultModel": "qwen2.5-coder:7b",
   "providers": {
-    "claude": { "apiKey": "sk-ant-xxx", "model": "claude-sonnet-4-20250514" },
-    "openai": { "apiKey": "sk-xxx", "model": "gpt-4o" },
-    "gemini": { "apiKey": "AIza-xxx", "model": "gemini-2.5-pro" },
-    "ollama": { "baseUrl": "http://localhost:11434", "model": "minimax-m2.7:cloud" }
+    "ollama": { "baseUrl": "http://localhost:11434", "model": "qwen2.5-coder:7b" },
+    "groq": { "apiKey": "gsk_xxx", "model": "llama-3.3-70b-versatile" },
+    "deepseek": { "apiKey": "sk-xxx", "model": "deepseek-chat" },
+    "claude": { "apiKey": "sk-ant-xxx", "model": "claude-sonnet-4-20250514" }
   }
 }
-```
-
-### MCP Desteği (İsteğe Bağlı)
-
-`~/.seth/mcp.json` ile [Model Context Protocol](https://modelcontextprotocol.io) sunucuları tanımlanabilir:
-
-```json
-{
-  "servers": {
-    "filesystem": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/projeler"]
-    }
-  }
-}
-```
-
-### Hook Sistemi (İsteğe Bağlı)
-
-`~/.seth/hooks.json` ile araç çalışmadan önce/sonra shell komutu çalıştırabilirsiniz:
-
-```json
-[
-  { "event": "PreToolUse", "tool": "file_write", "command": "echo 'Dosya yazılıyor'" },
-  { "event": "PostToolUse", "tool": "shell", "command": "notify-send 'Tamamlandı'", "async": true },
-  { "event": "OnResponse", "command": "notify-send 'SETH' 'Yanıt hazır'", "async": true }
-]
-```
-
----
-
-## 🖥️ Kullanım
-
-### Etkileşimli Mod
-
-```bash
-seth                        # Varsayılan sağlayıcı ile başlat
-seth --provider claude      # Claude ile başlat
-seth --provider gemini      # Gemini ile başlat
-seth --model gpt-4o         # Belirli model ile başlat
-```
-
-### Headless Mod
-
-```bash
-seth -p "main.ts içindeki hatayı düzelt"
-seth --auto -p "testleri çalıştır"       # Araç onaylarını atla
-seth -p "projeyi özetle" --no-tools      # Araçsız çalıştır
 ```
 
 ### Proje Talimatları (Otomatik Yükleme)
 
-Çalışma dizininde aşağıdaki dosyalar varsa içerikleri sistem istemine otomatik eklenir:
+Çalışma dizininde aşağıdaki dosyalar varsa sistem istemine otomatik eklenir:
 
 | Dosya | Açıklama |
 |-------|----------|
-| `CLAUDE.md` | Claude Code uyumu için talimatlar |
-| `AGENTS.md` | AGENTS uyumu için talimatlar |
-| `.seth/instructions.md` | SETH'e özel proje talimatları |
+| `SETH.md` | SETH'e özel proje talimatları |
+| `CLAUDE.md` | Claude Code uyumu |
+| `AGENTS.md` | Ajan uyumu |
+| `.seth/instructions.md` | Gizli proje talimatları |
 
 ---
 
-## 💬 SETH Komutları
+## 💬 REPL Komutları
 
 ### Bilgi & Analiz
 
 | Komut | Açıklama |
 |--------|-----------|
 | `/yardım` | Tüm komutları listele |
-| `/özellikler` | SETH yetenek raporunu göster |
-| `/istatistikler` | Token kullanımı, maliyet tahmini, geçmiş sayısı |
-| `/bağlam` | Token dağılımı, en çok kullanılan araçlar, tekrar okunan dosyalar |
-| `/ara <kelime>` | Mevcut konuşmada arama yap |
-| `/doktor` | Ortam sağlığı + araç kontrolü (curl, git, nmap, vb.) |
-| `/repo_özet` | Git: dal, son commit, diff --stat, status |
-| `/güncelle` | Yeni sürüm kontrolü (semver karşılaştırma) |
+| `/istatistikler` | Token kullanımı, **gerçek maliyet**, araç istatistikleri |
+| `/bağlam` | Token dağılımı ve bağlam doluluk çubuğu |
+| `/ara <kelime>` | Aktif konuşmada arama |
+| `/oturum-ara <kelime>` | **Tüm geçmiş oturumlarda** full-text arama |
+| `/doktor` | Ortam sağlığı + araç kontrolü + otomatik kurulum |
+| `/repo_özet` | Git: dal, son commit, diff --stat |
+| `/güncelle` | GitHub releases'den yeni sürüm kontrolü |
+| `/diff [--staged]` | Git diff görüntüleme |
 
 ### Bellek & Oturum
 
 | Komut | Açıklama |
 |--------|-----------|
-| `/hafıza` | Kalıcı belleği göster (`~/.seth/memory/`) |
-| `/hafıza <user\|project\|feedback\|reference>` | Belirli bellek tipini göster |
-| `/hafıza ekle <tip> <içerik>` | Belleğe yeni giriş ekle |
-| `/hafıza sil <tip>` | Belirli bellek tipini temizle |
-| `/hafıza-temizle` | Tüm kalıcı belleği sil (onay ister) |
+| `/hafıza` | Kalıcı belleği göster |
+| `/hafıza ekle <tip> <içerik>` | Belleğe giriş ekle |
+| `/hafıza sil <tip>` | Bellek tipini temizle |
 | `/bellek` | Görev listesi + oturum özeti |
-| `/context-temizle` | Oturumu sıfırla, yeni konuşma başlat |
-| `/temizle` | Konuşma geçmişini temizle |
-| `/sıkıştır` | Geçmişi sıkıştır |
-| `/geri` | Son mesajı geri al |
-| `/kaydet [dosya]` | Konuşmayı markdown olarak kaydet |
+| `/sıkıştır` | Geçmişi AI ile özetle (token tasarrufu) |
+| `/kaydet [md\|html\|txt]` | Konuşmayı dışa aktar |
+| `/export [json\|md\|html]` | Oturumu dışa aktar |
+| `/oturum-export` | Oturumu JSON olarak kaydet |
+| `/oturum-import <dosya>` | Önceki oturumu yükle |
 | `/geçmiş` | Önceki oturumu devam ettir |
 
 ### Ayarlar
@@ -182,139 +131,111 @@ seth -p "projeyi özetle" --no-tools      # Araçsız çalıştır
 | Komut | Açıklama |
 |--------|-----------|
 | `/değiştir` | Etkileşimli ayar menüsü |
-| `/sağlayıcı <isim>` | Sağlayıcı değiştir: `claude`, `gemini`, `openai`, `ollama` |
-| `/model <isim>` | Model adını doğrudan ayarla |
-| `/modeller` | Mevcut modelleri listele ve seç |
-| `/araçlar <açık\|kapalı>` | Araç kullanımını aç/kapat |
-| `/ajan <açık\|kapalı>` | Çok tur ajan modunu aç/kapat |
-| `/yetki <full\|normal\|dar>` | İzin seviyesini ayarla |
-| `/tema` | Renk teması değiştir (dark, light, cyberpunk, retro, ocean, sunset) |
-| `/apikey` | API anahtarlarını yönet / sil |
-| `/context <miktar>` | Oturum token bütçesi (örn: 500k) |
+| `/sağlayıcı <isim>` | Sağlayıcı değiştir (10 seçenek) |
+| `/modeller` | Canlı model listesi + seçim |
+| `/tema` | Renk teması (dark, light, cyberpunk, retro, ocean, sunset) |
+| `/context <miktar>` | Token bütçesi (örn: 500k, 2m) |
+| `/yetki <full\|normal\|dar>` | İzin seviyesi |
+| `/apikey` | API anahtarlarını yönet |
 
 ### Araçlar & Sistem
 
 | Komut | Açıklama |
 |--------|-----------|
+| `/cron ekle <isim> <interval> <prompt>` | Periyodik görev ekle (1m/1h/1d) |
+| `/cron liste` | Cron görevlerini listele |
+| `/worktree [list\|add\|remove]` | Git worktree yönetimi |
+| `/mcp-keşif` | MCP server otomatik keşfi |
+| `/ajan-koordinasyon` | Çoklu ajan koordinasyonu |
+| `/yapıştır` | Panodan yapıştır (xclip/wl-paste) |
+| `/provider-test` | Provider bağlantı testi + latency |
 | `/hook [liste\|örnek]` | Hook sistemi yönetimi |
-| `/rapor pdf` | Güvenlik taraması sonucunu LaTeX/PDF olarak dışa aktar |
-| `/sor` | İstek sihirbazını başlat |
-| `/dusunme` | Düşünme göstergesini aç/kapat |
+| `/rapor pdf` | Güvenlik taraması PDF raporu |
 | `/cd <dizin>` | Çalışma dizinini değiştir |
-| `/pwd` | Mevcut dizini göster |
-| `/cikis` | Uygulamadan çık |
 
 ### ⌨️ Kısayollar
 
 | Kısayol | Açıklama |
 |---------|----------|
-| `Ctrl+C` | Mevcut işlemi iptal et |
-| `Ctrl+D` | Boş satırda çıkış |
+| `Ctrl+C` | İşlemi iptal et / modeli durdur |
+| `Esc` | AI yanıtını anında durdur |
+| `Ctrl+D` | Çıkış |
 | `Ctrl+R` | Geçmiş fuzzy arama |
-| `Esc` | AI yanıtını durdur |
-| Satır sonu `\` | Çok satırlı girdi |
+| `Ctrl+O` | Son yapıştırılan içeriği göster |
+| `\` (satır sonu) | Çok satırlı girdi |
+
+---
+
+## 💰 Model Maliyet Tablosu
+
+`/istatistikler` komutu gerçek fiyatları gösterir:
+
+| Provider | Model | Input | Output |
+|----------|-------|-------|--------|
+| Groq | llama-3.3-70b | $0.059/M | $0.079/M |
+| DeepSeek | deepseek-chat | $0.14/M | $0.28/M |
+| Mistral | mistral-large | $2/M | $6/M |
+| xAI | grok-3 | $3/M | $15/M |
+| Claude | sonnet-4 | $3/M | $15/M |
+| OpenAI | gpt-4o | $5/M | $15/M |
+| Ollama / LM Studio | — | **Ücretsiz** | **Ücretsiz** |
 
 ---
 
 ## 🛠️ Yerleşik Araçlar
 
-### Dosya & Dizin
+### Dosya & Arama
+`file_read` · `file_write` · `file_edit` · `list_directory` · `glob` · `batch_read` · `search` · `grep`
 
-| Araç | Açıklama |
-|------|-----------|
-| `file_read` | Dosya oku (satır numarasıyla) |
-| `file_write` | Dosya yaz |
-| `file_edit` | Dosya düzenle (tam metin eşleşmesi) |
-| `list_directory` | Dizin içeriğini listele |
-| `glob` | Dosya deseni ile eşleştir |
-| `batch_read` | Birden fazla dosyayı aynı anda oku |
-
-### Arama
-
-| Araç | Açıklama |
-|------|-----------|
-| `search` | Kod tabanında metin ara (ripgrep varsa kullanır) |
-| `grep` | Regex ile dosyalarda ara (ripgrep varsa kullanır) |
-
-### Web
-
-| Araç | Açıklama |
-|------|-----------|
-| `web_fetch` | URL içeriğini getir (resim desteği dahil) |
-| `web_ara` | DuckDuckGo ile web araması yap |
-| `web_search` | Detaylı web araması (başlık, URL, tarih) |
+### Web & Ağ
+`web_fetch` · `web_ara` · `web_search` (Brave/DuckDuckGo/SerpAPI)
 
 ### Git
+`git_status` · `git_diff` · `git_log` · `git_worktree` · `repo_ozet`
 
-| Araç | Açıklama |
-|------|-----------|
-| `git_status` | Git durumunu göster (salt okunur) |
-| `git_diff` | Git farkını göster (salt okunur) |
-| `git_log` | Git geçmişini göster (salt okunur) |
-| `repo_ozet` | Tek çağrıda depo özeti |
-
-### Görev & Bellek
-
-| Araç | Açıklama |
-|------|-----------|
-| `gorev_oku` | Oturum görev listesini oku |
-| `gorev_yaz` | Oturum görev listesine yaz |
-| `gorev_ekle` | Görev ekle |
-| `gorev_guncelle` | Görev güncelle |
-| `memory_read` | Proje kalıcı belleğini oku |
-| `memory_write` | Proje kalıcı belleğine yaz |
-
-### Ajan & MCP
-
-| Araç | Açıklama |
-|------|-----------|
-| `agent_spawn` | Alt-ajan oluştur |
-| `ask_user` | Kullanıcıya soru sor |
-| `mcp_arac` | MCP sunucusunda araç listele / çağır |
-| `arac_ara` | Hangi aracın ne işe yaradığını bul |
-| `lsp_diagnostics` | Kod hatalarını ve uyarılarını listele |
+### Ajan & Bellek
+`agent_spawn` · `ask_user` · `memory_read` · `memory_write` · `mcp_arac` · `lsp_diagnostics`
 
 ### Siber Güvenlik
-
-| Araç | Açıklama |
-|------|-----------|
-| `nmap` | Ağ tarama ve port keşfi |
-| `sqlmap` | SQL injection testi |
-| `nikto` | Web sunucu güvenlik açığı taraması |
-| `gobuster` | Dizin ve dosya brute force taraması |
-| `sethEngine` | SETH otonom operasyon motoru |
+`nmap` · `sqlmap` · `nikto` · `gobuster` · `whois` · `dig` · `whatweb` · `ffuf` · `nuclei` · `masscan` · `subfinder` · `wpscan`
 
 ---
 
-## 🧠 Kalıcı Bellek Sistemi
+## 🧠 Kalıcı Bellek & Otomatik Öğrenme
 
-SETH, `~/.seth/memory/` altında 4 tip bellek tutar:
+SETH iki katmanlı bellek sistemi kullanır:
 
-| Tip | Açıklama |
-|-----|----------|
-| `user` | Kullanıcı tercihleri, rol, bilgi seviyesi |
-| `project` | Proje mimarisi, teknoloji stack'i |
-| `feedback` | Geçmiş geri bildirimler |
-| `reference` | Referans bilgiler, linkler |
-
+**Manuel Bellek** (`~/.seth/memory/`):
 ```bash
 /hafıza ekle user Kıdemli TypeScript geliştiricisiyim
 /hafıza ekle project Bu proje Next.js + Prisma kullanıyor
-/hafıza user          # user belleğini göster
-/hafıza-temizle       # tümünü sil
+```
+
+**Otomatik Bellek** (`~/.seth/auto-memory/`):
+Konuşma sonunda AI önemli bilgileri otomatik kaydeder — proje tercihleri, teknik kararlar, önemli detaylar bir sonraki oturumda hatırlanır.
+
+---
+
+## ⏰ Cron / Zamanlama
+
+```bash
+/cron ekle günlük-rapor 1d "git log --oneline -10 raporla"
+/cron ekle saatlik-test 1h "testleri çalıştır"
+/cron liste
+/cron sil <id>
 ```
 
 ---
 
 ## 🔒 Hook Sistemi
 
-`~/.seth/hooks.json` ile araç çalışmadan önce/sonra otomatik komut çalıştırın:
+`~/.seth/hooks.json`:
 
 ```json
 [
   { "event": "PreToolUse",  "tool": "file_write", "command": "git add -A" },
-  { "event": "PostToolUse", "tool": "shell",       "command": "echo done", "async": true },
-  { "event": "OnStart",                            "command": "echo 'SETH başladı'" }
+  { "event": "PostToolUse", "tool": "shell",       "command": "notify-send 'Tamamlandı'", "async": true },
+  { "event": "OnResponse",                         "command": "notify-send 'SETH' 'Yanıt hazır'", "async": true }
 ]
 ```
 
@@ -324,28 +245,22 @@ SETH, `~/.seth/memory/` altında 4 tip bellek tutar:
 
 ```
 src/
-├── cli.ts              # CLI giriş noktası
-├── repl.ts             # Etkileşimli REPL
-├── headless.ts         # Headless mod
-├── commands.ts         # Slash komutları
-├── renderer.ts         # Çıktı render
-├── welcome.ts          # Karşılama ekranı
-├── theme.ts            # Tema sistemi (lazy, 6 tema)
-├── hooks.ts            # Hook sistemi
-├── lifecycle.ts        # Graceful shutdown, arka plan temizlik
-├── semver.ts           # Semver karşılaştırma
-├── security-report.ts  # LaTeX/PDF rapor üretici
-├── history-search.ts   # Ctrl+R fuzzy arama
-├── project-instructions.ts
-├── prompts/
-│   └── system.ts       # Sistem istemi
-├── session-runtime.ts  # Oturum yönetimi
-├── mcp/                # MCP istemcisi
-├── providers/          # AI sağlayıcıları (Claude, Gemini, OpenAI, Ollama)
-├── tools/              # Yerleşik araçlar (36 araç)
-├── agent/              # Ajan döngüsü
-├── config/             # Yapılandırma
-└── storage/            # Oturum, geçmiş, bellek depolama
+├── cli.ts                  # CLI giriş noktası
+├── repl.ts                 # Etkileşimli REPL (paste, ESC, vim mode)
+├── headless.ts             # Headless mod (-p)
+├── commands.ts             # 50+ slash komutu
+├── agent/loop.ts           # Ajan döngüsü (fallback provider desteği)
+├── providers/              # Claude, Gemini, OpenAI, Ollama, Groq, DeepSeek, Mistral, xAI, LM Studio, OpenRouter
+├── tools/                  # 40+ yerleşik araç
+├── prompts/system.ts       # CTF + siber güvenlik sistem istemi
+├── model-cost.ts           # Gerçek model fiyat tablosu
+├── auto-memory.ts          # Otomatik bellek çıkarma
+├── cron.ts                 # Periyodik görev sistemi
+├── paste.ts                # Terminal paste desteği
+├── session-search.ts       # Oturum full-text arama
+├── update-check.ts         # GitHub releases güncelleme kontrolü
+├── mcp/discovery.ts        # MCP server otomatik keşfi
+└── storage/                # Oturum, geçmiş, bellek, araç metrikleri
 ```
 
 ---
@@ -353,13 +268,14 @@ src/
 ## 📋 Gereksinimler
 
 - **Node.js** >= 18
-- En az bir AI sağlayıcısı yapılandırılmış olmalı (Claude, Gemini, OpenAI veya Ollama)
-- Siber güvenlik araçları için: `nmap`, `sqlmap`, `nikto`, `gobuster` (isteğe bağlı)
-- PDF rapor için: `pdflatex` (isteğe bağlı, yoksa `.tex` dosyası üretilir)
-- Hızlı arama için: `rg` (ripgrep) — yoksa Node.js fallback kullanılır
+- En az bir AI sağlayıcısı (Ollama ücretsiz ve yerel)
+- **İsteğe bağlı:** `rg` (ripgrep) — hızlı arama için
+- **İsteğe bağlı:** `nmap`, `sqlmap`, `nikto` vb. — siber güvenlik araçları
+- **İsteğe bağlı:** `pdflatex` — PDF rapor için
+- **İsteğe bağlı:** `xclip` veya `wl-paste` — paste desteği için (Linux)
 
 ---
 
 ## 📄 Lisans
 
-GNU Affero General Public License v3.0 (AGPL v3.0)
+MIT License
