@@ -32,7 +32,25 @@ export const batchReadTool: ToolDefinition = {
   requiresConfirmation: false,
 
   async execute(input: Record<string, unknown>, cwd: string): Promise<ToolResult> {
-    const paths = input.paths as string[];
+    let paths = input.paths as string[];
+    // Glob pattern'ları genişlet — sadece ** içerenleri işle
+    const expandedPaths: string[] = [];
+    for (const p of paths) {
+      if (p.includes('*')) {
+        // Basit glob: sadece *.ext pattern'ı destekle
+        try {
+          const { readdirSync, statSync } = await import('fs');
+          const { join: pjoin, extname } = await import('path');
+          const ext = p.split('*').pop() ?? '';
+          const dir = p.includes('/') ? pjoin(cwd, p.split('*')[0]!.replace(/\/$/, '')) : cwd;
+          const files = readdirSync(dir).filter(f => f.endsWith(ext)).slice(0, MAX_FILES);
+          expandedPaths.push(...files.map(f => pjoin(dir, f)));
+        } catch { expandedPaths.push(p); }
+      } else {
+        expandedPaths.push(p);
+      }
+    }
+    paths = expandedPaths;
     const showLineNumbers = (input.show_line_numbers as boolean) ?? true;
 
     if (!Array.isArray(paths) || paths.length === 0) {

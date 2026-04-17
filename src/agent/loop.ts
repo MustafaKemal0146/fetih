@@ -50,6 +50,10 @@ export async function runAgentLoop(
   // Mutable kopyalar — fallback geçişi için
   let activeProvider = options.provider;
   let activeModel = options.model;
+
+  // #1 Loop detection
+  const { loopDetector } = await import('../loop-detection.js');
+  loopDetector.reset();
   const messages: ChatMessage[] = [
     ...history,
     { role: 'user', content: userMessage },
@@ -186,6 +190,17 @@ export async function runAgentLoop(
     // Execute tools in parallel (same-turn bağımsız çağrılar)
     const executed = await Promise.all(toolUseBlocks.map(async (toolBlock) => {
       if (options.onToolCall) options.onToolCall(toolBlock.name, toolBlock.input);
+
+      // #1 Loop detection — araç çağrısı döngüsü kontrolü
+      const loopResult = loopDetector.checkToolCall(toolBlock.name, toolBlock.input);
+      if (loopResult.isLoop) {
+        if (options.onText) options.onText(`\n⚠️ Döngü tespit edildi: ${loopResult.detail}\n`);
+        return {
+          toolBlock,
+          result: { output: `[DÖNGÜ TESPİT EDİLDİ] ${loopResult.detail} — Araç çağrısı durduruldu.`, isError: true },
+          record: { toolName: toolBlock.name, input: toolBlock.input, output: '', durationMs: 0, isError: true },
+        };
+      }
 
       if (toolBlock.name === 'sethEngine') {
         const saat = new Date().toLocaleTimeString('tr-TR');

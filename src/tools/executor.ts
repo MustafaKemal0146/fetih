@@ -11,6 +11,7 @@ import chalk from 'chalk';
 import { cmd } from '../theme.js';
 import { logToolMetric } from '../storage/tool-metrics.js';
 import { truncateToolOutput } from '../truncate.js';
+import { maskSensitiveOutput } from '../tool-output-masking.js';
 
 const MAX_TOOL_OUTPUT_CHARS = 20_000;
 
@@ -106,11 +107,15 @@ export class ToolExecutor {
     // Execute
     try {
       const result = await tool.execute(input, cwd);
-      // #14 Araç sonucu boyut sınırı — büyük çıktılar context'i doldurmasın
-      if (result.output.length > MAX_TOOL_OUTPUT_CHARS) {
-        return finalize({ ...result, output: truncateToolOutput(result.output, MAX_TOOL_OUTPUT_CHARS) });
+      // #14 Araç sonucu boyut sınırı
+      let output = result.output;
+      if (output.length > MAX_TOOL_OUTPUT_CHARS) {
+        output = truncateToolOutput(output, MAX_TOOL_OUTPUT_CHARS);
       }
-      return finalize(result);
+      // #3 Hassas bilgileri maskele
+      const { masked, count } = maskSensitiveOutput(output);
+      if (count > 0) output = masked;
+      return finalize({ ...result, output });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       const result: ToolResult = { output: `Araç çalışma hatası: ${message}`, isError: true };

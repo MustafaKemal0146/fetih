@@ -319,8 +319,8 @@ export class ReplStreamingController {
 
     const forCompareStream = stripEcho(streamedRaw, userInput).trim();
     const forCompareFinal = stripEcho(finalTrim, userInput).trim();
-    this.skipFinalMarkdown =
-      streamedRaw.length > 0 && forCompareStream === forCompareFinal;
+    // Markdown+TTY modunda streaming zaten yazdırdı — her zaman skip
+    this.skipFinalMarkdown = streamedRaw.length > 0;
 
     this.segmentBuffer = '';
     this.stablePrefixRef.current = '';

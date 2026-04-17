@@ -91,6 +91,9 @@ export async function createDefaultRegistry(): Promise<ToolRegistry> {
   const { lspDiagnosticsTool } = await import('./lsp.js');
   const { sethEngineTool } = await import('./seth-engine.js');
   const { gitWorktreeTool } = await import('./git-worktree.js');
+  const { topicTool } = await import('./topic-tool.js');
+  const { trackerReadTool, trackerWriteTool } = await import('./tracker-tools.js');
+  const { writeTodosTool, readTodosTool } = await import('./write-todos.js');
   const {
     sqlmapTool, nmapTool, niktoTool, gobusterTool,
     whoisTool, digTool, whatwebTool, ffufTool,
@@ -132,6 +135,11 @@ export async function createDefaultRegistry(): Promise<ToolRegistry> {
   registry.register(lspDiagnosticsTool);
   registry.register(sethEngineTool);
   registry.register(gitWorktreeTool);
+  registry.register(topicTool);
+  registry.register(trackerReadTool);
+  registry.register(trackerWriteTool);
+  registry.register(writeTodosTool);
+  registry.register(readTodosTool);
 
   // External security tools
   registry.register(sqlmapTool);

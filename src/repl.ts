@@ -67,6 +67,7 @@ import {
 import { setSharedAgentContext } from './tools/agent-spawn.js';
 import { writeRecoveryCheckpoint, checkRecovery, clearRecovery } from './session-recovery.js';
 import { generateSessionTitle } from './session-title.js';
+import { recordMessage } from './chat-recording.js';
 import chalk from 'chalk';
 import { cmd, promptBright } from './theme.js';
 import { loadHistory, addToHistory, storePaste } from './storage/history.js';
@@ -205,6 +206,7 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
     const pctColor = pct > 85 ? chalk.red : pct > 60 ? chalk.yellow : chalk.dim;
     const barFilled = Math.round(pct / 10);
     const bar = '█'.repeat(barFilled) + '░'.repeat(10 - barFilled);
+    const effortStr = appConfig.effort && appConfig.effort !== 'medium' ? chalk.dim(`·${appConfig.effort}`) : '';
 
     const promptSym = promptBright('>');
 
@@ -212,7 +214,8 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
       const lanePart = activeLane !== 'a' ? `${activeLane.toUpperCase()}·` : '';
       const info = chalk.dim(`[${lanePart}${userMsgs}msg·${tokenStr}/${budgetStr}]`);
       const ctxBar = pct > 0 ? ` ${pctColor(bar)}${chalk.dim(` ${pct}%`)}` : '';
-      return `${promptSym} ${info}${ctxBar} `;
+      const effortPart = appConfig.effort && appConfig.effort !== 'medium' ? chalk.dim(` ·${appConfig.effort}`) : '';
+      return `${info}${ctxBar}${effortPart}\n${promptSym} `;
     }
     return `${promptSym} `;
   }
@@ -498,6 +501,12 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
           fullSystemPrompt += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nOTOMATİK BELLEK\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n${autoMem}\n`;
         }
       } catch { /* otomatik bellek yoksa atla */ }
+      // #5 Skills
+      try {
+        const { loadSkills, formatSkillsForPrompt } = await import('./skills.js');
+        const skills = loadSkills(currentCwd);
+        if (skills.length > 0) fullSystemPrompt += formatSkillsForPrompt(skills);
+      } catch { /* skills yoksa atla */ }
       const tools = toolsEnabled ? toolRegistry : new ToolRegistry();
       const executor = toolsEnabled ? toolExecutor : new ToolExecutor(tools, appConfig.tools, confirmFn);
 
@@ -538,6 +547,16 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
           clearSpin();
           // Hook: PreToolUse
           runHooks('PreToolUse', name, { tool: name, input: JSON.stringify(input).slice(0, 200) });
+          // #1 JIT Context — dosya/dizin araçlarında alt dizin context'i yükle
+          if (['file_read', 'file_write', 'file_edit', 'list_directory', 'batch_read'].includes(name)) {
+            const accessedPath = String(input.path ?? (Array.isArray(input.paths) ? input.paths[0] : '') ?? '');
+            if (accessedPath) {
+              import('./jit-context.js').then(({ discoverJitContext }) => {
+                const jit = discoverJitContext(accessedPath, currentCwd);
+                if (jit) process.stderr.write(`[JIT] ${accessedPath.split('/').slice(-2).join('/')}\n`);
+              }).catch(() => {});
+            }
+          }
           // Check plan approval
           if (isPlanWaitingApproval()) {
             const ps = getPlanModeState();
@@ -600,6 +619,10 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
 
       clearSpin();
       stream.finalize(finalInput, result.finalText.trim(), stripLeadingUserEchoFromAssistantDisplay);
+      // #15 AI yanıtını kaydet
+      if (result.finalText.trim()) {
+        recordMessage(session.id, { role: 'assistant', content: result.finalText.trim() }, result.totalUsage.outputTokens);
+      }
 
       if (result.finalText.trim() && !stream.skipFinalMarkdown) {
         const forDisplay = stripLeadingUserEchoFromAssistantDisplay(result.finalText.trim(), finalInput);
@@ -648,10 +671,34 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
         }
       }
 
+      // #2 Rolling Summary — %75 dolunca otomatik özetle
+      const rsTokens = totalUsage.inputTokens + totalUsage.outputTokens;
+      const rsBudget = getEffectiveContextBudgetTokens(appConfig);
+      if (rsBudget > 0 && rsTokens / rsBudget >= 0.75 && laneHistories[activeLane].length > 16) {
+        import('./rolling-summary.js').then(({ applyRollingSummary }) => {
+          applyRollingSummary(laneHistories[activeLane], rsTokens, rsBudget, provider, currentModel)
+            .then(r => {
+              if (r.summarized) {
+                laneHistories[activeLane] = r.messages;
+                console.log(chalk.dim(`\n  ↩ Kayan özet: ${r.before} → ${r.after} mesaj\n`));
+              }
+            }).catch(() => {});
+        }).catch(() => {});
+      }
+
       // #2 Otomatik bellek çıkarma — arka planda, sessizce
       if (result.messages.length >= 6) {
         import('./auto-memory.js').then(({ extractAndSaveMemories }) => {
           extractAndSaveMemories(result.messages, provider, currentModel, currentCwd).catch(() => {});
+        }).catch(() => {});
+      }
+
+      // #12 Omission placeholder tespiti
+      if (result.finalText) {
+        import('./omission-detector.js').then(({ detectOmissionPlaceholder, getOmissionWarning }) => {
+          if (detectOmissionPlaceholder(result.finalText)) {
+            console.log(chalk.yellow(getOmissionWarning()));
+          }
         }).catch(() => {});
       }
 
@@ -696,11 +743,21 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
       ];
       if (line.startsWith('/')) {
         const hits = slashCmds.filter(c => c.startsWith(line));
-        return callback(null, [hits.length ? hits : slashCmds, line]);
+        const results = hits.length ? hits : slashCmds;
+        // Görsel öneri listesi — gemini-cli tarzı
+        if (results.length > 1 && results.length <= 12) {
+          process.stdout.write('\n' + chalk.dim(results.join('  ')) + '\n');
+          rl?.prompt(true);
+        }
+        return callback(null, [results, line]);
       }
       // Geçmişten öneri — async import
       import('./prompt-suggestions.js').then(({ getPromptSuggestions }) => {
         const suggestions = getPromptSuggestions(line);
+        if (suggestions.length > 0 && suggestions.length <= 5) {
+          process.stdout.write('\n' + chalk.dim(suggestions.map(s => s.slice(0, 60)).join('\n')) + '\n');
+          rl?.prompt(true);
+        }
         callback(null, [suggestions.length ? suggestions : [], line]);
       }).catch(() => callback(null, [[], line]));
     };
@@ -1019,6 +1076,7 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
 
         processing = true;
         addToHistory(finalInput);
+        recordMessage(session.id, { role: 'user', content: finalInput }); // #15
         // rl.pause() KALDIRILDI — input alanı görünür kalsın
         await runAgentTurn(finalInput);
       }, 10);
