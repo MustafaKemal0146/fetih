@@ -1012,27 +1012,28 @@ ${rows}
   rapor: async (args, ctx) => {
     const sub = args.trim();
     if (sub === 'pdf' || sub === '') {
-      // Son konuşmadan rapor metni al
-      const shouldExport = await confirm({
-        message: 'Son güvenlik taraması çıktısını PDF olarak dışa aktarmak ister misiniz?'
-      });
-      if (isCancel(shouldExport) || !shouldExport) return { output: chalk.dim('İptal.') };
-
       const outputDir = ctx.getCwd();
-      // Konuşma geçmişinden son mesajları al
-      const messages = ctx.getMessages?.() ?? [];
+
+      // Tüm konuşma geçmişini al — hem getMessages hem getHistory dene
+      const messages = ctx.getMessages?.() ?? ctx.getHistory?.() ?? [];
       const reportText = messages
         .filter((m: ChatMessage) => m.role === 'assistant')
-        .map((m: ChatMessage) => typeof m.content === 'string' ? m.content : '')
+        .map((m: ChatMessage) => typeof m.content === 'string' ? m.content : JSON.stringify(m.content))
         .join('\n\n')
-        .slice(0, 10000);
+        .slice(0, 15000);
+
+      // Kullanıcı mesajlarından hedef bul
+      const userMessages = messages
+        .filter((m: ChatMessage) => m.role === 'user')
+        .map((m: ChatMessage) => typeof m.content === 'string' ? m.content : '')
+        .join(' ');
 
       if (!reportText.trim()) {
         return { output: chalk.yellow('⚠ Rapor oluşturmak için önce bir güvenlik taraması yapın.') };
       }
 
       process.stdout.write(chalk.dim('\n  📄 Rapor oluşturuluyor...\n'));
-      const outFile = await exportSecurityReport(reportText, outputDir);
+      const outFile = await exportSecurityReport(reportText + '\n\nKULLANICI_MESAJLARI:\n' + userMessages, outputDir);
       if (!outFile) return { output: chalk.red('✗ Rapor oluşturulamadı.') };
 
       const ext = outFile.endsWith('.pdf') ? 'PDF' : 'LaTeX (.tex)';

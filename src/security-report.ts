@@ -79,6 +79,7 @@ ${data.rawOutput.slice(0, 3000)}
 
 \\geometry{margin=2.5cm}
 \\definecolor{sethblue}{RGB}{0,82,155}
+\\definecolor{sethred}{RGB}{180,0,0}
 \\definecolor{critred}{RGB}{200,0,0}
 
 \\pagestyle{fancy}
@@ -94,7 +95,9 @@ ${data.rawOutput.slice(0, 3000)}
 
 \\begin{titlepage}
 \\centering
-\\vspace*{2cm}
+\\vspace*{1.5cm}
+{\\ttfamily\\Huge\\bfseries\\color{sethred} SETH}\\\\[0.3cm]
+{\\small\\color{gray}\\url{https://github.com/MustafaKemal0146/seth}}\\\\[1cm]
 {\\Huge\\bfseries\\color{sethblue} SİBER GÜVENLİK\\\\[0.5em]TARAMA RAPORU}\\\\[2cm]
 \\begin{tabular}{rl}
 \\textbf{Hedef:} & ${escapeLaTeX(data.target)} \\\\[0.3em]
@@ -159,6 +162,9 @@ export async function exportSecurityReport(
 }
 
 function extractTarget(text: string): string {
+  // URL'den domain çıkar
+  const urlMatch = text.match(/https?:\/\/(?:www\.)?([a-zA-Z0-9._-]+\.[a-zA-Z]{2,})/);
+  if (urlMatch) return urlMatch[1]!;
   const m = text.match(/(?:hedef|target|domain|site)[:\s]+([a-zA-Z0-9._-]+\.[a-zA-Z]{2,})/i);
   return m?.[1] ?? 'Bilinmiyor';
 }
