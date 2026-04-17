@@ -13,7 +13,7 @@
   <img src="https://img.shields.io/badge/Node.js-%3E%3D18-green?style=flat-square&logo=node.js"/>
   <img src="https://img.shields.io/badge/TypeScript-5.x-blue?style=flat-square&logo=typescript"/>
   <img src="https://img.shields.io/badge/Version-3.8.3-purple?style=flat-square"/>
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=flat-square"/>
+  <img src="https://img.shields.io/badge/License-AGPL_v3-blue?style=flat-square"/>
   <img src="https://img.shields.io/badge/Dil-Türkçe-red?style=flat-square"/>
 </p>
 
@@ -42,7 +42,7 @@ npm install -g seth
 ```
 
 ```bash
-seth                          # Etkileşimli REPL
+seth                          # Etkileşimli mod
 seth --provider groq          # Belirli sağlayıcı ile başlat
 seth -p "bu projeyi özetle"   # Tek seferlik (headless) mod
 seth --auto -p "testleri çalıştır"  # Araç onaylarını atla
@@ -113,7 +113,7 @@ export OPENROUTER_API_KEY=sk-or-xxxxx
 
 ---
 
-## 💬 REPL Komutları
+## 💬 Komutlar
 
 ### Bilgi & Analiz
 
@@ -265,7 +265,7 @@ Konuşma sonunda AI önemli bilgileri otomatik kaydeder — proje tercihleri, te
 ```
 src/
 ├── cli.ts                  # CLI giriş noktası
-├── repl.ts                 # Etkileşimli REPL (paste, ESC, vim mode)
+├── repl.ts                 # Etkileşimli terminal arayüzü (paste, ESC, vim mode)
 ├── headless.ts             # Headless mod (-p)
 ├── commands.ts             # 50+ slash komutu
 ├── agent/loop.ts           # Ajan döngüsü (fallback provider desteği)
@@ -297,4 +297,10 @@ src/
 
 ## 📄 Lisans
 
-MIT License
+**GNU Affero General Public License v3.0 (AGPL-3.0)**
+
+- ✅ Kişisel ve eğitim amaçlı kullanım ücretsizdir
+- ✅ Kaynak kodu inceleyebilir, değiştirebilirsiniz
+- ⚠️ Değiştirip dağıtırsanız kaynak kodunu açık kaynak yapmak zorundasınız
+- ⚠️ Ağ üzerinden servis olarak sunarsanız kaynak kodunu paylaşmak zorundasınız
+- 💼 Ticari kullanım veya özel lisans için iletişime geçin
