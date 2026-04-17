@@ -7,7 +7,7 @@
 // Provider
 // ---------------------------------------------------------------------------
 
-export type ProviderName = 'claude' | 'gemini' | 'openai' | 'ollama' | 'openrouter' | 'groq';
+export type ProviderName = 'claude' | 'gemini' | 'openai' | 'ollama' | 'openrouter' | 'groq' | 'mistral' | 'deepseek' | 'xai' | 'lmstudio';
 
 export interface ProviderCapabilities {
   readonly supportsTools: boolean;

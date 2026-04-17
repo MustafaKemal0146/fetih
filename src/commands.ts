@@ -148,7 +148,7 @@ export const COMMANDS: Record<string, (args: string, ctx: CommandContext) => Pro
       '',
       chalk.dim('  ─── Ayarlar ──────────────────────────────────────────────────'),
       `  ${cmd('/değiştir')}                      Etkileşimli ayar menüsü`,
-      `  ${cmd('/sağlayıcı')} ${chalk.dim('<isim>')}             Sağlayıcı: claude, gemini, openai, ollama`,
+      `  ${cmd('/sağlayıcı')} ${chalk.dim('<isim>')}             Sağlayıcı: claude, gemini, openai, ollama, groq, deepseek, mistral, xai, lmstudio, openrouter`,
       `  ${cmd('/model')} ${chalk.dim('<isim>')}                 Model adını doğrudan ayarla`,
       `  ${cmd('/modeller')}                      Mevcut modelleri listele ve seç`,
       `  ${cmd('/araçlar')} ${chalk.dim('<açık|kapalı>')}        Araç kullanımını aç/kapat`,
@@ -285,11 +285,15 @@ SETH artık sadece bir araç değil, bir ordu gibi düşünen 'Leviathan' çekir
     if (!p) {
       const PROVIDERS = [
         { value: 'ollama',      label: 'ollama       — Yerel / Self-Hosted       (%100 uyumlu)' },
+        { value: 'lmstudio',    label: 'lmstudio     — LM Studio Yerel Sunucu    (%100 uyumlu)' },
         { value: 'openrouter',  label: 'openrouter   — 300+ Model, Tek API       (%100 uyumlu)' },
         { value: 'groq',        label: 'groq         — Groq LPU, Hızlı Çıkarım  (%100 uyumlu)' },
-        { value: 'claude',      label: 'claude       — Anthropic                 (test edilmedi, çünkü api alacak param yok)' },
-        { value: 'gemini',      label: 'gemini       — Google AI Studio          (test edilmedi, çünkü api alacak param yok)' },
-        { value: 'openai',      label: 'openai       — OpenAI                    (test edilmedi, çünkü api alacak param yok)' },
+        { value: 'deepseek',    label: 'deepseek     — DeepSeek AI               (%100 uyumlu)' },
+        { value: 'mistral',     label: 'mistral      — Mistral AI                (%100 uyumlu)' },
+        { value: 'xai',         label: 'xai          — xAI Grok                  (%100 uyumlu)' },
+        { value: 'claude',      label: 'claude       — Anthropic Claude          (API key gerekli)' },
+        { value: 'gemini',      label: 'gemini       — Google Gemini             (API key gerekli)' },
+        { value: 'openai',      label: 'openai       — OpenAI GPT                (API key gerekli)' },
       ];
       const selected = await select({
         message: 'Sağlayıcı seçin:',

@@ -151,12 +151,11 @@ export async function playIntro(provider: string, model: string, userEmail: stri
             // Bilgi satırları
             const base = TOP + SETH_LINES.length + 3;
             moveTo(base,     LEFT); process.stdout.write(`\x1b[2;31m  v${VERSION}\x1b[0m`);
-            moveTo(base + 1, LEFT); process.stdout.write(`\x1b[38;5;121m  👤 ${userEmail}\x1b[0m`); // Yeşil (Mat)
-            moveTo(base + 2, LEFT); process.stdout.write(`\x1b[38;5;75m  ✦ ${provider}/${model}\x1b[0m`);
-            moveTo(base + 3, LEFT); process.stdout.write(`\x1b[2;38;5;75m  ⌂ ${shortenPath(process.cwd())}\x1b[0m`);
-            moveTo(base + 5, LEFT); process.stdout.write(`\x1b[2m  /yardım → komutlar  •  Ctrl+C → iptal  •  Ctrl+D → çıkış\x1b[0m`);
+            moveTo(base + 1, LEFT); process.stdout.write(`\x1b[38;5;75m  ✦ ${provider}/${model}\x1b[0m`);
+            moveTo(base + 2, LEFT); process.stdout.write(`\x1b[2;38;5;75m  ⌂ ${shortenPath(process.cwd())}\x1b[0m`);
+            moveTo(base + 4, LEFT); process.stdout.write(`\x1b[2m  /yardım → komutlar  •  Ctrl+C → iptal  •  Ctrl+D → çıkış\x1b[0m`);
             // imleci bilgi satırlarının altına taşı
-            moveTo(base + 7, 0);
+            moveTo(base + 6, 0);
             showCursor();
 
             setTimeout(() => {

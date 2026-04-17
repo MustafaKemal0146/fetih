@@ -124,7 +124,7 @@ function printHelp(): void {
 
   Bayraklar:
     -p, --prompt <metin>                Tek seferlik görev (headless)
-    --provider <claude|gemini|openai|ollama>  Sağlayıcı belirle
+    --provider <claude|gemini|openai|ollama|groq|deepseek|mistral|xai|lmstudio|openrouter>  Sağlayıcı belirle
     --model <isim>                      Model belirle
     --auto, -y                          Araç onaylarını otomatik geç
     --no-tools                          Araçları devre dışı bırak
@@ -161,7 +161,13 @@ function printHelp(): void {
     ANTHROPIC_API_KEY                   Claude için
     OPENAI_API_KEY                      OpenAI için
     GEMINI_API_KEY                      Gemini için
+    GROQ_API_KEY                        Groq için
+    DEEPSEEK_API_KEY                    DeepSeek için
+    MISTRAL_API_KEY                     Mistral için
+    XAI_API_KEY                         xAI (Grok) için
+    OPENROUTER_API_KEY                  OpenRouter için
     OLLAMA_BASE_URL                     Ollama (varsayılan: http://localhost:11434)
+    LMSTUDIO_BASE_URL                   LM Studio (varsayılan: http://localhost:1234)
 `);
 }
 

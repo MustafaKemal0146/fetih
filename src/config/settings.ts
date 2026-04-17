@@ -46,6 +46,10 @@ const DEFAULT_CONFIG: SETHConfig = {
     ollama: { baseUrl: 'http://localhost:11434', model: 'qwen3-coder' },
     openrouter: { apiKey: undefined, model: 'openai/gpt-4o' },
     groq: { apiKey: undefined, model: 'llama-3.3-70b-versatile' },
+    mistral: { apiKey: undefined, model: 'mistral-large-latest' },
+    deepseek: { apiKey: undefined, model: 'deepseek-chat' },
+    xai: { apiKey: undefined, model: 'grok-3-latest' },
+    lmstudio: { baseUrl: 'http://localhost:1234', model: 'local-model' },
   },
   tools: {
     allowedTools: [],
@@ -98,6 +102,10 @@ export function loadConfig(overrides?: Partial<SETHConfig>): SETHConfig {
     OLLAMA_BASE_URL: 'ollama',
     OPENROUTER_API_KEY: 'openrouter',
     GROQ_API_KEY: 'groq',
+    MISTRAL_API_KEY: 'mistral',
+    DEEPSEEK_API_KEY: 'deepseek',
+    XAI_API_KEY: 'xai',
+    LMSTUDIO_BASE_URL: 'lmstudio',
   };
 
   for (const [envKey, provider] of Object.entries(envKeys)) {
@@ -181,6 +189,10 @@ export function resolveProviderApiKey(provider: ProviderName, config: SETHConfig
     ollama: '',
     openrouter: 'OPENROUTER_API_KEY',
     groq: 'GROQ_API_KEY',
+    mistral: 'MISTRAL_API_KEY',
+    deepseek: 'DEEPSEEK_API_KEY',
+    xai: 'XAI_API_KEY',
+    lmstudio: '',
   };
 
   const envKey = envMap[provider];

@@ -51,6 +51,29 @@ export async function createProvider(
       const { OpenAIProvider } = await import('./openai.js');
       return new OpenAIProvider(apiKey, 'https://api.groq.com/openai/v1');
     }
+    case 'mistral': {
+      const apiKey = resolveProviderApiKey('mistral', config);
+      if (!apiKey) throw new ProviderError('MISTRAL_API_KEY is not set. Set it in ~/.seth/settings.json or as an environment variable.', 'mistral');
+      const { OpenAIProvider } = await import('./openai.js');
+      return new OpenAIProvider(apiKey, 'https://api.mistral.ai/v1');
+    }
+    case 'deepseek': {
+      const apiKey = resolveProviderApiKey('deepseek', config);
+      if (!apiKey) throw new ProviderError('DEEPSEEK_API_KEY is not set. Set it in ~/.seth/settings.json or as an environment variable.', 'deepseek');
+      const { OpenAIProvider } = await import('./openai.js');
+      return new OpenAIProvider(apiKey, 'https://api.deepseek.com/v1');
+    }
+    case 'xai': {
+      const apiKey = resolveProviderApiKey('xai', config);
+      if (!apiKey) throw new ProviderError('XAI_API_KEY is not set. Set it in ~/.seth/settings.json or as an environment variable.', 'xai');
+      const { OpenAIProvider } = await import('./openai.js');
+      return new OpenAIProvider(apiKey, 'https://api.x.ai/v1');
+    }
+    case 'lmstudio': {
+      const baseUrl = config.providers.lmstudio?.baseUrl ?? 'http://localhost:1234';
+      const { OpenAIProvider } = await import('./openai.js');
+      return new OpenAIProvider('lm-studio', `${baseUrl}/v1`);
+    }
     default: {
       throw new ProviderError(`Unknown provider: ${name as string}`, name as string);
     }

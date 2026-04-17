@@ -56,9 +56,6 @@ export function renderWelcomeAnimation(provider: string, model: string, userEmai
   }
 
   lines.push('');
-  if (userEmail) {
-    lines.push(`\x1b[38;5;121m  👤 ${userEmail}\x1b[0m`); // Yeşil email
-  }
 
   lines.push(
     navyBright(`  ✦ ${provider}/${model}`),
