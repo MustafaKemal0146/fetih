@@ -9,3 +9,7 @@ build/
 Screenshot*
 oturum_ozet.txt
 seth güncelleme bilgileri.txt
+release/*.tgz
+release/*.tgz.sha256
+release/CHANGELOG-*.md
+release/artifact-manifest-*.json

@@ -7,6 +7,9 @@ import { existsSync } from 'fs';
 import { platform } from 'os';
 import type { ToolDefinition, ToolResult } from '../types.js';
 
+const DEFAULT_EXTERNAL_TIMEOUT_MS = 120_000;
+export const EXTERNAL_TIMEOUT_OUTPUT_FRAGMENT = '(zaman aşımı:';
+
 interface ExternalToolConfig {
   name: string;
   command: string;
@@ -52,13 +55,42 @@ async function run(toolName: string, args: string[], cwd: string): Promise<ToolR
     const allArgs = [...(t.commonArgs ?? []), ...args];
     const child = spawn(t.command, allArgs, { cwd, stdio: ['ignore', 'pipe', 'pipe'] });
     let out = '', err = '';
+    let timedOut = false;
+    let settled = false;
+    let forceKillTimer: NodeJS.Timeout | null = null;
+
+    const timer = setTimeout(() => {
+      timedOut = true;
+      try { child.kill('SIGTERM'); } catch {}
+      forceKillTimer = setTimeout(() => {
+        if (settled) return;
+        try { child.kill('SIGKILL'); } catch {}
+      }, 1_500);
+    }, DEFAULT_EXTERNAL_TIMEOUT_MS);
+
+    const finish = (code: number | null) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (forceKillTimer) clearTimeout(forceKillTimer);
+      const merged = (out + (err ? `\n[STDERR]\n${err}` : '')).trim();
+      const timeoutText = timedOut ? `\n\n${EXTERNAL_TIMEOUT_OUTPUT_FRAGMENT} ${DEFAULT_EXTERNAL_TIMEOUT_MS}ms)` : '';
+      resolve({
+        output: (merged || `${t.name} tamamlandı (kod: ${code})`) + timeoutText,
+        isError: timedOut || (code !== 0 && code !== null),
+      });
+    };
+
     child.stdout?.on('data', d => out += d);
     child.stderr?.on('data', d => err += d);
-    child.on('close', code => resolve({
-      output: (out + (err ? `\n[STDERR]\n${err}` : '')).trim() || `${t.name} tamamlandı (kod: ${code})`,
-      isError: code !== 0 && code !== null,
-    }));
-    child.on('error', e => resolve({ output: `${t.name} çalıştırılamadı: ${e.message}`, isError: true }));
+    child.on('close', code => finish(code));
+    child.on('error', e => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      if (forceKillTimer) clearTimeout(forceKillTimer);
+      resolve({ output: `${t.name} çalıştırılamadı: ${e.message}`, isError: true });
+    });
   });
 }
 

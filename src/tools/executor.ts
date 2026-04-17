@@ -5,9 +5,11 @@
 import type { ToolDefinition, ToolResult, ToolPermissionConfig, ToolCallRecord, PermissionLevel } from '../types.js';
 import type { ToolRegistry } from './registry.js';
 import { isToolAllowed } from './permission.js';
+import { EXTERNAL_TIMEOUT_OUTPUT_FRAGMENT } from './external-tool.js';
 import * as readline from 'readline';
 import chalk from 'chalk';
 import { cmd } from '../theme.js';
+import { logToolMetric } from '../storage/tool-metrics.js';
 
 // Tools that are always safe (read-only) and never need confirmation in 'normal' mode.
 const READ_ONLY_TOOLS = new Set([
@@ -54,24 +56,34 @@ export class ToolExecutor {
     cwd: string,
   ): Promise<{ result: ToolResult; record: ToolCallRecord }> {
     const startTime = Date.now();
+    const finalize = async (result: ToolResult): Promise<{ result: ToolResult; record: ToolCallRecord }> => {
+      const durationMs = Date.now() - startTime;
+      const isError = result.isError ?? false;
+      const isTimeout = result.output.includes(EXTERNAL_TIMEOUT_OUTPUT_FRAGMENT);
+      await logToolMetric({
+        timestamp: new Date().toISOString(),
+        toolName,
+        durationMs,
+        isError,
+        isTimeout,
+      });
+      return {
+        result,
+        record: { toolName, input, output: result.output, durationMs, isError, newCwd: result.newCwd },
+      };
+    };
     const tool = this.registry.get(toolName);
 
     if (!tool) {
       const result: ToolResult = { output: `Hata: Bilinmeyen araç "${toolName}".`, isError: true };
-      return {
-        result,
-        record: { toolName, input, output: result.output, durationMs: Date.now() - startTime, isError: true },
-      };
+      return finalize(result);
     }
 
     // Permission check (static config)
     const permission = isToolAllowed(tool, input, this.permissionConfig);
     if (!permission.allowed) {
       const result: ToolResult = { output: `Erişim engellendi: ${permission.reason}`, isError: true };
-      return {
-        result,
-        record: { toolName, input, output: result.output, durationMs: Date.now() - startTime, isError: true },
-      };
+      return finalize(result);
     }
 
     // ─── Runtime confirmation based on PermissionLevel ─────────────
@@ -81,10 +93,7 @@ export class ToolExecutor {
       const answer = await this.requestConfirmation(tool, input);
       if (answer === 'no') {
         const result: ToolResult = { output: 'Kullanıcı bu aracın çalıştırılmasına izin vermedi.', isError: true };
-        return {
-          result,
-          record: { toolName, input, output: result.output, durationMs: Date.now() - startTime, isError: true },
-        };
+        return finalize(result);
       }
       if (answer === 'always') {
         this.whitelistedTools.add(toolName);
@@ -94,18 +103,11 @@ export class ToolExecutor {
     // Execute
     try {
       const result = await tool.execute(input, cwd);
-      const durationMs = Date.now() - startTime;
-      return {
-        result,
-        record: { toolName, input, output: result.output, durationMs, isError: result.isError ?? false, newCwd: result.newCwd },
-      };
+      return finalize(result);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       const result: ToolResult = { output: `Araç çalışma hatası: ${message}`, isError: true };
-      return {
-        result,
-        record: { toolName, input, output: result.output, durationMs: Date.now() - startTime, isError: true },
-      };
+      return finalize(result);
     }
   }
 

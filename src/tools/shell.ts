@@ -54,7 +54,7 @@ export const shellTool: ToolDefinition = {
 
       const child = spawn(shell, shellArgs, {
         cwd,
-        env: { ...process.env, CLAUDECODE: '1' },
+        env: { ...process.env },
         stdio: ['ignore', 'pipe', 'pipe'],
       });
 
