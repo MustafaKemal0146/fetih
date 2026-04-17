@@ -11,6 +11,7 @@ import { SYSTEM_PROMPT_TR } from './prompts/system.js';
 const MAX_INSTRUCTION_CHARS = 24_000;
 
 const INSTRUCTION_FILES: { label: string; relativePath: string }[] = [
+  { label: 'SETH.md', relativePath: 'SETH.md' },
   { label: 'CLAUDE.md', relativePath: 'CLAUDE.md' },
   { label: 'AGENTS.md', relativePath: 'AGENTS.md' },
   { label: '.seth/instructions.md', relativePath: join('.seth', 'instructions.md') },

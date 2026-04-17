@@ -19,6 +19,24 @@ export class ClaudeProvider implements LLMProvider {
     this.client = new Anthropic({ apiKey });
   }
 
+  /**
+   * Gerçek token sayımı — API'den doğru sayı.
+   */
+  async countTokens(messages: ChatMessage[], systemPrompt?: string): Promise<number> {
+    try {
+      const { anthropicMessages } = this.prepareMessages(messages, { model: 'claude-3-5-haiku-latest', systemPrompt });
+      const result = await this.client.messages.countTokens({
+        model: 'claude-3-5-haiku-latest',
+        system: systemPrompt,
+        messages: anthropicMessages,
+      });
+      return result.input_tokens;
+    } catch {
+      const text = messages.map(m => typeof m.content === 'string' ? m.content : JSON.stringify(m.content)).join('');
+      return Math.ceil(text.length / 4);
+    }
+  }
+
   async chat(messages: ChatMessage[], options: ChatOptions): Promise<ChatResponse> {
     const { systemPrompt, anthropicMessages } = this.prepareMessages(messages, options);
 

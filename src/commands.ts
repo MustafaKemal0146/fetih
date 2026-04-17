@@ -650,6 +650,90 @@ SETH artık sadece bir araç değil, bir ordu gibi düşünen 'Leviathan' çekir
     return { output: [chalk.bold(`🔍 "${query}" — ${results.length} sonuç:`), '', ...results].join('\n') };
   },
 
+  // #10 Tüm oturumlarda arama
+  'oturum-ara': async (args) => {
+    const query = args.trim();
+    if (!query) return { output: chalk.dim('Kullanım: /oturum-ara <kelime>') };
+    const { searchAllSessions } = await import('./session-search.js');
+    const results = await searchAllSessions(query);
+    if (results.length === 0) return { output: chalk.dim(`"${query}" hiçbir oturumda bulunamadı.`) };
+    const lines = [chalk.bold(`🔍 "${query}" — ${results.length} oturumda bulundu:`), ''];
+    for (const r of results.slice(0, 10)) {
+      lines.push(`  ${chalk.cyan(r.sessionId.slice(0, 8))} ${chalk.dim(r.createdAt.slice(0, 10))} ${r.provider}/${r.model} — ${r.matchCount} eşleşme`);
+      lines.push(`    ${chalk.dim('...' + r.preview.slice(0, 80) + '...')}`);
+    }
+    return { output: lines.join('\n') };
+  },
+
+  // #9 Diff görüntüleme
+  diff: async (args, ctx) => {
+    const { gitDiffTool } = await import('./tools/git-diff.js');
+    const staged = args.includes('--staged') || args.includes('-s');
+    const stat = args.includes('--stat');
+    return gitDiffTool.execute({ staged, stat_only: stat }, ctx.getCwd());
+  },
+
+  // #7 Cron yönetimi
+  cron: async (args) => {
+    const { addCronJob, listCronJobs, removeCronJob, toggleCronJob, parseIntervalStr } = await import('./cron.js');
+    const parts = args.trim().split(' ');
+    const sub = parts[0];
+
+    if (!sub || sub === 'liste') {
+      const jobs = listCronJobs();
+      if (jobs.length === 0) return { output: chalk.dim('  Kayıtlı cron görevi yok. /cron ekle <isim> <interval> <prompt>') };
+      const lines = [chalk.bold('⏰ Cron Görevleri:'), ''];
+      for (const j of jobs) {
+        const status = j.enabled ? chalk.green('✓') : chalk.red('✗');
+        const interval = `${j.intervalMs / 60000}dk`;
+        lines.push(`  ${status} ${j.id.slice(-6)} ${j.name.padEnd(15)} ${chalk.dim(interval)} — ${j.prompt.slice(0, 50)}`);
+      }
+      return { output: lines.join('\n') };
+    }
+
+    if (sub === 'ekle') {
+      const name = parts[1];
+      const intervalStr = parts[2];
+      const prompt = parts.slice(3).join(' ');
+      if (!name || !intervalStr || !prompt) return { output: chalk.red('Kullanım: /cron ekle <isim> <interval(1m/1h/1d)> <prompt>') };
+      const ms = parseIntervalStr(intervalStr);
+      if (!ms) return { output: chalk.red('Geçersiz interval. Örnek: 30m, 2h, 1d') };
+      const job = addCronJob(name, prompt, ms);
+      return { output: chalk.green(`✓ Cron görevi eklendi: ${job.id}`) };
+    }
+
+    if (sub === 'sil') {
+      const id = parts[1];
+      if (!id) return { output: chalk.red('Kullanım: /cron sil <id>') };
+      const ok = removeCronJob(id);
+      return { output: ok ? chalk.green(`✓ Silindi: ${id}`) : chalk.red(`Bulunamadı: ${id}`) };
+    }
+
+    return { output: chalk.dim('/cron [liste|ekle|sil]') };
+  },
+
+  // #4 Paste — panodan yapıştır
+  yapıştır: async (_args, ctx) => {
+    const { getClipboardText, hasImageInClipboard, getImageFromClipboard, PASTE_THRESHOLD } = await import('./paste.js');
+    
+    // Önce görüntü var mı kontrol et
+    const hasImg = await hasImageInClipboard();
+    if (hasImg) {
+      const img = await getImageFromClipboard();
+      if (img) {
+        return { output: chalk.green(`✓ Görüntü panoya alındı (${img.base64.length} byte). Vision destekli modelde kullanılabilir.`) };
+      }
+    }
+
+    const text = await getClipboardText();
+    if (!text) return { output: chalk.dim('  Panoda metin veya görüntü bulunamadı.') };
+    
+    if (text.length > PASTE_THRESHOLD) {
+      return { runAsUserMessage: `[Yapıştırılan metin — ${text.split('\n').length} satır]\n${text}` };
+    }
+    return { runAsUserMessage: text };
+  },
+
   // ─── Bağlam Analizi ───────────────────────────────────────────────────────
   bağlam: (_args, ctx) => {
     const messages = ctx.getMessages?.() ?? [];
@@ -837,24 +921,47 @@ ${rows}
     const s = ctx.getStats();
     const history = loadHistory();
     const totalTokens = s.inputTokens + s.outputTokens;
-    const costEst = (totalTokens / 1_000_000 * 3).toFixed(4); // ~$3/M token
+
+    // #1 Gerçek maliyet hesabı
+    const { calculateCostUSD, formatCostUSD } = await import('./model-cost.js');
+    const costUSD = calculateCostUSD(s.inputTokens, s.outputTokens, ctx.currentModel, ctx.currentProvider);
 
     const lines = [
       chalk.bold('📊 SETH İstatistikleri'),
       '',
+      `  Sağlayıcı     : ${chalk.cyan(ctx.currentProvider)} / ${chalk.cyan(ctx.currentModel)}`,
       `  Mesaj sayısı  : ${chalk.cyan(s.messages)}`,
       `  Toplam token  : ${chalk.cyan(totalTokens.toLocaleString())}`,
       `    ↳ Giriş     : ${chalk.dim(s.inputTokens.toLocaleString())}`,
       `    ↳ Çıkış     : ${chalk.dim(s.outputTokens.toLocaleString())}`,
       `  Tur sayısı    : ${chalk.cyan(s.turns)}`,
-      `  Tahmini maliyet: ${chalk.yellow('~$' + costEst)}`,
+      `  Gerçek maliyet: ${chalk.yellow(formatCostUSD(costUSD))}`,
       '',
       `  Geçmiş kayıt  : ${chalk.cyan(history.length)} komut`,
     ];
-    console.log(lines.join('\n'));
 
-    // Günlük kullanım bilgilerini getir
-    return { output: chalk.dim('  Token maliyeti tahminidir, gerçek fiyat sağlayıcıya göre değişir.') };
+    // #17 Tool metrics
+    try {
+      const { readFile } = await import('fs/promises');
+      const { join } = await import('path');
+      const { homedir } = await import('os');
+      const summaryPath = join(homedir(), '.seth', 'metrics', 'tool-metrics-summary.json');
+      const raw = await readFile(summaryPath, 'utf-8').catch(() => null);
+      if (raw) {
+        const summary = JSON.parse(raw) as { totals: { calls: number; errors: number }; tools: Record<string, { calls: number }> };
+        lines.push('', chalk.bold('  🔧 Araç Kullanımı (toplam)'));
+        lines.push(`  Toplam çağrı  : ${chalk.cyan(summary.totals.calls)}`);
+        const topTools = Object.entries(summary.tools)
+          .sort((a, b) => b[1].calls - a[1].calls)
+          .slice(0, 5);
+        for (const [name, data] of topTools) {
+          lines.push(`    ${name.padEnd(20)} ${chalk.dim(data.calls + ' çağrı')}`);
+        }
+      }
+    } catch { /* metrics yoksa atla */ }
+
+    console.log(lines.join('\n'));
+    return { output: '' };
   },
   repo_özet: async (_args, ctx) => { const res = await runRepoOzetSummary(ctx.getCwd()); return { output: res.output }; },
   sor: async (_args, ctx) => { const p = await runSorWizard(ctx.getSessionId()); return typeof p === 'string' ? { runAsUserMessage: p } : { output: chalk.gray('İptal.') }; },

@@ -45,6 +45,9 @@ export async function runAgentLoop(
   history: ChatMessage[],
   options: AgentLoopOptions,
 ): Promise<AgentResult> {
+  // Mutable kopyalar — fallback geçişi için
+  let activeProvider = options.provider;
+  let activeModel = options.model;
   const messages: ChatMessage[] = [
     ...history,
     { role: 'user', content: userMessage },
@@ -62,7 +65,7 @@ export async function runAgentLoop(
   let finalText = '';
 
   const toolSchemas = options.toolRegistry.toSchemas();
-  const useTools = toolSchemas.length > 0 && options.provider.supportsTools;
+  const useTools = toolSchemas.length > 0 && activeProvider.supportsTools;
 
   while (budget.turnsUsed < budget.maxTurns) {
     budget.turnsUsed++;
@@ -70,7 +73,7 @@ export async function runAgentLoop(
     if (options.onTurnStart) options.onTurnStart(budget.turnsUsed, budget.maxTurns);
 
     const chatOptions: ChatOptions = {
-      model: options.model,
+      model: activeModel,
       systemPrompt: options.systemPrompt,
       tools: useTools ? toolSchemas : undefined,
       maxTokens: 8192,
@@ -81,7 +84,7 @@ export async function runAgentLoop(
     let response: ChatResponse;
 
     try {
-      if (options.provider.supportsStreaming) {
+      if (activeProvider.supportsStreaming) {
         // Streaming path — pipe text through ThinkingFilter
         let streamResponse: ChatResponse | null = null;
 
@@ -90,7 +93,7 @@ export async function runAgentLoop(
           if (options.onText) options.onText(chunk);
         });
 
-        for await (const event of options.provider.stream(messages, chatOptions)) {
+        for await (const event of activeProvider.stream(messages, chatOptions)) {
           if (event.type === 'text') {
             filter.feed(event.data as string);
           }
@@ -105,8 +108,8 @@ export async function runAgentLoop(
         if (!streamResponse) throw new Error('Stream ended without response');
         response = streamResponse;
       } else {
-        // Non-streaming path — still pipe through ThinkingFilter to suppress thinking blocks
-        response = await options.provider.chat(messages, chatOptions);
+        // Non-streaming path
+        response = await activeProvider.chat(messages, chatOptions);
         const textContent = response.content
           .filter(b => b.type === 'text')
           .map(b => (b as { text: string }).text)
@@ -130,10 +133,10 @@ export async function runAgentLoop(
         };
       }
       // Fallback sağlayıcı varsa geç
-      if (options.fallbackProvider && options.provider !== options.fallbackProvider) {
+      if (options.fallbackProvider && activeProvider !== options.fallbackProvider) {
         if (options.onText) options.onText(`\n⚡ Birincil sağlayıcı başarısız, yedek sağlayıcıya geçiliyor...\n`);
-        options.provider = options.fallbackProvider;
-        if (options.fallbackModel) options.model = options.fallbackModel;
+        activeProvider = options.fallbackProvider;
+        if (options.fallbackModel) activeModel = options.fallbackModel;
         continue;
       }
       throw err;

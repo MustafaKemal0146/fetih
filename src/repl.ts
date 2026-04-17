@@ -618,6 +618,13 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
         }
       }
 
+      // #2 Otomatik bellek çıkarma — arka planda, sessizce
+      if (result.messages.length >= 6) {
+        import('./auto-memory.js').then(({ extractAndSaveMemories }) => {
+          extractAndSaveMemories(result.messages, provider, currentModel, currentCwd).catch(() => {});
+        }).catch(() => {});
+      }
+
     } catch (err: any) {
       clearSpin();
       if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
@@ -686,6 +693,26 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
     let lineTimer: NodeJS.Timeout | null = null;
     let isProgrammaticClose = false;
     let vimState: 'INSERT' | 'NORMAL' = 'INSERT';
+
+    // Bracketed paste desteği — paste direkt göndermesin
+    let pasteBuffer = '';
+    let inPaste = false;
+    let lastPastedContent = '';
+    let pasteExpanded = false;
+    if (process.stdout.isTTY) {
+      process.stdout.write('\x1b[?2004h');
+    }
+    const cleanupBracketedPaste = () => {
+      if (process.stdout.isTTY) process.stdout.write('\x1b[?2004l');
+    };
+
+    // Hız bazlı paste algılama değişkenleri (Ctrl+Shift+V için)
+    let lastKeypressTime = 0;
+    let rapidCharCount = 0;
+    let rapidPasteDetected = false;
+    let rapidPasteTimer: NodeJS.Timeout | null = null;
+    const RAPID_THRESHOLD_MS = 20;
+    const RAPID_MIN_CHARS = 5;
 
     const renderVimStatus = () => {
       if (!appConfig.repl?.vimMode) return;
@@ -764,10 +791,67 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
         // Intercepted by vim handler
         return;
       }
+      // Bracketed paste — \x1b[200~ başlangıç, \x1b[201~ bitiş
+      if (s === '\x1b[200~') { inPaste = true; pasteBuffer = ''; return; }
+      if (s === '\x1b[201~') {
+        inPaste = false;
+        const pasted = pasteBuffer;
+        pasteBuffer = '';
+        if (!pasted.trim()) return;
+        // Sadece input'a yaz, gönderme — kullanıcı Enter'a bassın
+        if (rl) rl.write(pasted.replace(/\r\n/g, '\n').replace(/\r/g, '\n'));
+        return;
+      }
+      if (inPaste) { pasteBuffer += s; return; }
+
+      // Ctrl+O — son paste içeriğini göster/gizle
+      if (key?.ctrl && key?.name === 'o') {
+        if (!lastPastedContent) return;
+        pasteExpanded = !pasteExpanded;
+        if (pasteExpanded) {
+          process.stdout.write('\n' + chalk.dim('─'.repeat(50)) + '\n');
+          process.stdout.write(chalk.dim(lastPastedContent));
+          process.stdout.write('\n' + chalk.dim('─'.repeat(50)) + '\n');
+        }
+        if (rl) rl.prompt(true);
+        return;
+      }
+
+      // Ctrl+Shift+V hız bazlı algılama — sadece lastPastedContent güncelle
+      if (s && s.length === 1 && !key?.ctrl && !key?.meta) {
+        const now = Date.now();
+        const delta = now - lastKeypressTime;
+        lastKeypressTime = now;
+        if (delta < RAPID_THRESHOLD_MS) {
+          rapidCharCount++;
+          if (rapidPasteTimer) clearTimeout(rapidPasteTimer);
+          rapidPasteTimer = setTimeout(() => {
+            rapidPasteTimer = null;
+            if (rapidCharCount >= RAPID_MIN_CHARS) {
+              lastPastedContent = rl?.line ?? '';
+              rapidPasteDetected = false;
+            }
+            rapidCharCount = 0;
+          }, 50);
+        } else {
+          rapidCharCount = 1;
+        }
+      }
+
       // Esc → işlemi durdur (abort)
-      if (key?.name === 'escape' && processing && currentAbortController) {
-        currentAbortController.abort();
-        process.stdout.write(chalk.red('\n  ⚡ Durduruldu (Esc)\n'));
+      if (key?.name === 'escape') {
+        if (processing && currentAbortController) {
+          currentAbortController.abort();
+          process.stdout.write(chalk.red('\n  ⚡ Durduruldu (Esc)\n'));
+          processing = false; // Hemen işareti sıfırla
+          if (rl) { rl.setPrompt(getPromptStr()); rl.prompt(); }
+          return;
+        }
+        // Vim normal mode'dan çık
+        if (appConfig.repl?.vimMode && vimState === 'NORMAL') {
+          vimState = 'INSERT';
+          renderVimStatus();
+        }
         return;
       }
       // Ctrl+R — geçmiş fuzzy arama
@@ -788,56 +872,29 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
         });
         return;
       }
-      // Büyük paste algılama: 500+ karakter gelirse paste store'a yaz
+      // Büyük paste algılama: 500+ karakter gelirse paste store'a yaz (sessizce)
       if (s && s.length > 500 && !processing) {
-        const hash = storePaste(s);
-        process.stdout.write(chalk.dim(`\n  📋 Büyük içerik algılandı (${s.length} karakter) — hash: ${hash.slice(0, 8)}…\n`));
+        storePaste(s);
       }
     };
     process.stdin.on('keypress', onKeypress);
 
     // ─── İşlem sırasında yazılan mesajı beklet ────────────────────────────────
-    let pendingInput = '';   // AI çalışırken yazılan metin
-    let pendingVisible = false;
-    let pendingWaiting = false; // Zaten bekliyor mu?
-
-    const clearPendingPrompt = () => {
-      if (pendingVisible) {
-        process.stdout.write(`\r\x1b[K`);
-        pendingVisible = false;
-      }
-    };
+    // NOT: AI çalışırken yazılan metin otomatik gönderilmez — kullanıcı beklemeli.
 
     rl.on('line', (line: string) => {
-      // ─── AI çalışırken Enter → beklet ──────────────────────────────────────
+      // ─── AI çalışırken Enter → sadece uyar, gönderme ──────────────────────
       if (processing) {
-        const queued = pendingInput || line;
-        if (queued.trim()) {
-          clearPendingPrompt();
-          pendingInput = queued;
-          process.stdout.write(chalk.dim(`  ⏸ Kuyrukta: "${queued.slice(0, 60)}"\n`));
-          // Zaten bekleyen bir interval varsa yeni oluşturma
-          if (!pendingWaiting) {
-            pendingWaiting = true;
-            const waitInterval = setInterval(() => {
-              if (!processing) {
-                clearInterval(waitInterval);
-                pendingWaiting = false;
-                const toSend = pendingInput;
-                pendingInput = '';
-                if (toSend.trim()) {
-                  addToHistory(toSend);
-                  processing = true;
-                  runAgentTurn(toSend).then(() => {
-                    if (rl) { rl.setPrompt(getPromptStr()); rl.prompt(); }
-                  });
-                }
-              }
-            }, 200);
-          }
+        if (line.trim()) {
+          process.stdout.write(chalk.dim(`  ⏸ AI çalışıyor, lütfen bekleyin… (Esc ile durdurabilirsiniz)\n`));
         }
         return;
       }
+
+      // Hızlı paste devam ediyorsa veya yeni bittiyse gönderme
+      // (Ctrl+Shift+V ile yapıştırılan son satır 100ms içinde gelir)
+      if (rapidPasteTimer !== null) return;
+      if (rapidCharCount >= RAPID_MIN_CHARS) return; // timer henüz bitmedi
 
       if (vimState === 'NORMAL') {
         rl?.prompt();
@@ -919,6 +976,8 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
     rl.on('SIGINT', () => {
       if (currentAbortController) {
         currentAbortController.abort();
+        processing = false;
+        if (rl) { rl.setPrompt(getPromptStr()); rl.prompt(); }
         return;
       }
       if (multilineBuffer) {
@@ -940,6 +999,7 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
 
     rl.on('close', () => {
       process.stdin.removeListener('keypress', onKeypress);
+      cleanupBracketedPaste();
       if (!isProgrammaticClose) {
         saveSession(updateSessionMessages(session, laneHistories.a, laneHistories.b, activeLane, { inputTokens: 0, outputTokens: 0 }));
         console.log(chalk.dim(`\n  Ctrl+D — çıkılıyor. Devam etmek için: seth --devam ${session.id}`));

@@ -3,6 +3,7 @@
  * Usage: seth -p "your question"
  */
 
+import chalk from 'chalk';
 import type { SETHConfig, ProviderName } from './types.js';
 import { createProvider } from './providers/base.js';
 import { createDefaultRegistry, ToolRegistry } from './tools/registry.js';
@@ -66,10 +67,11 @@ export async function runHeadless(
         : undefined,
       onText: (text: string) => process.stdout.write(text),
       onToolCall: (name: string, input: Record<string, unknown>) => {
-        if (config.debug) console.error(renderToolCall(name, input));
+        process.stderr.write(chalk.dim(`\n  ⚙ ${name}(${JSON.stringify(input).slice(0, 100)})\n`));
       },
       onToolResult: (name: string, output: string, isError: boolean) => {
-        if (config.debug) console.error(renderToolResult(name, output, isError));
+        if (isError) process.stderr.write(chalk.red(`  ✗ ${name}: ${output.slice(0, 200)}\n`));
+        else if (config.debug) process.stderr.write(chalk.dim(`  ✓ ${name}: ${output.slice(0, 100)}\n`));
       },
     });
 
