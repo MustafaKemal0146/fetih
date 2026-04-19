@@ -4,8 +4,9 @@
  * Maksimum 7 katman derinliğe kadar recursive çalışır.
  */
 
-import { createHash, createDecipheriv } from 'crypto';
+import { createHash } from 'crypto';
 import type { ToolDefinition, ToolResult } from '../types.js';
+import { looksLikeFlag, isPrintableAscii, findFlags as findFlagsUtil } from './ctf-utils.js';
 
 // ─── Tipler ──────────────────────────────────────────────────────────────────
 
@@ -25,16 +26,6 @@ interface LayerResult {
 }
 
 // ─── Yardımcı: Anlamlı mı? ───────────────────────────────────────────────────
-
-function looksLikeFlag(s: string): boolean {
-  return /flag\{[^}]+\}/i.test(s) || /ctf\{[^}]+\}/i.test(s);
-}
-
-function isPrintableAscii(s: string, threshold = 0.85): boolean {
-  if (!s.length) return false;
-  const printable = s.split('').filter(c => c.charCodeAt(0) >= 32 && c.charCodeAt(0) < 127).length;
-  return printable / s.length >= threshold;
-}
 
 function looksLikeEnglish(s: string): boolean {
   const words = ['the', 'and', 'flag', 'ctf', 'is', 'you', 'have', 'key', 'secret', 'password'];

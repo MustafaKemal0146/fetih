@@ -5,9 +5,11 @@
 import { readFileSync, existsSync } from 'fs';
 import { extname } from 'path';
 import type { ToolDefinition, ToolResult } from '../types.js';
+import { extractStrings, findFlags, detectMagicType } from './ctf-utils.js';
 
 // ─── Magic Bytes Tablosu ─────────────────────────────────────────────────────
 
+// MAGIC_SIGNATURES — carveFiles için yerel (ext bilgisi gerekli)
 const MAGIC_SIGNATURES: Array<{ bytes: number[]; type: string; ext: string }> = [
   { bytes: [0xFF, 0xD8, 0xFF],             type: 'JPEG',  ext: '.jpg' },
   { bytes: [0x89, 0x50, 0x4E, 0x47],       type: 'PNG',   ext: '.png' },
@@ -44,39 +46,6 @@ export interface FileAnalysisResult {
   exif?: Record<string, unknown>;
   zipContents?: string[];
   notes: string[];
-}
-
-// ─── Magic Bytes Tespiti ─────────────────────────────────────────────────────
-
-function detectMagicType(buf: Buffer): string {
-  for (const sig of MAGIC_SIGNATURES) {
-    if (sig.bytes.every((b, i) => buf[i] === b)) return sig.type;
-  }
-  // MP4: offset 4'te ftyp
-  if (buf.length > 8 && buf.slice(4, 8).toString('ascii') === 'ftyp') return 'MP4';
-  return 'UNKNOWN';
-}
-
-// ─── String Extraction ───────────────────────────────────────────────────────
-
-function extractStrings(buf: Buffer, minLen = 4): string[] {
-  const results: string[] = [];
-  let current = '';
-  for (let i = 0; i < buf.length; i++) {
-    const c = buf[i]!;
-    if (c >= 0x20 && c < 0x7F) {
-      current += String.fromCharCode(c);
-    } else {
-      if (current.length >= minLen) results.push(current);
-      current = '';
-    }
-  }
-  if (current.length >= minLen) results.push(current);
-  return results;
-}
-
-function findFlags(strings: string[]): string[] {
-  return strings.filter(s => /flag\{[^}]+\}/i.test(s) || /ctf\{[^}]+\}/i.test(s));
 }
 
 // ─── File Carving ─────────────────────────────────────────────────────────────

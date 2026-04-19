@@ -2,9 +2,10 @@
  * @fileoverview Seth CTF Görsel Steganografi — LSB, Alpha, Renk Kanalı, Histogram
  */
 
-import { readFileSync, existsSync, writeFileSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import type { ToolDefinition, ToolResult } from '../types.js';
+import { findFlags, isPrintableAscii } from './ctf-utils.js';
 
 export interface StegoResult {
   method: string;
@@ -35,16 +36,8 @@ function bitsToString(bits: number[]): string {
   return result;
 }
 
-function findFlags(s: string): string[] {
-  const matches = s.match(/(?:flag|ctf)\{[^}]+\}/gi);
-  return matches ?? [];
-}
-
-function isPrintable(s: string, threshold = 0.8): boolean {
-  if (!s.length) return false;
-  const ok = s.split('').filter(c => c.charCodeAt(0) >= 32 && c.charCodeAt(0) < 127).length;
-  return ok / s.length >= threshold;
-}
+// isPrintable → isPrintableAscii (ctf-utils'ten import edildi)
+const isPrintable = (s: string, threshold = 0.8) => isPrintableAscii(s, threshold);
 
 // ─── Jimp ile Piksel Okuma ───────────────────────────────────────────────────
 
