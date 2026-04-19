@@ -33,11 +33,8 @@ export function useSethAgent(options: UseSethAgentOptions) {
     setCurrentTool(null);
     turnTextRef.current = '';
 
-    const updatedHistory: ChatMessage[] = [
-      ...history,
-      { role: 'user', content: text }
-    ];
-    setHistory(updatedHistory);
+    // UI'da hemen görünmesi için kullanıcı mesajını yerel state'e ekle
+    setHistory(prev => [...prev, { role: 'user', content: text }]);
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -50,6 +47,7 @@ export function useSethAgent(options: UseSethAgentOptions) {
           setStreamingText(turnTextRef.current);
         },
         onToolCall: (name, input) => {
+          // Tool başlamadan önce o ana kadar olan metni geçmişe işle
           if (turnTextRef.current) {
             setHistory(prev => [...prev, { role: 'assistant', content: turnTextRef.current }]);
             turnTextRef.current = '';
@@ -58,6 +56,7 @@ export function useSethAgent(options: UseSethAgentOptions) {
           setCurrentTool({ name, input });
         },
         onToolResult: (name, output, isError) => {
+          // Tool sonucunu geçmişe işle
           setHistory(prev => [
             ...prev, 
             { role: 'user', content: [{ type: 'tool_result', tool_use_id: 'auto', content: output, is_error: isError }] }
@@ -71,20 +70,25 @@ export function useSethAgent(options: UseSethAgentOptions) {
         abortSignal: controller.signal,
       };
 
-      const result = await runAgentLoop(text, updatedHistory, loopOptions);
+      // runAgentLoop'a ORİJİNAL history'yi veriyoruz.
+      // Çünkü runAgentLoop kendi içinde userMessage'ı (text) history'ye ekleyecek.
+      // Biz UI'da zaten bir kere eklediğimiz için, burada güncel (updated) history'yi verirsek 
+      // runAgentLoop onu tekrar ekler ve mesaj iki kere görünür.
+      const result = await runAgentLoop(text, history, loopOptions);
       
-      setHistory(result.messages);
+      let finalMessages = result.messages;
+
+      // Esc/Abort durumunda yarım kalan metni kurtar
+      if (controller.signal.aborted && turnTextRef.current) {
+        finalMessages = [...finalMessages, { role: 'assistant', content: turnTextRef.current + '\n\n*[İŞLEM DURDURULDU]*' }];
+      }
+
+      setHistory(finalMessages);
       setStreamingText('');
       setCurrentTool(null);
     } catch (err: any) {
-      // Esc/Abort durumunda yarım kalan metni kurtar
-      if (err?.name === 'AbortError' || err?.message?.includes('aborted')) {
-        const partialText = turnTextRef.current + ' [İŞLEM DURDURULDU]';
-        setHistory(prev => [...prev, { role: 'assistant', content: partialText }]);
-      } else {
-        console.error('Agent loop error:', err);
-        setHistory(prev => [...prev, { role: 'assistant', content: `Hata: ${err instanceof Error ? err.message : String(err)}` }]);
-      }
+      console.error('Agent loop error:', err);
+      setHistory(prev => [...prev, { role: 'assistant', content: `Hata: ${err instanceof Error ? err.message : String(err)}` }]);
     } finally {
       setIsProcessing(false);
       setStreamingText('');
