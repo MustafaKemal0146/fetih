@@ -24,8 +24,12 @@ function renderContent(content: string | ContentBlock[]) {
 export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
   const isUser = message.role === 'user';
   const roleLabel = isUser ? ' KULLANICI ' : ' SETH ';
-  const roleColor = isUser ? 'cyan' : 'green';
-  const borderColor = isUser ? 'blue' : 'green';
+  
+  // Tema: Crimson Hacker
+  const roleColor = 'red';
+  const borderColor = isUser ? 'gray' : 'red';
+  const labelBg = isUser ? 'white' : 'red';
+  const labelText = isUser ? 'black' : 'white';
 
   const text = renderContent(message.content);
   if (!text && !isStreaming) return null;
@@ -35,7 +39,7 @@ export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
   return (
     <Box flexDirection="column" marginBottom={1} width="100%">
       <Box paddingLeft={1}>
-        <Text bold color={roleColor} backgroundColor={isUser ? 'blue' : 'black'}>
+        <Text bold color={labelText} backgroundColor={labelBg}>
           {roleLabel}
         </Text>
       </Box>
@@ -45,8 +49,8 @@ export function ChatMessage({ message, isStreaming }: ChatMessageProps) {
         paddingX={1} 
         flexDirection="column"
       >
-        <Text color="white">{text}</Text>
-        {isStreaming && <Text color="green">▋</Text>}
+        <Text color={isUser ? 'white' : 'red'}>{text}</Text>
+        {isStreaming && <Text color="red">▋</Text>}
       </Box>
     </Box>
   );

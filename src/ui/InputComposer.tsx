@@ -34,10 +34,10 @@ export function InputComposer({ onSend, isProcessing, onAbort }: InputComposerPr
 
   return (
     <Box marginTop={1}>
-      <Text color="yellow">{isProcessing ? '⚡ ' : '> '}</Text>
+      <Text color="red" bold>{isProcessing ? '⚡ ' : '> '}</Text>
       <Text color="white">{input}</Text>
-      {!isProcessing && <Text color="yellow">_</Text>}
-      {isProcessing && <Text dimColor> (Durdurmak için Esc)</Text>}
+      {!isProcessing && <Text color="red">_</Text>}
+      {isProcessing && <Text dimColor color="red"> (Durdurmak için Esc)</Text>}
     </Box>
   );
 }
