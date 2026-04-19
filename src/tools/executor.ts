@@ -12,6 +12,8 @@ import { cmd } from '../theme.js';
 import { logToolMetric } from '../storage/tool-metrics.js';
 import { truncateToolOutput } from '../truncate.js';
 import { maskSensitiveOutput } from '../tool-output-masking.js';
+import { errorHandler } from '../error-handler.js';
+import { processPool } from '../process-pool.js';
 
 const MAX_TOOL_OUTPUT_CHARS = 20_000;
 

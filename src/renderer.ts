@@ -10,6 +10,7 @@ import stripAnsi from 'strip-ansi';
 import * as os from 'os';
 import { VERSION } from './version.js';
 import { navyBright, navyDim, navyMuted, promptBright, toolAccent } from './theme.js';
+import { VisualEngine } from './visual-engine.js';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const marked = new Marked();
