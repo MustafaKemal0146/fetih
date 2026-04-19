@@ -102,6 +102,8 @@ export async function createDefaultRegistry(): Promise<ToolRegistry> {
   const { browserAutomationTool, closeBrowser } = await import('./browser-automation.js');
   const { openBrowserAgentTool } = await import('./openbrowser-agent.js');
   const { ctfSolverTool } = await import('./ctf-solver.js');
+  const { ctfFileAnalyzerTool } = await import('./ctf-file-analyzer.js');
+  const { ctfStegoTool } = await import('./ctf-stego.js');
 
   registry.register(shellTool);
   registry.register(fileReadTool);
@@ -163,6 +165,8 @@ export async function createDefaultRegistry(): Promise<ToolRegistry> {
 
   // CTF Solver
   registry.register(ctfSolverTool);
+  registry.register(ctfFileAnalyzerTool);
+  registry.register(ctfStegoTool);
 
   // Arka plan görev araçları
   const { taskCreateTool, taskListTool, taskGetTool, taskStopTool } = await import('./background-tasks.js');

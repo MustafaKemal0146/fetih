@@ -14,6 +14,9 @@ export interface SolveResult {
   technique: string;
   explanation: string;
   layers: string[];
+  confidence: number;
+  alternatives: Array<{ technique: string; reason: string }>;
+  recommendations: string[];
 }
 
 interface LayerResult {
@@ -408,46 +411,159 @@ const TECHNIQUES: Array<(input: string) => LayerResult | null> = [
   tryWhitespaceStego,
 ];
 
+// ─── 3. AI Karar Motoru — Skor Sistemi ───────────────────────────────────────
+
+interface TechniqueScore {
+  technique: string;
+  fn: (input: string) => LayerResult | null;
+  score: number;
+}
+
+function scoreInput(input: string): TechniqueScore[] {
+  const clean = input.trim();
+  const len = clean.length;
+  const scores: TechniqueScore[] = [];
+
+  // Base64 skoru
+  const b64Chars = (clean.match(/[A-Za-z0-9+/=]/g) ?? []).length;
+  const b64Score = (b64Chars / len) * 100
+    * (len % 4 === 0 || clean.endsWith('=') ? 1.2 : 0.8)
+    * (/^[A-Za-z0-9+/]+=*$/.test(clean) ? 1.3 : 0.5);
+  scores.push({ technique: 'Base64', fn: tryBase64, score: Math.min(b64Score, 100) });
+
+  // Hex skoru
+  const hexClean = clean.replace(/\s|0x/g, '');
+  const hexChars = (hexClean.match(/[0-9a-fA-F]/g) ?? []).length;
+  const hexScore = (hexChars / hexClean.length) * 100
+    * (hexClean.length % 2 === 0 ? 1.3 : 0.3)
+    * (/^[0-9a-fA-F\s]+$/.test(clean) ? 1.2 : 0.6);
+  scores.push({ technique: 'Hex', fn: tryHex, score: Math.min(hexScore, 100) });
+
+  // Binary skoru
+  const binClean = clean.replace(/\s/g, '');
+  const binScore = /^[01]+$/.test(binClean) && binClean.length % 8 === 0 ? 90 : 5;
+  scores.push({ technique: 'Binary', fn: tryBinary, score: binScore });
+
+  // Hash skoru
+  const hashType = detectHashType(clean);
+  scores.push({ technique: 'Hash', fn: tryHashCrack, score: hashType ? 85 : 0 });
+
+  // RSA skoru
+  const rsaScore = /p\s*=\s*\d+/i.test(clean) && /q\s*=\s*\d+/i.test(clean) ? 95 : 0;
+  scores.push({ technique: 'RSA', fn: tryRSA, score: rsaScore });
+
+  // Morse skoru
+  const morseScore = /^[.\-\s/]+$/.test(clean) ? 90 : 0;
+  scores.push({ technique: 'Morse', fn: tryMorse, score: morseScore });
+
+  // ROT13 skoru — alfabe oranı yüksek ama anlamsız
+  const alphaRatio = (clean.match(/[a-zA-Z]/g) ?? []).length / len;
+  const rot13Score = alphaRatio > 0.7 ? 60 : alphaRatio * 50;
+  scores.push({ technique: 'ROT13', fn: tryROT13, score: rot13Score });
+
+  // Caesar skoru
+  scores.push({ technique: 'Caesar', fn: tryCaesar, score: alphaRatio > 0.8 ? 55 : alphaRatio * 40 });
+
+  // URL Encoding skoru
+  const urlScore = /%[0-9a-fA-F]{2}/.test(clean) ? 85 : 0;
+  scores.push({ technique: 'URL', fn: tryUrlDecode, score: urlScore });
+
+  // HTML Entity skoru
+  const htmlScore = /&[a-z]+;|&#\d+;/.test(clean) ? 85 : 0;
+  scores.push({ technique: 'HTML', fn: tryHtmlEntities, score: htmlScore });
+
+  // XOR skoru — hex ama flag içermiyorsa
+  const xorScore = /^[0-9a-fA-F\s]+$/.test(clean) && hexClean.length % 2 === 0 && hexClean.length > 8 ? 50 : 0;
+  scores.push({ technique: 'XOR', fn: tryXorSingleByte, score: xorScore });
+
+  // Bacon skoru
+  const baconScore = /^[AB\s]+$/.test(clean) && clean.replace(/\s/g, '').length % 5 === 0 ? 80 : 0;
+  scores.push({ technique: 'Bacon', fn: tryBacon, score: baconScore });
+
+  // Polybius skoru
+  const polybScore = /^[1-5\s]+$/.test(clean) && clean.replace(/\s/g, '').length % 2 === 0 ? 75 : 0;
+  scores.push({ technique: 'Polybius', fn: tryPolybius, score: polybScore });
+
+  // Atbash skoru
+  scores.push({ technique: 'Atbash', fn: tryAtbash, score: alphaRatio > 0.7 ? 45 : 20 });
+
+  // Base32 skoru
+  const b32Score = /^[A-Z2-7\s]+=*$/.test(clean.toUpperCase()) && len >= 8 ? 70 : 0;
+  scores.push({ technique: 'Base32', fn: tryBase32, score: b32Score });
+
+  // ASCII Decimal skoru
+  const parts = clean.split(/\s+/);
+  const asciiScore = parts.length >= 3 && parts.every(p => /^\d+$/.test(p) && Number(p) >= 32 && Number(p) <= 126) ? 85 : 0;
+  scores.push({ technique: 'ASCII', fn: tryAsciiDecimal, score: asciiScore });
+
+  // Rail Fence skoru
+  scores.push({ technique: 'RailFence', fn: tryRailFence, score: alphaRatio > 0.9 ? 35 : 15 });
+
+  // ROT47 skoru
+  const rot47Score = /[\x21-\x7e]/.test(clean) && alphaRatio < 0.5 ? 40 : 20;
+  scores.push({ technique: 'ROT47', fn: tryROT47, score: rot47Score });
+
+  // Whitespace stego skoru
+  const wsScore = /[\t ]/.test(clean) && clean.split('').filter(c => c === ' ' || c === '\t').length >= 8 ? 60 : 0;
+  scores.push({ technique: 'Whitespace', fn: tryWhitespaceStego, score: wsScore });
+
+  return scores.sort((a, b) => b.score - a.score);
+}
+
 export function solve(input: string, maxLayers = 7): SolveResult {
   const layers: string[] = [];
+  const alternatives: Array<{ technique: string; reason: string }> = [];
+  const recommendations: string[] = [];
+
+  // AI skor sistemi ile sıralı teknik listesi oluştur
+  const scoredTechniques = scoreInput(input.trim());
+  const orderedFns = scoredTechniques.map(s => s.fn);
+
+  // Dosya path'i mi?
+  if (input.trim().startsWith('/') || /^[A-Za-z]:\\/.test(input.trim())) {
+    recommendations.push('Dosya path\'i tespit edildi. ctf_file_analyzer ve ctf_stego tool\'larını kullan.');
+    return {
+      flag: null, technique: 'Dosya Analizi Gerekli',
+      explanation: 'Dosya path\'i için ctf_file_analyzer ve ctf_stego kullanın.',
+      layers: [], confidence: 0, alternatives: [], recommendations,
+    };
+  }
 
   function recurse(data: string, depth: number, usedTechniques: Set<string>): string | null {
     if (depth > maxLayers) return null;
     if (looksLikeFlag(data)) return data;
 
-    for (const technique of TECHNIQUES) {
-      const result = technique(data);
+    // Derinlik > 1'de yeniden skor hesapla
+    const fns = depth === 1 ? orderedFns : scoreInput(data).map(s => s.fn);
+
+    for (const fn of fns) {
+      const result = fn(data);
       if (!result) continue;
-      // Aynı tekniği aynı dalda tekrar kullanma (döngü önleme)
       if (usedTechniques.has(result.technique)) continue;
 
       layers.push(result.technique);
       const nextUsed = new Set(usedTechniques).add(result.technique);
 
-      // Flag bulundu mu?
       if (looksLikeFlag(result.decoded)) return result.decoded;
 
-      // Hash kırma veya kırılamadı mesajı → daha derin gitme
-      if (result.technique.includes('Hash')) {
-        return result.decoded;
-      }
+      if (result.technique.includes('Hash')) return result.decoded;
 
-      // Anlamlı sonuç → daha derin git
       if (isMeaningful(result.decoded) && result.decoded !== data) {
         const deeper = recurse(result.decoded, depth + 1, nextUsed);
         if (deeper) return deeper;
-        // Derin çözüm yoksa bu katmanı kabul et
         return result.decoded;
       }
 
-      // Anlamsız ama decode edildi → recursive dene
       if (result.decoded !== data && result.decoded.length > 0) {
         const deeper = recurse(result.decoded, depth + 1, nextUsed);
         if (deeper) return deeper;
       }
 
-      // Bu teknik işe yaramadı, layer'ı geri al
       layers.pop();
+      // Başarısız tekniği alternatives'e ekle (ilk 3)
+      if (alternatives.length < 3 && depth === 1) {
+        alternatives.push({ technique: result.technique, reason: 'Anlamlı sonuç üretemedi' });
+      }
     }
     return null;
   }
@@ -455,13 +571,30 @@ export function solve(input: string, maxLayers = 7): SolveResult {
   const finalResult = recurse(input.trim(), 1, new Set());
   const techniqueChain = layers.join(' → ') || 'Tanınamadı';
 
+  // Güven skoru hesapla
+  const topScore = scoredTechniques[0]?.score ?? 0;
+  const hasFlag = finalResult ? looksLikeFlag(finalResult) : false;
+  const confidence = hasFlag ? 95
+    : finalResult ? Math.min(70, topScore * 0.7)
+    : Math.min(30, topScore * 0.3);
+
+  // Öneriler
+  if (!hasFlag) {
+    recommendations.push('Daha derin analiz için: cyberchef.io');
+    if (topScore < 50) recommendations.push('Veri türü belirsiz — manuel inceleme gerekebilir');
+    if (input.length > 100) recommendations.push('Uzun veri — çok katmanlı encoding olabilir');
+  }
+
   if (finalResult) {
-    const flag = looksLikeFlag(finalResult) ? (finalResult.match(/(?:flag|ctf)\{[^}]+\}/i)?.[0] ?? finalResult) : finalResult;
+    const flag = hasFlag ? (finalResult.match(/(?:flag|ctf)\{[^}]+\}/i)?.[0] ?? finalResult) : finalResult;
     return {
       flag,
       technique: techniqueChain,
       explanation: `${layers.length} katman uygulandı: ${techniqueChain}`,
       layers,
+      confidence,
+      alternatives,
+      recommendations,
     };
   }
 
@@ -470,6 +603,9 @@ export function solve(input: string, maxLayers = 7): SolveResult {
     technique: techniqueChain || 'Hiçbir teknik işe yaramadı',
     explanation: 'Veri çözülemedi. Manuel analiz veya ek bilgi gerekebilir.',
     layers,
+    confidence: 0,
+    alternatives,
+    recommendations,
   };
 }
 
@@ -503,22 +639,29 @@ export const ctfSolverTool: ToolDefinition = {
     const input = String(rawInput['input'] ?? '').trim();
     const maxLayers = Number(rawInput['maxLayers'] ?? 7);
 
-    if (!input) {
-      return { output: 'Hata: input boş olamaz.', isError: true };
-    }
+    if (!input) return { output: 'Hata: input boş olamaz.', isError: true };
 
     const result = solve(input, maxLayers);
 
     const lines = [
       '┌─ CTF SOLVER SONUCU ─────────────────────────────────────────┐',
-      `│ Flag    : ${(result.flag ?? 'Bulunamadı').slice(0, 55)}`,
-      `│ Teknik  : ${result.technique.slice(0, 55)}`,
-      `│ Açıklama: ${result.explanation.slice(0, 55)}`,
-      `│ Katmanlar (${result.layers.length}): ${result.layers.join(' → ').slice(0, 45)}`,
-      '└─────────────────────────────────────────────────────────────┘',
-      '',
-      JSON.stringify(result, null, 2),
+      `│ Flag      : ${(result.flag ?? 'Bulunamadı').slice(0, 53)}`,
+      `│ Teknik    : ${result.technique.slice(0, 53)}`,
+      `│ Güven     : %${result.confidence}`,
+      `│ Katmanlar : ${result.layers.join(' → ').slice(0, 50)}`,
+      `│ Açıklama  : ${result.explanation.slice(0, 53)}`,
     ];
+    if (result.alternatives.length > 0) {
+      lines.push('│ Denenenler:');
+      result.alternatives.forEach(a => lines.push(`│   ✗ ${a.technique}: ${a.reason}`));
+    }
+    if (result.recommendations.length > 0) {
+      lines.push('│ Öneriler:');
+      result.recommendations.forEach(r => lines.push(`│   → ${r}`));
+    }
+    lines.push('└─────────────────────────────────────────────────────────────┘');
+    lines.push('');
+    lines.push(JSON.stringify(result, null, 2));
 
     return { output: lines.join('\n') };
   },
