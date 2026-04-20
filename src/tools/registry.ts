@@ -107,6 +107,7 @@ export async function createDefaultRegistry(): Promise<ToolRegistry> {
   const { ctfWebAnalyzerTool } = await import('./ctf-web-analyzer.js');
   const { ctfNetworkAnalyzerTool } = await import('./ctf-network-analyzer.js');
   const { ctfAutoTool } = await import('./ctf-auto.js');
+  const { shodanTool } = await import('./shodan.js');
 
   registry.register(shellTool);
   registry.register(fileReadTool);
@@ -173,6 +174,7 @@ export async function createDefaultRegistry(): Promise<ToolRegistry> {
   registry.register(ctfWebAnalyzerTool);
   registry.register(ctfNetworkAnalyzerTool);
   registry.register(ctfAutoTool);
+  registry.register(shodanTool);
 
   // Arka plan görev araçları
   const { taskCreateTool, taskListTool, taskGetTool, taskStopTool } = await import('./background-tasks.js');

@@ -83,6 +83,7 @@ Kullanıcı CTF sorusu, dosya veya resim verdiğinde OTOMATİK CTF moduna gir.
    c) Domain: whois, dig ANY, subfinder, crt.sh
    d) Wayback Machine: web.archive.org
    e) PDF/DOCX metadata: yazar, şirket, tarih
+   f) Shodan: shodan {action: "host", query: "IP"} -> IP detayları ve zafiyetler
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 OTOMASYON VE PARALEL İŞLEM KURALLARI (v3.8.12.1)
