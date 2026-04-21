@@ -5,6 +5,7 @@
 import { spawn } from 'child_process';
 import { existsSync } from 'fs';
 import { platform } from 'os';
+import chalk from 'chalk';
 import type { ToolDefinition, ToolResult } from '../types.js';
 
 const DEFAULT_EXTERNAL_TIMEOUT_MS = 120_000;
@@ -32,6 +33,8 @@ const TOOLS: Record<string, ExternalToolConfig> = {
   nc:        { name: 'nc',        command: 'nc',        install: { linux: 'sudo apt install netcat-openbsd',  macos: 'brew install netcat' },    versionArgs: ['-h'] },
   wpscan:    { name: 'wpscan',    command: 'wpscan',    install: { linux: 'sudo gem install wpscan',          macos: 'brew install wpscan' },    versionArgs: ['--version'] },
   subfinder: { name: 'subfinder', command: 'subfinder', install: { linux: 'go install github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest', macos: 'brew install subfinder' }, versionArgs: ['-version'] },
+  john:      { name: 'john',      command: 'john',      install: { linux: 'sudo apt install john',             macos: 'brew install john' },      versionArgs: [] },
+  hashcat:   { name: 'hashcat',   command: 'hashcat',   install: { linux: 'sudo apt install hashcat',          macos: 'brew install hashcat' },   versionArgs: ['--version'] },
 };
 
 async function isInstalled(toolName: string): Promise<boolean> {
@@ -430,5 +433,67 @@ export const subfinderTool: ToolDefinition = {
     if (input.silent) args.push('-silent');
     if (input.output) args.push('-o', input.output as string);
     return run('subfinder', args, cwd);
+  },
+};
+
+export const johnTool: ToolDefinition = {
+  name: 'john',
+  description: 'John the Ripper şifre kırma aracı. Hash kırma ve brute force.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      hash_file: { type: 'string', description: 'Kırılacak hashlerin bulunduğu dosya' },
+      format:    { type: 'string', description: 'Hash formatı (örn: md5, sha256)' },
+      wordlist:  { type: 'string', description: 'Wordlist dosya yolu' },
+    },
+    required: ['hash_file'],
+  },
+  isDestructive: false, requiresConfirmation: true,
+  async execute(input, cwd) {
+    const args = [input.hash_file as string];
+    if (input.format) args.push(`--format=${input.format as string}`);
+    if (input.wordlist) args.push(`--wordlist=${input.wordlist as string}`);
+    return run('john', args, cwd);
+  },
+};
+
+export const hashcatTool: ToolDefinition = {
+  name: 'hashcat',
+  description: 'Hashcat şifre kırma aracı. GPU hızlandırmalı hash kırma.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      hash_file: { type: 'string', description: 'Kırılacak hashlerin bulunduğu dosya' },
+      mode:      { type: 'number', description: 'Hash modu (örn: 0=MD5, 100=SHA1)' },
+      wordlist:  { type: 'string', description: 'Wordlist dosya yolu' },
+    },
+    required: ['hash_file', 'mode'],
+  },
+  isDestructive: false, requiresConfirmation: true,
+  async execute(input, cwd) {
+    const args = ['-m', String(input.mode), input.hash_file as string];
+    if (input.wordlist) args.push(input.wordlist as string);
+    return run('hashcat', args, cwd);
+  },
+};
+
+export const ffufWordlistTool: ToolDefinition = {
+  name: 'ffuf_wordlists',
+  description: 'Sistemde yüklü olan yaygın FFUF wordlistlerini listeler ve durumlarını kontrol eder.',
+  inputSchema: { type: 'object', properties: {} },
+  isDestructive: false, requiresConfirmation: false,
+  async execute() {
+    const paths = [
+      '/usr/share/wordlists/dirb/common.txt',
+      '/usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt',
+      '/usr/share/seclists/Discovery/Web-Content/common.txt',
+      '/opt/SecLists/Discovery/Web-Content/common.txt',
+    ];
+    const lines = [chalk.bold('📂 FFUF Wordlist Durumu:'), ''];
+    paths.forEach(p => {
+      const exists = existsSync(p);
+      lines.push(`  ${exists ? chalk.green('✓') : chalk.red('✗')} ${p}`);
+    });
+    return { output: lines.join('\n') };
   },
 };

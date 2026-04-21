@@ -27,7 +27,7 @@ import {
   getEffectiveContextBudgetTokens,
   deleteApiKey,
 } from './config/settings.js';
-import { listSessions } from './storage/session.js';
+import { listSessions, setSessionTag } from './storage/session.js';
 import { THEMES, type ThemeName, setTheme, getThemeColors } from './theme.js';
 
 export interface CommandContext {
@@ -101,11 +101,13 @@ export const COMMANDS: Record<string, (args: string, ctx: CommandContext) => Pro
       `  ${cmd('/geri')}                          Son mesajı geri al`,
       `  ${cmd('/kaydet')} ${chalk.dim('[md|html|txt] [dosya]')}  Konuşmayı dışa aktar`,
       `  ${cmd('/geçmiş')}                        Önceki oturumu devam ettir`,
+      `  ${cmd('/etiket')} ${chalk.dim('<isim>')}                 Oturumu adlandır / etiketle`,
       '',
       chalk.dim('  ─── Ayarlar ──────────────────────────────────────────────────'),
       `  ${cmd('/değiştir')}                      Etkileşimli ayar menüsü`,
       `  ${cmd('/sağlayıcı')} ${chalk.dim('<isim>')}             Sağlayıcı: claude, gemini, openai, ollama, groq, deepseek, mistral, xai, lmstudio, openrouter`,
       `  ${cmd('/model')} ${chalk.dim('<isim>')}                 Model adını doğrudan ayarla`,
+      `  ${cmd('/profil')}                        Kayıtlı sağlayıcı+model profilleri`,
       `  ${cmd('/modeller')}                      Mevcut modelleri listele ve seç`,
       `  ${cmd('/araçlar')} ${chalk.dim('<açık|kapalı>')}        Araç kullanımını aç/kapat`,
       `  ${cmd('/ajan')} ${chalk.dim('<açık|kapalı>')}           Çok tur ajan modunu aç/kapat`,
@@ -139,7 +141,7 @@ export const COMMANDS: Record<string, (args: string, ctx: CommandContext) => Pro
   }),
   özellikler: async () => ({
     output: `
-🎯 SETH v3.0.0-beta 'LEVIATHAN' — Yetenek Raporu
+🎯 SETH v${VERSION} 'LEVIATHAN' — Yetenek Raporu (v3.8.17)
 
 1. Siber Harekat (Multi-Target Campaign)
    • IP aralıkları (CIDR) ve wildcard alan adları (*.site.com) üzerinde otonom harekat.
@@ -148,16 +150,16 @@ export const COMMANDS: Record<string, (args: string, ctx: CommandContext) => Pro
 2. OSINT ve Sızıntı Verisi (Breach-Feeder)
    • breach_query: Hedef domain ile ilişkili sızdırılmış e-posta/şifre verilerini otonom çekme.
    • OSINT tabanlı akıllı brute-force saldırıları.
+   • Shodan: Gerçek zamanlı ağ keşfi ve zafiyet tespiti.
 
 3. Operasyon Haritası (Live Attack Map)
    • /harita: Operasyonun hangi aşamada olduğunu ve keşfedilen varlıkları görselleştirme.
 
 4. Gelişmiş İstismar ve Denetim
    • bypass_cloudflare: Gerçek IP tespiti.
-   • config_audit & service_integrity: Sistem bütünlüğü ve yapılandırma hataları.
-   • brute_force & exploit_search: Otonom sızma ve derinlemesine istismar.
+   • brute_force & exploit_search: Otonom sızma ve derinlemesine istismar (John/Hashcat).
 
-SETH artık sadece bir araç değil, bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. 😈🐍🔥
+SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcısı: Mustafa Kemal Çıngıl 😈🐍🔥
 `,
   }),
 
@@ -200,377 +202,240 @@ SETH artık sadece bir araç değil, bir ordu gibi düşünen 'Leviathan' çekir
           { value: 'normal', label: 'Normal (yazma/çalıştırma onay ister)' },
           { value: 'dar',    label: 'Dar (her araç onay ister)' },
         ],
-        initialValue: ctx.getPermissionLevel()
       });
-      if (isCancel(p)) return { output: chalk.gray('  İptal edildi.') };
+      if (isCancel(p)) return { output: chalk.dim('İptal edildi.') };
       ctx.setPermissionLevel(p as PermissionLevel);
-      return { output: chalk.green(`  ✓ İzin seviyesi: ${p as string}`) };
+      saveConfig({ tools: { ...ctx.config.tools, requireConfirmation: p !== 'full' } });
+      return { output: chalk.green(`✓ İzin seviyesi: ${p}`) };
     }
-    if (valid.includes(level as PermissionLevel)) {
-      ctx.setPermissionLevel(level as PermissionLevel);
-      return { output: chalk.green(`  ✓ İzin seviyesi: ${level}`) };
-    }
-    return { output: chalk.red('  Geçersiz seviye.') };
-  },
-
-  context: async (args, ctx) => {
-    const input = args.trim().toLowerCase();
-    if (!input) {
-      const p = await select({
-        message: 'Oturum token bütçesi seçin:',
-        options: [{ value: 250000, label: '250k' }, { value: 500000, label: '500k' }, { value: 1000000, label: '1m' }, { value: 2000000, label: '2m' }]
-      });
-      if (isCancel(p)) return { output: chalk.gray('İptal edildi.') };
-      ctx.setContextBudgetTokens(p as number);
-      return { output: chalk.green(`✓ Bütçe: ${(p as number).toLocaleString()} token`) };
-    }
-    let val = parseInt(input);
-    if (input.endsWith('k')) val = parseInt(input) * 1000;
-    if (input.endsWith('m')) val = parseInt(input) * 1000000;
-    if (isNaN(val) || val <= 0) return { output: chalk.red('Geçersiz miktar.') };
-    ctx.setContextBudgetTokens(val);
-    return { output: chalk.green(`✓ Bütçe: ${val.toLocaleString()} token`) };
+    if (!valid.includes(level as any)) return { output: chalk.red('Geçersiz seviye: full, normal, dar') };
+    ctx.setPermissionLevel(level as PermissionLevel);
+    saveConfig({ tools: { ...ctx.config.tools, requireConfirmation: level !== 'full' } });
+    return { output: chalk.green(`✓ İzin seviyesi: ${level}`) };
   },
 
   sağlayıcı: async (args, ctx) => {
-    const p = args.trim().toLowerCase();
-    if (!p) {
-      const PROVIDERS = [
-        { value: 'ollama',      label: 'ollama       — Yerel / Self-Hosted       (%100 uyumlu)' },
-        { value: 'lmstudio',    label: 'lmstudio     — LM Studio Yerel Sunucu    (%100 uyumlu)' },
-        { value: 'openrouter',  label: 'openrouter   — 300+ Model, Tek API       (%100 uyumlu)' },
-        { value: 'groq',        label: 'groq         — Groq LPU, Hızlı Çıkarım  (%100 uyumlu)' },
-        { value: 'deepseek',    label: 'deepseek     — DeepSeek AI               (%100 uyumlu)' },
-        { value: 'mistral',     label: 'mistral      — Mistral AI                (%100 uyumlu)' },
-        { value: 'xai',         label: 'xai          — xAI Grok                  (%100 uyumlu)' },
-        { value: 'claude',      label: 'claude       — Anthropic Claude          (API key gerekli)' },
-        { value: 'gemini',      label: 'gemini       — Google Gemini             (API key gerekli)' },
-        { value: 'openai',      label: 'openai       — OpenAI GPT                (API key gerekli)' },
-      ];
-      const selected = await select({
+    const name = args.trim().toLowerCase() as ProviderName;
+    if (!name) {
+      const p = await select({
         message: 'Sağlayıcı seçin:',
-        options: PROVIDERS,
+        options: [
+          { value: 'claude',    label: 'Claude (Anthropic)' },
+          { value: 'gemini',    label: 'Gemini (Google)' },
+          { value: 'openai',    label: 'OpenAI' },
+          { value: 'ollama',    label: 'Ollama (Yerel)' },
+          { value: 'groq',      label: 'Groq' },
+          { value: 'deepseek',  label: 'DeepSeek' },
+          { value: 'mistral',   label: 'Mistral' },
+          { value: 'xai',       label: 'xAI (Grok)' },
+          { value: 'lmstudio',  label: 'LM Studio' },
+          { value: 'openrouter',label: 'OpenRouter' },
+        ],
       });
-      if (isCancel(selected)) return { output: chalk.gray('İptal edildi.') };
-      const providerName = selected as ProviderName;
-
-      // API key gerektiren sağlayıcılar için key kontrolü
-      const API_KEY_PROVIDERS: Partial<Record<ProviderName, { label: string; envVar: string }>> = {
-        claude:      { label: 'Anthropic API Key (sk-ant-...)',     envVar: 'ANTHROPIC_API_KEY' },
-        gemini:      { label: 'Google AI Studio API Key (AIza...)', envVar: 'GEMINI_API_KEY' },
-        openai:      { label: 'OpenAI API Key (sk-...)',            envVar: 'OPENAI_API_KEY' },
-        openrouter:  { label: 'OpenRouter API Key (sk-or-...)',     envVar: 'OPENROUTER_API_KEY' },
-        groq:        { label: 'Groq API Key (gsk_...)',             envVar: 'GROQ_API_KEY' },
-      };
-
-      const keyInfo = API_KEY_PROVIDERS[providerName];
-      if (keyInfo) {
-        const existingKey = ctx.config.providers[providerName]?.apiKey || process.env[keyInfo.envVar];
-        if (!existingKey) {
-          const apiKey = await text({
-            message: `${keyInfo.label}:`,
-            placeholder: 'API anahtarını buraya yapıştır...',
-            validate: (v) => (v ?? '').trim().length < 10 ? 'Geçersiz API anahtarı.' : undefined,
-          });
-          if (isCancel(apiKey)) return { output: chalk.gray('İptal edildi.') };
-          saveConfig({
-            providers: { [providerName]: { apiKey: (apiKey as string).trim() } } as SETHConfig['providers'],
-          });
-          // Config'i yeniden yükle ki setProvider güncel key'i görsün
-          Object.assign(ctx.config.providers, { [providerName]: { ...ctx.config.providers[providerName], apiKey: apiKey.trim() } });
-        }
-      }
-
-      await ctx.setProvider(providerName);
-      return COMMANDS.modeller!('', ctx);
-    }
-    try {
+      if (isCancel(p)) return { output: chalk.dim('İptal edildi.') };
       await ctx.setProvider(p as ProviderName);
-      return { output: chalk.green(`✓ Sağlayıcı: ${p}`) };
-    } catch (err) {
-      return { output: chalk.red(`Sağlayıcı hatası: ${String(err)}`) };
+      persistProviderAndModel(p as ProviderName, ctx.currentModel);
+      return { output: chalk.green(`✓ Sağlayıcı değiştirildi: ${p}`) };
     }
+    await ctx.setProvider(name);
+    persistProviderAndModel(name, ctx.currentModel);
+    return { output: chalk.green(`✓ Sağlayıcı değiştirildi: ${name}`) };
   },
 
-  sağlayıcılar: async (_args, ctx) => COMMANDS.sağlayıcı!('', ctx),
-
-  model: async (args, ctx) => {
-    const m = args.trim();
-    if (!m) return COMMANDS.modeller!('', ctx);
-    ctx.setModel(m);
-    return { output: chalk.green(`✓ Model: ${m}`) };
+  model: (args, ctx) => {
+    const model = args.trim();
+    if (!model) return { output: chalk.dim(`Mevcut model: ${ctx.currentModel}`) };
+    ctx.setModel(model);
+    persistProviderAndModel(ctx.currentProvider, model);
+    return { output: chalk.green(`✓ Model ayarlandı: ${model}`) };
   },
 
-  araçlar: async (args, ctx) => {
-    const val = args.trim().toLowerCase();
-    if (val === 'açık' || val === 'acik' || val === 'on' || val === '1') { ctx.setToolsEnabled(true); return { output: chalk.green('✓ Araçlar aktif.') }; }
-    if (val === 'kapalı' || val === 'kapali' || val === 'off' || val === '0') { ctx.setToolsEnabled(false); return { output: chalk.green('✓ Araçlar devre dışı.') }; }
-    const t = await confirm({ message: 'Araçlar aktif edilsin mi?' });
-    if (isCancel(t)) return { output: chalk.gray('İptal.') };
-    ctx.setToolsEnabled(t);
-    return { output: chalk.green(`✓ Araçlar ${t ? 'aktif' : 'kapalı'}`) };
-  },
-
-  ajan: async (args, ctx) => {
-    const val = args.trim().toLowerCase();
-    if (val === 'açık' || val === 'acik' || val === 'on' || val === '1') { ctx.setAgentEnabled(true); return { output: chalk.green('✓ Ajan modu aktif.') }; }
-    if (val === 'kapalı' || val === 'kapali' || val === 'off' || val === '0') { ctx.setAgentEnabled(false); return { output: chalk.green('✓ Ajan modu devre dışı.') }; }
-    const a = await confirm({ message: 'Ajan modu aktif edilsin mi?' });
-    if (isCancel(a)) return { output: chalk.gray('İptal.') };
-    ctx.setAgentEnabled(a);
-    return { output: chalk.green(`✓ Ajan modu ${a ? 'aktif' : 'kapalı'}`) };
+  modeller: async (_args, ctx) => {
+    try {
+      const { listModels } = await import('./providers/factory.js');
+      const models = await listModels(ctx.currentProvider, ctx.config.providers[ctx.currentProvider]);
+      if (models.length === 0) return { output: chalk.yellow('Model listesi alınamadı veya boş.') };
+      const selected = await select({
+        message: `${ctx.currentProvider} için model seçin:`,
+        options: models.map((m: string) => ({ value: m, label: m })),
+      });
+      if (isCancel(selected)) return { output: chalk.dim('İptal edildi.') };
+      ctx.setModel(selected as string);
+      persistProviderAndModel(ctx.currentProvider, selected as string);
+      return { output: chalk.green(`✓ Model seçildi: ${selected}`) };
+    } catch (err) {
+      return { output: chalk.red(`Hata: ${err instanceof Error ? err.message : String(err)}`) };
+    }
   },
 
   değiştir: async (_args, ctx) => {
     const action = await select({
-      message: 'Neyi değiştirmek istersiniz?',
+      message: 'Ayar seçin:',
       options: [
-        { value: 'provider', label: `Sağlayıcı (${ctx.currentProvider})` },
-        { value: 'model', label: `Model (${ctx.currentModel})` },
-        { value: 'tools', label: `Araçlar (${ctx.toolsEnabled ? 'açık' : 'kapalı'})` },
-        { value: 'agent', label: `Ajan Modu (${ctx.agentEnabled ? 'açık' : 'kapalı'})` },
-        { value: 'context', label: `Bütçe (${ctx.getContextBudgetTokens().toLocaleString()} tok)` },
-        { value: 'perm', label: `İzin Seviyesi (${ctx.getPermissionLevel()})` },
+        { value: 'provider', label: 'Sağlayıcı (Provider)' },
+        { value: 'model',    label: 'Model' },
+        { value: 'perm',     label: 'İzin Seviyesi' },
+        { value: 'theme',    label: 'Tema' },
+        { value: 'tools',    label: 'Araçlar (Aç/Kapat)' },
       ],
     });
     if (isCancel(action)) return { output: chalk.gray('İptal edildi.') };
 
-    if (action === 'provider') return COMMANDS.saglayici!('', ctx);
-    if (action === 'model') return COMMANDS.modeller!('', ctx);
-    if (action === 'tools') return COMMANDS.araclar!('', ctx);
-    if (action === 'agent') return COMMANDS.ajan!('', ctx);
-    if (action === 'context') return COMMANDS.context!('', ctx);
-    if (action === 'perm') return COMMANDS.yetki!('', ctx);
+    switch (action) {
+      case 'provider': return COMMANDS.sağlayıcı('', ctx);
+      case 'model':    return COMMANDS.modeller('', ctx);
+      case 'perm':     return COMMANDS.yetki('', ctx);
+      case 'theme':    return COMMANDS.tema('', ctx);
+      case 'tools': {
+        const toggle = ctx.toolsEnabled ? 'Kapat' : 'Aç';
+        const ok = await confirm({ message: `Araç kullanımı ${toggle.toLowerCase()}ılsın mı?` });
+        if (ok) {
+          ctx.setToolsEnabled(!ctx.toolsEnabled);
+          return { output: chalk.green(`✓ Araçlar: ${!ctx.toolsEnabled ? 'Kapalı' : 'Açık'}`) };
+        }
+        return { output: chalk.gray('Değişiklik yapılmadı.') };
+      }
+    }
     return { output: '' };
   },
 
-  modeller: async (_args, ctx) => {
-    let models: string[] = [];
-
-    if (ctx.currentProvider === 'ollama') {
-      try {
-        const baseUrl = ctx.config.providers.ollama?.baseUrl || 'http://localhost:11434';
-        const res = await fetch(`${baseUrl}/api/tags`);
-        if (res.ok) {
-          const data = await res.json() as { models?: { name: string }[] };
-          models = data.models?.map((m) => m.name) || [];
-        }
-      } catch { /* fallback */ }
-    } else if (ctx.currentProvider === 'gemini') {
-      try {
-        const apiKey = ctx.config.providers.gemini?.apiKey || process.env.GEMINI_API_KEY;
-        if (apiKey) {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-          if (res.ok) {
-            const data = await res.json() as { models?: { name: string; supportedGenerationMethods?: string[] }[] };
-            models = (data.models || [])
-              .filter(m => m.supportedGenerationMethods?.includes('generateContent'))
-              .map(m => m.name.replace('models/', ''));
-          }
-        }
-      } catch { /* fallback */ }
-    } else if (ctx.currentProvider === 'openai') {
-      try {
-        const apiKey = ctx.config.providers.openai?.apiKey || process.env.OPENAI_API_KEY;
-        if (apiKey) {
-          const res = await fetch('https://api.openai.com/v1/models', {
-            headers: { Authorization: `Bearer ${apiKey}` },
-          });
-          if (res.ok) {
-            const data = await res.json() as { data?: { id: string }[] };
-            models = (data.data || [])
-              .map(m => m.id)
-              .filter(id => id.startsWith('gpt-') || id.startsWith('o1') || id.startsWith('o3'))
-              .sort();
-          }
-        }
-      } catch { /* fallback */ }
-    } else if (ctx.currentProvider === 'claude') {
-      try {
-        const apiKey = ctx.config.providers.claude?.apiKey || process.env.ANTHROPIC_API_KEY;
-        if (apiKey) {
-          const res = await fetch('https://api.anthropic.com/v1/models', {
-            headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-          });
-          if (res.ok) {
-            const data = await res.json() as { data?: { id: string }[] };
-            models = (data.data || []).map(m => m.id);
-          }
-        }
-      } catch { /* fallback */ }
-    } else if (ctx.currentProvider === 'groq') {
-      try {
-        const apiKey = ctx.config.providers.groq?.apiKey || process.env.GROQ_API_KEY;
-        if (apiKey) {
-          const res = await fetch('https://api.groq.com/openai/v1/models', {
-            headers: { Authorization: `Bearer ${apiKey}` },
-          });
-          if (res.ok) {
-            const data = await res.json() as { data?: { id: string; active?: boolean }[] };
-            models = (data.data || [])
-              .filter(m => m.active !== false && !m.id.includes('whisper') && !m.id.includes('guard'))
-              .map(m => m.id)
-              .sort();
-          }
-        }
-      } catch { /* fallback */ }
-    } else if (ctx.currentProvider === 'openrouter') {
-      try {
-        const apiKey = ctx.config.providers.openrouter?.apiKey || process.env.OPENROUTER_API_KEY;
-        if (apiKey) {
-          const res = await fetch('https://openrouter.ai/api/v1/models', {
-            headers: { Authorization: `Bearer ${apiKey}` },
-          });
-          if (res.ok) {
-            const data = await res.json() as { data?: { id: string }[] };
-            models = (data.data || []).map(m => m.id).sort();
-          }
-        }
-      } catch { /* fallback */ }
-    } else if (ctx.currentProvider === 'lmstudio') {
-      try {
-        const baseUrl = ctx.config.providers.lmstudio?.baseUrl || 'http://localhost:1234';
-        const res = await fetch(`${baseUrl}/v1/models`, { signal: AbortSignal.timeout(3000) });
-        if (res.ok) {
-          const data = await res.json() as { data?: { id: string }[] };
-          models = data.data?.map(m => m.id) ?? [];
-        }
-      } catch { /* fallback */ }
-    } else if (ctx.currentProvider === 'mistral') {
-      try {
-        const apiKey = ctx.config.providers.mistral?.apiKey || process.env.MISTRAL_API_KEY;
-        if (apiKey) {
-          const res = await fetch('https://api.mistral.ai/v1/models', { headers: { Authorization: `Bearer ${apiKey}` } });
-          if (res.ok) {
-            const data = await res.json() as { data?: { id: string }[] };
-            models = (data.data || []).map(m => m.id).sort();
-          }
-        }
-      } catch { /* fallback */ }
-    } else if (ctx.currentProvider === 'deepseek') {
-      try {
-        const apiKey = ctx.config.providers.deepseek?.apiKey || process.env.DEEPSEEK_API_KEY;
-        if (apiKey) {
-          const res = await fetch('https://api.deepseek.com/v1/models', { headers: { Authorization: `Bearer ${apiKey}` } });
-          if (res.ok) {
-            const data = await res.json() as { data?: { id: string }[] };
-            models = (data.data || []).map(m => m.id).sort();
-          }
-        }
-      } catch { /* fallback */ }
-    } else if (ctx.currentProvider === 'xai') {
-      try {
-        const apiKey = ctx.config.providers.xai?.apiKey || process.env.XAI_API_KEY;
-        if (apiKey) {
-          const res = await fetch('https://api.x.ai/v1/models', { headers: { Authorization: `Bearer ${apiKey}` } });
-          if (res.ok) {
-            const data = await res.json() as { data?: { id: string }[] };
-            models = (data.data || []).map(m => m.id).sort();
-          }
-        }
-      } catch { /* fallback */ }
-    }
-
-    if (models.length === 0) {
-      const defaults: Record<string, string[]> = {
-        openai:      ['gpt-4o', 'gpt-4o-mini', 'o1-preview', 'o1-mini', 'gpt-4-turbo'],
-        gemini:      ['gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-1.5-flash'],
-        claude:      ['claude-sonnet-4-20250514', 'claude-3-5-sonnet-latest', 'claude-3-5-haiku-latest', 'claude-3-opus-20240229'],
-        ollama:      ['qwen3-coder', 'qwen2.5-coder:7b', 'llama3.1', 'mistral', 'codellama'],
-        openrouter:  ['openai/gpt-4o', 'anthropic/claude-3.5-sonnet', 'google/gemini-2.5-pro', 'meta-llama/llama-3.1-70b-instruct', 'mistralai/mistral-7b-instruct'],
-        groq:        ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'llama3-70b-8192', 'mixtral-8x7b-32768', 'gemma2-9b-it'],
-        mistral:     ['mistral-large-latest', 'mistral-medium-latest', 'mistral-small-latest', 'codestral-latest', 'open-mistral-nemo'],
-        deepseek:    ['deepseek-chat', 'deepseek-reasoner'],
-        xai:         ['grok-3-latest', 'grok-3-mini-latest', 'grok-2-latest'],
-        lmstudio:    ['local-model'],
-      };
-      models = defaults[ctx.currentProvider] ?? [];
-    }
-
-    const m = await select({
-      message: `${ctx.currentProvider} için model seçin:`,
-      options: models.map(x => ({ value: x, label: x })),
-    });
-
-    if (isCancel(m)) return { output: chalk.gray('İptal edildi.') };
-    ctx.setModel(m as string);
-    return { output: chalk.green(`✓ Model: ${m as string}`) };
-  },
-
-  cd: (args, ctx) => {
-    const target = ctx.changeCwd(args.trim());
-    return target ? { output: chalk.green(`✓ Dizin: ${target}`) } : { output: chalk.red(`✗ Hata: Dizin bulunamadı.`) };
-  },
-
-  pwd: (_args, ctx) => ({ output: ctx.getCwd() }),
-  geri: (_args, ctx) => { ctx.undoHistory(); return { output: chalk.gray('  (Son mesaj geri alındı)') }; },
-  temizle: (args, ctx) => { ctx.clearHistory(args.trim() === 'tum' ? 'all' : 'active'); return { output: '', clearAndAnimate: true }; },
-
-  // ─── Context & Hafıza Yönetimi ────────────────────────────────────────────
-  'context-temizle': (_args, ctx) => {
+  temizle: (_args, ctx) => {
     ctx.clearHistory('active');
-    return { output: chalk.green('✓ Oturum sıfırlandı — yeni konuşma başlatıldı.'), clearAndAnimate: true };
+    return { output: chalk.green('✓ Konuşma geçmişi temizlendi.') };
   },
 
-  hafıza: async (args, _ctx) => {
-    const sub = args.trim();
-    const validTypes: MemoryType[] = ['user', 'project', 'feedback', 'reference'];
+  'context-temizle': async (_args, ctx) => {
+    const sure = await confirm({ message: 'Tüm oturum sıfırlansın mı? (Yeni konuşma)' });
+    if (isCancel(sure) || !sure) return { output: chalk.gray('İptal edildi.') };
+    ctx.clearHistory('all');
+    return { output: chalk.green('✓ Oturum sıfırlandı. Yeni bir başlangıç!') };
+  },
 
-    // /hafıza sil <tip> — belirli tipi sil
-    if (sub.startsWith('sil ')) {
-      const tip = sub.slice(4).trim() as MemoryType;
-      if (!validTypes.includes(tip)) {
-        return { output: chalk.red(`Geçersiz tip. Kullanım: /hafıza sil <user|project|feedback|reference>`) };
-      }
-      writeMemory(tip, '');
-      return { output: chalk.green(`✓ ${tip} belleği temizlendi.`) };
+  geri: (_args, ctx) => {
+    const ok = ctx.undoHistory();
+    return { output: ok ? chalk.green('✓ Son mesaj geri alındı.') : chalk.yellow('Geri alınacak mesaj yok.') };
+  },
+
+  sıkıştır: async (_args, ctx) => {
+    const res = await ctx.compactHistory();
+    if (!res) return { output: chalk.yellow('Geçmiş henüz sıkıştırmak için yeterince uzun değil.') };
+    return { output: chalk.green(`✓ Sıkıştırıldı: ${res.before} -> ${res.after} mesaj.`) };
+  },
+
+  kaydet: async (args, ctx) => {
+    const parts = args.trim().split(' ');
+    const fmt = ['md', 'html', 'txt', 'cast'].includes(parts[0] ?? '') ? parts.shift()! : 'md';
+    const filename = parts.join(' ') || `seth_chat_${Date.now()}.${fmt}`;
+    const messages = ctx.getHistory();
+
+    let content = '';
+    if (fmt === 'html') {
+      const rows = messages.map(m => {
+        const role = m.role === 'user' ? 'Sen' : 'SETH';
+        const cls = m.role === 'user' ? 'user' : 'assistant';
+        const text = typeof m.content === 'string' ? m.content : JSON.stringify(m.content);
+        return `<div class="msg ${cls}"><span class="role">${role}</span><pre>${text}</pre></div>`;
+      }).join('\n');
+      
+      content = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>SETH Chat</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0d0d0d;color:#e0e0e0;font-family:'Courier New',monospace;max-width:900px;margin:0 auto;padding:24px}
+  h1{color:#cc0000;font-size:1.4rem;margin-bottom:20px;border-bottom:1px solid #333;padding-bottom:10px}
+  .msg{padding:14px 18px;margin:10px 0;border-radius:8px;border-left:3px solid transparent}
+  .user{background:#1e1e1e;border-color:#555}
+  .assistant{background:#0f1a2e;border-color:#cc0000}
+  .role{font-size:.75rem;font-weight:bold;text-transform:uppercase;letter-spacing:.1em;opacity:.6;display:block;margin-bottom:6px}
+  .user .role{color:#aaa}
+  .assistant .role{color:#cc4444}
+  pre{white-space:pre-wrap;word-break:break-word;font-size:.9rem;line-height:1.6}
+</style>
+</head>
+<body>
+<h1>🐍 SETH — Sohbet Kaydı</h1>
+${rows}
+</body></html>`;
+    } else if (fmt === 'txt') {
+      content = messages.map(m => `[${m.role.toUpperCase()}]\n${typeof m.content === 'string' ? m.content : JSON.stringify(m.content)}\n`).join('\n---\n\n');
+    } else if (fmt === 'cast') {
+      const { exportAsAsciicast } = await import('./asciicast.js');
+      content = exportAsAsciicast(messages, ctx.currentProvider, ctx.currentModel);
+    } else {
+      content = messages.map(m => `### ${m.role.toUpperCase()}\n\n${typeof m.content === 'string' ? m.content : JSON.stringify(m.content)}`).join('\n\n---\n\n');
     }
 
-    // /hafıza ekle <tip> <içerik>
-    if (sub.startsWith('ekle ')) {
-      const rest = sub.slice(5);
-      const [tip, ...parts] = rest.split(' ');
-      if (!validTypes.includes(tip as MemoryType)) {
-        return { output: chalk.red(`Kullanım: /hafıza ekle <user|project|feedback|reference> <içerik>`) };
-      }
-      appendMemory(tip as MemoryType, parts.join(' '));
+    await writeFile(resolve(ctx.getCwd(), filename), content);
+    return { output: chalk.green(`✓ Kaydedildi: ${filename} (${fmt.toUpperCase()})`) };
+  },
+
+  // #18 /export — oturum export/import
+  export: async (args, ctx) => {
+    const parts = args.trim().split(' ');
+    const fmt = ['json', 'md', 'html', 'obsidian'].includes(parts[0] ?? '') ? parts.shift()! : 'json';
+    const filename = parts.join(' ') || `seth_export_${Date.now()}.${fmt === 'obsidian' ? 'md' : fmt}`;
+    const messages = ctx.getHistory();
+    const stats = ctx.getStats();
+
+    let content: string;
+    if (fmt === 'json') {
+      content = JSON.stringify({
+        version: VERSION,
+        provider: ctx.currentProvider,
+        model: ctx.currentModel,
+        exportedAt: new Date().toISOString(),
+        stats,
+        messages: messages.map(m => ({
+          role: m.role,
+          content: typeof m.content === 'string' ? m.content : JSON.stringify(m.content),
+        })),
+      }, null, 2);
+    } else if (fmt === 'obsidian') {
+      const fm = `---\ntitle: SETH Oturum Kaydı\ntags: [seth, ai-session, security]\nprovider: ${ctx.currentProvider}\nmodel: ${ctx.currentModel}\ndate: ${new Date().toISOString()}\n---\n\n`;
+      content = fm + messages.map(m => {
+        const role = m.role === 'user' ? '# User' : '# SETH';
+        const text = typeof m.content === 'string' ? m.content : JSON.stringify(m.content, null, 2);
+        return `${role}\n\n${text}`;
+      }).join('\n\n---\n\n');
+    } else if (fmt === 'md') {
+      const header = `# SETH Oturum Kaydı\n\n**Provider:** ${ctx.currentProvider} / ${ctx.currentModel}  \n**Tarih:** ${new Date().toLocaleString('tr-TR')}  \n**Mesaj:** ${stats.messages}  \n\n---\n\n`;
+      content = header + messages.map(m => {
+        const role = m.role === 'user' ? '**Sen**' : '**SETH**';
+        const text = typeof m.content === 'string' ? m.content : JSON.stringify(m.content, null, 2);
+        return `${role}\n\n${text}`;
+      }).join('\n\n---\n\n');
+    } else {
+      // HTML
+      const rows = messages.map(m => {
+        const role = m.role === 'user' ? 'Sen' : 'SETH';
+        const cls = m.role === 'user' ? 'user' : 'assistant';
+        const text = typeof m.content === 'string' ? m.content : JSON.stringify(m.content);
+        return `<div class="msg ${cls}"><span class="role">${role}</span><pre>${text}</pre></div>`;
+      }).join('\n');
+      content = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{background:#0d0d0d;color:#eee;font-family:monospace;padding:20px}.msg{margin:10px 0;padding:10px;border-radius:5px}.user{background:#222}.assistant{background:#111;border-left:3px solid #cc0000}.role{font-weight:bold;display:block;margin-bottom:5px}pre{white-space:pre-wrap}</style></head><body>${rows}</body></html>`;
+    }
+
+    await writeFile(resolve(ctx.getCwd(), filename), content);
+    return { output: chalk.green(`✓ Oturum ihraç edildi: ${filename}`) };
+  },
+
+  hafıza: async (args, ctx) => {
+    const parts = args.trim().split(' ');
+    const sub = parts[0];
+    const tip = parts[1];
+    const icerik = parts.slice(2).join(' ');
+
+    if (sub === 'ekle' && tip && icerik) {
+      appendMemory(tip as MemoryType, icerik);
       return { output: chalk.green(`✓ Belleğe eklendi (${tip})`) };
     }
-
-    // /hafıza <tip> — belirli tipi göster
-    if (validTypes.includes(sub as MemoryType)) {
-      const content = readMemory(sub as MemoryType);
-      if (!content.trim()) return { output: chalk.dim(`(${sub} belleği boş)`) };
-      const lines = [
-        chalk.bold(`🧠 ${sub} belleği:`),
-        '',
-        content.trim(),
-        '',
-        chalk.dim(`  /hafıza sil ${sub}  — bu belleği temizle`),
-        chalk.dim(`  /hafıza ekle ${sub} <içerik>  — ekle`),
-      ];
-      return { output: lines.join('\n') };
+    if (sub === 'sil' && tip) {
+      writeMemory(tip as MemoryType, '');
+      return { output: chalk.green(`✓ Bellek temizlendi (${tip})`) };
     }
 
-    // /hafıza — tümünü göster
     const all = loadAllMemories();
-    const lines = [
-      chalk.bold('🧠 Kalıcı Bellek'),
-      chalk.dim('  ~/.seth/memory/ altında saklanır'),
-      '',
-    ];
-    if (!all.trim()) {
-      lines.push(chalk.dim('  (bellek boş)'));
-    } else {
-      lines.push(all);
-    }
-    lines.push('');
-    lines.push(chalk.dim('  Komutlar:'));
-    lines.push(chalk.dim('  /hafıza <user|project|feedback|reference>  — tipi göster'));
-    lines.push(chalk.dim('  /hafıza ekle <tip> <içerik>               — ekle'));
-    lines.push(chalk.dim('  /hafıza sil <tip>                         — tipi temizle'));
-    lines.push(chalk.dim('  /hafıza-temizle                           — tümünü sil'));
-    return { output: lines.join('\n') };
+    if (!all) return { output: chalk.gray('Kalıcı bellek boş.') };
+    return { output: [chalk.bold('🧠 Kalıcı Bellek'), '', all].join('\n') };
   },
 
   'hafıza-temizle': async () => {
@@ -667,181 +532,130 @@ SETH artık sadece bir araç değil, bir ordu gibi düşünen 'Leviathan' çekir
   // #4 Paste — panodan yapıştır
   yapıştır: async (_args, ctx) => {
     const { getClipboardText, hasImageInClipboard, getImageFromClipboard, PASTE_THRESHOLD } = await import('./paste.js');
-    
+
     // Önce görüntü var mı kontrol et
-    const hasImg = await hasImageInClipboard();
-    if (hasImg) {
+    if (await hasImageInClipboard()) {
       const img = await getImageFromClipboard();
       if (img) {
-        return { output: chalk.green(`✓ Görüntü panoya alındı (${img.base64.length} byte). Vision destekli modelde kullanılabilir.`) };
+        return { 
+          output: chalk.green(`🖼️ Panodan görüntü alındı (${Math.round(img.base64.length * 0.75 / 1024)} KB)`),
+          runAsUserMessage: `[PASTE_IMAGE]${img.base64}`
+        };
       }
     }
 
     const text = await getClipboardText();
-    if (!text) return { output: chalk.dim('  Panoda metin veya görüntü bulunamadı.') };
+    if (!text) return { output: chalk.yellow('Pano boş.') };
     
     if (text.length > PASTE_THRESHOLD) {
-      return { runAsUserMessage: `[Yapıştırılan metin — ${text.split('\n').length} satır]\n${text}` };
+      return {
+        output: chalk.cyan(`📋 Büyük metin yapıştırıldı (${text.length} karakter).`),
+        runAsUserMessage: text
+      };
     }
     return { runAsUserMessage: text };
   },
 
-  // ─── Bağlam Analizi ───────────────────────────────────────────────────────
-  bağlam: (_args, ctx) => {
-    const messages = ctx.getMessages?.() ?? [];
-    const toolCounts: Record<string, number> = {};
-    const fileReads: Record<string, number> = {};
-    let userMsgs = 0, assistantMsgs = 0, totalChars = 0;
-
-    for (const msg of messages) {
-      const content = typeof msg.content === 'string' ? msg.content
-        : Array.isArray(msg.content) ? msg.content.map((b: any) => b.text ?? b.content ?? '').join(' ')
-        : '';
-      totalChars += content.length;
-      if (msg.role === 'user') userMsgs++;
-      else assistantMsgs++;
-
-      // Araç kullanımı say
-      const toolMatches = content.matchAll(/"name":\s*"([^"]+)"/g);
-      for (const m of toolMatches) {
-        const name = m[1]!;
-        toolCounts[name] = (toolCounts[name] ?? 0) + 1;
-      }
-      // Dosya okuma say
-      const fileMatches = content.matchAll(/"path":\s*"([^"]+)"/g);
-      for (const m of fileMatches) {
-        const path = m[1]!;
-        fileReads[path] = (fileReads[path] ?? 0) + 1;
-      }
-    }
-
-    const estTokens = Math.round(totalChars / 4);
-    const topTools = Object.entries(toolCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-    const dupFiles = Object.entries(fileReads).filter(([, c]) => c > 1).sort((a, b) => b[1] - a[1]).slice(0, 5);
-
-    const lines = [
-      chalk.bold('📊 Bağlam Analizi'),
-      '',
-      `  Mesajlar    : ${chalk.cyan(userMsgs)} kullanıcı, ${chalk.green(assistantMsgs)} asistan`,
-      `  Tahmini tok : ${chalk.yellow(estTokens.toLocaleString())}`,
-      `  Toplam char : ${totalChars.toLocaleString()}`,
-    ];
-    if (topTools.length > 0) {
-      lines.push('', chalk.bold('  En çok kullanılan araçlar:'));
-      topTools.forEach(([name, count]) => lines.push(`    ${name.padEnd(20)} ${chalk.dim(`×${count}`)}`));
-    }
-    if (dupFiles.length > 0) {
-      lines.push('', chalk.bold('  Tekrar okunan dosyalar:'));
-      dupFiles.forEach(([path, count]) => lines.push(`    ${path.slice(-40).padEnd(40)} ${chalk.yellow(`×${count}`)}`));
-    }
+  hook: async (args) => {
+    const sub = args.trim().toLowerCase();
+    if (sub === 'örnek') return { output: `Hook örneği (~/.seth/hooks.json):\n\n${JSON.stringify(getHooksExample(), null, 2)}` };
+    
+    const hooks = loadHooks();
+    if (hooks.length === 0) return { output: chalk.gray('Tanımlı hook yok. Örnek için: /hook örnek') };
+    const lines = [chalk.bold('🪝 Aktif Hooklar:'), ''];
+    hooks.forEach((h, i) => lines.push(`  ${i+1}. ${chalk.cyan(h.event)} ${h.tool ? `[${h.tool}]` : ''} -> ${h.command}`));
     return { output: lines.join('\n') };
   },
 
-  sıkıştır: async (_args, ctx) => { 
-    const r = await ctx.compactHistory(); 
-    return r ? { output: chalk.green(`✓ Sıkıştırıldı: ${r.before} -> ${r.after}`) } : { output: chalk.gray('Yetersiz mesaj.') }; 
+  rapor: async (args, ctx) => {
+    if (args.trim().toLowerCase() === 'pdf') {
+      const history = ctx.getHistory();
+      const reportText = history.map(m => typeof m.content === 'string' ? m.content : JSON.stringify(m.content)).join('\n\n');
+      const filename = await exportSecurityReport(reportText, ctx.getCwd());
+      return { output: chalk.green(`✓ Güvenlik raporu oluşturuldu: ${filename}`) };
+    }
+    return { output: chalk.dim('Kullanım: /rapor pdf') };
   },
-  kaydet: async (args, ctx) => {
-    const parts = args.trim().split(' ');
-    const fmt = ['html', 'txt', 'md', 'cast'].includes(parts[0] ?? '') ? parts.shift()! : 'md';
-    const filename = parts.join(' ') || `sohbet_${Date.now()}.${fmt === 'cast' ? 'cast' : fmt}`;
-    const messages = ctx.getHistory();
 
-    let content: string;
-    if (fmt === 'html') {
-      const rows = messages.map(m => {
-        const role = m.role === 'user' ? 'Sen' : 'SETH';
-        const text = (typeof m.content === 'string' ? m.content : JSON.stringify(m.content, null, 2))
-          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        const cls = m.role === 'user' ? 'user' : 'assistant';
-        return `<div class="msg ${cls}"><span class="role">${role}</span><pre>${text}</pre></div>`;
-      }).join('\n');
-      content = `<!DOCTYPE html>
-<html lang="tr">
-<head>
-<meta charset="utf-8">
-<title>SETH Sohbet</title>
-<style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:#0d0d0d;color:#e0e0e0;font-family:'Courier New',monospace;max-width:900px;margin:0 auto;padding:24px}
-  h1{color:#cc0000;font-size:1.4rem;margin-bottom:20px;border-bottom:1px solid #333;padding-bottom:10px}
-  .msg{padding:14px 18px;margin:10px 0;border-radius:8px;border-left:3px solid transparent}
-  .user{background:#1e1e1e;border-color:#555}
-  .assistant{background:#0f1a2e;border-color:#cc0000}
-  .role{font-size:.75rem;font-weight:bold;text-transform:uppercase;letter-spacing:.1em;opacity:.6;display:block;margin-bottom:6px}
-  .user .role{color:#aaa}
-  .assistant .role{color:#cc4444}
-  pre{white-space:pre-wrap;word-break:break-word;font-size:.9rem;line-height:1.6}
-</style>
-</head>
-<body>
-<h1>🐍 SETH — Sohbet Kaydı</h1>
-${rows}
-</body></html>`;
-    } else if (fmt === 'txt') {
-      content = messages.map(m => `[${m.role.toUpperCase()}]\n${typeof m.content === 'string' ? m.content : JSON.stringify(m.content)}\n`).join('\n---\n\n');
-    } else if (fmt === 'cast') {
-      const { exportAsAsciicast } = await import('./asciicast.js');
-      content = exportAsAsciicast(messages, ctx.currentProvider, ctx.currentModel);
-    } else {
-      content = messages.map(m => `### ${m.role.toUpperCase()}\n\n${typeof m.content === 'string' ? m.content : JSON.stringify(m.content)}`).join('\n\n---\n\n');
+  cd: (args, ctx) => {
+    const newDir = ctx.changeCwd(args.trim());
+    return { output: newDir ? chalk.green(`✓ Dizin değiştirildi: ${newDir}`) : chalk.red(`Geçersiz dizin: ${args}`) };
+  },
+
+  pwd: (_args, ctx) => ({ output: ctx.getCwd() }),
+
+  nasılçalışır: async () => {
+    await runNasilCalisirAnimation();
+    return { output: '' };
+  },
+
+  istatistikler: async (_args, ctx) => {
+    const s = ctx.getStats();
+    const history = loadHistory();
+    const totalTokens = s.inputTokens + s.outputTokens;
+
+    // #1 Gerçek maliyet hesabı
+    const { calculateCostUSD, formatCostUSD } = await import('./model-cost.js');
+    const costUSD = calculateCostUSD(s.inputTokens, s.outputTokens, ctx.currentModel, ctx.currentProvider);
+
+    const lines = [
+      chalk.bold('📊 SETH İstatistikleri'),
+      '',
+      `  Sağlayıcı     : ${chalk.cyan(ctx.currentProvider)} / ${chalk.cyan(ctx.currentModel)}`,
+      `  Mesaj sayısı  : ${chalk.cyan(s.messages)}`,
+      `  Toplam token  : ${chalk.cyan(totalTokens.toLocaleString())}`,
+      `    ↳ Giriş     : ${chalk.dim(s.inputTokens.toLocaleString())}`,
+      `    ↳ Çıkış     : ${chalk.dim(s.outputTokens.toLocaleString())}`,
+      `  Tur sayısı    : ${chalk.cyan(s.turns)}`,
+      `  Gerçek maliyet: ${chalk.yellow(formatCostUSD(costUSD))}`,
+      '',
+      `  Geçmiş kayıt  : ${chalk.cyan(history.length)} komut`,
+    ];
+
+    // En çok kullanılan komutlar (v3.8.17)
+    const counts: Record<string, number> = {};
+    history.forEach(h => {
+      const cmd = h.split(' ')[0] || '';
+      if (cmd.startsWith('/')) {
+        counts[cmd] = (counts[cmd] || 0) + 1;
+      }
+    });
+    const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    if (top.length > 0) {
+      lines.push('', chalk.dim('  Top Komutlar:'));
+      top.forEach(([c, n]) => lines.push(`    ${c.padEnd(15)} : ${n} kez`));
     }
 
-    await writeFile(resolve(ctx.getCwd(), filename), content);
-    return { output: chalk.green(`✓ Kaydedildi: ${filename} (${fmt.toUpperCase()})`) };
+    // #17 Tool metrics
+    try {
+      const { readFile } = await import('fs/promises');
+      const { join } = await import('path');
+      const { homedir } = await import('os');
+      const summaryPath = join(homedir(), '.seth', 'metrics', 'tool-metrics-summary.json');
+      const raw = await readFile(summaryPath, 'utf-8').catch(() => null);
+      if (raw) {
+        const data = JSON.parse(raw);
+        lines.push('', chalk.bold('🛠️  Araç Kullanımı (En Çok)'));
+        Object.entries(data.usageCount)
+          .sort((a: any, b: any) => b[1] - a[1])
+          .slice(0, 5)
+          .forEach(([name, count]) => {
+            lines.push(`  ${name.padEnd(15)} : ${count} kez`);
+          });
+      }
+    } catch { /* ignore */ }
+
+    return { output: lines.join('\n') };
   },
 
-  // #18 /export — oturum export/import
-  export: async (args, ctx) => {
-    const parts = args.trim().split(' ');
-    const fmt = ['json', 'md', 'html'].includes(parts[0] ?? '') ? parts.shift()! : 'json';
-    const filename = parts.join(' ') || `seth_export_${Date.now()}.${fmt}`;
-    const messages = ctx.getHistory();
-    const stats = ctx.getStats();
-
-    let content: string;
-    if (fmt === 'json') {
-      content = JSON.stringify({
-        version: VERSION,
-        provider: ctx.currentProvider,
-        model: ctx.currentModel,
-        exportedAt: new Date().toISOString(),
-        stats,
-        messages: messages.map(m => ({
-          role: m.role,
-          content: typeof m.content === 'string' ? m.content : JSON.stringify(m.content),
-        })),
-      }, null, 2);
-    } else if (fmt === 'md') {
-      const header = `# SETH Oturum Kaydı\n\n**Provider:** ${ctx.currentProvider} / ${ctx.currentModel}  \n**Tarih:** ${new Date().toLocaleString('tr-TR')}  \n**Mesaj:** ${stats.messages}  \n\n---\n\n`;
-      content = header + messages.map(m => {
-        const role = m.role === 'user' ? '**Sen**' : '**SETH**';
-        const text = typeof m.content === 'string' ? m.content : JSON.stringify(m.content, null, 2);
-        return `${role}\n\n${text}`;
-      }).join('\n\n---\n\n');
-    } else {
-      // HTML — kaydet komutuyla aynı CSS
-      const rows = messages.map(m => {
-        const role = m.role === 'user' ? 'Sen' : 'SETH';
-        const text = (typeof m.content === 'string' ? m.content : JSON.stringify(m.content, null, 2))
-          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        const cls = m.role === 'user' ? 'user' : 'assistant';
-        return `<div class="msg ${cls}"><span class="role">${role}</span><pre>${text}</pre></div>`;
-      }).join('\n');
-      content = `<!DOCTYPE html><html lang="tr"><head><meta charset="utf-8"><title>SETH Export</title><style>*{box-sizing:border-box;margin:0;padding:0}body{background:#0d0d0d;color:#e0e0e0;font-family:'Courier New',monospace;max-width:900px;margin:0 auto;padding:24px}h1{color:#cc0000;font-size:1.4rem;margin-bottom:20px;border-bottom:1px solid #333;padding-bottom:10px}.msg{padding:14px 18px;margin:10px 0;border-radius:8px;border-left:3px solid transparent}.user{background:#1e1e1e;border-color:#555}.assistant{background:#0f1a2e;border-color:#cc0000}.role{font-size:.75rem;font-weight:bold;text-transform:uppercase;letter-spacing:.1em;opacity:.6;display:block;margin-bottom:6px}.user .role{color:#aaa}.assistant .role{color:#cc4444}pre{white-space:pre-wrap;word-break:break-word;font-size:.9rem;line-height:1.6}</style></head><body><h1>🐍 SETH Export — ${ctx.currentProvider}/${ctx.currentModel}</h1>${rows}</body></html>`;
-    }
-
-    await writeFile(resolve(ctx.getCwd(), filename), content);
-    return { output: chalk.green(`✓ Export: ${filename} (${fmt.toUpperCase()}, ${messages.length} mesaj)`) };
-  },
-
-  bellek: async (args, ctx) => {
-    const sub = args.trim();
-    // /bellek kaydet <tip> <içerik>
+  bellek: async (sub, ctx) => {
+    const validTypes: MemoryType[] = ['user', 'project', 'feedback', 'reference'];
+    
+    // /bellek kaydet <tip> <icerik>
     if (sub.startsWith('kaydet ')) {
-      const rest = sub.slice(7);
-      const [tip, ...contentParts] = rest.split(' ');
-      const validTypes: MemoryType[] = ['user', 'project', 'feedback', 'reference'];
+      const parts = sub.slice(7).trim().split(' ');
+      const tip = parts[0];
+      const contentParts = parts.slice(1);
       if (!validTypes.includes(tip as MemoryType)) {
         return { output: chalk.red(`Geçersiz tip. Kullanım: /bellek kaydet <user|project|feedback|reference> <içerik>`) };
       }
@@ -872,226 +686,35 @@ ${rows}
     return { output: lines.join('\n') };
   },
 
-  istatistikler: async (_args, ctx) => {
-    const s = ctx.getStats();
-    const history = loadHistory();
-    const totalTokens = s.inputTokens + s.outputTokens;
-
-    // #1 Gerçek maliyet hesabı
-    const { calculateCostUSD, formatCostUSD } = await import('./model-cost.js');
-    const costUSD = calculateCostUSD(s.inputTokens, s.outputTokens, ctx.currentModel, ctx.currentProvider);
-
-    const lines = [
-      chalk.bold('📊 SETH İstatistikleri'),
-      '',
-      `  Sağlayıcı     : ${chalk.cyan(ctx.currentProvider)} / ${chalk.cyan(ctx.currentModel)}`,
-      `  Mesaj sayısı  : ${chalk.cyan(s.messages)}`,
-      `  Toplam token  : ${chalk.cyan(totalTokens.toLocaleString())}`,
-      `    ↳ Giriş     : ${chalk.dim(s.inputTokens.toLocaleString())}`,
-      `    ↳ Çıkış     : ${chalk.dim(s.outputTokens.toLocaleString())}`,
-      `  Tur sayısı    : ${chalk.cyan(s.turns)}`,
-      `  Gerçek maliyet: ${chalk.yellow(formatCostUSD(costUSD))}`,
-      '',
-      `  Geçmiş kayıt  : ${chalk.cyan(history.length)} komut`,
-    ];
-
-    // #17 Tool metrics
-    try {
-      const { readFile } = await import('fs/promises');
-      const { join } = await import('path');
-      const { homedir } = await import('os');
-      const summaryPath = join(homedir(), '.seth', 'metrics', 'tool-metrics-summary.json');
-      const raw = await readFile(summaryPath, 'utf-8').catch(() => null);
-      if (raw) {
-        const summary = JSON.parse(raw) as { totals: { calls: number; errors: number }; tools: Record<string, { calls: number }> };
-        lines.push('', chalk.bold('  🔧 Araç Kullanımı (toplam)'));
-        lines.push(`  Toplam çağrı  : ${chalk.cyan(summary.totals.calls)}`);
-        const topTools = Object.entries(summary.tools)
-          .sort((a, b) => b[1].calls - a[1].calls)
-          .slice(0, 5);
-        for (const [name, data] of topTools) {
-          lines.push(`    ${name.padEnd(20)} ${chalk.dim(data.calls + ' çağrı')}`);
-        }
-      }
-    } catch { /* metrics yoksa atla */ }
-
-    console.log(lines.join('\n'));
-    return { output: '' };
+  yan: async (args, ctx) => {
+    // Yan sorgu (side-query)
+    if (!args.trim()) return { output: chalk.dim('Kullanım: /yan <soru>') };
+    return { runAsUserMessage: args.trim() };
   },
-  repo_özet: async (_args, ctx) => { const res = await runRepoOzetSummary(ctx.getCwd()); return { output: res.output }; },
-  sor: async (_args, ctx) => { const p = await runSorWizard(ctx.getSessionId()); return typeof p === 'string' ? { runAsUserMessage: p } : { output: chalk.gray('İptal.') }; },
-  doktor: async (_args, ctx) => {
-    const { runDoktor } = await import('./commands/doktor.js');
-    return runDoktor(ctx);
-  },
-  'provider-test': async (_args, ctx) => {
-    const lines: string[] = [chalk.bold('🔌 Provider Bağlantı Testi'), ''];
-    const tests: Array<{ name: string; fn: () => Promise<number | null> }> = [
-      { name: 'ollama', fn: async () => { const t = Date.now(); const r = await fetch('http://localhost:11434/api/tags', { signal: AbortSignal.timeout(3000) }).catch(() => null); return r?.ok ? Date.now() - t : null; } },
-      { name: 'lmstudio', fn: async () => { const t = Date.now(); const r = await fetch('http://localhost:1234/v1/models', { signal: AbortSignal.timeout(3000) }).catch(() => null); return r?.ok ? Date.now() - t : null; } },
-    ];
-    for (const test of tests) {
-      const ms = await test.fn().catch(() => null);
-      lines.push(`  ${ms !== null ? chalk.green('✓') : chalk.red('✗')} ${test.name.padEnd(12)} ${ms !== null ? chalk.dim(`${ms}ms`) : chalk.red('bağlanamadı')}`);
+
+  effort: async (args, ctx) => {
+    const level = args.trim().toLowerCase();
+    const levels = ['low', 'medium', 'high', 'max'];
+    const desc: Record<string, string> = {
+      low: 'Hızlı — kısa yanıtlar, az token',
+      medium: 'Dengeli — varsayılan',
+      high: 'Derin — uzun, detaylı yanıtlar',
+      max: 'Maksimum — en derin düşünme ve analiz',
+    };
+    if (!level) {
+      const selected = await select({
+        message: 'Düşünme seviyesini seçin:',
+        options: levels.map(l => ({ value: l, label: `${l.padEnd(8)} — ${desc[l]}` })),
+      });
+      if (isCancel(selected)) return { output: chalk.gray('İptal edildi.') };
+      ctx.setThinkingStyle(selected as any);
+      saveConfig({ effort: selected as any });
+      return { output: chalk.green(`✓ Effort seviyesi: ${selected}`) };
     }
-    return { output: lines.join('\n') };
-  },
-
-  web: async (args, ctx) => {
-    if (!args.trim()) return { output: [chalk.bold('Web Browser Otomasyon'), '', chalk.dim('Kullanım:'), `  ${cmd('/web')} ${chalk.dim('navigate <url>')}`, `  ${cmd('/web')} ${chalk.dim('extract [json]')}`, `  ${cmd('/web')} ${chalk.dim('screenshot')}`, `  ${cmd('/web')} ${chalk.dim('close')}`].join('\n') };
-    const parts = args.trim().split(' ');
-    const firstWord = parts[0];
-    const simpleActions = ['navigate', 'click', 'type', 'screenshot', 'extract', 'cookie', 'execute', 'wait', 'scroll', 'download', 'close'];
-    if (simpleActions.includes(firstWord)) {
-      if (firstWord === 'close') { const { closeBrowser } = await import('./tools/browser-automation.js'); await closeBrowser(); return { output: chalk.green('✓ Tarayıcı kapatıldı') }; }
-      let action = firstWord; let params: Record<string, string> = {};
-      if (action === 'navigate') params.url = parts[1] || '';
-      else if (action === 'click') params.selector = parts[1] || '';
-      else if (action === 'type') { params.selector = parts[1] || ''; params.text = parts.slice(2).join(' '); }
-      else if (action === 'extract') params.format = parts[1] || 'text';
-      else if (action === 'wait') params.selector = parts[1] || '';
-      else if (action === 'execute') params.script = parts.slice(1).join(' ');
-      const paramStr = Object.entries(params).map(([k, v]) => `${k}="${v}"`).join(', ');
-      return { runAsUserMessage: `browser_automation aracını kullan: action="${action}", ${paramStr}` };
-    }
-    return { output: chalk.yellow('⚠️  browser_automation adımlarını manuel kullanın') };
-  },
-
-  nasılçalışır: async () => { await runNasilCalisirAnimation(); return { output: '' }; },
-
-  // ─── Yan Sorgu ────────────────────────────────────────────────────────────
-  'yan-sorgu': async (args, ctx) => {
-    if (!args.trim()) return { output: chalk.dim('Kullanım: /yan-sorgu <soru>') };
-    // Mevcut konuşmayı bozmadan ayrı bir headless sorgu yap
-    return { runAsUserMessage: `[YAN SORGU - mevcut konuşmayı etkileme, sadece bu soruyu yanıtla]: ${args.trim()}` };
-  },
-
-  // ─── Arka Plan Görevleri ──────────────────────────────────────────────────
-  görevler: async () => {
-    const { taskListTool } = await import('./tools/background-tasks.js');
-    return taskListTool.execute({}, process.cwd());
-  },
-
-  // ─── Güncelleme Kontrolü ──────────────────────────────────────────────────
-  güncelle: async () => {
-    try {
-      const { execSync } = await import('child_process');
-      const { semverGt } = await import('./semver.js');
-      const latest = execSync('npm show seth version 2>/dev/null', { encoding: 'utf8', timeout: 8000 }).trim();
-      if (!latest) return { output: chalk.dim('npm erişilemiyor.') };
-      if (!semverGt(latest, VERSION)) {
-        return { output: chalk.green(`✓ Seth güncel (v${VERSION})`) };
-      }
-      return { output: [
-        chalk.yellow(`⚡ Yeni sürüm: v${latest}  (mevcut: v${VERSION})`),
-        chalk.dim('  Güncellemek için: npm install -g seth'),
-      ].join('\n') };
-    } catch {
-      return { output: chalk.dim('Güncelleme kontrolü başarısız.') };
-    }
-  },
-
-  // ─── Hook Yönetimi ────────────────────────────────────────────────────────
-  hook: async (args) => {
-    const sub = args.trim();
-    if (sub === 'liste' || sub === '') {
-      const hooks = loadHooks();
-      if (hooks.length === 0) return { output: chalk.dim('Hook tanımlı değil.\n\nÖrnek: ~/.seth/hooks.json\n' + getHooksExample()) };
-      return { output: chalk.bold('🪝 Aktif Hook\'lar\n') + hooks.map((h, i) =>
-        `  ${i + 1}. [${h.event}] ${h.tool ? `(${h.tool}) ` : ''}${h.command}`
-      ).join('\n') };
-    }
-    if (sub === 'örnek') {
-      const hooksFile = join(homedir(), '.seth', 'hooks.json');
-      return { output: `Örnek hooks.json (${hooksFile}):\n\n${getHooksExample()}` };
-    }
-    return { output: chalk.dim('Kullanım: /hook liste | /hook örnek') };
-  },
-
-  // ─── Güvenlik Raporu PDF ──────────────────────────────────────────────────
-  rapor: async (args, ctx) => {
-    const sub = args.trim();
-    if (sub === 'pdf' || sub === '') {
-      const outputDir = ctx.getCwd();
-
-      // Tüm konuşma geçmişini al — hem getMessages hem getHistory dene
-      const messages = ctx.getMessages?.() ?? ctx.getHistory?.() ?? [];
-      const reportText = messages
-        .filter((m: ChatMessage) => m.role === 'assistant')
-        .map((m: ChatMessage) => typeof m.content === 'string' ? m.content : JSON.stringify(m.content))
-        .join('\n\n')
-        .slice(0, 15000);
-
-      // Kullanıcı mesajlarından hedef bul
-      const userMessages = messages
-        .filter((m: ChatMessage) => m.role === 'user')
-        .map((m: ChatMessage) => typeof m.content === 'string' ? m.content : '')
-        .join(' ');
-
-      if (!reportText.trim()) {
-        return { output: chalk.yellow('⚠ Rapor oluşturmak için önce bir güvenlik taraması yapın.') };
-      }
-
-      process.stdout.write(chalk.dim('\n  📄 Rapor oluşturuluyor...\n'));
-      const outFile = await exportSecurityReport(reportText + '\n\nKULLANICI_MESAJLARI:\n' + userMessages, outputDir);
-      if (!outFile) return { output: chalk.red('✗ Rapor oluşturulamadı.') };
-
-      const ext = outFile.endsWith('.pdf') ? 'PDF' : 'LaTeX (.tex)';
-      return { output: chalk.green(`✓ ${ext} raporu oluşturuldu:\n  ${outFile}`) };
-    }
-    return { output: chalk.dim('Kullanım: /rapor pdf') };
-  },
-
-  apikey: async (_args, ctx) => {
-    const API_PROVIDERS: ProviderName[] = ['claude', 'gemini', 'openai', 'openrouter', 'groq'];
-    const options = API_PROVIDERS.map(p => {
-      const key = ctx.config.providers[p]?.apiKey || process.env[
-        p === 'claude' ? 'ANTHROPIC_API_KEY' :
-        p === 'gemini' ? 'GEMINI_API_KEY' :
-        p === 'openrouter' ? 'OPENROUTER_API_KEY' :
-        p === 'groq' ? 'GROQ_API_KEY' : 'OPENAI_API_KEY'
-      ];
-      const masked = key ? `${key.slice(0, 8)}${'*'.repeat(8)}` : chalk.dim('(kayıtlı değil)');
-      return { value: p, label: `${p.padEnd(8)} ${masked}` };
-    });
-    options.push({ value: 'yeni' as ProviderName, label: chalk.green('+ Yeni API anahtarı ekle') });
-
-    const selected = await select({ message: 'API Anahtarları:', options });
-    if (isCancel(selected)) return { output: chalk.gray('İptal edildi.') };
-
-    if (selected === 'yeni' as ProviderName) {
-      return COMMANDS.saglayici!('', ctx);
-    }
-
-    // Mevcut key yönetimi
-    const action = await select({
-      message: `${selected} — ne yapmak istersin?`,
-      options: [
-        { value: 'update', label: 'Anahtarı güncelle' },
-        { value: 'delete', label: chalk.red('Anahtarı sil') },
-        { value: 'cancel', label: 'İptal' },
-      ],
-    });
-    if (isCancel(action) || action === 'cancel') return { output: chalk.gray('İptal edildi.') };
-
-    if (action === 'delete') {
-      const sure = await confirm({ message: `${selected} API anahtarı silinsin mi?` });
-      if (isCancel(sure) || !sure) return { output: chalk.gray('İptal edildi.') };
-      deleteApiKey(selected as ProviderName);
-      return { output: chalk.green(`✓ ${selected} API anahtarı silindi.`) };
-    }
-
-    // update
-    const newKey = await text({
-      message: `Yeni API anahtarı (${selected}):`,
-      placeholder: 'API anahtarını buraya yapıştır...',
-      validate: (v) => (v ?? '').trim().length < 10 ? 'Geçersiz API anahtarı.' : undefined,
-    });
-    if (isCancel(newKey)) return { output: chalk.gray('İptal edildi.') };
-    saveConfig({
-      providers: { [selected]: { apiKey: (newKey as string).trim() } } as SETHConfig['providers'],
-    });
-    return { output: chalk.green(`✓ ${selected} API anahtarı güncellendi.`) };
+    if (!levels.includes(level)) return { output: chalk.red('Geçersiz seviye: low, medium, high, max') };
+    ctx.setThinkingStyle(level as any);
+    saveConfig({ effort: level as any });
+    return { output: chalk.green(`✓ Effort seviyesi: ${level}`) };
   },
 
   tema: async (_args, _ctx) => {
@@ -1128,7 +751,8 @@ ${rows}
 
     const options = sessions.map(s => {
       const date = new Date(s.updatedAt).toLocaleString('tr-TR', { dateStyle: 'short', timeStyle: 'short' });
-      return { value: s.id, label: `${chalk.dim(s.id.slice(0, 8))}  ${s.provider}/${s.model}  ${chalk.dim(date)}` };
+      const tag = s.tag ? ` ${chalk.bgBlue.white(` ${s.tag} `)}` : '';
+      return { value: s.id, label: `${chalk.dim(s.id.slice(0, 8))}  ${s.provider}/${s.model}${tag}  ${chalk.dim(date)}` };
     });
 
     const selected = await select({ message: 'Oturum seçin:', options });
@@ -1140,110 +764,46 @@ ${rows}
     };
   },
 
-  cikis: () => ({ shouldExit: true }),
-
-  // #4 Effort / Düşünme Seviyesi
-  effort: async (args, ctx) => {
-    const level = args.trim().toLowerCase();
-    const levels = ['low', 'medium', 'high', 'max'];
-    const desc: Record<string, string> = {
-      low: 'Hızlı — kısa yanıtlar, az token',
-      medium: 'Dengeli — varsayılan',
-      high: 'Derin — uzun, detaylı yanıtlar',
-      max: 'Maksimum — en uzun, en detaylı',
-    };
-    if (!level) {
-      const p = await select({
-        message: 'Düşünme seviyesi seçin:',
-        options: levels.map(l => ({ value: l, label: `${l.padEnd(8)} — ${desc[l]}` })),
-        initialValue: ctx.config.effort ?? 'medium',
-      });
-      if (isCancel(p)) return { output: chalk.gray('İptal.') };
-      saveConfig({ effort: p as import('./types.js').EffortLevel });
-      return { output: chalk.green(`✓ Effort: ${p as string}`) };
-    }
-    if (!levels.includes(level)) return { output: chalk.red(`Geçersiz seviye. Seçenekler: ${levels.join(', ')}`) };
-    saveConfig({ effort: level as import('./types.js').EffortLevel });
-    return { output: chalk.green(`✓ Effort: ${level} — ${desc[level]}`) };
+  etiket: async (args, ctx) => {
+    const tag = args.trim();
+    if (!tag) return { output: chalk.dim('Kullanım: /etiket <isim>') };
+    const ok = setSessionTag(ctx.getSessionId(), tag);
+    return { output: ok ? chalk.green(`✓ Oturum etiketlendi: ${tag}`) : chalk.red('Hata: Oturum bulunamadı.') };
   },
 
-  kullanım: async (_args, _ctx) => {
-    return { output: chalk.dim('  Yerel modda çalışıyorsunuz.') };
-  },
-
-  // #21 Çoklu ajan koordinasyonu
-  'ajan-koordinasyon': async (args, ctx) => {
-    const sub = args.trim();
-    if (!sub || sub === 'yardım') {
-      return { output: [
-        chalk.bold('🤖 Çoklu Ajan Koordinasyonu'),
-        '',
-        `  ${cmd('/ajan-koordinasyon')} ${chalk.dim('başlat <görev>')}    Yeni alt ajan başlat`,
-        `  ${cmd('/ajan-koordinasyon')} ${chalk.dim('durum')}             Aktif ajanları listele`,
-        `  ${cmd('/ajan-koordinasyon')} ${chalk.dim('durdur <id>')}       Ajanı durdur`,
-      ].join('\n') };
-    }
-    if (sub.startsWith('başlat ') || sub.startsWith('basla ')) {
-      const task = sub.replace(/^(başlat|basla)\s+/, '');
-      return { runAsUserMessage: `[ALT AJAN GÖREVİ]: ${task}` };
-    }
-    if (sub === 'durum') {
-      const { taskListTool } = await import('./tools/background-tasks.js');
-      const result = await taskListTool.execute({}, ctx.getCwd());
-      return { output: result.output || chalk.dim('  Aktif ajan yok.') };
-    }
-    return { output: chalk.red('Bilinmeyen alt komut. /ajan-koordinasyon yardım') };
-  },
-
-  // #24 Oturum export/import
-  'oturum-export': async (args, ctx) => {
-    const filename = args.trim() || `seth_session_${Date.now()}.json`;
-    const messages = ctx.getHistory();
-    const data = {
-      version: VERSION,
-      provider: ctx.currentProvider,
-      model: ctx.currentModel,
-      exportedAt: new Date().toISOString(),
-      messages: messages.map(m => ({
-        role: m.role,
-        content: typeof m.content === 'string' ? m.content : JSON.stringify(m.content),
-      })),
-    };
-    await writeFile(resolve(ctx.getCwd(), filename), JSON.stringify(data, null, 2));
-    return { output: chalk.green(`✓ Oturum export edildi: ${filename}`) };
-  },
-
-  'oturum-import': async (args, ctx) => {
-    const filename = args.trim();
-    if (!filename) return { output: chalk.red('Kullanım: /oturum-import <dosya.json>') };
-    try {
-      const { readFile: rf } = await import('fs/promises');
-      const raw = await rf(resolve(ctx.getCwd(), filename), 'utf-8');
-      const data = JSON.parse(raw) as { messages?: Array<{ role: string; content: string }> };
-      if (!data.messages) return { output: chalk.red('Geçersiz oturum dosyası.') };
-      return { output: chalk.green(`✓ ${data.messages.length} mesaj yüklendi. Konuşmaya devam edebilirsiniz.`) };
-    } catch (e) {
-      return { output: chalk.red(`Import hatası: ${e instanceof Error ? e.message : String(e)}`), isError: true };
-    }
-  },
-
-  // #23 MCP keşif
-  'mcp-keşif': async () => {
-    const { discoverMcpServers } = await import('./mcp/discovery.js');
-    const found = await discoverMcpServers();
-    if (found.length === 0) return { output: chalk.dim('  Yüklü MCP server bulunamadı.') };
-    return { output: [
-      chalk.bold('🔌 Bulunan MCP Server\'lar:'),
-      ...found.map(s => `  ${chalk.green('✓')} ${s.name.padEnd(15)} ${chalk.dim(s.description)}`),
-    ].join('\n') };
-  },
-
-  // #22 Git worktree
-  worktree: async (args, ctx) => {
+  profil: async (args, ctx) => {
     const parts = args.trim().split(' ');
-    const action = parts[0] || 'list';
-    const { gitWorktreeTool } = await import('./tools/git-worktree.js');
-    return gitWorktreeTool.execute({ action, path: parts[1], branch: parts[2] }, ctx.getCwd());
+    const sub = parts[0];
+    const cfg = loadConfig();
+    const profiles = cfg.profiles || {};
+
+    if (!sub || sub === 'liste') {
+      const names = Object.keys(profiles);
+      if (names.length === 0) return { output: chalk.dim('  Kayıtlı profil yok. /profil ekle <isim>') };
+      const lines = [chalk.bold('👤 Kayıtlı Profiller:'), ''];
+      for (const name of names) {
+        const p = profiles[name];
+        lines.push(`  • ${chalk.cyan(name.padEnd(15))} : ${p.provider} / ${p.model}`);
+      }
+      return { output: lines.join('\n') };
+    }
+
+    if (sub === 'ekle') {
+      const name = parts[1];
+      if (!name) return { output: chalk.red('Kullanım: /profil ekle <isim>') };
+      const newProfiles = { ...profiles, [name]: { provider: ctx.currentProvider, model: ctx.currentModel } };
+      saveConfig({ profiles: newProfiles });
+      return { output: chalk.green(`✓ Profil eklendi: ${name}`) };
+    }
+
+    if (profiles[sub]) {
+      const p = profiles[sub];
+      await ctx.setProvider(p.provider);
+      ctx.setModel(p.model);
+      return { output: chalk.green(`✓ Profile geçildi: ${sub} (${p.provider}/${p.model})`) };
+    }
+
+    return { output: chalk.red(`Profil bulunamadı: ${sub}`) };
   },
 
   çıkış: async () => {
@@ -1251,11 +811,11 @@ ${rows}
   },
 
   yapımcı: () => ({
-
     output: `
 ${chalk.bold.red('🐍 SETH v' + VERSION + ' — Strategic Exploitation & Tactical Hybrid')}
 
 ${chalk.bold.cyan('👨‍💻 Yapımcı:')} ${chalk.bold('Mustafa Kemal Çıngıl')}
+${chalk.dim('GitHub:')} ${chalk.underline('https://github.com/MustafaKemal0146')}
 
 ${chalk.dim('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')}
 
@@ -1278,7 +838,6 @@ ${chalk.blue('📊 İstatistikler:')}
 
 ${chalk.magenta('🌐 İletişim:')}
   • Web: ${chalk.underline('https://mustafakemalcingil.site')}
-  • GitHub: ${chalk.underline('https://github.com/mustafakemal0146')}
   • LinkedIn: ${chalk.underline('https://linkedin.com/in/mustafakemalcingil')}
   • E-posta: ${chalk.underline('ismustafakemal0146@gmail.com')}
 
@@ -1295,7 +854,7 @@ ${chalk.dim('Yanıt süresi: 24 saat içinde • Çalışma dili: Türkçe, İng
   yardim: (...args) => COMMANDS.yardım(...args),
   ozellikler: (...args) => COMMANDS.özellikler(...args),
   saglayici: (...args) => COMMANDS.sağlayıcı(...args),
-  saglayicilar: (...args) => COMMANDS.sağlayıcılar(...args),
+  saglayicilar: (...args) => (COMMANDS as any).sağlayıcılar(...args),
   araclar: (...args) => COMMANDS.araçlar(...args),
   degistir: (...args) => COMMANDS.değiştir(...args),
   sikistir: (...args) => COMMANDS.sıkıştır(...args),

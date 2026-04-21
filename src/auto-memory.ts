@@ -12,7 +12,6 @@ const MIN_MESSAGES_FOR_EXTRACT = 4; // En az bu kadar mesaj olsun
 
 /**
  * Konuşmadan önemli bilgileri çıkar ve kaydet.
- * Arka planda çalışır, hata olursa sessizce geçer.
  */
 export async function extractAndSaveMemories(
   messages: ChatMessage[],
@@ -64,7 +63,68 @@ Hatırlanacak bilgiler (madde madde):`;
     
     const entry = `\n## ${new Date().toLocaleTimeString('tr-TR')} — ${cwd}\n\n${memoryText}\n`;
     writeFileSync(memFile, existing + entry, 'utf-8');
+
+    // v3.8.17: Bellek sıkıştırma — eğer dosya çok büyüdüyse özetle
+    if (existing.length > 20000) {
+      await compressAutoMemory(memFile, provider, model);
+    }
   } catch { /* sessizce geç */ }
+}
+
+/**
+ * Eski bellek girişlerini özetleyerek sıkıştırır (v3.8.17).
+ */
+async function compressAutoMemory(filePath: string, provider: LLMProvider, model: string): Promise<void> {
+  try {
+    const content = readFileSync(filePath, 'utf-8');
+    const compressPrompt = `Aşağıdaki geçmiş bellek kayıtlarını oku ve tek bir maddeleştirilmiş özet haline getir. 
+Tekrarları temizle, sadece hala geçerli olan önemli bilgileri koru.
+
+Kayıtlar:
+${content}
+
+Özetlenmiş Bellek:`;
+
+    let summary = '';
+    for await (const event of provider.stream([{ role: 'user', content: compressPrompt }], { model, maxTokens: 1000 })) {
+      if (event.type === 'text') summary += event.data as string;
+      if (event.type === 'done') break;
+    }
+
+    if (summary.trim()) {
+      writeFileSync(filePath, `# SIKIŞTIRILMIŞ BELLEK (${new Date().toLocaleDateString('tr-TR')})\n\n${summary.trim()}\n`, 'utf-8');
+    }
+  } catch { /* ignore */ }
+}
+
+/**
+ * Proje bazlı otomatik bellek oluşturma (v3.8.17).
+ */
+export async function ensureProjectMetadata(cwd: string, provider: LLMProvider, model: string): Promise<void> {
+  const sethDir = join(cwd, '.seth');
+  const projectMd = join(sethDir, 'project.md');
+
+  if (existsSync(projectMd)) return;
+
+  try {
+    if (!existsSync(sethDir)) mkdirSync(sethDir, { recursive: true });
+
+    const analyzePrompt = `Mevcut dizindeki dosyaları incele ve projenin ne olduğunu, hangi teknolojileri kullandığını, 
+yapısını ve amacını özetleyen bir 'project.md' içeriği hazırla.
+Kısa, teknik ve öz olsun.
+
+Dizin: ${cwd}`;
+
+    let summary = '';
+    for await (const event of provider.stream([{ role: 'user', content: analyzePrompt }], { model, maxTokens: 800 })) {
+      if (event.type === 'text') summary += event.data as string;
+      if (event.type === 'done') break;
+    }
+
+    if (summary.trim()) {
+      writeFileSync(projectMd, summary.trim(), 'utf-8');
+    }
+  } catch { /* ignore */ }
 }
 
 /**

@@ -145,6 +145,11 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
 
   let session = createSession(currentProvider, currentModel);
 
+  // v3.8.17: Proje bazlı otomatik bellek (project.md)
+  import('./auto-memory.js').then(({ ensureProjectMetadata }) => {
+    ensureProjectMetadata(currentCwd, provider, currentModel).catch(() => {});
+  }).catch(() => {});
+
   // #10 Crash recovery kontrolü
   const recovery = checkRecovery();
   if (recovery && recovery.messageCount > 0 && recovery.sessionId) {
@@ -423,6 +428,13 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
   async function runAgentTurn(finalInput: string): Promise<void> {
     sethLog('Ajan turu yürütme');
     const turnStart = Date.now();
+    
+    // v3.8.17: Maliyet tahmini
+    const estimatedTokens = Math.ceil(finalInput.length / 4);
+    const { calculateCostUSD, formatCostUSD } = await import('./model-cost.js');
+    const estimatedCost = calculateCostUSD(estimatedTokens, 0, currentModel, currentProvider);
+    process.stdout.write(chalk.dim(`  [Tahmini: ~${estimatedTokens} token / ${formatCostUSD(estimatedCost)}]\n`));
+
     // Terminal başlığını "işleniyor" olarak güncelle
     process.stdout.write(`\x1b]0;⏳ SETH — İşleniyor...\x07`);
     const spinOpts = { thinkingMode: appConfig.repl?.thinkingStyle ?? 'minimal' };
@@ -433,17 +445,6 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
       renderMarkdown,
     });
 
-    // Kullanıcı mesajını gri arka planla vurgula
-    {
-      const cols = process.stdout.columns || 80;
-      const lines2 = finalInput.split('\n');
-      const sym = getPromptStr().replace(/\n/g, '');
-      process.stdout.write(`\x1b[${lines2.length}A\x1b[0J`);
-      lines2.forEach((ln, i) => {
-        const padded = ((i === 0 ? sym + ' ' : '  ') + ln).padEnd(cols);
-        process.stdout.write(chalk.bgHex('#2a2a2a').white(padded) + '\n');
-      });
-    }
     // Context budget check
     const budget = getEffectiveContextBudgetTokens(appConfig);
     const cumTokens = totalUsage.inputTokens + totalUsage.outputTokens;
@@ -725,15 +726,12 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
 
       // Eğer 30 saniyeden uzun sürdüyse bildir
       if (parseFloat(elapsed) > 30) {
-        process.stdout.write(`\n${chalk.green(`  ✓ Tamamlandı (${elapsed}s)`)}\n`);
+        process.stdout.write(`\n\x07${chalk.green(`  ✓ Tamamlandı (${elapsed}s)`)}\n`);
       }
 
-      // ─── Çakışma Önleyici: Satırı temizle ve tekil prompt ver ────────────────
+      // ─── Çakışma Önleyici: Sadece terminal başlığını temiz tut ────────────────
       if (rl && !wasAbortedByEsc) {
-        // İmleci satır başına al ve o satırı tamamen temizle
-        process.stdout.write('\r\x1b[K');
-        rl.setPrompt(getPromptStr());
-        rl.prompt(true);
+        // rl.prompt(true) KALDIRILDI — readline zaten yeni satırda bekliyor
       }
     }
   }
@@ -1063,11 +1061,6 @@ ${toSummarize.map(m => `${m.role}: ${m.content}`).join('\n\n')}`;
         if (!finalInput.trim()) { if (rl) rl.prompt(true); return; }
 
         if (finalInput.trim().startsWith('/')) {
-          // ─── Format Command Input Display ──────────────────────────────────
-          const displayPrompt = getPromptStr().replace(/^\n/, '');
-          const linesToMoveUp = finalInput.split('\n').length;
-          process.stdout.write(`\x1b[${linesToMoveUp}A\x1b[0J${displayPrompt}${finalInput}\n`);
-
           // Slash command
           // Close rl to free stdin for @clack/prompts, then recreate.
           if (rl) {

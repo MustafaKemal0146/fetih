@@ -3,6 +3,7 @@
  */
 
 import { relative, resolve } from 'path';
+import chalk from 'chalk';
 import type { ToolDefinition, ToolResult } from '../types.js';
 import { resolveGitRepoRoot, runGit } from './git-internal.js';
 
@@ -63,7 +64,21 @@ export const gitDiffTool: ToolDefinition = {
         isError: true,
       };
     }
+    
     const out = r.stdout.trim();
-    return { output: out || (statOnly ? '(değişiklik yok)' : '') };
+    if (!out) return { output: statOnly ? '(değişiklik yok)' : '' };
+
+    if (statOnly) return { output: out };
+
+    // Basit renklendirme
+    const lines = out.split('\n').map(line => {
+      if (line.startsWith('+') && !line.startsWith('+++')) return chalk.green(line);
+      if (line.startsWith('-') && !line.startsWith('---')) return chalk.red(line);
+      if (line.startsWith('@@')) return chalk.cyan(line);
+      if (line.startsWith('diff') || line.startsWith('index')) return chalk.bold(line);
+      return line;
+    });
+
+    return { output: lines.join('\n') };
   },
 };

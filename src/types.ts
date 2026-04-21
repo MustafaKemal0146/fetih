@@ -162,6 +162,8 @@ export interface SessionData {
   readonly model: string;
   /** Otomatik üretilen oturum başlığı */
   readonly title?: string;
+  /** Kullanıcı tarafından atanan etiket */
+  readonly tag?: string;
   readonly messages: ChatMessage[];
   /** Çift hat: B geçmişi (A = `messages`) */
   readonly messagesLaneB?: ChatMessage[];
@@ -214,6 +216,8 @@ export interface SETHConfig {
   readonly autoApprove?: boolean;
   readonly repl?: ReplUiConfig;
   readonly theme?: string;
+  /** Kayıtlı sağlayıcı+model kombinasyonları */
+  readonly profiles?: Record<string, { provider: ProviderName; model: string }>;
   /** Birincil sağlayıcı başarısız olursa kullanılacak yedek sağlayıcı */
   readonly fallbackProvider?: ProviderName;
   readonly fallbackModel?: string;
