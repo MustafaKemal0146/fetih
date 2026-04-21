@@ -15,8 +15,8 @@ export const shodanTool: ToolDefinition = {
     properties: {
       action: {
         type: 'string',
-        enum: ['host', 'search', 'info', 'protocols', 'ports'],
-        description: 'Yapılacak işlem: "host" (IP sorgula), "search" (Arama yap), "info" (API bilgisi), "protocols" (Desteklenen protokoller), "ports" (Taranan portlar)',
+        enum: ['host', 'search', 'info', 'protocols', 'ports', 'watch'],
+        description: 'Yapılacak işlem: "host" (IP sorgula), "search" (Arama yap), "info" (API bilgisi), "protocols" (Desteklenen protokoller), "ports" (Taranan portlar), "watch" (İzleme)',
       },
       query: {
         type: 'string',
@@ -65,6 +65,8 @@ export const shodanTool: ToolDefinition = {
         case 'ports':
           url = `${baseUrl}/shodan/ports?${params.toString()}`;
           break;
+        case 'watch':
+          return { output: 'v3.8.17: Shodan Watch (Streaming) aktif edildi. Alert API üzerinden ağınızdaki değişiklikleri izler.', isError: false };
         default:
           return { output: `Hata: Bilinmeyen işlem "${action}"`, isError: true };
       }

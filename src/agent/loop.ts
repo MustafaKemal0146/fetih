@@ -197,6 +197,12 @@ export async function runAgentLoop(
     for (let i = 0; i < toolUseBlocks.length; i += MAX_CONCURRENT) {
       const chunk = toolUseBlocks.slice(i, i + MAX_CONCURRENT);
       
+      // v3.8.17: Paralel yürütme görselleştirmesi
+      if (toolUseBlocks.length > 1) {
+        const names = chunk.map(b => b.name).join(', ');
+        if (options.onText) options.onText(`\n\x1b[90m⚙️  Paralel yürütülüyor (${i+1}-${Math.min(i+MAX_CONCURRENT, toolUseBlocks.length)}/${toolUseBlocks.length}): ${names}\x1b[0m\n`);
+      }
+
       // Dinamik dinleyici ayarı
       const currentListeners = process.rawListeners('SIGINT').length;
       process.setMaxListeners(Math.max(50, currentListeners + chunk.length + 5));

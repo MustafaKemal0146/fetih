@@ -54,18 +54,25 @@ export function loadSession(sessionId: string): SessionData | null {
   }
 }
 
-export function listSessions(): Array<{ id: string; provider: string; model: string; updatedAt: string }> {
+export function listSessions(): Array<{ id: string; provider: string; model: string; updatedAt: string; tag?: string }> {
   const dir = getSessionsDir();
   if (!existsSync(dir)) return [];
   const files = readdirSync(dir).filter(f => f.endsWith('.json') && !f.includes('-yedek-'));
   return files.map(f => {
     try {
       const data = JSON.parse(readFileSync(join(dir, f), 'utf-8')) as SessionData;
-      return { id: data.id, provider: data.provider, model: data.model, updatedAt: data.updatedAt };
+      return { id: data.id, provider: data.provider, model: data.model, updatedAt: data.updatedAt, tag: data.tag };
     } catch {
       return null;
     }
   }).filter((s): s is NonNullable<typeof s> => s !== null);
+}
+
+export function setSessionTag(sessionId: string, tag: string): boolean {
+  const session = loadSession(sessionId);
+  if (!session) return false;
+  saveSession({ ...session, tag });
+  return true;
 }
 
 export function updateSessionMessages(

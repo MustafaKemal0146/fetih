@@ -98,6 +98,7 @@ export async function createDefaultRegistry(): Promise<ToolRegistry> {
     sqlmapTool, nmapTool, niktoTool, gobusterTool,
     whoisTool, digTool, whatwebTool, ffufTool,
     nucleiTool, masscanTool, ncTool, wpscanTool, subfinderTool,
+    johnTool, hashcatTool, ffufWordlistTool,
   } = await import('./external-tool.js');
   const { browserAutomationTool, closeBrowser } = await import('./browser-automation.js');
   const { openBrowserAgentTool } = await import('./openbrowser-agent.js');
@@ -162,6 +163,9 @@ export async function createDefaultRegistry(): Promise<ToolRegistry> {
   registry.register(ncTool);
   registry.register(wpscanTool);
   registry.register(subfinderTool);
+  registry.register(johnTool);
+  registry.register(hashcatTool);
+  registry.register(ffufWordlistTool);
 
   // Browser automation
   registry.register(browserAutomationTool);
@@ -175,6 +179,25 @@ export async function createDefaultRegistry(): Promise<ToolRegistry> {
   registry.register(ctfNetworkAnalyzerTool);
   registry.register(ctfAutoTool);
   registry.register(shodanTool);
+
+  // v3.8.17: Plugin Sistemi — ~/.seth/plugins/ dizininden araç yükleme
+  try {
+    const { existsSync, readdirSync, mkdirSync } = await import('fs');
+    const { join } = await import('path');
+    const { homedir } = await import('os');
+    const pluginDir = join(homedir(), '.seth', 'plugins');
+    if (!existsSync(pluginDir)) mkdirSync(pluginDir, { recursive: true });
+    
+    const files = readdirSync(pluginDir).filter(f => f.endsWith('.js'));
+    for (const file of files) {
+      try {
+        const plugin = await import(join(pluginDir, file));
+        if (plugin.default && typeof plugin.default.execute === 'function') {
+          registry.register(plugin.default);
+        }
+      } catch { /* ignore invalid plugin */ }
+    }
+  } catch { /* ignore fs errors */ }
 
   // Arka plan görev araçları
   const { taskCreateTool, taskListTool, taskGetTool, taskStopTool } = await import('./background-tasks.js');
