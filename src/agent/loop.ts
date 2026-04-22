@@ -8,6 +8,7 @@ import { ToolRegistry } from '../tools/registry.js';
 import { BudgetExceededError } from '../core/errors.js';
 import { ThinkingFilter } from '../thinking-filter.js';
 import { webUIController } from '../web/controller.js';
+import { isPlanWaitingApproval, getPlanModeState } from '../plan-mode-state.js';
 
 // Helper to let the event loop breathe
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -36,6 +37,8 @@ export interface AgentLoopOptions {
   /** Birincil sağlayıcı başarısız olursa kullanılacak yedek sağlayıcı */
   fallbackProvider?: LLMProvider;
   fallbackModel?: string;
+  /** Paralel araç yürütme üst sınırı (varsayılan: 5) */
+  maxConcurrentTools?: number;
 }
 
 export interface AgentResult {
@@ -210,9 +213,9 @@ export async function runAgentLoop(
       break;
     }
 
-    // [v3.8.12.2] Execute tools in smaller chunks of 5 for better UI responsiveness
+    // [v3.8.12.2] Execute tools in smaller chunks for better UI responsiveness
     const executed = [];
-    const MAX_CONCURRENT = 5;
+    const MAX_CONCURRENT = options.maxConcurrentTools ?? 5;
 
     for (let i = 0; i < toolUseBlocks.length; i += MAX_CONCURRENT) {
       const chunk = toolUseBlocks.slice(i, i + MAX_CONCURRENT);
@@ -287,6 +290,12 @@ export async function runAgentLoop(
 
     if (options.onTurnEnd) options.onTurnEnd(budget.turnsUsed, budget.maxTurns);
     if (options.onTurnComplete) options.onTurnComplete(budget.turnsUsed, budget.maxTurns);
+
+    // Plan approval checkpoint — exit loop so REPL can ask user
+    if (isPlanWaitingApproval()) {
+      finalText = getPlanModeState().planText;
+      break;
+    }
   }
 
   if (budget.turnsUsed >= budget.maxTurns && !finalText) {

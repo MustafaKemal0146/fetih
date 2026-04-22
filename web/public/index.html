@@ -223,6 +223,40 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 .tool-card-args { color: var(--text-dim); font-size: 10px; white-space: pre-wrap; word-break: break-all; }
 .tool-card-result { color: #a1a1aa; font-size: 10px; white-space: pre-wrap; word-break: break-all; max-height: 300px; overflow-y: auto; }
 
+/* ── IDE Open Button ── */
+.ide-open-btn {
+  margin-top: 6px; padding: 3px 10px; background: transparent;
+  border: 1px solid var(--border); border-radius: 3px;
+  color: var(--text-dim); font-size: 9px; cursor: pointer; font-family: inherit;
+  transition: border-color 0.15s, color 0.15s;
+}
+.ide-open-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── Diff Card ── */
+.diff-card { margin: 6px 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.diff-header { display: flex; align-items: center; gap: 8px; padding: 7px 12px; cursor: pointer; font-family: 'Fira Code', monospace; font-size: 11px; color: var(--text); }
+.diff-header:hover { background: rgba(220,38,38,0.04); }
+.diff-body { display: none; border-top: 1px solid var(--border); overflow-x: auto; }
+.diff-body.visible { display: block; }
+.diff-lines { font-family: 'Fira Code', monospace; font-size: 10px; padding: 8px 12px; line-height: 1.6; }
+.diff-add { color: #4ade80; background: rgba(74,222,128,0.06); }
+.diff-del { color: #f87171; background: rgba(248,113,113,0.06); }
+.diff-ctx { color: var(--text-dim); }
+
+/* ── Plan Proposal Card ── */
+.plan-proposal-card { margin: 8px 0; border: 1px solid rgba(220,38,38,0.3); border-radius: 8px; background: rgba(220,38,38,0.04); overflow: hidden; }
+.plan-proposal-header { padding: 10px 14px; border-bottom: 1px solid rgba(220,38,38,0.15); font-family: 'Fira Code', monospace; }
+.plan-proposal-body { padding: 12px 14px; max-height: 400px; overflow-y: auto; }
+.plan-proposal-actions { display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--border); }
+.plan-btn { padding: 5px 16px; border-radius: 4px; font-size: 11px; cursor: pointer; font-family: 'Fira Code', monospace; border: 1px solid; transition: 0.15s; }
+.plan-btn.approve { background: rgba(34,197,94,0.1); border-color: #16a34a; color: #4ade80; }
+.plan-btn.approve:hover { background: rgba(34,197,94,0.2); }
+.plan-btn.reject  { background: rgba(239,68,68,0.1); border-color: var(--accent); color: #f87171; }
+.plan-btn.reject:hover  { background: rgba(239,68,68,0.2); }
+
+/* ── Tasks Widget ── */
+.tasks-widget { margin: 8px 0; padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-family: 'Fira Code', monospace; }
+
 /* ── Processing banner ── */
 #processing-banner {
   display: none; padding: 6px 32px; background: rgba(220,38,38,0.06);
@@ -1022,6 +1056,15 @@ function connect() {
         appendLog('CMD RESULT: ' + msg.data, 'green');
         showToast(msg.data);
         break;
+      case 'diff':
+        renderDiff(msg.data.filename, msg.data.diff);
+        break;
+      case 'plan_proposal':
+        renderPlanProposal(msg.data);
+        break;
+      case 'tasks':
+        renderTasksWidget(msg.data);
+        break;
     }
   };
 }
@@ -1420,6 +1463,26 @@ function onToolResult(name, output, isError) {
   const snippet = (output || '').slice(0, 100).replace(/\n/g, ' ');
   appendLog((isError ? '✗ ' : '✓ ') + name + ': ' + snippet, isError ? 'red' : 'green');
   if (isAutoScroll) $('chat-flow').scrollTop = $('chat-flow').scrollHeight;
+
+  // IDE Bridge: dosya araçları için "Editörde Aç" butonu
+  if (!isError && card && (name === 'file_edit' || name === 'file_write' || name === 'file_read')) {
+    // input'tan path çıkar
+    try {
+      const argsEl = card.querySelector('.tool-card-args');
+      if (argsEl) {
+        const parsed = JSON.parse(argsEl.textContent || '{}');
+        const filePath = parsed.path;
+        if (filePath) {
+          const btn = document.createElement('button');
+          btn.className = 'ide-open-btn';
+          btn.textContent = '⎆ Editörde Aç';
+          btn.onclick = () => openInEditor(filePath);
+          const body = card.querySelector('.tool-card-body');
+          if (body) body.appendChild(btn);
+        }
+      }
+    } catch { /* parse hatası — pas geç */ }
+  }
 }
 
 function toggleToolCard(id) {
@@ -1434,6 +1497,96 @@ function escHtml(s) {
   return String(s)
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════════════
+//  Diff Viewer
+// ══════════════════════════════════════════════════════
+function renderDiff(filename, diff) {
+  const card = document.createElement('div');
+  card.className = 'diff-card';
+  const id = 'diff-' + Date.now();
+  const lines = diff.split('\n').map(line => {
+    if (line.startsWith('+ ')) return `<div class="diff-add">${escHtml(line)}</div>`;
+    if (line.startsWith('- ')) return `<div class="diff-del">${escHtml(line)}</div>`;
+    return `<div class="diff-ctx">${escHtml(line)}</div>`;
+  }).join('');
+  card.innerHTML = `
+    <div class="diff-header" onclick="toggleDiffCard('${id}')">
+      <span style="color:var(--accent)">±</span>
+      <span style="font-weight:600;font-size:11px;">${escHtml(filename)}</span>
+      <span style="margin-left:auto;font-size:9px;color:var(--text-dim)">▶</span>
+    </div>
+    <div class="diff-body" id="${id}">
+      <div class="diff-lines">${lines}</div>
+    </div>`;
+  $('chat-flow').appendChild(card);
+  if (isAutoScroll) $('chat-flow').scrollTop = $('chat-flow').scrollHeight;
+}
+function toggleDiffCard(id) {
+  const b = $(id); if (b) b.classList.toggle('visible');
+}
+
+// ══════════════════════════════════════════════════════
+//  Plan Proposal UI
+// ══════════════════════════════════════════════════════
+function renderPlanProposal(planText) {
+  const card = document.createElement('div');
+  card.className = 'plan-proposal-card';
+  card.innerHTML = `
+    <div class="plan-proposal-header">
+      <span style="color:var(--accent);font-weight:700;">📋 PLAN SUNULDU</span>
+      <span style="font-size:9px;color:var(--text-dim);margin-left:8px;">Onay gerekiyor</span>
+    </div>
+    <div class="plan-proposal-body"><pre style="white-space:pre-wrap;word-break:break-word;margin:0;font-size:11px;color:var(--text);">${escHtml(planText)}</pre></div>
+    <div class="plan-proposal-actions">
+      <button class="plan-btn approve" onclick="sendPlanApproval(true, this)">✓ Onayla</button>
+      <button class="plan-btn reject" onclick="sendPlanApproval(false, this)">✗ Reddet</button>
+    </div>`;
+  $('chat-flow').appendChild(card);
+  if (isAutoScroll) $('chat-flow').scrollTop = $('chat-flow').scrollHeight;
+}
+function sendPlanApproval(approved, btn) {
+  sendMsg(approved ? '/onayla' : '/reddet');
+  const card = btn.closest('.plan-proposal-card');
+  if (card) {
+    card.querySelector('.plan-proposal-actions').innerHTML =
+      `<span style="color:${approved ? 'var(--accent)' : '#71717a'};font-size:11px;">${approved ? '✓ Onaylandı' : '✗ Reddedildi'}</span>`;
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  Tasks Widget
+// ══════════════════════════════════════════════════════
+function renderTasksWidget(tasks) {
+  if (!tasks || tasks.length === 0) return;
+  const existing = $('tasks-widget');
+  const container = existing || document.createElement('div');
+  container.id = 'tasks-widget';
+  container.className = 'tasks-widget';
+  const lines = tasks.map(t => {
+    const icon = t.status === 'completed' ? '✓' : t.status === 'in_progress' ? '→' : '○';
+    const color = t.status === 'completed' ? '#22c55e' : t.status === 'in_progress' ? 'var(--accent)' : 'var(--text-dim)';
+    return `<div style="display:flex;gap:6px;align-items:center;padding:2px 0;">
+      <span style="color:${color};font-size:10px;">${icon}</span>
+      <span style="font-size:10px;color:${t.status === 'completed' ? 'var(--text-dim)' : 'var(--text)'};text-decoration:${t.status === 'completed' ? 'line-through' : 'none'};">${escHtml(t.title)}</span>
+    </div>`;
+  }).join('');
+  container.innerHTML = `<div style="font-size:9px;color:var(--accent);font-weight:700;margin-bottom:6px;">GÖREVLER</div>${lines}`;
+  if (!existing) {
+    const chatFlow = $('chat-flow');
+    if (chatFlow) chatFlow.appendChild(container);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  IDE Bridge
+// ══════════════════════════════════════════════════════
+function openInEditor(path) {
+  if (socket && socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify({ type: 'open_in_editor', data: { path } }));
+    showToast('Editörde açıldı: ' + path);
+  }
 }
 
 // ══════════════════════════════════════════════════════

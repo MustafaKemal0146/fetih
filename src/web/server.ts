@@ -6,6 +6,7 @@ import chalk from 'chalk';
 import { join } from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import { spawnSync, spawn as spawnAsync } from 'child_process';
 import { webUIController } from './controller.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -40,6 +41,13 @@ export async function startWebServer(port = 4321) {
           webUIController.handleWebAbort();
         } else if (event.type === 'get_models') {
           webUIController.handleGetModels(event.data);
+        } else if (event.type === 'open_in_editor') {
+          const filePath = String(event.data?.path ?? '');
+          if (filePath) {
+            const vscodeCheck = spawnSync('which', ['code'], { encoding: 'utf-8' });
+            const cmd = vscodeCheck.status === 0 ? 'code' : 'xdg-open';
+            spawnAsync(cmd, [filePath], { detached: true, stdio: 'ignore' }).unref();
+          }
         }
       } catch (err) {
         console.error('WebSocket mesaj hatası:', err);

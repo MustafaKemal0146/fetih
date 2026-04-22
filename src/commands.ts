@@ -72,6 +72,12 @@ export interface CommandContext {
   setEffort: (level: EffortLevel) => void;
   setVimMode: (enabled: boolean) => void;
   getMessages?: () => ChatMessage[];
+  setMaxConcurrentTools?: (n: number) => void;
+  getMaxConcurrentTools?: () => number;
+  setHistory?: (messages: ChatMessage[]) => void;
+  getLaneHistoriesB?: () => ChatMessage[];
+  approvePlanFromWeb?: () => void;
+  rejectPlanFromWeb?: () => void;
 }
 
 export interface CommandResult {
@@ -135,6 +141,11 @@ const COMMAND_HELP_CONTRACT: readonly CommandHelpItem[] = [
   { section: 'Araçlar & Sistem', name: 'hook', usage: '[liste|örnek]', description: 'Hook sistemi (PreToolUse/PostToolUse)' },
   { section: 'Araçlar & Sistem', name: 'rapor', usage: 'pdf', description: 'Güvenlik taramasını LaTeX/PDF olarak aktar' },
   { section: 'Araçlar & Sistem', name: 'görevler', description: 'Arka plan görevlerini listele' },
+  { section: 'Bellek & Oturum', name: 'checkpoint', usage: '[ad] | listele | yükle <ad> | sil <ad>', description: 'Konuşma anını kaydet / geri yükle' },
+  { section: 'Ayarlar', name: 'plan-modu', usage: '<açık|kapalı>', description: 'Plan modu — karmaşık görevlerde önce plan onayı iste' },
+  { section: 'Ayarlar', name: 'paralel', usage: '<1-20>', description: 'Eşzamanlı araç sayısını ayarla (varsayılan: 5)' },
+  { section: 'Bilgi & Analiz', name: 'pr-incele', usage: '<PR numarası veya URL>', description: 'GitHub PR diff + yorumlarını AI ile değerlendir' },
+  { section: 'Araçlar & Sistem', name: 'ide', usage: '[dosya:satır]', description: 'Dosyayı VS Code veya varsayılan editörde aç' },
   { section: 'Araçlar & Sistem', name: 'yan-sorgu', usage: '<soru>', description: 'Konuşmayı bozmadan hızlı soru sor' },
   { section: 'Araçlar & Sistem', name: 'sor', description: 'İstek sihirbazını başlat' },
   { section: 'Araçlar & Sistem', name: 'dusunme', usage: '[minimal|animated]', description: 'Düşünme göstergesini aç/kapat' },
@@ -1211,6 +1222,140 @@ ${chalk.dim('Yanıt süresi: 24 saat içinde • Çalışma dili: Türkçe, İng
 
   cikis: async (_args, _ctx) => COMMANDS.çıkış('', _ctx),
 
+  // ─── Checkpoint ────────────────────────────────────────────────────────────
+  checkpoint: async (args, ctx) => {
+    const { saveCheckpoint, loadCheckpoint, listCheckpoints, deleteCheckpoint } = await import('./checkpoints.js');
+    const sub = args.trim().toLowerCase();
+    const sessionId = ctx.getSessionId();
+
+    if (!sub || (!sub.startsWith('listele') && !sub.startsWith('yükle') && !sub.startsWith('yukle') && !sub.startsWith('sil'))) {
+      // Kaydet
+      const name = args.trim() || new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      const messages = ctx.getHistory();
+      const laneB = ctx.getLaneHistoriesB?.() ?? [];
+      const activeLane = ctx.getActiveLane();
+      const stats = ctx.getStats();
+      saveCheckpoint(sessionId, name, messages, laneB, activeLane, { inputTokens: stats.inputTokens, outputTokens: stats.outputTokens });
+      return { output: chalk.green(`  ✓ Checkpoint kaydedildi: "${name}" (${messages.length} mesaj)`) };
+    }
+
+    if (sub === 'listele') {
+      const list = listCheckpoints(sessionId);
+      if (list.length === 0) return { output: chalk.dim('  (Kayıtlı checkpoint yok)') };
+      const lines = list.map(c => `  ${chalk.yellow(c.name.padEnd(30))} ${chalk.dim(c.savedAt.slice(0, 19))} ${chalk.cyan(`${c.messages} msg`)}`);
+      return { output: lines.join('\n') };
+    }
+
+    const parts = args.trim().split(/\s+/);
+    const action = parts[0]!.toLowerCase();
+    const cpName = parts.slice(1).join(' ');
+
+    if ((action === 'yükle' || action === 'yukle') && cpName) {
+      const data = loadCheckpoint(sessionId, cpName);
+      if (!data) return { output: chalk.red(`  ✗ Checkpoint bulunamadı: "${cpName}"`) };
+      ctx.setHistory?.(data.messages);
+      return { output: chalk.green(`  ✓ Checkpoint yüklendi: "${cpName}" (${data.messages.length} mesaj, ${data.savedAt.slice(0, 19)})`) };
+    }
+
+    if (action === 'sil' && cpName) {
+      const ok = deleteCheckpoint(sessionId, cpName);
+      return { output: ok ? chalk.green(`  ✓ Silindi: "${cpName}"`) : chalk.red(`  ✗ Bulunamadı: "${cpName}"`) };
+    }
+
+    return { output: chalk.dim('  Kullanım: /checkpoint [ad] | listele | yükle <ad> | sil <ad>') };
+  },
+
+  // ─── Plan Modu ─────────────────────────────────────────────────────────────
+  'plan-modu': async (args, _ctx) => {
+    const { setPlanModeEnabled, isPlanModeEnabled } = await import('./plan-mode-state.js');
+    const sub = args.trim().toLowerCase();
+    if (!sub) {
+      const current = isPlanModeEnabled();
+      return { output: chalk.dim(`  Plan modu: ${current ? chalk.green('açık') : chalk.gray('kapalı')}`) };
+    }
+    if (sub === 'açık' || sub === 'acik' || sub === 'on' || sub === '1') {
+      setPlanModeEnabled(true);
+      return { output: chalk.green('  ✓ Plan modu açıldı — karmaşık görevlerde önce plan onayı istenir.') };
+    }
+    if (sub === 'kapalı' || sub === 'kapali' || sub === 'off' || sub === '0') {
+      setPlanModeEnabled(false);
+      return { output: chalk.yellow('  Plan modu kapatıldı.') };
+    }
+    return { output: chalk.dim('  Kullanım: /plan-modu açık|kapalı') };
+  },
+
+  onayla: async (_args, ctx) => {
+    ctx.approvePlanFromWeb?.();
+    const { approvePlan } = await import('./plan-mode-state.js');
+    approvePlan();
+    return { output: chalk.green('  ✓ Plan onaylandı.') };
+  },
+
+  reddet: async (_args, ctx) => {
+    ctx.rejectPlanFromWeb?.();
+    const { rejectPlan } = await import('./plan-mode-state.js');
+    rejectPlan();
+    return { output: chalk.yellow('  Plan reddedildi.') };
+  },
+
+  // ─── Paralel araç ayarı ────────────────────────────────────────────────────
+  paralel: async (args, ctx) => {
+    const n = parseInt(args.trim(), 10);
+    if (isNaN(n) || n < 1 || n > 20) {
+      const current = ctx.getMaxConcurrentTools?.() ?? 5;
+      return { output: chalk.dim(`  Mevcut paralel araç sayısı: ${current}\n  Kullanım: /paralel <1-20>`) };
+    }
+    ctx.setMaxConcurrentTools?.(n);
+    return { output: chalk.green(`  ✓ Paralel araç sayısı: ${n}`) };
+  },
+
+  // ─── PR Review ─────────────────────────────────────────────────────────────
+  'pr-incele': async (args, _ctx) => {
+    const { execSync } = await import('child_process');
+    const prRef = args.trim();
+    if (!prRef) return { output: chalk.dim('  Kullanım: /pr-incele <PR numarası veya URL>') };
+
+    // gh CLI varlık kontrolü
+    try { execSync('which gh', { encoding: 'utf-8', stdio: 'pipe' }); } catch {
+      return { output: chalk.red('  ✗ gh CLI bulunamadı. Yüklemek için: https://cli.github.com') };
+    }
+
+    // PR numarasını URL'den çıkar
+    const prNum = prRef.replace(/.*\/pull\//, '').replace(/[^0-9].*/, '').trim() || prRef;
+
+    try {
+      const meta = execSync(`gh pr view ${prNum} --json title,body,additions,deletions,changedFiles,author,url 2>/dev/null`, { encoding: 'utf-8', stdio: 'pipe' });
+      const diff = execSync(`gh pr diff ${prNum} 2>/dev/null`, { encoding: 'utf-8', stdio: 'pipe' });
+      const diffSlice = diff.slice(0, 8000) + (diff.length > 8000 ? '\n... (diff kısaltıldı)' : '');
+      const context = `GitHub PR ${prNum} için kod incelemesi yap:\n\nMETA:\n${meta}\n\nDIFF:\n\`\`\`diff\n${diffSlice}\n\`\`\`\n\nBu PR'ı kod kalitesi, güvenlik, performans ve best practices açısından değerlendir.`;
+      return { runAsUserMessage: context };
+    } catch (err: any) {
+      return { output: chalk.red(`  ✗ PR alınamadı: ${err.message?.slice(0, 200) ?? String(err)}`) };
+    }
+  },
+
+  // ─── IDE Bridge ────────────────────────────────────────────────────────────
+  ide: async (args, ctx) => {
+    const { execSync, spawn } = await import('child_process');
+    const target = args.trim() || ctx.getCwd();
+
+    // VS Code varsa kullan
+    try {
+      execSync('which code', { encoding: 'utf-8', stdio: 'pipe' });
+      spawn('code', [target], { detached: true, stdio: 'ignore' }).unref();
+      return { output: chalk.green(`  ✓ VS Code açıldı: ${target}`) };
+    } catch { /* VS Code yok */ }
+
+    // xdg-open dene (Linux)
+    try {
+      execSync('which xdg-open', { encoding: 'utf-8', stdio: 'pipe' });
+      spawn('xdg-open', [target], { detached: true, stdio: 'ignore' }).unref();
+      return { output: chalk.green(`  ✓ Editörde açıldı: ${target}`) };
+    } catch { /* xdg-open yok */ }
+
+    return { output: chalk.yellow(`  ⚠ Editör bulunamadı. Dosya: ${target}`) };
+  },
+
   'kabuk-kurulum': async (_args, _ctx) => {
     const { setupShellCompletion } = await import('./shell-completion.js');
     const result = await setupShellCompletion();
@@ -1242,6 +1387,15 @@ export const COMMAND_ALIASES: Record<string, string> = {
   yan: 'yan-sorgu',
   guvenlik: 'güvenlik',
   provider_test: 'provider-test',
+  'plan-mode': 'plan-modu',
+  planmodu: 'plan-modu',
+  cp: 'checkpoint',
+  approve: 'onayla',
+  reject: 'reddet',
+  pr: 'pr-incele',
+  'pr-review': 'pr-incele',
+  editor: 'ide',
+  vscode: 'ide',
 };
 
 for (const [alias, target] of Object.entries(COMMAND_ALIASES)) {

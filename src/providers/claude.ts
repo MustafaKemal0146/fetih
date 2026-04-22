@@ -16,7 +16,10 @@ export class ClaudeProvider implements LLMProvider {
   private readonly client: Anthropic;
 
   constructor(apiKey: string) {
-    this.client = new Anthropic({ apiKey });
+    this.client = new Anthropic({
+      apiKey,
+      defaultHeaders: { 'anthropic-beta': 'prompt-caching-2024-07-31' },
+    });
   }
 
   /**
@@ -39,6 +42,8 @@ export class ClaudeProvider implements LLMProvider {
 
   async chat(messages: ChatMessage[], options: ChatOptions): Promise<ChatResponse> {
     const { systemPrompt, anthropicMessages } = this.prepareMessages(messages, options);
+    const cachedSystem = this.buildCachedSystem(systemPrompt);
+    const cachedTools = options.tools ? this.toCachedTools(options.tools) : undefined;
 
     try {
       const response = await this.client.messages.create(
@@ -46,8 +51,8 @@ export class ClaudeProvider implements LLMProvider {
           model: options.model,
           max_tokens: options.maxTokens ?? 4096,
           messages: anthropicMessages,
-          system: systemPrompt,
-          tools: options.tools ? this.toAnthropicTools(options.tools) : undefined,
+          system: cachedSystem as any,
+          tools: cachedTools as any,
           temperature: options.temperature,
         },
         { signal: options.abortSignal },
@@ -73,14 +78,16 @@ export class ClaudeProvider implements LLMProvider {
 
   async *stream(messages: ChatMessage[], options: ChatOptions): AsyncIterable<StreamEvent> {
     const { systemPrompt, anthropicMessages } = this.prepareMessages(messages, options);
+    const cachedSystem = this.buildCachedSystem(systemPrompt);
+    const cachedTools = options.tools ? this.toCachedTools(options.tools) : undefined;
 
     const stream = this.client.messages.stream(
       {
         model: options.model,
         max_tokens: options.maxTokens ?? 4096,
         messages: anthropicMessages,
-        system: systemPrompt,
-        tools: options.tools ? this.toAnthropicTools(options.tools) : undefined,
+        system: cachedSystem as any,
+        tools: cachedTools as any,
         temperature: options.temperature,
       },
       { signal: options.abortSignal },
@@ -180,5 +187,19 @@ export class ClaudeProvider implements LLMProvider {
       description: t.description,
       input_schema: { type: 'object' as const, ...t.inputSchema },
     }));
+  }
+
+  /** System promptu önbelleklenebilir blok dizisine dönüştür. */
+  private buildCachedSystem(systemPrompt: string | undefined): any {
+    if (!systemPrompt) return undefined;
+    return [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }];
+  }
+
+  /** Tool listesini önbelleklenebilir hale getir (son araça cache_control ekle). */
+  private toCachedTools(tools: readonly ToolSchema[]): any[] {
+    const anthropicTools = this.toAnthropicTools(tools);
+    if (anthropicTools.length === 0) return anthropicTools;
+    const last = { ...anthropicTools[anthropicTools.length - 1]!, cache_control: { type: 'ephemeral' } };
+    return [...anthropicTools.slice(0, -1), last];
   }
 }

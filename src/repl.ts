@@ -45,6 +45,7 @@ import { renderWelcomeAnimation, sethLog } from './welcome.js';
 import { createReplStreamingController, resolveStreamMode } from './repl-streaming.js';
 import {
   isPlanWaitingApproval,
+  isPlanModeEnabled,
   getPlanModeState,
   approvePlan,
   rejectPlan,
@@ -84,9 +85,12 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
   let toolsEnabled = true;
   let agentEnabled = appConfig.agent.enabled;
   let currentEffort = appConfig.effort ?? 'medium';
+  let currentMaxConcurrentTools = 5;
   let provider: LLMProvider;
   let totalTurns = 0;
   let compactWarned = false;
+  // Plan onayı için callback — terminal + web UI'dan çözülebilir
+  let planApprovalResolver: ((approved: boolean) => void) | null = null;
 
   try {
     provider = await createProvider(currentProvider, appConfig);
@@ -210,6 +214,15 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
     setThinkingStyle: (s) => { saveConfig({ repl: { thinkingStyle: s } }); appConfig = loadConfig(configOverrides); },
     setEffort: (level) => { currentEffort = level; saveConfig({ effort: level }); appConfig = loadConfig(configOverrides); webUIController.sendEffort(level); },
     setVimMode: (e) => { saveConfig({ repl: { ...appConfig.repl, vimMode: e } }); appConfig = loadConfig(configOverrides); },
+    setMaxConcurrentTools: (n) => { currentMaxConcurrentTools = Math.max(1, Math.min(20, n)); },
+    getMaxConcurrentTools: () => currentMaxConcurrentTools,
+    setHistory: (messages) => {
+      laneHistories[activeLane] = messages;
+      webUIController.sendHistory(messages);
+    },
+    getLaneHistoriesB: () => laneHistories.b,
+    approvePlanFromWeb: () => { if (planApprovalResolver) { planApprovalResolver(true); planApprovalResolver = null; } },
+    rejectPlanFromWeb: () => { if (planApprovalResolver) { planApprovalResolver(false); planApprovalResolver = null; } },
   };
 
   if (!skipWelcome) renderWelcomeAnimation(currentProvider, currentModel);
@@ -244,14 +257,19 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
     });
 
     try {
+      const planModePrompt = isPlanModeEnabled()
+        ? 'PLAN MODU AKTİF: Her karmaşık veya çok adımlı görev için önce enter_plan_mode aracını çağır, planını yaz, sonra exit_plan_mode ile kullanıcıya sun. Kullanıcı onayı olmadan dosya değiştirme veya komut çalıştırma.'
+        : '';
+
       const loopOptions: AgentLoopOptions = {
-        provider, model: currentModel, systemPrompt: '',
+        provider, model: currentModel, systemPrompt: planModePrompt,
         toolRegistry, toolExecutor,
         maxTurns: appConfig.agent.maxTurns,
         maxTokens: appConfig.agent.maxTokens,
         cwd: currentCwd, debug: appConfig.debug,
         effort: currentEffort,
         abortSignal: controller.signal,
+        maxConcurrentTools: currentMaxConcurrentTools,
         onText: (chunk) => {
           streaming.onText(chunk, () => clearSpinner());
         },
@@ -268,6 +286,45 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
       };
 
       const result = await runAgentLoop(text, laneHistories[activeLane], loopOptions);
+
+      // ─── Plan Onayı ──────────────────────────────────────────────────────────
+      if (isPlanWaitingApproval()) {
+        clearSpinner();
+        const planText = getPlanModeState().planText;
+
+        // Web UI'ya plan gönder
+        webUIController.sendPlanProposal(planText);
+
+        process.stdout.write(chalk.yellow('\n\n  ─── PLAN SUNULDU ───\n'));
+        process.stdout.write(chalk.dim('  Planı onaylıyor musunuz?\n'));
+
+        const approved = await new Promise<boolean>(resolve => {
+          planApprovalResolver = resolve;
+          rl?.question(chalk.yellow('  [O]nayla / [R]eddet: '), (answer) => {
+            planApprovalResolver = null;
+            resolve(answer.trim().toLowerCase().startsWith('o') || answer.trim().toLowerCase() === 'y' || answer.trim() === '');
+          });
+        });
+
+        if (approved) {
+          approvePlan();
+          process.stdout.write(chalk.green('  ✓ Plan onaylandı, uygulanıyor...\n\n'));
+          webUIController.sendCommandResult('✓ Plan onaylandı.');
+          // Planı uygula — aynı fonksiyonu tekrar çağır
+          processing = false;
+          await runAgentTurn(`Planı uygula (kullanıcı onayladı):\n\n${planText}`);
+          return;
+        } else {
+          rejectPlan();
+          process.stdout.write(chalk.red('  Plan reddedildi.\n'));
+          webUIController.sendCommandResult('Plan reddedildi.');
+          processing = false;
+          currentAbortController = null;
+          webUIController.sendStatus('idle', false);
+          if (rl) rl.prompt();
+          return;
+        }
+      }
 
       streaming.finalize(text, result.finalText, stripLeadingUserEchoFromAssistantDisplay);
 

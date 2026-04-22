@@ -3,6 +3,8 @@
  */
 
 export interface PlanModeState {
+  /** Kullanıcı tarafından aktif edilen plan modu bayrağı. */
+  enabled: boolean;
   active: boolean;
   reason: string;
   planText: string;
@@ -11,6 +13,7 @@ export interface PlanModeState {
 }
 
 let planState: PlanModeState = {
+  enabled: false,
   active: false,
   reason: '',
   planText: '',
@@ -27,6 +30,7 @@ export function setPlanModeState(patch: Partial<PlanModeState>): void {
 
 export function resetPlanModeState(): void {
   planState = {
+    enabled: planState.enabled, // enabled flag'i koru
     active: false,
     reason: '',
     planText: '',
@@ -36,6 +40,14 @@ export function resetPlanModeState(): void {
 
 export function isPlanModeActive(): boolean {
   return planState.active;
+}
+
+export function isPlanModeEnabled(): boolean {
+  return planState.enabled;
+}
+
+export function setPlanModeEnabled(value: boolean): void {
+  planState = { ...planState, enabled: value };
 }
 
 export function isPlanWaitingApproval(): boolean {

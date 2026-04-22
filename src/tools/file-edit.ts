@@ -6,6 +6,7 @@ import { readFile, writeFile } from 'fs/promises';
 import { resolve, basename } from 'path';
 import chalk from 'chalk';
 import type { ToolDefinition, ToolResult, FileToolData } from '../types.js';
+import { webUIController } from '../web/controller.js';
 
 export const fileEditTool: ToolDefinition = {
   name: 'file_edit',
@@ -65,21 +66,26 @@ export const fileEditTool: ToolDefinition = {
       const updated = allowMultiple ? content.split(oldStr).join(newStr) : content.replace(oldStr, newStr);
       await writeFile(filePath, updated, 'utf-8');
 
-      // Generate diff output
+      // Generate colored diff for terminal
       const diff = generateDiff(oldStr, newStr, filePath, occurrences);
+      // Generate clean diff for web UI
+      const cleanDiff = generateCleanDiff(oldStr, newStr);
 
-      const oldLines = oldStr.split('\n').length;
-      const newLines = newStr.split('\n').length;
-      const summary = `Replaced ${occurrences} occurrence(s) of ${oldLines} line(s) with ${newLines} line(s)`;
+      const oldLineCount = oldStr.split('\n').length;
+      const newLineCount = newStr.split('\n').length;
+      const summary = `Replaced ${occurrences} occurrence(s) of ${oldLineCount} line(s) with ${newLineCount} line(s)`;
       const totalLines = updated.split('\n').length;
 
       const data: FileToolData = {
         type: 'update',
         path: input.path as string,
-        diff,
+        diff: cleanDiff,
         lineCount: totalLines,
         summary,
       };
+
+      // Web UI'ya diff gönder
+      webUIController.sendDiff(basename(filePath), cleanDiff);
 
       return { output: `✅ ${summary} in ${basename(filePath)}\n\n${diff}`, data };
     } catch (err) {
@@ -109,6 +115,14 @@ function generateDiff(oldStr: string, newStr: string, filePath: string, occurren
   }
   
   lines.push(`${'─'.repeat(50)}`);
-  
+
+  return lines.join('\n');
+}
+
+/** Web UI için ANSI kodsuz temiz diff (- / + satır önekleri). */
+function generateCleanDiff(oldStr: string, newStr: string): string {
+  const lines: string[] = [];
+  for (const line of oldStr.split('\n')) lines.push(`- ${line}`);
+  for (const line of newStr.split('\n')) lines.push(`+ ${line}`);
   return lines.join('\n');
 }
