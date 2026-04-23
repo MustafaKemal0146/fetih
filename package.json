@@ -1,6 +1,6 @@
 {
   "name": "seth",
-  "version": "3.9.1",
+  "version": "3.9.2",
   "description": "Terminalde çalışan yapay zeka kodlama ajanı. Claude, Gemini, OpenAI, Ollama. Türkçe arayüz. HİÇBİR SİSTEM GÜVENLİ DEĞİLDİR.",
   "type": "module",
   "main": "dist/cli.js",
@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "dev": "tsx src/cli.ts",
-    "build": "tsc",
+    "build": "tsc && (mkdir -p dist/skills && cp src/skills/*.md dist/skills/ 2>/dev/null || true)",
     "start": "node dist/cli.js",
     "test": "vitest run",
     "test:smoke": "tsx scripts/smoke-tests.ts",

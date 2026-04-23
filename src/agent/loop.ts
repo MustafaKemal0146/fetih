@@ -39,6 +39,8 @@ export interface AgentLoopOptions {
   fallbackModel?: string;
   /** Paralel araç yürütme üst sınırı (varsayılan: 5) */
   maxConcurrentTools?: number;
+  /** Araç çıktısı kırpıldığında çağrılır (kullanıcıya uyarı göster). */
+  onTruncation?: (toolName: string) => void;
 }
 
 export interface AgentResult {
@@ -262,6 +264,8 @@ export async function runAgentLoop(
         if (options.onToolResult) options.onToolResult(toolBlock.name, result.output, result.isError ?? false, result.data);
         // v3.9.0: Web UI'ya araç sonucunu gönder
         webUIController.sendToolResult(toolBlock.name, result.output, result.isError ?? false);
+        // v3.9.2: Kırpılmış çıktı uyarısı
+        if (result.isTruncated && options.onTruncation) options.onTruncation(toolBlock.name);
 
         return { toolBlock, result, record };
       }));

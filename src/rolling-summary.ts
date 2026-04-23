@@ -8,6 +8,50 @@
 
 import type { ChatMessage, LLMProvider } from './types.js';
 
+/**
+ * Konuşma geçmişini manuel olarak sıkıştır (kullanıcı tetiklemeli /sıkıştır komutu için).
+ * Tüm mesajları özetler, sonuçta minimal mesaj geçmişi döner.
+ */
+export async function compactMessages(
+  messages: ChatMessage[],
+  provider: LLMProvider,
+  model: string,
+): Promise<{ messages: ChatMessage[]; before: number; after: number }> {
+  if (messages.length < 4) {
+    return { messages, before: messages.length, after: messages.length };
+  }
+
+  const KEEP_LAST = 6;
+  const toSummarize = messages.slice(0, -KEEP_LAST);
+  const toKeep = messages.slice(-KEEP_LAST);
+
+  try {
+    const transcript = toSummarize
+      .map(m => `${m.role === 'user' ? 'Kullanıcı' : 'SETH'}: ${typeof m.content === 'string' ? m.content.slice(0, 600) : '[araç çağrısı/sonucu]'}`)
+      .join('\n\n');
+
+    const summaryResponse = await provider.chat(
+      [{ role: 'user', content: `Aşağıdaki konuşmayı kısa ve bilgi yoğun bir özete dönüştür. Yapılan işler, kararlar ve önemli bulgular belirtilmeli:\n\n${transcript}` }],
+      { model, maxTokens: 1200, temperature: 0.1 },
+    );
+
+    const summaryText = summaryResponse.content
+      .filter(b => b.type === 'text')
+      .map(b => (b as { text: string }).text)
+      .join('');
+
+    const compacted: ChatMessage[] = [
+      { role: 'user', content: `[Sıkıştırılmış konuşma özeti]\n${summaryText}` },
+      { role: 'assistant', content: 'Özet alındı. Devam edelim.' },
+      ...toKeep,
+    ];
+
+    return { messages: compacted, before: messages.length, after: compacted.length };
+  } catch {
+    return { messages, before: messages.length, after: messages.length };
+  }
+}
+
 const ROLLING_SUMMARY_THRESHOLD = 0.75; // %75 dolunca tetikle
 const KEEP_LAST_MESSAGES = 10;           // Son kaç mesajı koru
 const MIN_MESSAGES_TO_SUMMARIZE = 6;     // En az kaç mesaj olsun

@@ -120,13 +120,15 @@ export class ToolExecutor {
       const result = await tool.execute(input, cwd);
       // #14 Araç sonucu boyut sınırı
       let output = result.output;
+      let isTruncated = false;
       if (output.length > MAX_TOOL_OUTPUT_CHARS) {
         output = truncateToolOutput(output, MAX_TOOL_OUTPUT_CHARS);
+        isTruncated = true;
       }
       // #3 Hassas bilgileri maskele
       const { masked, count } = maskSensitiveOutput(output);
       if (count > 0) output = masked;
-      return finalize({ ...result, output });
+      return finalize({ ...result, output, isTruncated });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       const result: ToolResult = { output: `Araç çalışma hatası: ${message}`, isError: true };

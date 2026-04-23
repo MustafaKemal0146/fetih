@@ -53,6 +53,9 @@ import {
 } from './plan-mode-state.js';
 import { setSharedAgentContext } from './tools/agent-spawn.js';
 import { writeRecoveryCheckpoint, checkRecovery, clearRecovery } from './session-recovery.js';
+import { compactMessages } from './rolling-summary.js';
+import { createVimHandler } from './vim-mode.js';
+import { loadKeybindings } from './keybindings.js';
 import { generateSessionTitle } from './session-title.js';
 import { recordMessage } from './chat-recording.js';
 import { cmd, promptBright } from './theme.js';
@@ -143,14 +146,31 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
     const budget = getEffectiveContextBudgetTokens(appConfig);
     const pct = budget > 0 ? Math.round((cumTokens / budget) * 100) : 0;
     const promptSym = promptBright('>');
-    
+
+    // Vim modu göstergesi
+    const vimPart = appConfig.repl?.vimMode ? chalk.dim(`[${vimHandler?.getMode() === 'NORMAL' ? 'N' : 'I'}] `) : '';
+
     if (userMsgs > 0 || cumTokens > 0) {
       const tokenStr = cumTokens >= 1000 ? `${(cumTokens / 1000).toFixed(1)}k` : `${cumTokens}`;
       const budgetStr = budget >= 1000 ? `${(budget / 1000).toFixed(0)}k` : `${budget}`;
       const lanePart = activeLane !== 'a' ? `${activeLane.toUpperCase()}·` : '';
-      return chalk.dim(`[${lanePart}${userMsgs}msg·${tokenStr}/${budgetStr}] `) + promptSym + ' ';
+
+      // Context window bar (8 karakter genişlik)
+      let barPart = '';
+      if (budget > 0 && cumTokens > 0) {
+        const filled = Math.round((pct / 100) * 8);
+        const bar = '█'.repeat(filled) + '░'.repeat(8 - filled);
+        const coloredBar = pct >= 80
+          ? chalk.red(bar)
+          : pct >= 60
+            ? chalk.yellow(bar)
+            : chalk.green(bar);
+        barPart = chalk.dim('[') + coloredBar + chalk.dim(`] ${pct}% `);
+      }
+
+      return vimPart + barPart + chalk.dim(`[${lanePart}${userMsgs}msg·${tokenStr}/${budgetStr}] `) + promptSym + ' ';
     }
-    return promptSym + ' ';
+    return vimPart + promptSym + ' ';
   }
 
   const ctx: CommandContext = {
@@ -183,7 +203,17 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
     setContextBudgetTokens: (n) => { saveConfig({ contextBudgetTokens: n }); appConfig = loadConfig(configOverrides); },
     getActiveLane: () => activeLane,
     setActiveLane: (l) => { activeLane = l; if (rl) rl.setPrompt(getPromptStr()); },
-    compactHistory: async () => null,
+    compactHistory: async () => {
+      const history = laneHistories[activeLane];
+      if (history.length < 4) return null;
+      const result = await compactMessages(history, provider, currentModel);
+      if (result.before !== result.after) {
+        laneHistories[activeLane] = result.messages;
+        webUIController.sendHistory(result.messages);
+        if (rl) rl.setPrompt(getPromptStr());
+      }
+      return { before: result.before, after: result.after };
+    },
     undoHistory: () => {
       if (laneHistories[activeLane].length > 0) {
         laneHistories[activeLane].pop();
@@ -232,6 +262,10 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
   let processing = false;
   let lastPastedContent = '';
   let isProgrammaticClose = false;
+  // v3.9.2: Vim mode handler (başlangıçta null, rl oluşturulunca init edilir)
+  let vimHandler: ReturnType<typeof createVimHandler> | null = null;
+  // v3.9.2: Keybindinglar
+  const keybindings = loadKeybindings();
 
   async function runAgentTurn(text: string) {
     const controller = new AbortController();
@@ -282,6 +316,10 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
         onToolResult: (name, output, isError, data) => {
           clearSpinner();
           process.stdout.write(renderToolResult(name, output, isError, data));
+        },
+        onTruncation: (toolName) => {
+          process.stdout.write(chalk.yellow(`\n  ⚠ Araç çıktısı kesildi (${toolName}) — daha küçük sorgu deneyin\n`));
+          webUIController.sendWarning(`Araç çıktısı kesildi: ${toolName}`, toolName);
         },
       };
 
@@ -423,6 +461,11 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
       completer: tabCompleter,
     });
 
+    // v3.9.2: Vim mode handler'ı başlat
+    if (appConfig.repl?.vimMode) {
+      vimHandler = createVimHandler(rl);
+    }
+
     rl.on('line', async (line) => {
       if (processing) return;
       const trimmed = line.trim();
@@ -460,6 +503,14 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
 
     process.stdin.on('keypress', async (_str, key) => {
       if (!key || processing) return;
+
+      // v3.9.2: Vim mode — önce vim handler'a ver
+      if (vimHandler && appConfig.repl?.vimMode) {
+        const consumed = vimHandler.handleKey(_str, key);
+        // Prompt'u güncelle (vim mode göstergesi için)
+        if (rl) rl.setPrompt(getPromptStr());
+        if (consumed) return;
+      }
 
       // Ctrl+R — geçmiş arama
       if (key.ctrl && key.name === 'r') {

@@ -40,7 +40,10 @@ import { THEMES, type ThemeName, setTheme, getThemeColors } from './theme.js';
 import { runDoktor } from './commands/doktor.js';
 import { checkForUpdates } from './update-check.js';
 import { listModels } from './providers/factory.js';
-import { getModelPrice } from './model-cost.js';
+import { getModelPrice, calculateCostUSD, formatCostUSD } from './model-cost.js';
+import { listAllSkills, findSkill, renderSkill, formatSkillsTable } from './skills.js';
+import { formatKeybindingsTable, loadKeybindings } from './keybindings.js';
+import { getActiveSubAgentCount } from './agent/coordinator.js';
 
 export interface CommandContext {
   config: SETHConfig;
@@ -156,6 +159,16 @@ const COMMAND_HELP_CONTRACT: readonly CommandHelpItem[] = [
   { section: 'Araçlar & Sistem', name: 'nasılçalışır', description: 'Canlı demo (typewriter animasyonu)' },
   { section: 'Araçlar & Sistem', name: 'kabuk-kurulum', description: 'Bash/Zsh/Fish shell tamamlamasını kur' },
   { section: 'Araçlar & Sistem', name: 'cikis', description: 'Uygulamadan çık' },
+  // v3.9.2
+  { section: 'Bilgi & Analiz', name: 'maliyet', description: 'Oturum maliyet tablosu (token × birim fiyat, saatlik tahmin)' },
+  { section: 'Bellek & Oturum', name: 'paylaş', usage: '[son <N>] [json]', description: 'Konuşmayı ~/.seth/exports/ klasörüne aktar' },
+  { section: 'Bilgi & Analiz', name: 'incele', usage: '[--staged|--head|<dosya>]', description: 'Staged/head diff\'i AI ile incele (code review)' },
+  { section: 'Araçlar & Sistem', name: 'skills', description: 'Kullanılabilir skill\'leri listele' },
+  { section: 'Araçlar & Sistem', name: 'skill', usage: '<ad> [parametreler]', description: 'Belirtilen skill\'i çalıştır' },
+  { section: 'Ayarlar', name: 'keybindings', usage: '[sıfırla]', description: 'Tuş kısayollarını göster / sıfırla' },
+  { section: 'Araçlar & Sistem', name: 'koordinator', usage: '<görev>', description: 'Koordinatör modu — görevi alt ajanlara bölerek paralel çalıştır' },
+  { section: 'Araçlar & Sistem', name: 'ajanlar', description: 'Aktif alt ajan sayısını göster' },
+  { section: 'Ayarlar', name: 'vim', description: 'Vim modu aç/kapat (INSERT/NORMAL)' },
 ];
 
 const HELP_SECTION_ORDER: readonly HelpSection[] = ['Bilgi & Analiz', 'Bellek & Oturum', 'Ayarlar', 'Araçlar & Sistem'];
@@ -1364,6 +1377,199 @@ ${chalk.dim('Yanıt süresi: 24 saat içinde • Çalışma dili: Türkçe, İng
       .join('\n');
     return { output };
   },
+
+  // ─── Maliyet (v3.9.2) ──────────────────────────────────────────────────────
+  maliyet: (_args, ctx) => {
+    const stats = ctx.getStats();
+    const { inputTokens, outputTokens } = stats;
+    const model = ctx.currentModel;
+    const provider = ctx.currentProvider;
+
+    if (inputTokens === 0 && outputTokens === 0) {
+      return { output: chalk.dim('  Henüz token kullanımı yok.') };
+    }
+
+    const inputCost = calculateCostUSD(inputTokens, 0, model, provider);
+    const outputCost = calculateCostUSD(0, outputTokens, model, provider);
+    const total = inputCost + outputCost;
+
+    const lines: string[] = [
+      chalk.bold('\n  Oturum Maliyeti'),
+      chalk.dim('  ' + '─'.repeat(44)),
+      `  ${'Model:'.padEnd(20)} ${model}`,
+      `  ${'Provider:'.padEnd(20)} ${provider}`,
+      chalk.dim('  ' + '─'.repeat(44)),
+      `  ${'Input:'.padEnd(20)} ${inputTokens.toLocaleString()} token  →  ${formatCostUSD(inputCost)}`,
+      `  ${'Output:'.padEnd(20)} ${outputTokens.toLocaleString()} token  →  ${formatCostUSD(outputCost)}`,
+      chalk.dim('  ' + '─'.repeat(44)),
+      `  ${chalk.bold('Toplam:').padEnd(20 + 9)} ${chalk.green(formatCostUSD(total))}`,
+    ];
+
+    return { output: lines.join('\n') };
+  },
+
+  // ─── Paylaş (v3.9.2) ───────────────────────────────────────────────────────
+  paylaş: async (args, ctx) => {
+    const { writeFile: fsWrite, mkdir } = await import('fs/promises');
+    const { join: pjoin } = await import('path');
+    const { homedir: phome } = await import('os');
+
+    const trimmed = args.trim();
+    const isJson = trimmed.includes('json');
+    const lastNMatch = trimmed.match(/son\s+(\d+)/i);
+    const lastN = lastNMatch ? parseInt(lastNMatch[1]!) : 0;
+
+    const history = ctx.getHistory();
+    const messages = lastN > 0 ? history.slice(-lastN) : history;
+
+    const exportDir = pjoin(phome(), '.seth', 'exports');
+    await mkdir(exportDir, { recursive: true });
+
+    const now = new Date();
+    const dateStr = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
+    const sessionId = ctx.getSessionId().slice(0, 8);
+    const ext = isJson ? 'json' : 'md';
+    const filePath = pjoin(exportDir, `${sessionId}-${dateStr}.${ext}`);
+
+    if (isJson) {
+      await fsWrite(filePath, JSON.stringify({ sessionId, exportedAt: now.toISOString(), model: ctx.currentModel, provider: ctx.currentProvider, messages }, null, 2), 'utf-8');
+    } else {
+      const lines: string[] = [
+        `# Konuşma — ${now.toLocaleString('tr-TR')}`,
+        `**Oturum**: ${sessionId}  **Model**: ${ctx.currentModel}  **Provider**: ${ctx.currentProvider}`,
+        '',
+      ];
+      for (const m of messages) {
+        const role = m.role === 'user' ? '## Kullanıcı' : '## SETH';
+        const content = typeof m.content === 'string' ? m.content : JSON.stringify(m.content, null, 2);
+        lines.push(role, '', content, '');
+      }
+      await fsWrite(filePath, lines.join('\n'), 'utf-8');
+    }
+
+    return { output: chalk.green(`  ✓ Konuşma aktarıldı: ${filePath}`) };
+  },
+
+  // ─── Kod İnceleme (v3.9.2) ─────────────────────────────────────────────────
+  incele: async (args, ctx) => {
+    const { execSync } = await import('child_process');
+    const trimmed = args.trim();
+
+    let diff = '';
+    let label = '';
+
+    try {
+      if (trimmed === '--head' || trimmed === 'head') {
+        diff = execSync('git diff HEAD~1', { encoding: 'utf-8', stdio: 'pipe', cwd: ctx.getCwd() });
+        label = 'Son commit';
+      } else if (trimmed && !trimmed.startsWith('--')) {
+        // Belirli dosya
+        diff = execSync(`git diff HEAD -- ${trimmed}`, { encoding: 'utf-8', stdio: 'pipe', cwd: ctx.getCwd() });
+        label = `Dosya: ${trimmed}`;
+      } else {
+        // --staged veya varsayılan
+        diff = execSync('git diff --staged', { encoding: 'utf-8', stdio: 'pipe', cwd: ctx.getCwd() });
+        label = 'Staged değişiklikler';
+        if (!diff.trim()) {
+          diff = execSync('git diff', { encoding: 'utf-8', stdio: 'pipe', cwd: ctx.getCwd() });
+          label = 'Unstaged değişiklikler';
+        }
+      }
+    } catch (err: any) {
+      return { output: chalk.red(`  ✗ Git diff alınamadı: ${err.message?.slice(0, 200) ?? String(err)}`) };
+    }
+
+    if (!diff.trim()) {
+      return { output: chalk.dim('  İncelenecek değişiklik bulunamadı.') };
+    }
+
+    const diffSlice = diff.slice(0, 10000) + (diff.length > 10000 ? '\n... (diff kısaltıldı)' : '');
+    const context = `KOD İNCELEME İSTEĞİ — ${label}\n\nAşağıdaki diff'i kod kalitesi, güvenlik, performans ve best practices açısından incele:\n\n\`\`\`diff\n${diffSlice}\n\`\`\``;
+
+    return { runAsUserMessage: context };
+  },
+
+  // ─── Skills (v3.9.2) ───────────────────────────────────────────────────────
+  skills: (_args, _ctx) => {
+    const allSkills = listAllSkills();
+    return { output: formatSkillsTable(allSkills) };
+  },
+
+  skill: (args, _ctx) => {
+    const parts = args.trim().split(/\s+/);
+    const skillName = parts[0] ?? '';
+    const params = parts.slice(1).join(' ');
+
+    if (!skillName) {
+      const allSkills = listAllSkills();
+      return { output: formatSkillsTable(allSkills) };
+    }
+
+    const skill = findSkill(skillName);
+    if (!skill) {
+      return { output: chalk.red(`  ✗ Skill bulunamadı: "${skillName}"\n  /skills ile mevcut skill'leri listele.`) };
+    }
+
+    const prompt = renderSkill(skill, params);
+    return { runAsUserMessage: prompt };
+  },
+
+  // ─── Keybindings (v3.9.2) ──────────────────────────────────────────────────
+  keybindings: async (args, _ctx) => {
+    const trimmed = args.trim().toLowerCase();
+
+    if (trimmed === 'sıfırla' || trimmed === 'sifirla' || trimmed === 'reset') {
+      const { unlink } = await import('fs/promises');
+      const { join: pjoin } = await import('path');
+      const { homedir: phome } = await import('os');
+      const kbPath = pjoin(phome(), '.seth', 'keybindings.json');
+      try {
+        await unlink(kbPath);
+        return { output: chalk.green('  ✓ Keybindinglar varsayılana sıfırlandı.') };
+      } catch {
+        return { output: chalk.dim('  Özel keybinding dosyası zaten yok.') };
+      }
+    }
+
+    const bindings = loadKeybindings();
+    return { output: formatKeybindingsTable(bindings) };
+  },
+
+  // ─── Koordinatör (v3.9.2) ──────────────────────────────────────────────────
+  koordinator: (args, _ctx) => {
+    const task = args.trim();
+    if (!task) {
+      return { output: chalk.dim('  Kullanım: /koordinator <görev>\n  Örnek: /koordinator "src/ dizinindeki tüm TODO\'ları bul ve özetle"') };
+    }
+
+    // Koordinatör modu mesajı — ajan alt görevlere bölerek çalışır
+    const coordinatorMsg =
+      `KOORDİNATÖR MODU: Aşağıdaki görevi analiz et, bağımsız alt görevlere böl ve her birini ` +
+      `agent_spawn aracıyla paralel olarak çalıştır. Tüm sonuçları birleştirerek kapsamlı özet sun.\n\n` +
+      `GÖREV: ${task}`;
+
+    return { runAsUserMessage: coordinatorMsg };
+  },
+
+  ajanlar: (_args, _ctx) => {
+    const depth = getActiveSubAgentCount();
+    if (depth === 0) {
+      return { output: chalk.dim('  Aktif alt ajan yok.') };
+    }
+    return { output: chalk.cyan(`  Aktif alt ajan derinliği: ${depth}`) };
+  },
+
+  // ─── Vim modu (v3.9.2) ─────────────────────────────────────────────────────
+  vim: (_args, ctx) => {
+    const current = ctx.config.repl?.vimMode ?? false;
+    ctx.setVimMode(!current);
+    const newState = !current;
+    return {
+      output: newState
+        ? chalk.green('  ✓ Vim modu AKTİF — INSERT: yazma, Esc: NORMAL moda geç')
+        : chalk.dim('  Vim modu kapalı.'),
+    };
+  },
 };
 
 export const COMMAND_ALIASES: Record<string, string> = {
@@ -1396,6 +1602,19 @@ export const COMMAND_ALIASES: Record<string, string> = {
   'pr-review': 'pr-incele',
   editor: 'ide',
   vscode: 'ide',
+  // v3.9.2
+  cost: 'maliyet',
+  maliyet_goster: 'maliyet',
+  paylas: 'paylaş',
+  share: 'paylaş',
+  review: 'incele',
+  'code-review': 'incele',
+  'skill-list': 'skills',
+  kb: 'keybindings',
+  agent: 'koordinator',
+  agents: 'ajanlar',
+  koordinatör: 'koordinator',
+  'vim-mode': 'vim',
 };
 
 for (const [alias, target] of Object.entries(COMMAND_ALIASES)) {

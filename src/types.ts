@@ -122,6 +122,8 @@ export interface ToolResult {
   readonly newCwd?: string;
   /** Yapısal veri döndüren araçlar için opsiyonel alan (ör. kırpılmış dosya gösterimi detayları). */
   readonly data?: FileToolData | AgentToolData;
+  /** Araç çıktısı token sınırı nedeniyle kırpıldıysa true. */
+  readonly isTruncated?: boolean;
 }
 
 export interface ToolDefinition {

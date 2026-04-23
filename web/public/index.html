@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>SETH v3.9.0</title>
+<title>SETH v3.9.2</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
@@ -1065,6 +1065,9 @@ function connect() {
       case 'tasks':
         renderTasksWidget(msg.data);
         break;
+      case 'warning':
+        showWarningToast(msg.data.message, msg.data.toolName);
+        break;
     }
   };
 }
@@ -1314,6 +1317,24 @@ function showToast(raw) {
   lastToastTimer = setTimeout(() => {
     document.querySelectorAll('.qs-toast').forEach(t => t.classList.remove('visible'));
   }, 4000);
+}
+
+// Warning toast (v3.9.2)
+let warningToastTimer;
+function showWarningToast(message, toolName) {
+  // Create or reuse warning toast element
+  let el = document.getElementById('warning-toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'warning-toast';
+    el.style.cssText = 'position:fixed;bottom:80px;right:20px;background:#854d0e;color:#fef3c7;padding:10px 16px;border-radius:8px;font-size:12px;z-index:9999;max-width:340px;box-shadow:0 4px 12px rgba(0,0,0,0.4);transition:opacity 0.3s;opacity:0;pointer-events:none;';
+    document.body.appendChild(el);
+  }
+  const toolStr = toolName ? ` (${toolName})` : '';
+  el.innerHTML = `⚠ ${message}${toolStr}`;
+  el.style.opacity = '1';
+  clearTimeout(warningToastTimer);
+  warningToastTimer = setTimeout(() => { el.style.opacity = '0'; }, 5000);
 }
 
 // ══════════════════════════════════════════════════════

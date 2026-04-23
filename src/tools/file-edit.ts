@@ -7,6 +7,7 @@ import { resolve, basename } from 'path';
 import chalk from 'chalk';
 import type { ToolDefinition, ToolResult, FileToolData } from '../types.js';
 import { webUIController } from '../web/controller.js';
+import { generateColoredDiff } from '../diff-utils.js';
 
 export const fileEditTool: ToolDefinition = {
   name: 'file_edit',
@@ -67,7 +68,7 @@ export const fileEditTool: ToolDefinition = {
       await writeFile(filePath, updated, 'utf-8');
 
       // Generate colored diff for terminal
-      const diff = generateDiff(oldStr, newStr, filePath, occurrences);
+      const diff = generateDiff(oldStr, newStr, filePath, occurrences, content);
       // Generate clean diff for web UI
       const cleanDiff = generateCleanDiff(oldStr, newStr);
 
@@ -94,28 +95,25 @@ export const fileEditTool: ToolDefinition = {
   },
 };
 
-function generateDiff(oldStr: string, newStr: string, filePath: string, occurrences: number): string {
-  const oldLines = oldStr.split('\n');
-  const newLines = newStr.split('\n');
-  
+function generateDiff(oldStr: string, newStr: string, filePath: string, occurrences: number, fullContent?: string): string {
   const lines: string[] = [];
-  
-  lines.push(`${'─'.repeat(50)}`);
-  lines.push(`📝 ${basename(filePath)} (${occurrences} match${occurrences > 1 ? 'es' : ''})`);
-  lines.push(`${'─'.repeat(50)}`);
-  
-  // Show removed lines
-  for (const line of oldLines) {
-    lines.push(`\x1b[31m- ${line}\x1b[0m`);  // Red for removed
-  }
-  
-  // Show added lines  
-  for (const line of newLines) {
-    lines.push(`\x1b[32m+ ${line}\x1b[0m`);  // Green for added
-  }
-  
-  lines.push(`${'─'.repeat(50)}`);
+  lines.push(`\x1b[90m${'─'.repeat(50)}\x1b[0m`);
+  lines.push(`\x1b[1m📝 ${basename(filePath)}\x1b[0m \x1b[90m(${occurrences} match${occurrences > 1 ? 'es' : ''})\x1b[0m`);
+  lines.push(`\x1b[90m${'─'.repeat(50)}\x1b[0m`);
 
+  // Use context-aware diff if we have the full file content
+  if (fullContent) {
+    const oldStart = fullContent.indexOf(oldStr);
+    const linesBefore = oldStart >= 0 ? fullContent.slice(0, oldStart).split('\n').length : 1;
+    const colored = generateColoredDiff(oldStr, newStr, 2);
+    // Adjust line numbers based on actual position in file
+    const shifted = colored.replace(/^\s*(\d+)/gm, (_, n) => String(parseInt(n) + linesBefore - 1).padStart(4));
+    lines.push(shifted);
+  } else {
+    lines.push(generateColoredDiff(oldStr, newStr, 2));
+  }
+
+  lines.push(`\x1b[90m${'─'.repeat(50)}\x1b[0m`);
   return lines.join('\n');
 }
 
