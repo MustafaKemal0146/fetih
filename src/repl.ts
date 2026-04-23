@@ -3,6 +3,7 @@
  */
 
 import readline from 'node:readline';
+import { PassThrough } from 'node:stream';
 import { homedir, tmpdir } from 'node:os';
 import { join as pathJoin } from 'node:path';
 import { readdirSync } from 'node:fs';
@@ -262,6 +263,11 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
   let processing = false;
   let lastPastedContent = '';
   let isProgrammaticClose = false;
+  // v3.9.3: Typeahead — chars typed while AI processes
+  let typeaheadBuffer = '';
+  // v3.9.3: Paste debounce — batch rapid 'line' events from paste
+  let _pendingLines: string[] = [];
+  let _lineFlushTimer: ReturnType<typeof setTimeout> | null = null;
   // v3.9.2: Vim mode handler (başlangıçta null, rl oluşturulunca init edilir)
   let vimHandler: ReturnType<typeof createVimHandler> | null = null;
   // v3.9.2: Keybindinglar
@@ -387,7 +393,15 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
       processing = false;
       currentAbortController = null;
       webUIController.sendStatus('idle', false);
-      if (rl) rl.prompt();
+      // v3.9.3: Restore typeahead chars typed during AI processing
+      if (typeaheadBuffer && rl) {
+        const buf = typeaheadBuffer;
+        typeaheadBuffer = '';
+        rl.prompt();
+        rl.write(buf);
+      } else {
+        if (rl) rl.prompt();
+      }
     }
   }
 
@@ -453,12 +467,65 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
 
   // ─── Readline arayüzü ────────────────────────────────────────────────────────
   function createInterface() {
+    // v3.9.3: Paste filtre akışı — readline ham stdin yerine bu akışı okur.
+    // process.stdin'den gelen veriler önce _stdinDataHandler'dan geçer:
+    //   - Bracketed paste marker'ları (\x1b[200~ … \x1b[201~) yakalanır ve filtrelenir
+    //   - Paste içeriği tamponlanır; tamamlanınca rl.write() ile temiz eklenir
+    //   - Diğer tüm tuş verileri değişmeden rlInput'a aktarılır → readline görür
+    const rlInput = new PassThrough();
+    let _pasteMode = false;
+    let _pasteBuffer = '';
+
+    function _handlePaste(text: string) {
+      if (!text) return;
+      // Çok satırlı paste → boşlukla birleştir (readline tek satır destekler)
+      const clean = text.replace(/\r\n|\r|\n/g, ' ').trimEnd();
+      if (processing) {
+        typeaheadBuffer += clean;
+      } else if (rl) {
+        rl.write(clean);
+      }
+    }
+
+    const _stdinDataHandler = (raw: Buffer) => {
+      const str = raw.toString();
+      let out = '';
+      let i = 0;
+      while (i < str.length) {
+        if (str.slice(i, i + 6) === '\x1b[200~') {
+          _pasteMode = true; _pasteBuffer = ''; i += 6;
+        } else if (str.slice(i, i + 6) === '\x1b[201~') {
+          _pasteMode = false;
+          _handlePaste(_pasteBuffer);
+          _pasteBuffer = ''; i += 6;
+        } else if (_pasteMode) {
+          _pasteBuffer += str[i++];
+        } else {
+          out += str[i++];
+        }
+      }
+      if (out) rlInput.push(out);
+    };
+
+    process.stdin.on('data', _stdinDataHandler);
+
+    // PassThrough bir TTY değil → readline setRawMode çağıramaz, manuel yapıyoruz
+    if (process.stdin.isTTY) process.stdin.setRawMode(true);
+
+    // v3.9.3: Bracketed paste mode aktif — marker'lar artık _stdinDataHandler tarafından yakalanıyor
+    if (process.stdout.isTTY) process.stdout.write('\x1b[?2004h');
+
     rl = readline.createInterface({
-      input: process.stdin,
+      input: rlInput,           // process.stdin yerine filtre akışı
       output: process.stdout,
       prompt: getPromptStr(),
       terminal: true,
       completer: tabCompleter,
+    });
+
+    // Cleanup: rl kapanınca stdin handler'ı kaldır
+    rl.on('close', () => {
+      process.stdin.removeListener('data', _stdinDataHandler);
     });
 
     // v3.9.2: Vim mode handler'ı başlat
@@ -468,23 +535,56 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
 
     rl.on('line', async (line) => {
       if (processing) return;
-      const trimmed = line.trim();
-      if (!trimmed) { rl?.prompt(); return; }
-      if (trimmed.startsWith('/')) {
-        rl?.pause();                    // clack prompts öncesi readline'ı durdur
-        const result = await executeCommand(line, ctx);
-        process.stdin.resume();         // clack stdin'i kapattıysa geri aç
-        rl?.resume();                   // readline'ı yeniden etkinleştir
-        if (result?.output) console.log(result.output);
-        if (result?.shouldExit) process.exit(0);
-        if (result?.runAsUserMessage) {
-          await runAgentTurn(result.runAsUserMessage);
-        } else {
-          if (rl) rl.prompt();
+
+      // v3.9.3: Batch rapid lines (paste debounce — 20 ms window)
+      _pendingLines.push(line);
+      if (_lineFlushTimer) clearTimeout(_lineFlushTimer);
+      _lineFlushTimer = setTimeout(async () => {
+        _lineFlushTimer = null;
+        const lines = _pendingLines;
+        _pendingLines = [];
+        const combined = lines.join('\n');
+        const trimmed = combined.trim();
+        if (!trimmed) { rl?.prompt(); return; }
+
+        // v3.9.3: Drag-and-drop file path detection
+        // Terminal drag-drop pastes the path; if the whole input is just a path, intercept it
+        if (lines.length === 1) {
+          const stripped = trimmed.replace(/^['"]|['"]$/g, '').replace(/\\ /g, ' ');
+          if (/^(?:\/|~\/|\.\.?\/)[\S]+$/.test(stripped)) {
+            const { existsSync } = await import('node:fs');
+            const resolved = stripped.startsWith('~/')
+              ? pathJoin(homedir(), stripped.slice(2))
+              : stripped.startsWith('/') ? stripped : pathJoin(currentCwd, stripped);
+            if (existsSync(resolved)) {
+              process.stdout.write(
+                '\n' + chalk.dim('  📎 Sürüklenen dosya: ') + chalk.cyan(resolved) +
+                chalk.dim('\n  Yolu komutunuza ekleyebilirsiniz:\n\n'),
+              );
+              rl?.write(null, { ctrl: true, name: 'u' });
+              rl?.write(resolved);
+              rl?.prompt();
+              return;
+            }
+          }
         }
-      } else {
-        await runAgentTurn(line);
-      }
+
+        if (trimmed.startsWith('/')) {
+          rl?.pause();                    // clack prompts öncesi readline'ı durdur
+          const result = await executeCommand(trimmed, ctx);
+          process.stdin.resume();         // clack stdin'i kapattıysa geri aç
+          rl?.resume();                   // readline'ı yeniden etkinleştir
+          if (result?.output) console.log(result.output);
+          if (result?.shouldExit) process.exit(0);
+          if (result?.runAsUserMessage) {
+            await runAgentTurn(result.runAsUserMessage);
+          } else {
+            if (rl) rl.prompt();
+          }
+        } else {
+          await runAgentTurn(trimmed);
+        }
+      }, 20);
     });
 
     rl.on('SIGINT', () => {
@@ -498,11 +598,35 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
     });
 
     // ─── Özel tuş kombinasyonları ─────────────────────────────────────────────
-    readline.emitKeypressEvents(process.stdin, rl);
+    // rlInput: readline'ın dahili ok tuşu/backspace işlemesi
+    readline.emitKeypressEvents(rlInput, rl);
+    // process.stdin: bizim özel handler'ımız (ESC, Ctrl+R, typeahead vb.)
+    readline.emitKeypressEvents(process.stdin);
     let ctrlXArmed = false; // Ctrl+X → Ctrl+E dizisi için
 
     process.stdin.on('keypress', async (_str, key) => {
-      if (!key || processing) return;
+      if (!key) return;
+
+      // v3.9.3: Bracketed paste markers — ignore (debounce handles multi-line paste)
+      if (key.sequence === '\x1b[200~' || key.sequence === '\x1b[201~') return;
+
+      // v3.9.3: ESC during AI processing → abort
+      if (key.name === 'escape' && processing) {
+        currentAbortController?.abort();
+        return;
+      }
+
+      // v3.9.3: Typeahead — silently collect printable keys while AI processes
+      if (processing) {
+        if (!key.ctrl && !key.meta) {
+          if (key.name === 'backspace') {
+            typeaheadBuffer = typeaheadBuffer.slice(0, -1);
+          } else if (_str && _str.length === 1 && _str >= ' ') {
+            typeaheadBuffer += _str;
+          }
+        }
+        return;
+      }
 
       // v3.9.2: Vim mode — önce vim handler'a ver
       if (vimHandler && appConfig.repl?.vimMode) {
@@ -622,4 +746,53 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
   }
 
   createInterface();
+
+  // v3.9.3: Startup güncelleme kontrolü (non-blocking, 24 saatte bir)
+  void (async () => {
+    try {
+      const { checkForUpdates } = await import('./update-check.js');
+      const update = await checkForUpdates();
+      if (!update?.hasUpdate || !rl) return;
+
+      // Hoş geldin ekranı tamamen yerleşsin diye kısa bekleme
+      await new Promise(r => setTimeout(r, 300));
+      if (processing) return; // Kullanıcı zaten bir şeyler yapıyor
+
+      process.stdout.write(
+        '\n' +
+        chalk.yellow(`  ⬆  Yeni sürüm: v${update.latestVersion}`) +
+        chalk.dim(' — şu an kurulu: ') + chalk.dim(`v${(await import('./version.js')).VERSION}`) +
+        '\n',
+      );
+
+      await new Promise<void>(resolve => {
+        rl!.question(chalk.dim('  GitHub\'dan güncellemek ister misiniz? [E/h] '), (answer) => {
+          const yes = answer.trim() === '' || answer.trim().toLowerCase() === 'e';
+          if (yes) {
+            process.stdout.write(chalk.dim('\n  Çalıştırılıyor: npm install -g seth\n\n'));
+            const child = spawn('npm', ['install', '-g', 'github:MustafaKemal0146/seth'], { stdio: 'inherit' });
+            child.on('close', (code) => {
+              if (code === 0) {
+                process.stdout.write(chalk.green('\n  ✓ Güncelleme tamamlandı! Yeniden başlatın: seth\n\n'));
+              } else {
+                process.stdout.write(chalk.red('\n  ✗ Güncelleme başarısız. Manuel: npm install -g seth\n\n'));
+              }
+              if (rl && !processing) rl.prompt();
+              resolve();
+            });
+            child.on('error', () => {
+              process.stdout.write(chalk.red('\n  ✗ npm bulunamadı. Manuel: npm install -g seth\n\n'));
+              if (rl && !processing) rl.prompt();
+              resolve();
+            });
+          } else {
+            if (rl && !processing) rl.prompt();
+            resolve();
+          }
+        });
+      });
+    } catch {
+      // Hata durumunda sessizce devam et
+    }
+  })();
 }
