@@ -1,5 +1,7 @@
 /**
- * @fileoverview Shell tool — cross-platform command execution.
+ * @fileoverview Shell tool — PTY destekli cross-platform komut çalıştırma.
+ * node-pty ile gerçek pseudo-terminal: sudo, ssh gibi interaktif komutlar çalışır.
+ * node-pty yoksa eski spawn yöntemine düşer.
  */
 
 import { spawn } from 'child_process';
@@ -8,14 +10,26 @@ import { join } from 'path';
 import { readFileSync, unlinkSync } from 'fs';
 import { randomUUID } from 'crypto';
 import type { ToolDefinition, ToolResult } from '../types.js';
+import { enterPtyMode, exitPtyMode } from '../pty-mode.js';
 
 const DEFAULT_TIMEOUT = 30_000;
+
+// node-pty'yi dinamik yükle — yoksa spawn'a düş
+let ptyLib: typeof import('node-pty') | null = null;
+(async () => {
+  try {
+    ptyLib = await import('node-pty');
+  } catch {
+    // node-pty yok → spawn fallback
+  }
+})();
 
 export const shellTool: ToolDefinition = {
   name: 'shell',
   description:
-    'Kabuk komutu çalıştırır. Linux/macOS’ta bash, Windows’ta PowerShell kullanılır. ' +
-    'Dosya işlemleri, betik çalıştırma, paket kurulumu, git vb. için kullan.',
+    'Kabuk komutu calistirir. Linux/macOS bash, Windows PowerShell kullanir. ' +
+    'Dosya islemleri, betik, paket kurulumu, git, sudo vb. icin kullan. ' +
+    'PTY destekli: sudo sifre isterleri kullaniciya gorunur ve girilebilir.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -33,88 +47,188 @@ export const shellTool: ToolDefinition = {
 
     const isWindows = platform() === 'win32';
     const shell = isWindows ? 'powershell.exe' : 'bash';
-    
-    // Track CWD changes by appending pwd command
+
+    // CWD takibi için geçici dosya
     const cwdFile = join(tmpdir(), `seth-cwd-${randomUUID()}`);
     let command: string;
-    
+
     if (isWindows) {
-      // PowerShell: execute command then write PWD to file
       command = `${rawCommand}; Get-Location | Select-Object -ExpandProperty Path | Out-File -FilePath "${cwdFile}" -Encoding utf8`;
     } else {
-      // Bash: execute command then write pwd -P to file
       command = `${rawCommand} && pwd -P > "${cwdFile}" || { pwd -P > "${cwdFile}"; exit 1; }`;
     }
 
-    const shellArgs = isWindows ? ['-NoProfile', '-NonInteractive', '-Command', command] : ['-c', command];
+    // PTY destekli yol (Linux/macOS + node-pty mevcut)
+    if (ptyLib && !isWindows) {
+      return runWithPty(ptyLib, shell, command, cwd, cwdFile, timeoutMs);
+    }
 
-    return new Promise<ToolResult>((resolve) => {
-      const stdoutChunks: Buffer[] = [];
-      const stderrChunks: Buffer[] = [];
-
-      const child = spawn(shell, shellArgs, {
-        cwd,
-        env: { ...process.env },
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
-
-      child.stdout.on('data', (chunk: Buffer) => stdoutChunks.push(chunk));
-      child.stderr.on('data', (chunk: Buffer) => stderrChunks.push(chunk));
-
-      let settled = false;
-      let timedOut = false;
-
-      const timer = setTimeout(() => {
-        timedOut = true;
-        child.kill('SIGKILL');
-      }, timeoutMs);
-
-      const finish = (exitCode: number) => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timer);
-
-        const stdout = Buffer.concat(stdoutChunks).toString('utf8');
-        const stderr = Buffer.concat(stderrChunks).toString('utf8');
-
-        let output = '';
-        if (stdout) output += stdout;
-        if (stderr) output += (output ? '\n--- stderr ---\n' : '') + stderr;
-        if (!output) output = exitCode === 0 ? '(completed with no output)' : `(exit code: ${exitCode})`;
-        if (exitCode !== 0 && output) output += `\n(exit code: ${exitCode})`;
-        if (timedOut) output += '\n(timed out)';
-
-        // Read new CWD
-        let newCwd: string | undefined;
-        try {
-          newCwd = readFileSync(cwdFile, 'utf8').trim();
-          unlinkSync(cwdFile);
-        } catch {
-          // ignore
-        }
-
-        resolve({ 
-          output: truncateOutput(output), 
-          isError: exitCode !== 0,
-          newCwd: (newCwd && newCwd !== cwd) ? newCwd : undefined
-        });
-      };
-
-      child.on('close', (code) => finish(code ?? (timedOut ? 124 : 1)));
-      child.on('error', (err) => {
-        if (!settled) {
-          settled = true;
-          clearTimeout(timer);
-          try { unlinkSync(cwdFile); } catch {}
-          resolve({ output: `Error: ${err.message}`, isError: true });
-        }
-      });
-    });
+    // Fallback: eski spawn yöntemi
+    return runWithSpawn(shell, command, cwd, cwdFile, timeoutMs, isWindows);
   },
 };
+
+// ─── PTY yolu ────────────────────────────────────────────────────────────────
+
+async function runWithPty(
+  pty: typeof import('node-pty'),
+  shell: string,
+  command: string,
+  cwd: string,
+  cwdFile: string,
+  timeoutMs: number,
+): Promise<ToolResult> {
+  return new Promise<ToolResult>((resolve) => {
+    const cols = process.stdout.columns || 80;
+    const rows = process.stdout.rows || 24;
+
+    const ptyProc = pty.spawn(shell, ['-c', command], {
+      name: 'xterm-256color',
+      cols,
+      rows,
+      cwd,
+      env: { ...process.env } as Record<string, string>,
+    });
+
+    const outputChunks: string[] = [];
+    let settled = false;
+    let timedOut = false;
+
+    // PTY çıktısını hem kullanıcıya göster hem de AI için yakala
+    ptyProc.onData((data) => {
+      process.stdout.write(data);
+      outputChunks.push(data);
+    });
+
+    // stdin → PTY yönlendirmesi (sudo şifre girişi vb.)
+    enterPtyMode((data) => ptyProc.write(data));
+
+    const timer = setTimeout(() => {
+      timedOut = true;
+      try { ptyProc.kill(); } catch {}
+    }, timeoutMs);
+
+    ptyProc.onExit(({ exitCode }) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      exitPtyMode();
+
+      // Terminal'in son satırından sonra boş satır bırak
+      process.stdout.write('\n');
+
+      const rawOutput = outputChunks.join('');
+      // ANSI kaçış kodlarını temizle — AI temiz metin okur
+      const cleanOutput = stripAnsiCodes(rawOutput);
+
+      const code = exitCode ?? (timedOut ? 124 : 1);
+      let output = cleanOutput.trim() || (code === 0 ? '(çıktı yok)' : `(exit code: ${code})`);
+      if (code !== 0 && cleanOutput.trim()) output += `\n(exit code: ${code})`;
+      if (timedOut) output += '\n(zaman aşımı)';
+
+      let newCwd: string | undefined;
+      try {
+        newCwd = readFileSync(cwdFile, 'utf8').trim();
+        unlinkSync(cwdFile);
+      } catch {}
+
+      resolve({
+        output: truncateOutput(output),
+        isError: code !== 0,
+        newCwd: newCwd && newCwd !== cwd ? newCwd : undefined,
+      });
+    });
+  });
+}
+
+// ─── Spawn fallback ──────────────────────────────────────────────────────────
+
+function runWithSpawn(
+  shell: string,
+  command: string,
+  cwd: string,
+  cwdFile: string,
+  timeoutMs: number,
+  isWindows: boolean,
+): Promise<ToolResult> {
+  const shellArgs = isWindows
+    ? ['-NoProfile', '-NonInteractive', '-Command', command]
+    : ['-c', command];
+
+  return new Promise<ToolResult>((resolve) => {
+    const stdoutChunks: Buffer[] = [];
+    const stderrChunks: Buffer[] = [];
+
+    const child = spawn(shell, shellArgs, {
+      cwd,
+      env: { ...process.env },
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+
+    child.stdout.on('data', (chunk: Buffer) => stdoutChunks.push(chunk));
+    child.stderr.on('data', (chunk: Buffer) => stderrChunks.push(chunk));
+
+    let settled = false;
+    let timedOut = false;
+
+    const timer = setTimeout(() => {
+      timedOut = true;
+      child.kill('SIGKILL');
+    }, timeoutMs);
+
+    const finish = (exitCode: number) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+
+      const stdout = Buffer.concat(stdoutChunks).toString('utf8');
+      const stderr = Buffer.concat(stderrChunks).toString('utf8');
+
+      let output = '';
+      if (stdout) output += stdout;
+      if (stderr) output += (output ? '\n--- stderr ---\n' : '') + stderr;
+      if (!output) output = exitCode === 0 ? '(completed with no output)' : `(exit code: ${exitCode})`;
+      if (exitCode !== 0 && output) output += `\n(exit code: ${exitCode})`;
+      if (timedOut) output += '\n(timed out)';
+
+      let newCwd: string | undefined;
+      try {
+        newCwd = readFileSync(cwdFile, 'utf8').trim();
+        unlinkSync(cwdFile);
+      } catch {}
+
+      resolve({
+        output: truncateOutput(output),
+        isError: exitCode !== 0,
+        newCwd: newCwd && newCwd !== cwd ? newCwd : undefined,
+      });
+    };
+
+    child.on('close', (code) => finish(code ?? (timedOut ? 124 : 1)));
+    child.on('error', (err) => {
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        try { unlinkSync(cwdFile); } catch {}
+        resolve({ output: `Error: ${err.message}`, isError: true });
+      }
+    });
+  });
+}
+
+// ─── Yardımcılar ─────────────────────────────────────────────────────────────
 
 function truncateOutput(output: string, maxLen = 10000): string {
   if (output.length <= maxLen) return output;
   const half = Math.floor(maxLen / 2);
   return `${output.slice(0, half)}\n\n... [${output.length - maxLen} chars truncated] ...\n\n${output.slice(-half)}`;
+}
+
+/** Temel ANSI kaçış kodu temizleyici */
+function stripAnsiCodes(str: string): string {
+  // eslint-disable-next-line no-control-regex
+  return str.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '')
+            .replace(/\x1b\][^\x07]*\x07/g, '')
+            .replace(/\x1b[()][AB012]/g, '')
+            .replace(/\r/g, '');
 }

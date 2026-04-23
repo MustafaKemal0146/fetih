@@ -3,10 +3,9 @@
  */
 
 import readline from 'node:readline';
-import { PassThrough } from 'node:stream';
 import { homedir, tmpdir } from 'node:os';
 import { join as pathJoin } from 'node:path';
-import { readdirSync } from 'node:fs';
+import { readdirSync, existsSync } from 'node:fs';
 import { writeFile as fsWriteFile, readFile as fsReadFile, unlink as fsUnlink } from 'node:fs/promises';
 import { spawn } from 'node:child_process';
 import chalk from 'chalk';
@@ -60,6 +59,7 @@ import { loadKeybindings } from './keybindings.js';
 import { generateSessionTitle } from './session-title.js';
 import { recordMessage } from './chat-recording.js';
 import { cmd, promptBright } from './theme.js';
+import { ptyModeActive, ptyInputWriter } from './pty-mode.js';
 import { loadHistory, addToHistory, storePaste } from './storage/history.js';
 import { runHistorySearch } from './history-search.js';
 import { runHooks } from './hooks.js';
@@ -467,70 +467,64 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
 
   // ─── Readline arayüzü ────────────────────────────────────────────────────────
   function createInterface() {
-    // v3.9.3: Paste filtre akışı — readline ham stdin yerine bu akışı okur.
-    // process.stdin'den gelen veriler önce _stdinDataHandler'dan geçer:
-    //   - Bracketed paste marker'ları (\x1b[200~ … \x1b[201~) yakalanır ve filtrelenir
-    //   - Paste içeriği tamponlanır; tamamlanınca rl.write() ile temiz eklenir
-    //   - Diğer tüm tuş verileri değişmeden rlInput'a aktarılır → readline görür
-    const rlInput = new PassThrough();
-    let _pasteMode = false;
-    let _pasteBuffer = '';
-
-    function _handlePaste(text: string) {
-      if (!text) return;
-      // Çok satırlı paste → boşlukla birleştir (readline tek satır destekler)
-      const clean = text.replace(/\r\n|\r|\n/g, ' ').trimEnd();
-      if (processing) {
-        typeaheadBuffer += clean;
-      } else if (rl) {
-        rl.write(clean);
-      }
-    }
-
-    const _stdinDataHandler = (raw: Buffer) => {
-      const str = raw.toString();
-      let out = '';
-      let i = 0;
-      while (i < str.length) {
-        if (str.slice(i, i + 6) === '\x1b[200~') {
-          _pasteMode = true; _pasteBuffer = ''; i += 6;
-        } else if (str.slice(i, i + 6) === '\x1b[201~') {
-          _pasteMode = false;
-          _handlePaste(_pasteBuffer);
-          _pasteBuffer = ''; i += 6;
-        } else if (_pasteMode) {
-          _pasteBuffer += str[i++];
-        } else {
-          out += str[i++];
-        }
-      }
-      if (out) rlInput.push(out);
-    };
-
-    process.stdin.on('data', _stdinDataHandler);
-
-    // PassThrough bir TTY değil → readline setRawMode çağıramaz, manuel yapıyoruz
-    if (process.stdin.isTTY) process.stdin.setRawMode(true);
-
-    // v3.9.3: Bracketed paste mode aktif — marker'lar artık _stdinDataHandler tarafından yakalanıyor
-    if (process.stdout.isTTY) process.stdout.write('\x1b[?2004h');
-
     rl = readline.createInterface({
-      input: rlInput,           // process.stdin yerine filtre akışı
+      input: process.stdin,
       output: process.stdout,
       prompt: getPromptStr(),
       terminal: true,
       completer: tabCompleter,
     });
 
-    // Cleanup: rl kapanınca stdin handler'ı kaldır
-    rl.on('close', () => {
-      process.stdin.removeListener('data', _stdinDataHandler);
-    });
-
     // v3.9.2: Vim mode handler'ı başlat
     if (appConfig.repl?.vimMode) {
       vimHandler = createVimHandler(rl);
+    }
+
+    // v3.9.3: Bracketed paste mode — terminal marker gönder
+    if (process.stdout.isTTY) process.stdout.write('\x1b[?2004h');
+
+    // v3.9.3: _ttyWrite override — paste, PTY yönlendirme, AI işlenirken yankı bastırma
+    // readline'ın dahili _ttyWrite'ını sarmalayarak tüm terminal girişini tek noktada kontrol ediyoruz.
+    {
+      const _origTtyWrite = (rl as any)._ttyWrite?.bind(rl);
+      let _pasteMode = false;
+      let _pasteBuffer = '';
+
+      function _handlePaste(text: string) {
+        if (!text) return;
+        const clean = text.replace(/\r\n|\r|\n/g, ' ').trimEnd();
+        if (processing) {
+          typeaheadBuffer += clean;
+        } else if (rl) {
+          rl.write(clean);
+        }
+      }
+
+      if (_origTtyWrite) {
+        (rl as any)._ttyWrite = function(s: string, key: any) {
+          // PTY mod: stdin'i PTY'ye yönlendir (sudo, ssh vb.)
+          if (ptyModeActive && ptyInputWriter) {
+            ptyInputWriter(s ?? key?.sequence ?? '');
+            return;
+          }
+          // Bracketed paste başlangıç markeri
+          if (key?.sequence === '\x1b[200~') {
+            _pasteMode = true; _pasteBuffer = ''; return;
+          }
+          // Bracketed paste bitiş markeri
+          if (key?.sequence === '\x1b[201~') {
+            _pasteMode = false; _handlePaste(_pasteBuffer); return;
+          }
+          // Paste içeriği: tampona ekle, readline'a gösterme
+          if (_pasteMode) {
+            _pasteBuffer += s ?? key?.sequence ?? ''; return;
+          }
+          // AI işlenirken: yankıyı bastır (typeaheadBuffer keypress handler'da doldurulur)
+          if (processing) return;
+          // Normal: readline'ın orijinal işleyicisi
+          return _origTtyWrite(s, key);
+        };
+      }
     }
 
     rl.on('line', async (line) => {
@@ -552,7 +546,6 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
         if (lines.length === 1) {
           const stripped = trimmed.replace(/^['"]|['"]$/g, '').replace(/\\ /g, ' ');
           if (/^(?:\/|~\/|\.\.?\/)[\S]+$/.test(stripped)) {
-            const { existsSync } = await import('node:fs');
             const resolved = stripped.startsWith('~/')
               ? pathJoin(homedir(), stripped.slice(2))
               : stripped.startsWith('/') ? stripped : pathJoin(currentCwd, stripped);
@@ -598,10 +591,7 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
     });
 
     // ─── Özel tuş kombinasyonları ─────────────────────────────────────────────
-    // rlInput: readline'ın dahili ok tuşu/backspace işlemesi
-    readline.emitKeypressEvents(rlInput, rl);
-    // process.stdin: bizim özel handler'ımız (ESC, Ctrl+R, typeahead vb.)
-    readline.emitKeypressEvents(process.stdin);
+    readline.emitKeypressEvents(process.stdin, rl);
     let ctrlXArmed = false; // Ctrl+X → Ctrl+E dizisi için
 
     process.stdin.on('keypress', async (_str, key) => {
@@ -613,6 +603,7 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
       // v3.9.3: ESC during AI processing → abort
       if (key.name === 'escape' && processing) {
         currentAbortController?.abort();
+        process.stdout.write('\n' + chalk.yellow('  ⏹  Durduruluyor…\n'));
         return;
       }
 
