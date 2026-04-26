@@ -308,13 +308,38 @@ export function removePlugin(name: string): boolean {
 
 let watcher: ReturnType<typeof watch> | null = null;
 
-export function watchPluginDir(callback: (fileName: string) => void): void {
+export function watchPluginDir(
+  onPluginChange?: (pluginName: string, action: 'loaded' | 'removed') => void,
+): void {
   if (watcher) return;
   const dir = getPluginDir();
   
-  watcher = watch(dir, (eventType, fileName) => {
-    if (fileName && (fileName.endsWith('.js') || fileName.endsWith('.manifest.json'))) {
-      callback(fileName);
+  watcher = watch(dir, async (eventType, fileName) => {
+    if (!fileName) return;
+    
+    if (fileName.endsWith('.js') || fileName.endsWith('.mjs')) {
+      log(`Değişiklik algılandı: ${fileName} (${eventType})`);
+      
+      if (eventType === 'change') {
+        // Plugin güncellendi — yeniden yükle
+        const baseName = fileName.replace(/\.(js|mjs)$/, '');
+        // Eski kaydı temizle
+        const pluginName = baseName;
+        const state = getRegistryState();
+        state.plugins.delete(pluginName);
+        
+        // Yeniden yükle
+        const tool = await loadPlugin(fileName);
+        if (tool && onPluginChange) {
+          onPluginChange(tool.name, 'loaded');
+        }
+      } else if (eventType === 'rename') {
+        log(`Plugin dosyası silindi/taşındı: ${fileName}`);
+        if (onPluginChange) {
+          const baseName = fileName.replace(/\.(js|mjs)$/, '');
+          onPluginChange(baseName, 'removed');
+        }
+      }
     }
   });
   
@@ -325,6 +350,7 @@ export function stopWatching(): void {
   if (watcher) {
     watcher.close();
     watcher = null;
+    log('Plugin izleme durduruldu');
   }
 }
 

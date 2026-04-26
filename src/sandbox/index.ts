@@ -4,7 +4,7 @@
  * AGPL-3.0
  */
 
-import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { homedir, tmpdir } from 'os';
 import { execSync, exec } from 'child_process';
@@ -225,8 +225,6 @@ export function sandboxReadFile(sandboxDir: string, filePath: string): string {
 }
 
 export function sandboxListFiles(sandboxDir: string): string[] {
-  const { readdirSync } = require('fs');
-  const { join } = require('path');
 
   function walk(dir: string): string[] {
     const files: string[] = [];

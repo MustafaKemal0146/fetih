@@ -6,23 +6,38 @@
 import type { SETHConfig } from './types.js';
 
 export async function initNewModules(config: SETHConfig): Promise<void> {
-  const { initPluginSystem } = await import('./plugin/index.js');
-  const { initTaskSystem } = await import('./tasks/index.js');
-  const { initSandbox } = await import('./sandbox/index.js');
-  const { initContextEngine } = await import('./context-engine/index.js');
+  // 1. Güvenlik denetimi — en önce başlamalı
   const { initSecurity } = await import('./security/index.js');
-  const { initAutoReply } = await import('./auto-reply/index.js');
-  const { initFlows } = await import('./flows/index.js');
-
-  // Sıralı başlatma
   initSecurity(config);
+
+  // 2. Görev sistemi
+  const { initTaskSystem, registerCronTasks } = await import('./tasks/index.js');
   initTaskSystem();
+
+  // 3. Eski cron görevlerini task sistemine aktar
+  registerCronTasks();
+
+  // 4. Sandbox
+  const { initSandbox } = await import('./sandbox/index.js');
   initSandbox();
-  initContextEngine();
+
+  // 5. Context Engine
+  const { initContextEngine } = await import('./context-engine/index.js');
+  initContextEngine({
+    maxTokens: config.contextBudgetTokens || 200_000,
+    compressionEnabled: true,
+  });
+
+  // 6. Auto-Reply
+  const { initAutoReply, setEnabled } = await import('./auto-reply/index.js');
   initAutoReply();
+  // Auto-Reply varsayılan olarak kapalı, /autoreply komutu ile açılır
+
+  // 7. Akışlar
+  const { initFlows } = await import('./flows/index.js');
   initFlows();
 
-  // Plugin sistemi registry'de ayrıca başlatılıyor, burada sadece dizin kontrolü
+  // 8. Plugin dizini hazır (plugin'ler registry.ts'de ayrıca yükleniyor)
   const { getPluginDir } = await import('./plugin/index.js');
   getPluginDir();
 }

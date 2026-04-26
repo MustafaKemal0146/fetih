@@ -2,7 +2,7 @@ import { type WebSocket as WS, WebSocketServer } from 'ws';
 import type { ChatMessage } from '../types.js';
 
 export interface WebUIEvent {
-  type: 'init' | 'text' | 'tool_call' | 'tool_result' | 'history' | 'status' | 'stats' | 'abort' | 'command_result' | 'effort' | 'settings' | 'models' | 'diff' | 'plan_proposal' | 'tasks' | 'warning';
+  type: 'init' | 'text' | 'tool_call' | 'tool_result' | 'history' | 'status' | 'stats' | 'abort' | 'command_result' | 'effort' | 'settings' | 'models' | 'diff' | 'plan_proposal' | 'tasks' | 'warning' | 'dashboard_data' | 'a2ui_render' | 'a2ui_clear' | 'get_usage';
   data: any;
 }
 
