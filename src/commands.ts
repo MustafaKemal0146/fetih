@@ -4,6 +4,9 @@
 
 import chalk from 'chalk';
 import { cmd, promptBright } from './theme.js';
+import { setAlias, listAliases, deleteAlias, getAlias } from './commands/alias.js';
+import { listTemplates, getTemplate, applyTemplate, setTemplate, deleteTemplate } from './commands/sablon.js';
+import { logUsage, getUsageStats, getCostEstimate } from './commands/maliyet.js';
 import { select, isCancel, confirm, text } from '@clack/prompts';
 import { writeFile } from 'fs/promises';
 import { resolve, join } from 'path';
@@ -949,7 +952,7 @@ ${rows}
 
   // #9 Diff görüntüleme
   diff: async (args, ctx) => {
-    const { gitDiffTool } = await import('./tools/git-diff.js');
+    const { gitDiffTool } = await import('./tools/git/git-diff.js');
     const staged = args.includes('--staged') || args.includes('-s');
     const stat = args.includes('--stat');
     return gitDiffTool.execute({ staged, stat_only: stat }, ctx.getCwd());

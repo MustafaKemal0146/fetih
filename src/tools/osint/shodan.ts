@@ -3,7 +3,7 @@
  * Provides access to Shodan API for OSINT and network reconnaissance.
  */
 
-import type { ToolDefinition, ToolResult } from '../types.js';
+import type { ToolDefinition, ToolResult } from '../../types.js';
 
 export const shodanTool: ToolDefinition = {
   name: 'shodan',

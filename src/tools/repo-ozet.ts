@@ -3,7 +3,7 @@
  */
 
 import type { ToolDefinition, ToolResult } from '../types.js';
-import { resolveGitRepoRoot, runGit } from './git-internal.js';
+import { resolveGitRepoRoot, runGit } from './git/git-internal.js';
 
 function section(title: string, body: string): string {
   return `${title}\n${body.trim() || '(boş)'}\n`;

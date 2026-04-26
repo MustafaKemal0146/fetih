@@ -3,7 +3,7 @@
  */
 
 import { existsSync, readFileSync } from 'fs';
-import type { ToolDefinition, ToolResult } from '../types.js';
+import type { ToolDefinition, ToolResult } from '../../types.js';
 import { solve, type SolveResult } from './ctf-solver.js';
 import { analyzeWeb, type WebAnalysisResult } from './ctf-web-analyzer.js';
 import { analyzeNetwork, type NetworkAnalysisResult } from './ctf-network-analyzer.js';

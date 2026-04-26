@@ -5,7 +5,7 @@
  */
 
 import { createHash } from 'crypto';
-import type { ToolDefinition, ToolResult } from '../types.js';
+import type { ToolDefinition, ToolResult } from '../../types.js';
 import { looksLikeFlag, isPrintableAscii, findFlags as findFlagsUtil } from './ctf-utils.js';
 
 // ─── Tipler ──────────────────────────────────────────────────────────────────

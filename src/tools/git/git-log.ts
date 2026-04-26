@@ -3,7 +3,7 @@
  */
 
 import { relative, resolve } from 'path';
-import type { ToolDefinition, ToolResult } from '../types.js';
+import type { ToolDefinition, ToolResult } from '../../types.js';
 import { resolveGitRepoRoot, runGit } from './git-internal.js';
 
 const DEFAULT_N = 10;
