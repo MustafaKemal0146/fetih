@@ -151,9 +151,16 @@ export async function runHealthCheck(config?: SETHConfig): Promise<HealthCheckRe
 
 async function checkAudio(): Promise<HealthCheck> {
   const start = Date.now();
+  const platform = process.platform;
   try {
     const { execSync } = await import('child_process');
-    execSync('which aplay || which paplay || which ffplay', { encoding: 'utf-8', stdio: 'ignore' });
+    if (platform === 'linux') {
+      execSync('which aplay 2>/dev/null || which paplay 2>/dev/null || which ffplay 2>/dev/null || which pulseaudio 2>/dev/null', { encoding: 'utf-8', stdio: 'ignore' });
+    } else if (platform === 'darwin') {
+      execSync('which afplay 2>/dev/null', { encoding: 'utf-8', stdio: 'ignore' });
+    } else if (platform === 'win32') {
+      execSync('where wmplayer 2>nul || where ffplay 2>nul', { encoding: 'utf-8', stdio: 'ignore' });
+    }
     return { name: 'Audio', status: 'pass', message: 'Ses sistemi kullanılabilir', duration: Date.now() - start };
   } catch {
     return { name: 'Audio', status: 'warn', message: 'Ses sistemi bulunamadı (opsiyonel)', duration: Date.now() - start };

@@ -14,6 +14,8 @@ import type { ToolRegistry } from './registry.js';
 import { isToolAllowed } from './permission.js';
 import { EXTERNAL_TIMEOUT_OUTPUT_FRAGMENT } from './external-tool.js';
 import * as readline from 'readline';
+import { readFile } from 'fs/promises';
+import { resolve as resolvePath, join as joinPath } from 'path';
 import chalk from 'chalk';
 import { cmd } from '../theme.js';
 import { logToolMetric } from '../storage/tool-metrics.js';
@@ -21,6 +23,12 @@ import { truncateToolOutput } from '../truncate.js';
 import { maskSensitiveOutput } from '../tool-output-masking.js';
 
 const MAX_TOOL_OUTPUT_CHARS = 20_000;
+
+// Araçlar çalışmadan önce cwd'deki .env dosyası bunlara enjekte edilir.
+const ENV_INJECT_TOOLS = new Set([
+  'shell', 'sqlmap', 'nmap', 'nikto', 'gobuster', 'whois', 'dig', 'whatweb',
+  'ffuf', 'nuclei', 'masscan', 'nc', 'wpscan', 'subfinder', 'john', 'hashcat',
+]);
 
 // Tools that are always safe (read-only) and never need confirmation in 'normal' mode.
 const READ_ONLY_TOOLS = new Set([
@@ -105,6 +113,10 @@ export class ToolExecutor {
     const needsConfirm = this.shouldConfirm(tool, input, permission.needsConfirmation);
 
     if (needsConfirm) {
+      // Diff önizleme: onay öncesi değişiklikleri göster
+      if (toolName === 'file_write' || toolName === 'file_edit') {
+        await this.showDiffPreview(toolName, input, cwd);
+      }
       const answer = await this.requestConfirmation(tool, input);
       if (answer === 'no') {
         const result: ToolResult = { output: 'Kullanıcı bu aracın çalıştırılmasına izin vermedi.', isError: true };
@@ -115,24 +127,48 @@ export class ToolExecutor {
       }
     }
 
+    // .env bağlamı: SETH_LOAD_ENV=false ile devre dışı bırakılabilir
+    let envSnapshot: Record<string, string | undefined> = {};
+    if (process.env['SETH_LOAD_ENV'] !== 'false' && ENV_INJECT_TOOLS.has(toolName)) {
+      envSnapshot = await this.loadDotEnv(cwd);
+    }
+
     // Execute
     try {
-      const result = await tool.execute(input, cwd);
-      // #14 Araç sonucu boyut sınırı
-      let output = result.output;
-      let isTruncated = false;
-      if (output.length > MAX_TOOL_OUTPUT_CHARS) {
-        output = truncateToolOutput(output, MAX_TOOL_OUTPUT_CHARS);
-        isTruncated = true;
+      try {
+        const result = await tool.execute(input, cwd);
+        // #14 Araç sonucu boyut sınırı
+        let output = result.output;
+        let isTruncated = false;
+        if (output.length > MAX_TOOL_OUTPUT_CHARS) {
+          output = truncateToolOutput(output, MAX_TOOL_OUTPUT_CHARS);
+          isTruncated = true;
+        }
+        // #3 Hassas bilgileri maskele
+        const { masked, count } = maskSensitiveOutput(output);
+        if (count > 0) output = masked;
+
+        // v3.9.5: Audit log
+        try {
+          const { recordToolExecution } = await import('../security/index.js');
+          recordToolExecution(toolName, input, true);
+        } catch { /* audit sessizce başarısız olabilir */ }
+
+        return finalize({ ...result, output, isTruncated });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+
+        // v3.9.5: Audit log (hata)
+        try {
+          const { recordToolExecution } = await import('../security/index.js');
+          recordToolExecution(toolName, input, false);
+        } catch { /* audit sessizce başarısız olabilir */ }
+
+        const result: ToolResult = { output: `Araç çalışma hatası: ${message}`, isError: true };
+        return finalize(result);
       }
-      // #3 Hassas bilgileri maskele
-      const { masked, count } = maskSensitiveOutput(output);
-      if (count > 0) output = masked;
-      return finalize({ ...result, output, isTruncated });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      const result: ToolResult = { output: `Araç çalışma hatası: ${message}`, isError: true };
-      return finalize(result);
+    } finally {
+      this.restoreEnv(envSnapshot);
     }
   }
 
@@ -235,5 +271,73 @@ export class ToolExecutor {
       return `MCP ${chalk.bold(String(input.sunucu ?? ''))} → ${chalk.bold(String(input.islem ?? ''))}`;
     }
     return `${tool.name}(${JSON.stringify(input).slice(0, 80)})`;
+  }
+
+  /** Onay öncesi basit satır karşılaştırmalı diff önizleme gösterir. */
+  private async showDiffPreview(toolName: string, input: Record<string, unknown>, cwd: string): Promise<void> {
+    const SEP = chalk.dim('  ' + '─'.repeat(50));
+    process.stdout.write('\n' + SEP + '\n');
+    process.stdout.write(chalk.dim('  Diff Önizleme\n') + SEP + '\n');
+
+    if (toolName === 'file_write') {
+      const filePath = resolvePath(cwd, String(input['path'] ?? ''));
+      const newContent = String(input['content'] ?? '');
+      let oldContent = '';
+      try { oldContent = await readFile(filePath, 'utf-8'); } catch { /* yeni dosya */ }
+
+      if (oldContent) {
+        const oldLines = oldContent.split('\n');
+        const limit = 12;
+        for (const l of oldLines.slice(0, limit)) process.stdout.write(chalk.red(`  - ${l}\n`));
+        if (oldLines.length > limit) process.stdout.write(chalk.dim(`  ... ${oldLines.length - limit} satır daha\n`));
+      }
+      const newLines = newContent.split('\n');
+      const limit = 12;
+      for (const l of newLines.slice(0, limit)) process.stdout.write(chalk.green(`  + ${l}\n`));
+      if (newLines.length > limit) process.stdout.write(chalk.dim(`  ... ${newLines.length - limit} satır daha\n`));
+    } else if (toolName === 'file_edit') {
+      const oldStr = String(input['old_string'] ?? '');
+      const newStr = String(input['new_string'] ?? '');
+      const limit = 8;
+      const oldLines = oldStr.split('\n');
+      const newLines = newStr.split('\n');
+      for (const l of oldLines.slice(0, limit)) process.stdout.write(chalk.red(`  - ${l}\n`));
+      if (oldLines.length > limit) process.stdout.write(chalk.dim(`  ... ${oldLines.length - limit} satır daha\n`));
+      for (const l of newLines.slice(0, limit)) process.stdout.write(chalk.green(`  + ${l}\n`));
+      if (newLines.length > limit) process.stdout.write(chalk.dim(`  ... ${newLines.length - limit} satır daha\n`));
+    }
+
+    process.stdout.write(SEP + '\n');
+  }
+
+  /** cwd içindeki .env dosyasını yükler, process.env'e enjekte eder ve snapshot döndürür. */
+  private async loadDotEnv(cwd: string): Promise<Record<string, string | undefined>> {
+    const snapshot: Record<string, string | undefined> = {};
+    try {
+      const raw = await readFile(joinPath(cwd, '.env'), 'utf-8');
+      for (const line of raw.split('\n')) {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) continue;
+        const eqIdx = trimmed.indexOf('=');
+        if (eqIdx === -1) continue;
+        const key = trimmed.slice(0, eqIdx).trim();
+        const val = trimmed.slice(eqIdx + 1).trim().replace(/^["']|["']$/g, '');
+        if (!key) continue;
+        snapshot[key] = process.env[key];
+        process.env[key] = val;
+      }
+    } catch { /* .env yok veya okunamadı */ }
+    return snapshot;
+  }
+
+  /** loadDotEnv tarafından alınan snapshot'ı geri yükler. */
+  private restoreEnv(snapshot: Record<string, string | undefined>): void {
+    for (const [key, val] of Object.entries(snapshot)) {
+      if (val === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = val;
+      }
+    }
   }
 }

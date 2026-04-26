@@ -77,9 +77,9 @@ export async function createDefaultRegistry(config?: SETHConfig): Promise<ToolRe
   const { gorevYazTool } = await import('./gorev-yaz.js');
   const { aracAraTool } = await import('./arac-ara.js');
   const { mcpAracTool } = await import('./mcp-arac.js');
-  const { gitStatusTool } = await import('./git-status.js');
-  const { gitDiffTool } = await import('./git-diff.js');
-  const { gitLogTool } = await import('./git-log.js');
+  const { gitStatusTool } = await import('./git/git-status.js');
+  const { gitDiffTool } = await import('./git/git-diff.js');
+  const { gitLogTool } = await import('./git/git-log.js');
   const { repoOzetTool } = await import('./repo-ozet.js');
   const { takimOlusturTool } = await import('./takim-olustur.js');
   const { takimOkuTool } = await import('./takim-oku.js');
@@ -90,7 +90,7 @@ export async function createDefaultRegistry(config?: SETHConfig): Promise<ToolRe
   const { memoryReadTool, memoryWriteTool } = await import('./agent-memory.js');
   const { lspDiagnosticsTool } = await import('./lsp.js');
   const { sethEngineTool } = await import('./seth-engine.js');
-  const { gitWorktreeTool } = await import('./git-worktree.js');
+  const { gitWorktreeTool } = await import('./git/git-worktree.js');
   const { topicTool } = await import('./topic-tool.js');
   const { trackerReadTool, trackerWriteTool } = await import('./tracker-tools.js');
   const { writeTodosTool, readTodosTool } = await import('./write-todos.js');
@@ -102,13 +102,13 @@ export async function createDefaultRegistry(config?: SETHConfig): Promise<ToolRe
   } = await import('./external-tool.js');
   const { browserAutomationTool, closeBrowser } = await import('./browser-automation.js');
   const { openBrowserAgentTool } = await import('./openbrowser-agent.js');
-  const { ctfSolverTool } = await import('./ctf-solver.js');
-  const { ctfFileAnalyzerTool } = await import('./ctf-file-analyzer.js');
-  const { ctfStegoTool } = await import('./ctf-stego.js');
-  const { ctfWebAnalyzerTool } = await import('./ctf-web-analyzer.js');
-  const { ctfNetworkAnalyzerTool } = await import('./ctf-network-analyzer.js');
-  const { ctfAutoTool } = await import('./ctf-auto.js');
-  const { shodanTool } = await import('./shodan.js');
+  const { ctfSolverTool } = await import('./ctf/ctf-solver.js');
+  const { ctfFileAnalyzerTool } = await import('./ctf/ctf-file-analyzer.js');
+  const { ctfStegoTool } = await import('./ctf/ctf-stego.js');
+  const { ctfWebAnalyzerTool } = await import('./ctf/ctf-web-analyzer.js');
+  const { ctfNetworkAnalyzerTool } = await import('./ctf/ctf-network-analyzer.js');
+  const { ctfAutoTool } = await import('./ctf/ctf-auto.js');
+  const { shodanTool } = await import('./osint/shodan.js');
 
   registry.register(shellTool);
   registry.register(fileReadTool);
