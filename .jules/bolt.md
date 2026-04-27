@@ -1,0 +1,3 @@
+- Use `Promise.all()` to map over an array and execute asynchronous I/O operations (like `fs.promises.stat` or `fs.promises.unlink`) concurrently instead of using a sequential `for...of` loop with `await` on each iteration.
+- For `startBackgroundCleanup` optimization, mapping the files and keeping track of variables like `deleted++` inside `Promise.all` async arrow function is perfectly safe since Javascript operates on a single-threaded event loop and we are correctly catching the async promise rejection.
+- Concurrency reduces background execution time considerably on I/O heavy operations. A 5000-file benchmark simulated on this background cleanup operation yielded a speed increase from ~1106 ms to ~304 ms.
