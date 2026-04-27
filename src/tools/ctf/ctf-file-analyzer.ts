@@ -4,7 +4,7 @@
 
 import { readFileSync, existsSync } from 'fs';
 import { extname } from 'path';
-import type { ToolDefinition, ToolResult } from '../types.js';
+import type { ToolDefinition, ToolResult } from '../../types.js';
 import { extractStrings, findFlags, detectMagicType } from './ctf-utils.js';
 
 // ─── Magic Bytes Tablosu ─────────────────────────────────────────────────────

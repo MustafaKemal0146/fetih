@@ -1,12 +1,12 @@
 /**
  * @fileoverview SETH Görev Sistemi (Tasks) — v3.9.5
  * AGPL-3.0
- * AGPL-3.0
  */
 
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
+import { exec } from 'child_process';
 
 // ---------------------------------------------------------------------------
 // Tipler
@@ -16,37 +16,21 @@ export type TaskStatus = 'pending' | 'running' | 'completed' | 'failed' | 'cance
 export type TaskPriority = 'low' | 'normal' | 'high' | 'critical';
 
 export interface TaskDefinition {
-  /** Görev benzersiz ID'si */
   id: string;
-  /** Görev adı */
   name: string;
-  /** Çalıştırılacak komut/dosya */
   command: string;
-  /** Çalışma dizini */
   cwd: string;
-  /** Durum */
   status: TaskStatus;
-  /** Öncelik */
   priority: TaskPriority;
-  /** Oluşturulma zamanı */
   createdAt: string;
-  /** Başlama zamanı */
   startedAt?: string;
-  /** Bitiş zamanı */
   completedAt?: string;
-  /** Çıktı (başarılı) */
   output?: string;
-  /** Hata mesajı */
   error?: string;
-  /** Çıkış kodu */
   exitCode?: number;
-  /** Süpervizör PID */
   pid?: number;
-  /** Maksimum çalışma süresi (ms) */
   timeout?: number;
-  /** Etiketler */
   tags?: string[];
-  /** İlişkili akış ID'si */
   flowId?: string;
 }
 
@@ -73,49 +57,29 @@ export interface TaskQuery {
 
 const TASKS_DIR = join(homedir(), '.seth', 'tasks');
 const TASKS_FILE = join(TASKS_DIR, 'tasks.json');
-
-// ---------------------------------------------------------------------------
-// State
-// ---------------------------------------------------------------------------
-
 let tasks: TaskDefinition[] = [];
 let loaded = false;
 
-// ---------------------------------------------------------------------------
-// Yardımcılar
-// ---------------------------------------------------------------------------
-
-function ensureDir(): void {
-  if (!existsSync(TASKS_DIR)) {
-    mkdirSync(TASKS_DIR, { recursive: true });
-  }
+function log(msg: string): void {
+  process.stderr.write(`[seth:tasks] ${msg}\n`);
 }
 
 function generateId(): string {
   return `task_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function log(msg: string): void {
-  process.stderr.write(`[seth:tasks] ${msg}\n`);
+function ensureDir(): void {
+  if (!existsSync(TASKS_DIR)) mkdirSync(TASKS_DIR, { recursive: true });
 }
-
-// ---------------------------------------------------------------------------
-// Task Registry
-// ---------------------------------------------------------------------------
 
 function loadTasks(): TaskDefinition[] {
   if (loaded) return tasks;
   loaded = true;
   ensureDir();
-  
   if (existsSync(TASKS_FILE)) {
-    try {
-      tasks = JSON.parse(readFileSync(TASKS_FILE, 'utf-8'));
-    } catch {
-      tasks = [];
-    }
+    try { tasks = JSON.parse(readFileSync(TASKS_FILE, 'utf-8')); }
+    catch { tasks = []; }
   }
-  
   return tasks;
 }
 
@@ -130,7 +94,6 @@ function saveTasks(): void {
 
 export function createTask(params: TaskCreateParams): TaskDefinition {
   loadTasks();
-  
   const task: TaskDefinition = {
     id: generateId(),
     name: params.name,
@@ -143,11 +106,8 @@ export function createTask(params: TaskCreateParams): TaskDefinition {
     tags: params.tags,
     flowId: params.flowId,
   };
-  
   tasks.push(task);
   saveTasks();
-  log(`Görev oluşturuldu: ${task.name} (${task.id})`);
-  
   return task;
 }
 
@@ -155,47 +115,42 @@ export async function executeTask(taskId: string): Promise<TaskDefinition> {
   loadTasks();
   const task = tasks.find(t => t.id === taskId);
   if (!task) throw new Error(`Görev bulunamadı: ${taskId}`);
-  
+
   task.status = 'running';
   task.startedAt = new Date().toISOString();
   saveTasks();
-  
-  try {
-    const { execSync } = await import('child_process');
-    
-    const output = execSync(task.command, {
+
+  return new Promise((resolve) => {
+    const child = exec(task.command, {
       cwd: task.cwd,
       timeout: task.timeout || 300_000,
-      encoding: 'utf-8',
       maxBuffer: 10 * 1024 * 1024,
+    }, (error, stdout, stderr) => {
+      if (error) {
+        task.status = 'failed';
+        task.error = stderr || error.message;
+        task.exitCode = typeof error.code === 'number' ? error.code : 1;
+      } else {
+        task.status = 'completed';
+        task.output = stdout.trim();
+        task.exitCode = 0;
+      }
+      task.completedAt = new Date().toISOString();
+      saveTasks();
+      resolve(task);
     });
-    
-    task.status = 'completed';
-    task.output = output.trim();
-    task.exitCode = 0;
-    task.completedAt = new Date().toISOString();
-  } catch (err: any) {
-    task.status = 'failed';
-    task.error = err.stderr || err.message || String(err);
-    task.exitCode = err.status || 1;
-    task.completedAt = new Date().toISOString();
-  }
-  
-  saveTasks();
-  return task;
+    task.pid = child.pid;
+    saveTasks();
+  });
 }
 
 export function cancelTask(taskId: string): boolean {
   loadTasks();
   const task = tasks.find(t => t.id === taskId);
   if (!task || task.status === 'completed') return false;
-  
   if (task.pid) {
-    try {
-      process.kill(task.pid, 'SIGTERM');
-    } catch { /* process already gone */ }
+    try { process.kill(task.pid, 'SIGTERM'); } catch { /* ignore */ }
   }
-  
   task.status = 'cancelled';
   task.completedAt = new Date().toISOString();
   saveTasks();
@@ -209,23 +164,11 @@ export function getTask(taskId: string): TaskDefinition | undefined {
 
 export function listTasks(query?: TaskQuery): TaskDefinition[] {
   loadTasks();
-  
   let result = [...tasks];
-  
-  if (query?.status) {
-    result = result.filter(t => t.status === query.status);
-  }
-  if (query?.priority) {
-    result = result.filter(t => t.priority === query.priority);
-  }
-  if (query?.tag) {
-    result = result.filter(t => t.tags?.includes(query.tag!));
-  }
-  
-  if (query?.limit && query.limit > 0) {
-    result = result.slice(0, query.limit);
-  }
-  
+  if (query?.status) result = result.filter(t => t.status === query.status);
+  if (query?.priority) result = result.filter(t => t.priority === query.priority);
+  if (query?.tag) result = result.filter(t => t.tags?.includes(query.tag!));
+  if (query?.limit && query.limit > 0) result = result.slice(0, query.limit);
   return result;
 }
 
@@ -237,7 +180,7 @@ export function clearCompletedTasks(): number {
   return before - tasks.length;
 }
 
-export function getTaskStats(): { total: number; running: number; completed: number; failed: number } {
+export function getTaskStats() {
   loadTasks();
   return {
     total: tasks.length,
@@ -248,46 +191,62 @@ export function getTaskStats(): { total: number; running: number; completed: num
 }
 
 // ---------------------------------------------------------------------------
-// Background Task Runner (Arka Plan)
+// Background Runner
 // ---------------------------------------------------------------------------
 
 export function runInBackground(taskId: string): void {
   loadTasks();
   const task = tasks.find(t => t.id === taskId);
   if (!task) return;
-  
-  // Arka planda çalıştır
-  const child = require('child_process').spawn('sh', ['-c', task.command], {
+
+  const child = exec(task.command, {
     cwd: task.cwd,
-    stdio: ['ignore', 'pipe', 'pipe'],
-    detached: true,
+    timeout: task.timeout || 300_000,
+    maxBuffer: 10 * 1024 * 1024,
   });
-  
+
   task.pid = child.pid;
   task.status = 'running';
   task.startedAt = new Date().toISOString();
   saveTasks();
-  
+
   let output = '';
-  
-  child.stdout?.on('data', (data: Buffer) => {
-    output += data.toString();
-  });
-  
-  child.stderr?.on('data', (data: Buffer) => {
-    output += data.toString();
-  });
-  
-  child.on('close', (code: number) => {
+  child.stdout?.on('data', (data: Buffer) => { output += data.toString(); });
+  child.stderr?.on('data', (data: Buffer) => { output += data.toString(); });
+
+  child.on('close', (code) => {
     task.status = code === 0 ? 'completed' : 'failed';
     task.output = output.trim();
-    task.exitCode = code;
+    task.exitCode = code ?? 1;
     task.completedAt = new Date().toISOString();
     saveTasks();
-    log(`Görev tamamlandı: ${task.name} (kod: ${code})`);
   });
-  
+
   child.unref();
+}
+
+// ---------------------------------------------------------------------------
+// Cron Entegrasyonu
+// ---------------------------------------------------------------------------
+
+export function registerCronTasks(): void {
+  const cronFile = join(homedir(), '.seth', 'cron.json');
+
+  if (!existsSync(cronFile)) return;
+
+  try {
+    const cronJobs = JSON.parse(readFileSync(cronFile, 'utf-8'));
+    if (Array.isArray(cronJobs)) {
+      for (const job of cronJobs) {
+        createTask({
+          name: job.name || 'cron-task',
+          command: `echo "Cron: ${job.prompt || job.name}"`,
+          tags: ['cron', 'auto'],
+        });
+      }
+      log(`${cronJobs.length} cron görevi task sistemine aktarıldı`);
+    }
+  } catch { /* ignore */ }
 }
 
 // ---------------------------------------------------------------------------
@@ -306,4 +265,6 @@ export function initTaskSystem(): void {
     saveTasks();
     log(`${running.length} bekleyen görev iptal edildi (yeniden başlatma)`);
   }
+
+  registerCronTasks();
 }

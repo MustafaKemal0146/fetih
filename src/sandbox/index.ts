@@ -4,8 +4,8 @@
  * AGPL-3.0
  */
 
-import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync } from 'fs';
-import { join } from 'path';
+import { existsSync, mkdirSync, writeFileSync, readFileSync, rmSync, readdirSync } from 'fs';
+import { join, resolve, sep } from 'path';
 import { homedir, tmpdir } from 'os';
 import { execSync, exec } from 'child_process';
 
@@ -208,8 +208,14 @@ export function executeSandboxAsync(
 // ---------------------------------------------------------------------------
 
 export function sandboxWriteFile(sandboxDir: string, filePath: string, content: string): void {
-  const fullPath = join(sandboxDir, filePath);
-  const dir = join(sandboxDir, filePath, '..');
+  const fullPath = resolve(sandboxDir, filePath);
+  const resolvedSandbox = resolve(sandboxDir);
+
+  if (!fullPath.startsWith(resolvedSandbox + sep) && fullPath !== resolvedSandbox) {
+    throw new Error(`Güvenlik ihlali: Sandbox dışına erişim engellendi (${filePath})`);
+  }
+
+  const dir = join(fullPath, '..');
   if (!existsSync(dir)) {
     mkdirSync(dir, { recursive: true });
   }
@@ -217,7 +223,13 @@ export function sandboxWriteFile(sandboxDir: string, filePath: string, content: 
 }
 
 export function sandboxReadFile(sandboxDir: string, filePath: string): string {
-  const fullPath = join(sandboxDir, filePath);
+  const fullPath = resolve(sandboxDir, filePath);
+  const resolvedSandbox = resolve(sandboxDir);
+
+  if (!fullPath.startsWith(resolvedSandbox + sep) && fullPath !== resolvedSandbox) {
+    throw new Error(`Güvenlik ihlali: Sandbox dışına erişim engellendi (${filePath})`);
+  }
+
   if (!existsSync(fullPath)) {
     throw new Error(`Dosya bulunamadı: ${filePath}`);
   }
@@ -225,8 +237,6 @@ export function sandboxReadFile(sandboxDir: string, filePath: string): string {
 }
 
 export function sandboxListFiles(sandboxDir: string): string[] {
-  const { readdirSync } = require('fs');
-  const { join } = require('path');
 
   function walk(dir: string): string[] {
     const files: string[] = [];

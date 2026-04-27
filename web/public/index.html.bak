@@ -6,7 +6,6 @@
 <title>SETH v3.9.2</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet"/>
@@ -28,14 +27,14 @@
         },
         fontFamily: {
           sans: ['Space Grotesk', 'sans-serif'],
-          mono: ["Fira Code", 'monospace'],
+          mono: ['Fira Code', 'monospace'],
         }
       }
     }
   }
 </script>
 <style>
-/* ── CSS Tema Variables ── */
+/* ── CSS Theme Variables ── */
 :root {
   --accent:        #dc2626;
   --accent-dim:    rgba(220,38,38,0.15);
@@ -60,11 +59,6 @@
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: 'Space Grotesk', sans-serif; }
 
-/* ── Responsive Dashboard ── */
-@media (max-width: 768px) {
-  #view-dashboard .grid { grid-template-columns: 1fr !important; }
-  #view-dashboard .md\\:col-span-2 { grid-column: 1 !important; }
-}
 /* ── Scanline overlay ── */
 #scanline {
   position: fixed; inset: 0; z-index: 9999; pointer-events: none;
@@ -98,7 +92,7 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 .tab-btn {
   display: flex; align-items: center; gap: 6px;
   padding: 6px 14px; border-radius: 4px; border: none; background: transparent;
-  color: var(--text-dim); font-family: "Fira Code", monospace; font-size: 11px; font-weight: 500;
+  color: var(--text-dim); font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 500;
   letter-spacing: 0.06em; cursor: pointer; transition: all 0.15s; text-transform: uppercase;
 }
 .tab-btn:hover { color: var(--text); background: var(--surface); }
@@ -107,8 +101,8 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 
 /* ── Status bar ── */
 #status-bar { display: flex; align-items: center; gap: 16px; }
-#session-label { font-family: "Fira Code", monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
-#clock { font-family: "Fira Code", monospace; font-size: 10px; color: var(--muted); }
+#session-label { font-family: 'Fira Code', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+#clock { font-family: 'Fira Code', monospace; font-size: 10px; color: var(--muted); }
 
 /* ── View container ── */
 #views { height: calc(100vh - 52px); overflow: hidden; position: relative; }
@@ -138,7 +132,7 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 
 .msg-header {
   display: flex; align-items: center; gap: 6px; margin-bottom: 6px;
-  font-family: "Fira Code", monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
+  font-family: 'Fira Code', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
 }
 .msg-header.user { flex-direction: row-reverse; }
 .msg-header .role { font-weight: 700; }
@@ -153,7 +147,7 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 }
 .msg-bubble.user {
   background: var(--bg-deep); border-color: var(--border); color: #a1a1aa;
-  font-family: "Fira Code", monospace; font-size: 12px;
+  font-family: 'Fira Code', monospace; font-size: 12px;
 }
 .msg-bubble.assistant {
   background: rgba(14,14,18,0.7); border-color: rgba(220,38,38,0.12);
@@ -178,7 +172,7 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 .markdown-body li { margin-bottom: 3px; }
 .markdown-body code {
   background: var(--bg-deep); padding: 2px 6px; border-radius: 3px;
-  font-family: "Fira Code", monospace; color: #fbbf24; font-size: 0.88em;
+  font-family: 'Fira Code', monospace; color: #fbbf24; font-size: 0.88em;
   border: 1px solid var(--border);
 }
 .markdown-body pre {
@@ -186,48 +180,48 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
   overflow-x: auto; margin-bottom: 0.9rem; position: relative;
 }
 .markdown-body pre code { background: transparent; padding: 0; color: var(--text); border: none; }
-.markdown-body tablo { border-collapse: collapse; width: 100%; margin-bottom: 0.9rem; font-size: 0.85em; }
+.markdown-body table { border-collapse: collapse; width: 100%; margin-bottom: 0.9rem; font-size: 0.85em; }
 .markdown-body th, .markdown-body td { border: 1px solid var(--border); padding: 6px 10px; }
 .markdown-body th { background: var(--surface); color: var(--accent); }
 .markdown-body blockquote { border-left: 3px solid var(--accent); padding-left: 12px; color: var(--text-dim); margin: 0 0 0.7rem; }
 .markdown-body a { color: #f87171; text-decoration: underline; }
 .copy-btn {
   position: absolute; top: 6px; right: 6px; background: var(--border); color: var(--text-dim);
-  border: 1px solid var(--muted-dark); padding: 2px 8px; font-size: 9px; font-family: "Fira Code", monospace;
+  border: 1px solid var(--muted-dark); padding: 2px 8px; font-size: 9px; font-family: 'Fira Code', monospace;
   border-radius: 3px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em;
 }
 .copy-btn:hover { background: var(--accent); color: white; border-color: var(--accent); }
 
 /* ── Inline Tool Cards ── */
-.tool-kart {
+.tool-card {
   border: 1px solid var(--border); border-left: 3px solid #ca8a04; border-radius: 4px;
   background: rgba(10,10,14,0.8); overflow: hidden; margin: 6px 0;
-  font-family: "Fira Code", monospace; font-size: 11px; width: 100%;
+  font-family: 'Fira Code', monospace; font-size: 11px; width: 100%;
   transition: border-color 0.2s;
 }
-.tool-kart.done { border-left-color: #16a34a; }
-.tool-kart.error { border-left-color: var(--accent); }
+.tool-card.done { border-left-color: #16a34a; }
+.tool-card.error { border-left-color: var(--accent); }
 
-.tool-kart-header {
+.tool-card-header {
   display: flex; align-items: center; gap: 8px; padding: 8px 12px;
   cursor: pointer; user-select: none; background: rgba(0,0,0,0.3);
 }
-.tool-kart-header:hover { background: rgba(220,38,38,0.05); }
-.tool-kart-icon { font-size: 13px; }
-.tool-kart-name { font-weight: 700; color: #fbbf24; flex: 1; }
-.tool-kart.done .tool-kart-name { color: #4ade80; }
-.tool-kart.error .tool-kart-name { color: #f87171; }
+.tool-card-header:hover { background: rgba(220,38,38,0.05); }
+.tool-card-icon { font-size: 13px; }
+.tool-card-name { font-weight: 700; color: #fbbf24; flex: 1; }
+.tool-card.done .tool-card-name { color: #4ade80; }
+.tool-card.error .tool-card-name { color: #f87171; }
 .executing-badge {
   font-size: 9px; color: #ca8a04; text-transform: uppercase; letter-spacing: 0.1em;
   animation: blink-cursor 1s step-end infinite;
 }
-.tool-kart-toggle { color: var(--muted); font-size: 10px; transition: transform 0.2s; }
-.tool-kart-toggle.open { transform: rotate(90deg); }
+.tool-card-toggle { color: var(--muted); font-size: 10px; transition: transform 0.2s; }
+.tool-card-toggle.open { transform: rotate(90deg); }
 
-.tool-kart-body { display: none; padding: 10px 12px; border-top: 1px solid var(--border); }
-.tool-kart-body.visible { display: block; }
-.tool-kart-args { color: var(--text-dim); font-size: 10px; white-space: pre-wrap; word-break: break-all; }
-.tool-kart-result { color: #a1a1aa; font-size: 10px; white-space: pre-wrap; word-break: break-all; max-height: 300px; overflow-y: auto; }
+.tool-card-body { display: none; padding: 10px 12px; border-top: 1px solid var(--border); }
+.tool-card-body.visible { display: block; }
+.tool-card-args { color: var(--text-dim); font-size: 10px; white-space: pre-wrap; word-break: break-all; }
+.tool-card-result { color: #a1a1aa; font-size: 10px; white-space: pre-wrap; word-break: break-all; max-height: 300px; overflow-y: auto; }
 
 /* ── IDE Open Button ── */
 .ide-open-btn {
@@ -239,34 +233,34 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 .ide-open-btn:hover { border-color: var(--accent); color: var(--accent); }
 
 /* ── Diff Card ── */
-.diff-kart { margin: 6px 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--surface); }
-.diff-header { display: flex; align-items: center; gap: 8px; padding: 7px 12px; cursor: pointer; font-family: "Fira Code", monospace; font-size: 11px; color: var(--text); }
+.diff-card { margin: 6px 0; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; background: var(--surface); }
+.diff-header { display: flex; align-items: center; gap: 8px; padding: 7px 12px; cursor: pointer; font-family: 'Fira Code', monospace; font-size: 11px; color: var(--text); }
 .diff-header:hover { background: rgba(220,38,38,0.04); }
 .diff-body { display: none; border-top: 1px solid var(--border); overflow-x: auto; }
 .diff-body.visible { display: block; }
-.diff-lines { font-family: "Fira Code", monospace; font-size: 10px; padding: 8px 12px; line-height: 1.6; }
+.diff-lines { font-family: 'Fira Code', monospace; font-size: 10px; padding: 8px 12px; line-height: 1.6; }
 .diff-add { color: #4ade80; background: rgba(74,222,128,0.06); }
 .diff-del { color: #f87171; background: rgba(248,113,113,0.06); }
 .diff-ctx { color: var(--text-dim); }
 
 /* ── Plan Proposal Card ── */
-.plan-proposal-kart { margin: 8px 0; border: 1px solid rgba(220,38,38,0.3); border-radius: 8px; background: rgba(220,38,38,0.04); overflow: hidden; }
-.plan-proposal-header { padding: 10px 14px; border-bottom: 1px solid rgba(220,38,38,0.15); font-family: "Fira Code", monospace; }
+.plan-proposal-card { margin: 8px 0; border: 1px solid rgba(220,38,38,0.3); border-radius: 8px; background: rgba(220,38,38,0.04); overflow: hidden; }
+.plan-proposal-header { padding: 10px 14px; border-bottom: 1px solid rgba(220,38,38,0.15); font-family: 'Fira Code', monospace; }
 .plan-proposal-body { padding: 12px 14px; max-height: 400px; overflow-y: auto; }
 .plan-proposal-actions { display: flex; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--border); }
-.plan-btn { padding: 5px 16px; border-radius: 4px; font-size: 11px; cursor: pointer; font-family: "Fira Code", monospace; border: 1px solid; transition: 0.15s; }
+.plan-btn { padding: 5px 16px; border-radius: 4px; font-size: 11px; cursor: pointer; font-family: 'Fira Code', monospace; border: 1px solid; transition: 0.15s; }
 .plan-btn.approve { background: rgba(34,197,94,0.1); border-color: #16a34a; color: #4ade80; }
 .plan-btn.approve:hover { background: rgba(34,197,94,0.2); }
 .plan-btn.reject  { background: rgba(239,68,68,0.1); border-color: var(--accent); color: #f87171; }
 .plan-btn.reject:hover  { background: rgba(239,68,68,0.2); }
 
 /* ── Tasks Widget ── */
-.tasks-widget { margin: 8px 0; padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-family: "Fira Code", monospace; }
+.tasks-widget { margin: 8px 0; padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); font-family: 'Fira Code', monospace; }
 
-/* ── İşleniyor banner ── */
+/* ── Processing banner ── */
 #processing-banner {
   display: none; padding: 6px 32px; background: rgba(220,38,38,0.06);
-  border-top: 1px solid rgba(220,38,38,0.15); font-family: "Fira Code", monospace;
+  border-top: 1px solid rgba(220,38,38,0.15); font-family: 'Fira Code', monospace;
   font-size: 9px; color: rgba(220,38,38,0.6); letter-spacing: 0.15em; text-transform: uppercase;
   align-items: center; gap: 8px;
 }
@@ -287,7 +281,7 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 }
 #input-wrap:focus-within { border-color: var(--accent-focus); }
 #user-input {
-  width: 100%; background: transparent; color: var(--text); font-family: "Fira Code", monospace;
+  width: 100%; background: transparent; color: var(--text); font-family: 'Fira Code', monospace;
   font-size: 13px; padding: 14px 16px; min-height: 72px; max-height: 260px;
   resize: none; border: none; outline: none;
 }
@@ -297,15 +291,15 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
   display: flex; align-items: center; justify-content: space-between;
   padding: 8px 12px; border-top: 1px solid var(--border); background: rgba(0,0,0,0.2);
 }
-.input-hint { font-family: "Fira Code", monospace; font-size: 9px; color: var(--muted-dark); letter-spacing: 0.08em; }
+.input-hint { font-family: 'Fira Code', monospace; font-size: 9px; color: var(--muted-dark); letter-spacing: 0.08em; }
 .input-actions { display: flex; gap: 8px; align-items: center; }
-#lock-msg { font-family: "Fira Code", monospace; font-size: 9px; color: rgba(220,38,38,0.5); letter-spacing: 0.1em; text-transform: uppercase; display: none; }
+#lock-msg { font-family: 'Fira Code', monospace; font-size: 9px; color: rgba(220,38,38,0.5); letter-spacing: 0.1em; text-transform: uppercase; display: none; }
 #lock-msg.visible { display: block; }
 
 .btn-abort {
   display: none; align-items: center; gap: 6px; padding: 7px 16px;
   background: rgba(127,29,29,0.3); border: 1px solid var(--accent); border-radius: 4px;
-  color: #ef4444; font-family: "Fira Code", monospace; font-size: 10px; font-weight: 700;
+  color: #ef4444; font-family: 'Fira Code', monospace; font-size: 10px; font-weight: 700;
   letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.15s;
 }
 .btn-abort.visible { display: flex; }
@@ -314,7 +308,7 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 .btn-send {
   display: flex; align-items: center; gap: 6px; padding: 7px 18px;
   background: var(--accent-glow); border: 1px solid var(--accent-focus); border-radius: 4px;
-  color: var(--accent); font-family: "Fira Code", monospace; font-size: 10px; font-weight: 700;
+  color: var(--accent); font-family: 'Fira Code', monospace; font-size: 10px; font-weight: 700;
   letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all 0.15s;
 }
 .btn-send:hover { background: var(--accent); color: black; border-color: var(--accent); }
@@ -331,25 +325,25 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 .intel-header {
   padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;
 }
-.intel-header h3 { font-family: "Fira Code", monospace; font-size: 10px; font-weight: 700; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin: 0; flex: 1; }
+.intel-header h3 { font-family: 'Fira Code', monospace; font-size: 10px; font-weight: 700; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin: 0; flex: 1; }
 
 #telemetry { padding: 12px 16px; border-bottom: 1px solid var(--border); }
 .tele-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
-.tele-key { font-family: "Fira Code", monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
-.tele-val { font-family: "Fira Code", monospace; font-size: 9px; color: var(--text-dim); text-align: right; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tele-key { font-family: 'Fira Code', monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.tele-val { font-family: 'Fira Code', monospace; font-size: 9px; color: var(--text-dim); text-align: right; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tele-val.red { color: var(--accent); }
 
 #active-tools-section { flex: 1; overflow-y: auto; padding: 12px 16px; }
-.active-tools-title { font-family: "Fira Code", monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+.active-tools-title { font-family: 'Fira Code', monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
 .tool-widget {
   padding: 8px 10px; background: var(--accent-glow); border: 1px solid rgba(220,38,38,0.08);
   border-left: 2px solid var(--accent); border-radius: 3px; margin-bottom: 8px;
   animation: tool-pulse 2s ease-in-out infinite;
 }
 @keyframes tool-pulse { 0%, 100% { border-left-color: var(--accent); } 50% { opacity: 0.7; } }
-.tool-widget-name { font-family: "Fira Code", monospace; font-size: 9px; font-weight: 700; color: #f87171; text-transform: uppercase; letter-spacing: 0.08em; }
-.tool-widget-args { font-family: "Fira Code", monospace; font-size: 8px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 3px; }
-#no-tools-msg { font-family: "Fira Code", monospace; font-size: 9px; color: var(--muted-dark); font-style: italic; }
+.tool-widget-name { font-family: 'Fira Code', monospace; font-size: 9px; font-weight: 700; color: #f87171; text-transform: uppercase; letter-spacing: 0.08em; }
+.tool-widget-args { font-family: 'Fira Code', monospace; font-size: 8px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 3px; }
+#no-tools-msg { font-family: 'Fira Code', monospace; font-size: 9px; color: var(--muted-dark); font-style: italic; }
 
 /* ── SETTINGS VIEW ── */
 #view-settings {
@@ -360,8 +354,8 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 #settings-header {
   max-width: 1100px; margin-bottom: 28px;
 }
-#settings-header h2 { font-family: "Fira Code", monospace; font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin: 0 0 4px; }
-#settings-header p { font-family: "Fira Code", monospace; font-size: 9px; color: var(--muted); margin: 0; }
+#settings-header h2 { font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin: 0 0 4px; }
+#settings-header p { font-family: 'Fira Code', monospace; font-size: 9px; color: var(--muted); margin: 0; }
 
 /* QS grid */
 .qs-grid {
@@ -373,19 +367,19 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 .qs-grid--span { grid-column: 1 / -1; }
 
 /* Cards */
-.qs-kart {
+.qs-card {
   background: var(--bg-deep); border: 1px solid var(--border); border-radius: 6px; overflow: hidden;
   transition: border-color 0.2s;
 }
-.qs-kart:hover { border-color: var(--accent-dim); }
-.qs-kart__head {
+.qs-card:hover { border-color: var(--accent-dim); }
+.qs-card__head {
   display: flex; align-items: center; gap: 8px;
   padding: 12px 16px; border-bottom: 1px solid var(--border);
   background: rgba(14,14,18,0.6);
 }
-.qs-kart__head h3 { font-family: "Fira Code", monospace; font-size: 9px; font-weight: 700; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin: 0; flex: 1; }
-.qs-kart__head .ms { font-size: 14px; color: var(--muted); }
-.qs-kart__body { padding: 0; }
+.qs-card__head h3 { font-family: 'Fira Code', monospace; font-size: 9px; font-weight: 700; color: var(--accent); letter-spacing: 0.18em; text-transform: uppercase; margin: 0; flex: 1; }
+.qs-card__head .ms { font-size: 14px; color: var(--muted); }
+.qs-card__body { padding: 0; }
 
 /* Rows */
 .qs-row {
@@ -393,14 +387,14 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
   padding: 10px 16px; gap: 12px;
 }
 .qs-row + .qs-row { border-top: 1px solid rgba(28,28,36,0.8); }
-.qs-row__label { font-family: "Fira Code", monospace; font-size: 9px; color: var(--muted-mid); text-transform: uppercase; letter-spacing: 0.08em; flex-shrink: 0; }
+.qs-row__label { font-family: 'Fira Code', monospace; font-size: 9px; color: var(--muted-mid); text-transform: uppercase; letter-spacing: 0.08em; flex-shrink: 0; }
 .qs-row__value { display: flex; align-items: center; gap: 6px; }
 
 /* Segmented control */
 .seg { display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: 5px; padding: 3px; gap: 2px; }
 .seg-btn {
   padding: 5px 11px; border-radius: 3px; border: none; background: transparent;
-  color: var(--muted-mid); font-family: "Fira Code", monospace; font-size: 9px; font-weight: 700;
+  color: var(--muted-mid); font-family: 'Fira Code', monospace; font-size: 9px; font-weight: 700;
   cursor: pointer; transition: all 0.12s; letter-spacing: 0.06em; text-transform: uppercase;
   line-height: 1;
 }
@@ -414,7 +408,7 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 /* Selects */
 .qs-select {
   background: var(--bg); border: 1px solid var(--border); border-radius: 4px;
-  color: #a1a1aa; padding: 6px 10px; font-family: "Fira Code", monospace; font-size: 10px;
+  color: #a1a1aa; padding: 6px 10px; font-family: 'Fira Code', monospace; font-size: 10px;
   outline: none; cursor: pointer; transition: border-color 0.15s; appearance: none;
   min-width: 160px;
 }
@@ -424,28 +418,28 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 .qs-input-row { display: flex; gap: 6px; width: 100%; }
 .qs-input {
   flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 4px;
-  color: #a1a1aa; padding: 6px 10px; font-family: "Fira Code", monospace; font-size: 10px;
+  color: #a1a1aa; padding: 6px 10px; font-family: 'Fira Code', monospace; font-size: 10px;
   outline: none; transition: border-color 0.15s; min-width: 0;
 }
 .qs-input:focus { border-color: var(--accent-hover); color: var(--text); }
 .qs-input::placeholder { color: var(--muted-dark); }
 .qs-input-apply {
   padding: 6px 10px; background: var(--accent-glow); border: 1px solid var(--accent-border);
-  border-radius: 4px; color: var(--accent); font-family: "Fira Code", monospace; font-size: 9px;
+  border-radius: 4px; color: var(--accent); font-family: 'Fira Code', monospace; font-size: 9px;
   font-weight: 700; cursor: pointer; transition: all 0.12s; white-space: nowrap;
 }
 .qs-input-apply:hover { background: var(--accent); color: black; }
 
-/* API Anahtarları */
+/* API Keys */
 .apikey-row { display: flex; align-items: center; padding: 9px 16px; gap: 12px; }
 .apikey-row + .apikey-row { border-top: 1px solid rgba(28,28,36,0.8); }
-.apikey-name { font-family: "Fira Code", monospace; font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; width: 80px; flex-shrink: 0; }
-.apikey-val { font-family: "Fira Code", monospace; font-size: 10px; color: var(--muted); flex: 1; letter-spacing: 0.1em; }
+.apikey-name { font-family: 'Fira Code', monospace; font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; width: 80px; flex-shrink: 0; }
+.apikey-val { font-family: 'Fira Code', monospace; font-size: 10px; color: var(--muted); flex: 1; letter-spacing: 0.1em; }
 .apikey-val.set { color: var(--muted-mid); }
 .apikey-action { display: flex; align-items: center; gap: 6px; }
 .apikey-btn {
   padding: 4px 8px; background: transparent; border: 1px solid var(--border); border-radius: 3px;
-  color: var(--muted-mid); font-family: "Fira Code", monospace; font-size: 8px; font-weight: 700;
+  color: var(--muted-mid); font-family: 'Fira Code', monospace; font-size: 8px; font-weight: 700;
   cursor: pointer; transition: all 0.12s; letter-spacing: 0.06em; text-transform: uppercase;
   white-space: nowrap;
 }
@@ -454,41 +448,41 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 .apikey-input-row { display: flex; gap: 4px; flex: 1; }
 .apikey-input {
   flex: 1; background: var(--bg); border: 1px solid var(--accent-border); border-radius: 3px;
-  color: var(--text); padding: 4px 8px; font-family: "Fira Code", monospace; font-size: 10px;
+  color: var(--text); padding: 4px 8px; font-family: 'Fira Code', monospace; font-size: 10px;
   outline: none; min-width: 0;
 }
 
-/* Tema karts */
+/* Theme cards */
 .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px 16px; }
-.theme-kart {
+.theme-card {
   border: 1px solid var(--border); border-radius: 5px; overflow: hidden;
   cursor: pointer; transition: all 0.15s; position: relative;
 }
-.theme-kart:hover { border-color: var(--accent-hover); transform: translateY(-1px); }
-.theme-kart.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-border); }
+.theme-card:hover { border-color: var(--accent-hover); transform: translateY(-1px); }
+.theme-card.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent-border); }
 .theme-swatch { height: 32px; width: 100%; }
 .theme-info { padding: 6px 8px; background: var(--bg-deep); }
-.theme-name { font-family: "Fira Code", monospace; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); }
-.theme-kart.active .theme-name { color: var(--accent); }
+.theme-name { font-family: 'Fira Code', monospace; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-dim); }
+.theme-card.active .theme-name { color: var(--accent); }
 .theme-check {
   position: absolute; top: 4px; right: 4px; width: 14px; height: 14px;
   background: var(--accent); border-radius: 50%; display: none;
   font-size: 8px; color: white; align-items: center; justify-content: center;
 }
-.theme-kart.active .theme-check { display: flex; }
+.theme-card.active .theme-check { display: flex; }
 
-/* Session kart */
+/* Session card */
 .session-layout { display: flex; gap: 0; align-items: stretch; }
 .session-stats { flex: 1; padding: 0; }
 .session-stat-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 16px; }
 .session-stat-row + .session-stat-row { border-top: 1px solid rgba(28,28,36,0.8); }
-.session-stat-key { font-family: "Fira Code", monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
-.session-stat-val { font-family: "Fira Code", monospace; font-size: 9px; color: var(--text-dim); }
+.session-stat-key { font-family: 'Fira Code', monospace; font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.session-stat-val { font-family: 'Fira Code', monospace; font-size: 9px; color: var(--text-dim); }
 .session-stat-val.accent { color: var(--accent); }
 .session-actions { width: 200px; flex-shrink: 0; border-left: 1px solid var(--border); display: flex; flex-direction: column; }
 .session-action-btn {
   flex: 1; display: flex; align-items: center; gap: 8px; padding: 0 14px;
-  background: transparent; border: none; color: var(--muted-mid); font-family: "Fira Code", monospace;
+  background: transparent; border: none; color: var(--muted-mid); font-family: 'Fira Code', monospace;
   font-size: 9px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
   cursor: pointer; transition: all 0.12s; text-align: left;
 }
@@ -500,7 +494,7 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 /* Toast */
 .qs-toast {
   margin: 0 16px 12px; padding: 8px 12px; border-radius: 4px;
-  font-family: "Fira Code", monospace; font-size: 9px; border: 1px solid; display: none;
+  font-family: 'Fira Code', monospace; font-size: 9px; border: 1px solid; display: none;
 }
 .qs-toast.visible { display: block; }
 .qs-toast.ok { background: rgba(22,163,74,0.08); border-color: rgba(22,163,74,0.3); color: #4ade80; }
@@ -516,10 +510,10 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
   padding: 14px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 16px;
   background: rgba(6,6,8,0.9); flex-shrink: 0;
 }
-#logs-header h2 { font-family: "Fira Code", monospace; font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin: 0; flex: 1; }
+#logs-header h2 { font-family: 'Fira Code', monospace; font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.15em; text-transform: uppercase; margin: 0; flex: 1; }
 .btn-sm {
   padding: 5px 12px; background: transparent; border: 1px solid var(--border); border-radius: 3px;
-  color: var(--muted-mid); font-family: "Fira Code", monospace; font-size: 9px; font-weight: 600;
+  color: var(--muted-mid); font-family: 'Fira Code', monospace; font-size: 9px; font-weight: 600;
   letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; transition: all 0.15s;
 }
 .btn-sm:hover { border-color: var(--accent-hover); color: var(--accent); }
@@ -527,7 +521,7 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 
 #log-container {
   flex: 1; overflow-y: auto; padding: 16px 24px;
-  font-family: "Fira Code", monospace; font-size: 10px; line-height: 1.7;
+  font-family: 'Fira Code', monospace; font-size: 10px; line-height: 1.7;
   background: var(--bg-dark);
 }
 .log-line { display: flex; gap: 12px; padding: 2px 0; }
@@ -560,11 +554,8 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
     <button class="tab-btn active" data-view="chat" onclick="switchTab('chat')">
       <span class="ms tab-icon">chat</span> Chat
     </button>
-    <button class="tab-btn" data-view="dashboard" onclick="switchTab('dashboard')">
-      <span class="ms tab-icon">monitoring</span> Dashboard
-    </button>
     <button class="tab-btn" data-view="settings" onclick="switchTab('settings')">
-      <span class="ms tab-icon">tune</span> Ayarlar
+      <span class="ms tab-icon">tune</span> Settings
     </button>
     <button class="tab-btn" data-view="logs" onclick="switchTab('logs')">
       <span class="ms tab-icon">terminal</span> Logs
@@ -598,10 +589,10 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
             <span class="input-hint">Enter → send &nbsp;·&nbsp; Shift+Enter → newline &nbsp;·&nbsp; ↑↓ → history</span>
             <div class="input-actions">
               <span id="lock-msg">SYSTEM LOCKED…</span>
-              <button id="abort-btn" class="btn-abort" onclick="sendİptal()">
-                <span class="ms" style="font-size:14px">cancel</span> İptal
+              <button id="abort-btn" class="btn-abort" onclick="sendAbort()">
+                <span class="ms" style="font-size:14px">cancel</span> Abort
               </button>
-              <button id="send-btn" class="btn-send" onclick="handleGönder()">
+              <button id="send-btn" class="btn-send" onclick="handleSend()">
                 Execute <span class="ms btn-icon">send</span>
               </button>
             </div>
@@ -633,43 +624,6 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
     </aside>
   </div>
 
-  <!-- ▸ DASHBOARD VIEW ── -->
-  <div id="view-dashboard" class="view" class="overflow-y-auto p-4 md:p-6 lg:p-8">
-    <div style="max-width:1200px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
-        <div>
-          <h2 style="font-family:"Fira Code",monospace;font-size:11px;font-weight:700;color:var(--accent);letter-spacing:0.2em;text-transform:uppercase;margin:0 0 4px;">Operasyon Paneli</h2>
-          <p style="font-family:"Fira Code",monospace;font-size:9px;color:var(--muted);margin:0;">Anlık analitik & oturum yönetimi</p>
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button onclick="refreshDashboard()" style="background:var(--btn-bg,var(--accent-glow));border:1px solid var(--accent-focus);color:var(--accent);padding:5px 14px;border-radius:4px;cursor:pointer;font-family:"Fira Code",monospace;font-size:10px;">Yenile</button>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4" style="max-width:1200px;">
-        <div class="qs-kart" class="md:col-span-2">
-          <div class="qs-kart__head"><span class="ms">bar_chart</span><h3>Token Kullanımı</h3></div>
-          <div class="qs-kart__body" style="padding:16px;height:220px;"><canvas id="tokenChart"></canvas></div>
-        </div>
-        <div class="qs-kart">
-          <div class="qs-kart__head"><span class="ms">payments</span><h3>Maliyet Tahmini</h3></div>
-          <div class="qs-kart__body" style="padding:20px;text-align:center;">
-            <div style="font-size:28px;font-weight:700;color:var(--accent);font-family:"Fira Code",monospace;" id="dash-cost">$0.000000</div>
-            <div style="font-size:10px;color:var(--muted);margin-top:4px;">Tahmini toplam maliyet</div>
-          </div>
-        </div>
-        <div class="qs-kart">
-          <div class="qs-kart__head"><span class="ms">donut_small</span><h3>Modeller</h3></div>
-          <div class="qs-kart__body" style="padding:16px;height:200px;"><canvas id="modelChart"></canvas></div>
-        </div>
-        <div class="qs-kart" class="md:col-span-2">
-          <div class="qs-kart__head"><span class="ms">grid_view</span><h3>AI Panosu</h3></div>
-          <div class="qs-kart__body" id="a2ui-canvas" style="min-height:80px;padding:20px;color:var(--muted);font-size:10px;text-align:center;font-family:"Fira Code",monospace;">
-            AI panosu boş.
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
   <!-- ▸ SETTINGS VIEW ── -->
   <div id="view-settings" class="view">
     <div id="settings-header">
@@ -680,12 +634,12 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
     <div class="qs-grid">
 
       <!-- Card 1: Model & Effort -->
-      <div class="qs-kart">
-        <div class="qs-kart__head">
+      <div class="qs-card">
+        <div class="qs-card__head">
           <span class="ms">hub</span>
           <h3>Model &amp; Effort</h3>
         </div>
-        <div class="qs-kart__body">
+        <div class="qs-card__body">
           <div class="qs-row">
             <span class="qs-row__label">Provider</span>
             <div class="qs-row__value">
@@ -754,13 +708,13 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
         </div>
       </div>
 
-      <!-- Card 2: API Anahtarları -->
-      <div class="qs-kart">
-        <div class="qs-kart__head">
+      <!-- Card 2: API Keys -->
+      <div class="qs-card">
+        <div class="qs-card__head">
           <span class="ms">key</span>
-          <h3>API Anahtarları</h3>
+          <h3>API Keys</h3>
         </div>
-        <div class="qs-kart__body">
+        <div class="qs-card__body">
           <div class="apikey-row" id="apikey-row-claude">
             <span class="apikey-name">Claude</span>
             <span class="apikey-val" id="apikey-val-claude">not set</span>
@@ -822,12 +776,12 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
       </div>
 
       <!-- Card 3: Security -->
-      <div class="qs-kart">
-        <div class="qs-kart__head">
+      <div class="qs-card">
+        <div class="qs-card__head">
           <span class="ms">shield</span>
           <h3>Security</h3>
         </div>
-        <div class="qs-kart__body">
+        <div class="qs-card__body">
           <div class="qs-row">
             <span class="qs-row__label">Permission</span>
             <div class="qs-row__value">
@@ -852,39 +806,39 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
       </div>
 
       <!-- Card 4: Appearance -->
-      <div class="qs-kart">
-        <div class="qs-kart__head">
+      <div class="qs-card">
+        <div class="qs-card__head">
           <span class="ms">palette</span>
           <h3>Appearance</h3>
         </div>
-        <div class="qs-kart__body">
+        <div class="qs-card__body">
           <div class="theme-grid">
-            <div class="theme-kart active" id="theme-kart-dark" onclick="applyTema('dark')">
+            <div class="theme-card active" id="theme-card-dark" onclick="applyTheme('dark')">
               <div class="theme-swatch" style="background:linear-gradient(135deg,#060608 50%,#1e88e5 100%);"></div>
               <div class="theme-info"><div class="theme-name">Dark</div></div>
               <div class="theme-check">✓</div>
             </div>
-            <div class="theme-kart" id="theme-kart-light" onclick="applyTema('light')">
+            <div class="theme-card" id="theme-card-light" onclick="applyTheme('light')">
               <div class="theme-swatch" style="background:linear-gradient(135deg,#f5f5f5 50%,#0d47a1 100%);"></div>
               <div class="theme-info"><div class="theme-name">Light</div></div>
               <div class="theme-check">✓</div>
             </div>
-            <div class="theme-kart" id="theme-kart-cyberpunk" onclick="applyTema('cyberpunk')">
+            <div class="theme-card" id="theme-card-cyberpunk" onclick="applyTheme('cyberpunk')">
               <div class="theme-swatch" style="background:linear-gradient(135deg,#050510 50%,#00ff41 100%);"></div>
               <div class="theme-info"><div class="theme-name">Cyberpunk</div></div>
               <div class="theme-check">✓</div>
             </div>
-            <div class="theme-kart" id="theme-kart-retro" onclick="applyTema('retro')">
+            <div class="theme-card" id="theme-card-retro" onclick="applyTheme('retro')">
               <div class="theme-swatch" style="background:linear-gradient(135deg,#1a0a00 50%,#ff6b35 100%);"></div>
               <div class="theme-info"><div class="theme-name">Retro</div></div>
               <div class="theme-check">✓</div>
             </div>
-            <div class="theme-kart" id="theme-kart-ocean" onclick="applyTema('ocean')">
+            <div class="theme-card" id="theme-card-ocean" onclick="applyTheme('ocean')">
               <div class="theme-swatch" style="background:linear-gradient(135deg,#001420 50%,#006064 100%);"></div>
               <div class="theme-info"><div class="theme-name">Ocean</div></div>
               <div class="theme-check">✓</div>
             </div>
-            <div class="theme-kart" id="theme-kart-sunset" onclick="applyTema('sunset')">
+            <div class="theme-card" id="theme-card-sunset" onclick="applyTheme('sunset')">
               <div class="theme-swatch" style="background:linear-gradient(135deg,#1a0010 50%,#e91e63 100%);"></div>
               <div class="theme-info"><div class="theme-name">Sunset</div></div>
               <div class="theme-check">✓</div>
@@ -894,12 +848,12 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
       </div>
 
       <!-- Card 5: Session (full width) -->
-      <div class="qs-kart qs-grid--span">
-        <div class="qs-kart__head">
+      <div class="qs-card qs-grid--span">
+        <div class="qs-card__head">
           <span class="ms">analytics</span>
           <h3>Session</h3>
         </div>
-        <div class="qs-kart__body">
+        <div class="qs-card__body">
           <div class="session-layout">
             <div class="session-stats">
               <div class="session-stat-row">
@@ -935,7 +889,7 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
                 <span class="ms">undo</span> Undo Last
               </button>
               <button class="session-action-btn" onclick="sendMsg('/kaydet')">
-                <span class="ms">save</span> Kaydet Session
+                <span class="ms">save</span> Save Session
               </button>
               <button class="session-action-btn danger" onclick="if(confirm('Wipe all memory?')) sendMsg('/hafıza-temizle')">
                 <span class="ms">delete_forever</span> Wipe Memory
@@ -953,7 +907,7 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
     <div id="logs-header">
       <h2>System Logs</h2>
       <button class="btn-sm" id="autoscroll-btn" onclick="toggleAutoScroll()" title="Toggle auto-scroll">Auto-Scroll: ON</button>
-      <button class="btn-sm" onclick="clearLogs()">Temizle</button>
+      <button class="btn-sm" onclick="clearLogs()">Clear</button>
     </div>
     <div id="log-container"></div>
   </div>
@@ -962,7 +916,7 @@ html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text);
 
 <script>
 // ══════════════════════════════════════════════════════
-//  Tema System
+//  Theme System
 // ══════════════════════════════════════════════════════
 const WEB_THEMES = {
   dark:      { '--accent':'#dc2626', '--accent-dim':'rgba(220,38,38,0.15)', '--accent-glow':'rgba(220,38,38,0.08)', '--accent-border':'rgba(220,38,38,0.3)', '--accent-hover':'rgba(220,38,38,0.4)', '--accent-focus':'rgba(220,38,38,0.5)', '--bg':'#060608', '--bg-dark':'#050507', '--bg-deep':'#0a0a0e', '--surface':'#0e0e12', '--border':'#1c1c24', '--text':'#e4e4e7', '--text-dim':'#71717a', '--muted':'#3f3f46', '--muted-mid':'#52525b', '--muted-dark':'#27272a', '--grid-line':'rgba(220,38,38,0.03)' },
@@ -974,7 +928,7 @@ const WEB_THEMES = {
 };
 
 // ══════════════════════════════════════════════════════
-//  Provider → Modeller map
+//  Provider → Models map
 // ══════════════════════════════════════════════════════
 const PROVIDER_MODELS = {
   claude:      ['claude-opus-4-5-20251101','claude-sonnet-4-5-20251001','claude-haiku-4-5-20251001','claude-opus-4','claude-sonnet-4','claude-3-5-sonnet-20241022','claude-3-5-haiku-20241022'],
@@ -994,7 +948,7 @@ const PROVIDER_MODELS = {
 // ══════════════════════════════════════════════════════
 let socket;
 let reconnectDelay = 1000;
-let isİşleniyor = false;
+let isProcessing = false;
 let isAutoScroll = true;
 let isLogAutoScroll = true;
 let msgHistory = [];
@@ -1036,7 +990,7 @@ function connect() {
   socket.onopen = () => {
     $('conn-dot').classList.add('online');
     if ($('conn-dot-r')) $('conn-dot-r').style.background = '#dc2626';
-    $('session-label').innerText = 'BAĞLANTI_AKTİF';
+    $('session-label').innerText = 'LINK_ACTIVE';
     $('session-label').style.color = '#dc2626';
     appendLog('Kernel link established — bi-directional telemetry active.', 'green');
     reconnectDelay = 1000;
@@ -1045,7 +999,7 @@ function connect() {
   socket.onclose = () => {
     $('conn-dot').classList.remove('online');
     if ($('conn-dot-r')) $('conn-dot-r').style.background = '#3f3f46';
-    $('session-label').innerText = 'YENİDEN_BAĞLANIYOR…';
+    $('session-label').innerText = 'RECONNECTING…';
     $('session-label').style.color = '#3f3f46';
     appendLog(`Link lost — retrying in ${reconnectDelay/1000}s`, 'dim');
     setTimeout(connect, reconnectDelay);
@@ -1059,9 +1013,9 @@ function connect() {
         $('chat-flow').innerHTML = '';
         msg.data.history.forEach(m => appendMessage(m.role, m.content));
         if (msg.data.stats) updateStats(msg.data.stats);
-        setİşleniyor(msg.data.status.processing);
+        setProcessing(msg.data.status.processing);
         if (msg.data.effort) applyEffortUI(msg.data.effort);
-        if (msg.data.settings) applyAyarlarUI(msg.data.settings);
+        if (msg.data.settings) applySettingsUI(msg.data.settings);
         break;
       case 'text':
         appendMessage('assistant', msg.data, true);
@@ -1082,9 +1036,9 @@ function connect() {
         break;
       case 'status':
         $('session-label').innerText = msg.data.processing ? 'NEURAL_PROCESSING' : 'LINK_READY';
-        setİşleniyor(msg.data.processing);
+        setProcessing(msg.data.processing);
         if (!msg.data.processing) {
-          // Kaldır streaming cursor from all bubbles
+          // Remove streaming cursor from all bubbles
           document.querySelectorAll('.msg-bubble.streaming').forEach(b => b.classList.remove('streaming'));
         }
         break;
@@ -1093,7 +1047,7 @@ function connect() {
         appendLog('Effort → ' + msg.data.toUpperCase(), 'default');
         break;
       case 'settings':
-        applyAyarlarUI(msg.data);
+        applySettingsUI(msg.data);
         break;
       case 'models':
         populateModelList(msg.data.provider, msg.data.models);
@@ -1119,10 +1073,10 @@ function connect() {
 }
 
 // ══════════════════════════════════════════════════════
-//  İşleniyor state
+//  Processing state
 // ══════════════════════════════════════════════════════
-function setİşleniyor(on) {
-  isİşleniyor = on;
+function setProcessing(on) {
+  isProcessing = on;
   $('user-input').disabled = on;
   $('lock-msg').classList.toggle('visible', on);
   $('abort-btn').classList.toggle('visible', on);
@@ -1140,7 +1094,7 @@ function updateStats(s) {
   if (s.turns !== undefined) $('tele-turns').innerText = s.turns;
   const total = (s.inputTokens || 0) + (s.outputTokens || 0);
   $('tele-tokens').innerText = formatTokens(total);
-  // Session kart
+  // Session card
   if (s.provider && $('sess-provider')) $('sess-provider').innerText = s.provider.toUpperCase();
   if (s.model && $('sess-model')) $('sess-model').innerText = s.model;
   if (s.turns !== undefined && $('sess-turns')) $('sess-turns').innerText = s.turns;
@@ -1170,7 +1124,7 @@ function applyEffortUI(level) {
   if (seg) seg.querySelectorAll('.seg-btn').forEach(b => b.classList.toggle('active', b.dataset.val === level));
 }
 
-function applyAyarlarUI(s) {
+function applySettingsUI(s) {
   if (s.permissionLevel) {
     $('tele-perm').innerText = s.permissionLevel;
     const seg = $('perm-seg');
@@ -1184,14 +1138,14 @@ function applyAyarlarUI(s) {
     const t = WEB_THEMES[s.theme] || WEB_THEMES.dark;
     const r = document.documentElement;
     Object.entries(t).forEach(([k, v]) => r.style.setProperty(k, v));
-    document.querySelectorAll('.theme-kart').forEach(c => c.classList.remove('active'));
-    const tc = $('theme-kart-' + s.theme);
+    document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+    const tc = $('theme-card-' + s.theme);
     if (tc) tc.classList.add('active');
   }
 }
 
 // ══════════════════════════════════════════════════════
-//  Gönder / İptal
+//  Send / Abort
 // ══════════════════════════════════════════════════════
 function sendMsg(text) {
   if (!socket || socket.readyState !== WebSocket.OPEN) return;
@@ -1205,8 +1159,8 @@ function sendMsg(text) {
   }
 }
 
-function handleGönder() {
-  if (isİşleniyor) return;
+function handleSend() {
+  if (isProcessing) return;
   const text = $('user-input').value.trim();
   if (!text) return;
   if (!text.startsWith('/')) {
@@ -1218,7 +1172,7 @@ function handleGönder() {
   $('user-input').value = '';
 }
 
-function sendİptal() {
+function sendAbort() {
   if (socket) socket.send(JSON.stringify({ type: 'abort' }));
   appendLog('ABORT signal sent.', 'yellow');
 }
@@ -1253,12 +1207,12 @@ function setProfileSeg(profile) {
   sendMsg('/güvenlik ' + profile);
 }
 
-function applyTema(name) {
+function applyTheme(name) {
   const t = WEB_THEMES[name] || WEB_THEMES.dark;
   const r = document.documentElement;
   Object.entries(t).forEach(([k, v]) => r.style.setProperty(k, v));
-  document.querySelectorAll('.theme-kart').forEach(c => c.classList.remove('active'));
-  const tc = $('theme-kart-' + name);
+  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+  const tc = $('theme-card-' + name);
   if (tc) tc.classList.add('active');
   sendMsg('/tema ' + name);
 }
@@ -1312,8 +1266,8 @@ function startApiKeyInput(provider) {
   if (!actionEl) return;
   actionEl.innerHTML = `<div class="apikey-input-row">
     <input class="apikey-input" id="apikey-inp-${provider}" type="password" placeholder="sk-…"/>
-    <button class="apikey-btn" onclick="saveApiKey('${provider}')">Kaydet</button>
-    <button class="apikey-btn" aria-label="Cancel API key input" title="Cancel" onclick="cancelApiKeyInput('${provider}')">✕</button>
+    <button class="apikey-btn" onclick="saveApiKey('${provider}')">Save</button>
+    <button class="apikey-btn" onclick="cancelApiKeyInput('${provider}')">✕</button>
   </div>`;
   const inp = $('apikey-inp-' + provider);
   if (inp) { inp.focus(); inp.addEventListener('keydown', e => { if (e.key === 'Enter') saveApiKey(provider); if (e.key === 'Escape') cancelApiKeyInput(provider); }); }
@@ -1327,7 +1281,7 @@ function saveApiKey(provider) {
   const valEl = $('apikey-val-' + provider);
   if (valEl) { valEl.innerText = '••••••••'; valEl.classList.add('set'); }
   const actionEl = $('apikey-action-' + provider);
-  if (actionEl) actionEl.innerHTML = `<button class="apikey-btn danger" aria-label="Delete API key" title="Delete" onclick="deleteApiKey('${provider}')">× Del</button>`;
+  if (actionEl) actionEl.innerHTML = `<button class="apikey-btn danger" onclick="deleteApiKey('${provider}')">× Del</button>`;
 }
 
 function cancelApiKeyInput(provider) {
@@ -1336,7 +1290,7 @@ function cancelApiKeyInput(provider) {
   const actionEl = $('apikey-action-' + provider);
   if (!actionEl) return;
   if (hasKey) {
-    actionEl.innerHTML = `<button class="apikey-btn danger" aria-label="Delete API key" title="Delete" onclick="deleteApiKey('${provider}')">× Del</button>`;
+    actionEl.innerHTML = `<button class="apikey-btn danger" onclick="deleteApiKey('${provider}')">× Del</button>`;
   } else {
     actionEl.innerHTML = `<button class="apikey-btn" onclick="startApiKeyInput('${provider}')">+ Set</button>`;
   }
@@ -1393,7 +1347,7 @@ function parseContent(content) {
   if (!Array.isArray(content)) return JSON.stringify(content, null, 2);
   return content.map(b => {
     if (b.type === 'text') return b.text || '';
-    if (b.type === 'tool_result') return ''; // shown as inline karts
+    if (b.type === 'tool_result') return ''; // shown as inline cards
     if (b.type === 'tool_use') return '';
     return '';
   }).join('');
@@ -1465,25 +1419,25 @@ function onToolCall(name, input) {
   toolCallSeq++;
   const id = 'tc-' + name + '-' + toolCallSeq;
 
-  // ── Inline kart in chat ──
-  const kart = document.createElement('div');
-  kart.className = 'tool-kart';
-  kart.id = id;
-  kart.setAttribute('data-tool', name);
+  // ── Inline card in chat ──
+  const card = document.createElement('div');
+  card.className = 'tool-card';
+  card.id = id;
+  card.setAttribute('data-tool', name);
 
   const argsText = JSON.stringify(input, null, 2);
-  kart.innerHTML = `
-    <div class="tool-kart-header" onclick="toggleToolCard('${id}')">
-      <span class="tool-kart-icon">⚙</span>
-      <span class="tool-kart-name">${escHtml(name)}</span>
+  card.innerHTML = `
+    <div class="tool-card-header" onclick="toggleToolCard('${id}')">
+      <span class="tool-card-icon">⚙</span>
+      <span class="tool-card-name">${escHtml(name)}</span>
       <span class="executing-badge">EXECUTING…</span>
-      <span class="tool-kart-toggle" id="${id}-toggle">▶</span>
+      <span class="tool-card-toggle" id="${id}-toggle">▶</span>
     </div>
-    <div class="tool-kart-body" id="${id}-body">
-      <div class="tool-kart-args">${escHtml(argsText)}</div>
+    <div class="tool-card-body" id="${id}-body">
+      <div class="tool-card-args">${escHtml(argsText)}</div>
     </div>`;
 
-  $('chat-flow').appendChild(kart);
+  $('chat-flow').appendChild(card);
   if (isAutoScroll) $('chat-flow').scrollTop = $('chat-flow').scrollHeight;
 
   // ── Sidebar widget ──
@@ -1496,27 +1450,27 @@ function onToolResult(name, output, isError) {
   const dur = toolCallTimes[name] ? Date.now() - toolCallTimes[name] : 0;
   delete toolCallTimes[name];
 
-  // Update the most recent kart for this tool
-  const karts = document.querySelectorAll('.tool-kart[data-tool="' + name + '"]');
-  const kart = karts[karts.length - 1];
-  if (kart) {
-    kart.classList.add(isError ? 'error' : 'done');
-    const badge = kart.querySelector('.executing-badge');
+  // Update the most recent card for this tool
+  const cards = document.querySelectorAll('.tool-card[data-tool="' + name + '"]');
+  const card = cards[cards.length - 1];
+  if (card) {
+    card.classList.add(isError ? 'error' : 'done');
+    const badge = card.querySelector('.executing-badge');
     if (badge) badge.remove();
-    const nameEl = kart.querySelector('.tool-kart-name');
-    const header = kart.querySelector('.tool-kart-header');
+    const nameEl = card.querySelector('.tool-card-name');
+    const header = card.querySelector('.tool-card-header');
     if (header) {
       const durSpan = document.createElement('span');
       durSpan.style.cssText = 'font-size:9px;color:#3f3f46;margin-left:auto;padding-right:4px;';
       durSpan.innerText = (isError ? '✗' : '✓') + ' ' + dur + 'ms';
-      header.insertBefore(durSpan, kart.querySelector('.tool-kart-toggle'));
+      header.insertBefore(durSpan, card.querySelector('.tool-card-toggle'));
     }
     // Put result in body
-    const body = kart.querySelector('.tool-kart-body');
+    const body = card.querySelector('.tool-card-body');
     if (body) {
-      const argsDiv = body.querySelector('.tool-kart-args');
+      const argsDiv = body.querySelector('.tool-card-args');
       const resultDiv = document.createElement('div');
-      resultDiv.className = 'tool-kart-result';
+      resultDiv.className = 'tool-card-result';
       const out = output || '';
       const snippet = out.slice(0, 2000);
       const truncated = out.length > 2000 ? '\n… (truncated)' : '';
@@ -1531,20 +1485,20 @@ function onToolResult(name, output, isError) {
   appendLog((isError ? '✗ ' : '✓ ') + name + ': ' + snippet, isError ? 'red' : 'green');
   if (isAutoScroll) $('chat-flow').scrollTop = $('chat-flow').scrollHeight;
 
-  // IDE Bridge: dosya araçları için "Düzenleörde Aç" butonu
-  if (!isError && kart && (name === 'file_edit' || name === 'file_write' || name === 'file_read')) {
+  // IDE Bridge: dosya araçları için "Editörde Aç" butonu
+  if (!isError && card && (name === 'file_edit' || name === 'file_write' || name === 'file_read')) {
     // input'tan path çıkar
     try {
-      const argsEl = kart.querySelector('.tool-kart-args');
+      const argsEl = card.querySelector('.tool-card-args');
       if (argsEl) {
         const parsed = JSON.parse(argsEl.textContent || '{}');
         const filePath = parsed.path;
         if (filePath) {
           const btn = document.createElement('button');
           btn.className = 'ide-open-btn';
-          btn.textContent = '⎆ Düzenleörde Aç';
-          btn.onclick = () => openInDüzenleor(filePath);
-          const body = kart.querySelector('.tool-kart-body');
+          btn.textContent = '⎆ Editörde Aç';
+          btn.onclick = () => openInEditor(filePath);
+          const body = card.querySelector('.tool-card-body');
           if (body) body.appendChild(btn);
         }
       }
@@ -1570,15 +1524,15 @@ function escHtml(s) {
 //  Diff Viewer
 // ══════════════════════════════════════════════════════
 function renderDiff(filename, diff) {
-  const kart = document.createElement('div');
-  kart.className = 'diff-kart';
+  const card = document.createElement('div');
+  card.className = 'diff-card';
   const id = 'diff-' + Date.now();
   const lines = diff.split('\n').map(line => {
     if (line.startsWith('+ ')) return `<div class="diff-add">${escHtml(line)}</div>`;
     if (line.startsWith('- ')) return `<div class="diff-del">${escHtml(line)}</div>`;
     return `<div class="diff-ctx">${escHtml(line)}</div>`;
   }).join('');
-  kart.innerHTML = `
+  card.innerHTML = `
     <div class="diff-header" onclick="toggleDiffCard('${id}')">
       <span style="color:var(--accent)">±</span>
       <span style="font-weight:600;font-size:11px;">${escHtml(filename)}</span>
@@ -1587,7 +1541,7 @@ function renderDiff(filename, diff) {
     <div class="diff-body" id="${id}">
       <div class="diff-lines">${lines}</div>
     </div>`;
-  $('chat-flow').appendChild(kart);
+  $('chat-flow').appendChild(card);
   if (isAutoScroll) $('chat-flow').scrollTop = $('chat-flow').scrollHeight;
 }
 function toggleDiffCard(id) {
@@ -1598,9 +1552,9 @@ function toggleDiffCard(id) {
 //  Plan Proposal UI
 // ══════════════════════════════════════════════════════
 function renderPlanProposal(planText) {
-  const kart = document.createElement('div');
-  kart.className = 'plan-proposal-kart';
-  kart.innerHTML = `
+  const card = document.createElement('div');
+  card.className = 'plan-proposal-card';
+  card.innerHTML = `
     <div class="plan-proposal-header">
       <span style="color:var(--accent);font-weight:700;">📋 PLAN SUNULDU</span>
       <span style="font-size:9px;color:var(--text-dim);margin-left:8px;">Onay gerekiyor</span>
@@ -1610,14 +1564,14 @@ function renderPlanProposal(planText) {
       <button class="plan-btn approve" onclick="sendPlanApproval(true, this)">✓ Onayla</button>
       <button class="plan-btn reject" onclick="sendPlanApproval(false, this)">✗ Reddet</button>
     </div>`;
-  $('chat-flow').appendChild(kart);
+  $('chat-flow').appendChild(card);
   if (isAutoScroll) $('chat-flow').scrollTop = $('chat-flow').scrollHeight;
 }
 function sendPlanApproval(approved, btn) {
   sendMsg(approved ? '/onayla' : '/reddet');
-  const kart = btn.closest('.plan-proposal-kart');
-  if (kart) {
-    kart.querySelector('.plan-proposal-actions').innerHTML =
+  const card = btn.closest('.plan-proposal-card');
+  if (card) {
+    card.querySelector('.plan-proposal-actions').innerHTML =
       `<span style="color:${approved ? 'var(--accent)' : '#71717a'};font-size:11px;">${approved ? '✓ Onaylandı' : '✗ Reddedildi'}</span>`;
   }
 }
@@ -1632,8 +1586,8 @@ function renderTasksWidget(tasks) {
   container.id = 'tasks-widget';
   container.className = 'tasks-widget';
   const lines = tasks.map(t => {
-    const icon = t.status === 'completed' ? '✓' : t.status === 'in_ilerleme' ? '→' : '○';
-    const color = t.status === 'completed' ? '#22c55e' : t.status === 'in_ilerleme' ? 'var(--accent)' : 'var(--text-dim)';
+    const icon = t.status === 'completed' ? '✓' : t.status === 'in_progress' ? '→' : '○';
+    const color = t.status === 'completed' ? '#22c55e' : t.status === 'in_progress' ? 'var(--accent)' : 'var(--text-dim)';
     return `<div style="display:flex;gap:6px;align-items:center;padding:2px 0;">
       <span style="color:${color};font-size:10px;">${icon}</span>
       <span style="font-size:10px;color:${t.status === 'completed' ? 'var(--text-dim)' : 'var(--text)'};text-decoration:${t.status === 'completed' ? 'line-through' : 'none'};">${escHtml(t.title)}</span>
@@ -1649,10 +1603,10 @@ function renderTasksWidget(tasks) {
 // ══════════════════════════════════════════════════════
 //  IDE Bridge
 // ══════════════════════════════════════════════════════
-function openInDüzenleor(path) {
+function openInEditor(path) {
   if (socket && socket.readyState === WebSocket.OPEN) {
     socket.send(JSON.stringify({ type: 'open_in_editor', data: { path } }));
-    showToast('Düzenleörde açıldı: ' + path);
+    showToast('Editörde açıldı: ' + path);
   }
 }
 
@@ -1712,8 +1666,8 @@ $('chat-flow').addEventListener('scroll', () => {
 });
 
 $('user-input').addEventListener('keydown', e => {
-  if (isİşleniyor) { if (e.key === 'Enter') e.preventDefault(); return; }
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleGönder(); return; }
+  if (isProcessing) { if (e.key === 'Enter') e.preventDefault(); return; }
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); return; }
   if (e.key === 'ArrowUp' && $('user-input').value.trim() === '') {
     e.preventDefault();
     if (msgHistoryIdx < msgHistory.length - 1) { msgHistoryIdx++; $('user-input').value = msgHistory[msgHistoryIdx] || ''; }
@@ -1749,130 +1703,6 @@ renderer.code = function(code, lang) {
   return `<pre><code class="hljs">${escHtml(c)}</code></pre>`;
 };
 marked.use({ renderer, gfm: true, breaks: true });
-
-// ══════════════════════════════════════════════════════
-//  Dashboard & A2UI
-// ══════════════════════════════════════════════════════
-let tokenChart = null, modelChart = null;
-
-function initDashboard() {
-  setTimeout(() => {
-    if (socket && socket.readyState === 1) {
-      socket.send(JSON.stringify({type:'get_usage'}));
-    }
-  }, 500);
-}
-
-function refreshDashboard() {
-  if (socket && socket.readyState === 1) {
-    socket.send(JSON.stringify({type:'get_usage'}));
-  }
-}
-
-function updateDashboard(data) {
-  if (!data) return;
-  if (data.cost && $(`dash-cost`)) $(`dash-cost`).innerText = '$' + (data.cost.total || 0).toFixed(6);
-
-  // Token chart
-  const tc = document.getElementById('tokenChart');
-  if (tc && data.tokens) {
-    const ctx = tc.getContext('2d');
-    if (tokenChart) { tokenChart.destroy(); }
-    tokenChart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: ['Input', 'Output'],
-        datasets: [{
-          label: 'Tokens',
-          data: [data.tokens.input || 0, data.tokens.output || 0],
-          backgroundColor: ['rgba(220,38,38,0.6)', 'rgba(59,130,246,0.6)'],
-          borderColor: ['#dc2626', '#3b82f6'],
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { ticks: { color: '#3f3f46', font: {size:9} }, grid: {color:'rgba(28,28,36,0.5)'} },
-          x: { ticks: { color: '#71717a', font: {size:10} } }
-        }
-      }
-    });
-  }
-
-  // Model chart
-  const mc = document.getElementById('modelChart');
-  if (mc && data.models && Object.keys(data.models).length) {
-    const ctx = mc.getContext('2d');
-    if (modelChart) { modelChart.destroy(); }
-    const colors = ['#dc2626','#3b82f6','#22c55e','#f59e0b','#8b5cf6'];
-    modelChart = new Chart(ctx, {
-      type: 'doughnut',
-      data: {
-        labels: Object.keys(data.models),
-        datasets: [{ data: Object.values(data.models), backgroundColor: colors, borderWidth: 0 }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { position: 'bottom', labels: { color: '#71717a', font: {size:9}, padding:6 } } }
-      }
-    });
-  }
-
-  // Sessions
-  if (data.sessions && $(`dash-sessions`)) {
-    let h = '';
-    for (const s of data.sessions) {
-      h += '<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(28,28,36,0.5);font-family:"Fira Code",monospace;font-size:9px;">'
-        + '<span style="color:var(--text);">' + (s.id||'session') + '</span>'
-        + '<span style="color:var(--accent);">' + (s.tokens||0) + ' tok</span></div>';
-    }
-    $(`dash-sessions`).innerHTML = h || '<div style="color:var(--muted);font-size:9px;">Oturum verisi yok</div>';
-  }
-}
-
-// A2UI
-function renderA2UI(comp) {
-  const canvas = document.getElementById('a2ui-canvas');
-  if (!canvas) return;
-  canvas.innerHTML = '';
-  let el = document.createElement('div');
-  el.style.cssText = 'display:inline-block;';
-  if (comp.type === 'metrik') {
-    el.style.cssText = 'display:inline-flex;flex-direction:column;align-items:center;padding:12px 20px;background:var(--bg-deep);border:1px solid var(--border);border-radius:6px;margin:4px;';
-    el.innerHTML = '<div style="font-size:20px;font-weight:700;color:var(--accent);font-family:"Fira Code",monospace;">' + (comp.value||'') + '</div><div style="font-size:9px;color:var(--muted);">' + (comp.label||'') + '</div>';
-  } else if (comp.type === 'kart') {
-    el.style.cssText = 'padding:14px;background:var(--bg-deep);border:1px solid rgba(220,38,38,0.15);border-radius:6px;margin:4px;max-width:300px;';
-    el.innerHTML = (comp.title?'<div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:6px;">'+comp.title+'</div>':'') + '<div style="font-size:10px;color:var(--text);">'+(comp.body||'')+'</div>';
-  } else {
-    el.innerText = JSON.stringify(comp);
-  }
-  canvas.appendChild(el);
-}
-
-function clearA2UI() {
-  const c = document.getElementById('a2ui-canvas');
-  if (c) c.innerHTML = '<div style="color:var(--muted);font-size:10px;text-align:center;">AI panosu boş.</div>';
-}
-
-// WebSocket message handler'ı genişlet (mevcut handler'ı bozmadan)
-const _origOnMsg = socket ? socket.onmessage : null;
-function _attachDashHandler() {
-  const sock = socket;
-  if (!sock) { setTimeout(_attachDashHandler, 500); return; }
-  const orig = sock.onmessage;
-  sock.onmessage = function(ev) {
-    try {
-      const msg = JSON.parse(ev.data);
-      if (msg.type === 'dashboard_data') updateDashboard(msg.data);
-      else if (msg.type === 'a2ui_render') renderA2UI(msg.data);
-      else if (msg.type === 'a2ui_clear') clearA2UI();
-    } catch(e) {}
-    if (orig) orig.call(this, ev);
-  };
-}
-setTimeout(_attachDashHandler, 300);
 
 // ══════════════════════════════════════════════════════
 //  Boot

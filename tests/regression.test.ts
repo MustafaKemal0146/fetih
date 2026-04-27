@@ -6,8 +6,8 @@ import { compareVersions } from '../src/update-check.js';
 import { parseIntervalStr } from '../src/cron.js';
 
 describe('version', () => {
-  it('sürüm 3.9.5 olmalı', () => {
-    expect(VERSION).toBe('3.9.5');
+  it('sürüm 3.9.6 olmalı', () => {
+    expect(VERSION).toBe('3.9.6');
   });
 });
 
@@ -34,8 +34,8 @@ describe('model maliyet', () => {
   });
 
   it('maliyet formatı doğru olmalı', () => {
-    expect(formatCostUSD(0)).toBe('$0.00 (yerel)');
-    expect(formatCostUSD(0.005)).toContain('$');
+    expect(formatCostUSD(0)).toBe('< $0.0001');
+    expect(formatCostUSD(0.005)).toContain('0.0050');
   });
 });
 

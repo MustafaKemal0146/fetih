@@ -1,5 +1,22 @@
 # Değişiklik Günlüğü
 
+## [3.9.6] - 2026-04-27
+
+### 🚀 Yeni Özellikler
+
+- **Self-Update Sistemi** (`src/update-check.ts`): SETH artık kendi kendini güncelleyebiliyor!
+  - `/güncelle --auto` ile REPL içinden otomatik güncelleme
+  - `seth --update` / `seth -u` ile CLI'dan direkt güncelleme
+  - Git clone ortamında: `git fetch` → `git pull` → `npm run build`
+  - npm global ortamında: `npm install -g`
+  - Yerel değişiklikleri otomatik stash'leme ve geri alma
+  - GitHub release kontrolü + cache mekanizması
+  - Progress callback ile adım adım ilerleme bildirimi
+
+### 📝 Dokümantasyon
+- **Intro mesajı** güncellendi: Yeni sürüm bulunca `/güncelle --auto` öneriyor
+- **README güncellenecek**: Self-update kullanım talimatları
+
 ## [3.8.4] - 2026-04-19
 
 ### 🐛 Hata Düzeltmeleri

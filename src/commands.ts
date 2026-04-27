@@ -4,6 +4,9 @@
 
 import chalk from 'chalk';
 import { cmd, promptBright } from './theme.js';
+import { setAlias, listAliases, deleteAlias, getAlias } from './commands/alias.js';
+import { listTemplates, getTemplate, applyTemplate, setTemplate, deleteTemplate } from './commands/sablon.js';
+import { logUsage, getUsageStats, getCostEstimate } from './commands/maliyet.js';
 import { select, isCancel, confirm, text } from '@clack/prompts';
 import { writeFile } from 'fs/promises';
 import { resolve, join } from 'path';
@@ -38,7 +41,7 @@ import {
 import { listSessions, setSessionTag } from './storage/session.js';
 import { THEMES, type ThemeName, setTheme, getThemeColors } from './theme.js';
 import { runDoktor } from './commands/doktor.js';
-import { checkForUpdates } from './update-check.js';
+import { checkForUpdates, performSelfUpdate } from './update-check.js';
 import { listModels } from './providers/factory.js';
 import { getModelPrice, calculateCostUSD, formatCostUSD } from './model-cost.js';
 import { listAllSkills, findSkill, renderSkill, formatSkillsTable } from './skills.js';
@@ -322,21 +325,64 @@ SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcı
 
   repo_özet: async (_args, ctx) => runRepoOzetSummary(ctx.getCwd()),
 
-  güncelle: async () => {
+  güncelle: async (args) => {
+    // --auto flag'ı ile onaysız güncelleme
+    const isAuto = args.includes('--auto');
+
     const result = await checkForUpdates();
-    if (result?.hasUpdate) {
-      return {
-        output: [
-          chalk.yellow('⬆️ Yeni sürüm mevcut'),
-          '',
-          `  Güncel sürüm: ${chalk.cyan(VERSION)}`,
-          `  Yeni sürüm  : ${chalk.green(result.latestVersion)}`,
-          '',
-          chalk.dim('  Güncelleme: npm i -g seth'),
-        ].join('\n'),
-      };
+    if (!result) {
+      return { output: chalk.green(`✓ Güncel sürümdesiniz (v${VERSION})`) };
     }
-    return { output: chalk.green(`✓ Güncel sürümdesiniz (v${VERSION})`) };
+
+    if (!result.hasUpdate) {
+      return { output: chalk.green(`✓ Zaten en güncel sürümdesiniz (v${VERSION})`) };
+    }
+
+    // Yeni sürüm var — güncelleme teklifi
+    const lines: string[] = [
+      chalk.yellow('⬆️ Yeni sürüm mevcut!'),
+      '',
+      `  Güncel sürüm: ${chalk.cyan(VERSION)}`,
+      `  Yeni sürüm  : ${chalk.green(result.latestVersion)}`,
+      '',
+    ];
+
+    if (isAuto) {
+      // Otomatik güncelleme
+      lines.push(chalk.dim('🔄 Otomatik güncelleme başlatılıyor...'));
+
+      const progressLines: string[] = [];
+      const updateResult = await performSelfUpdate((msg) => {
+        progressLines.push(msg);
+      });
+
+      lines.push(...progressLines.map(l => chalk.dim(l)));
+      lines.push('');
+
+      if (updateResult.success) {
+        if (updateResult.method === 'none') {
+          lines.push(chalk.green(updateResult.message));
+        } else {
+          lines.push(chalk.green(updateResult.message.split('\n')[0]!));
+          lines.push(chalk.cyan(`  v${updateResult.previousVersion} → v${updateResult.newVersion}`));
+          lines.push('');
+          lines.push(chalk.yellow('  🔄 SETH yeniden başlatılmalı! (Ctrl+C → tekrar seth)'));
+        }
+      } else {
+        lines.push(chalk.red(updateResult.message));
+      }
+
+      return { output: lines.join('\n') };
+    }
+
+    // Manuel mod — sadece bilgi ver
+    lines.push(chalk.dim('  Otomatik güncelleme için:'));
+    lines.push(chalk.dim(`    /güncelle --auto`));
+    lines.push('');
+    lines.push(chalk.dim('  Elle güncelleme:'));
+    lines.push(chalk.dim('    npm install -g seth'));
+
+    return { output: lines.join('\n') };
   },
 
   'provider-test': async (args, ctx) => {
@@ -949,7 +995,7 @@ ${rows}
 
   // #9 Diff görüntüleme
   diff: async (args, ctx) => {
-    const { gitDiffTool } = await import('./tools/git-diff.js');
+    const { gitDiffTool } = await import('./tools/git/git-diff.js');
     const staged = args.includes('--staged') || args.includes('-s');
     const stat = args.includes('--stat');
     return gitDiffTool.execute({ staged, stat_only: stat }, ctx.getCwd());

@@ -4,7 +4,7 @@
 
 import { relative, resolve } from 'path';
 import chalk from 'chalk';
-import type { ToolDefinition, ToolResult } from '../types.js';
+import type { ToolDefinition, ToolResult } from '../../types.js';
 import { resolveGitRepoRoot, runGit } from './git-internal.js';
 
 export const gitDiffTool: ToolDefinition = {

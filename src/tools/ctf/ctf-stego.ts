@@ -4,7 +4,7 @@
 
 import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
-import type { ToolDefinition, ToolResult } from '../types.js';
+import type { ToolDefinition, ToolResult } from '../../types.js';
 import { findFlags, isPrintableAscii } from './ctf-utils.js';
 
 export interface StegoResult {

@@ -3,7 +3,7 @@
  * SQLi, XSS, LFI, IDOR tespiti + dizin keşfi önerileri
  */
 
-import type { ToolDefinition, ToolResult } from '../types.js';
+import type { ToolDefinition, ToolResult } from '../../types.js';
 
 export interface VulnDetail {
   type: string;

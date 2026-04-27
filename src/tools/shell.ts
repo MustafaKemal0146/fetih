@@ -2,6 +2,7 @@
  * @fileoverview Shell tool — PTY destekli cross-platform komut çalıştırma.
  * node-pty ile gerçek pseudo-terminal: sudo, ssh gibi interaktif komutlar çalışır.
  * node-pty yoksa eski spawn yöntemine düşer.
+ * v3.9.6: Shell güvenlik analizi entegrasyonu.
  */
 
 import { spawn } from 'child_process';
@@ -11,17 +12,15 @@ import { readFileSync, unlinkSync } from 'fs';
 import { randomUUID } from 'crypto';
 import type { ToolDefinition, ToolResult } from '../types.js';
 import { enterPtyMode, exitPtyMode } from '../pty-mode.js';
+import { analyzeShellCommand, formatSecurityReport } from './shell-security.js';
 
 const DEFAULT_TIMEOUT = 30_000;
 
-// node-pty'yi dinamik yükle — yoksa spawn'a düş
 let ptyLib: typeof import('node-pty') | null = null;
 (async () => {
   try {
     ptyLib = await import('node-pty');
-  } catch {
-    // node-pty yok → spawn fallback
-  }
+  } catch { /* node-pty yok → spawn fallback */ }
 })();
 
 export const shellTool: ToolDefinition = {
@@ -45,10 +44,25 @@ export const shellTool: ToolDefinition = {
     const rawCommand = input.command as string;
     const timeoutMs = (input.timeout as number) ?? DEFAULT_TIMEOUT;
 
+    // v3.9.6: Shell güvenlik analizi
+    const securityAnalysis = analyzeShellCommand(rawCommand);
+    let securityWarning = '';
+    if (securityAnalysis.findings.length > 0) {
+      securityWarning = formatSecurityReport(securityAnalysis);
+      if (securityAnalysis.severity === 'block') {
+        try {
+          const { recordSecurityViolation } = await import('../security/index.js');
+          recordSecurityViolation('Shell güvenlik ihlali', {
+            command: rawCommand.slice(0, 200),
+            findings: securityAnalysis.findings.map(f => `${f.type}: ${f.message}`),
+          });
+        } catch {}
+      }
+    }
+
     const isWindows = platform() === 'win32';
     const shell = isWindows ? 'powershell.exe' : 'bash';
 
-    // CWD takibi için geçici dosya
     const cwdFile = join(tmpdir(), `seth-cwd-${randomUUID()}`);
     let command: string;
 
@@ -58,13 +72,10 @@ export const shellTool: ToolDefinition = {
       command = `${rawCommand} && pwd -P > "${cwdFile}" || { pwd -P > "${cwdFile}"; exit 1; }`;
     }
 
-    // PTY destekli yol (Linux/macOS + node-pty mevcut)
     if (ptyLib && !isWindows) {
-      return runWithPty(ptyLib, shell, command, cwd, cwdFile, timeoutMs);
+      return runWithPty(ptyLib, shell, command, cwd, cwdFile, timeoutMs, securityWarning);
     }
-
-    // Fallback: eski spawn yöntemi
-    return runWithSpawn(shell, command, cwd, cwdFile, timeoutMs, isWindows);
+    return runWithSpawn(shell, command, cwd, cwdFile, timeoutMs, isWindows, securityWarning);
   },
 };
 
@@ -77,6 +88,7 @@ async function runWithPty(
   cwd: string,
   cwdFile: string,
   timeoutMs: number,
+  securityWarning: string,
 ): Promise<ToolResult> {
   return new Promise<ToolResult>((resolve) => {
     const cols = process.stdout.columns || 80;
@@ -94,13 +106,11 @@ async function runWithPty(
     let settled = false;
     let timedOut = false;
 
-    // PTY çıktısını hem kullanıcıya göster hem de AI için yakala
     ptyProc.onData((data) => {
       process.stdout.write(data);
       outputChunks.push(data);
     });
 
-    // stdin → PTY yönlendirmesi (sudo şifre girişi vb.)
     enterPtyMode((data) => ptyProc.write(data));
 
     const timer = setTimeout(() => {
@@ -113,12 +123,9 @@ async function runWithPty(
       settled = true;
       clearTimeout(timer);
       exitPtyMode();
-
-      // Terminal'in son satırından sonra boş satır bırak
       process.stdout.write('\n');
 
       const rawOutput = outputChunks.join('');
-      // ANSI kaçış kodlarını temizle — AI temiz metin okur
       const cleanOutput = stripAnsiCodes(rawOutput);
 
       const code = exitCode ?? (timedOut ? 124 : 1);
@@ -132,8 +139,9 @@ async function runWithPty(
         unlinkSync(cwdFile);
       } catch {}
 
+      const secOutput = securityWarning ? '\n' + securityWarning + '\n' : '';
       resolve({
-        output: truncateOutput(output),
+        output: truncateOutput(output) + secOutput,
         isError: code !== 0,
         newCwd: newCwd && newCwd !== cwd ? newCwd : undefined,
       });
@@ -150,6 +158,7 @@ function runWithSpawn(
   cwdFile: string,
   timeoutMs: number,
   isWindows: boolean,
+  securityWarning: string,
 ): Promise<ToolResult> {
   const shellArgs = isWindows
     ? ['-NoProfile', '-NonInteractive', '-Command', command]
@@ -197,8 +206,9 @@ function runWithSpawn(
         unlinkSync(cwdFile);
       } catch {}
 
+      const secOutput = securityWarning ? '\n' + securityWarning + '\n' : '';
       resolve({
-        output: truncateOutput(output),
+        output: truncateOutput(output) + secOutput,
         isError: exitCode !== 0,
         newCwd: newCwd && newCwd !== cwd ? newCwd : undefined,
       });
@@ -210,7 +220,8 @@ function runWithSpawn(
         settled = true;
         clearTimeout(timer);
         try { unlinkSync(cwdFile); } catch {}
-        resolve({ output: `Error: ${err.message}`, isError: true });
+        const secOutput = securityWarning ? '\n' + securityWarning + '\n' : '';
+        resolve({ output: `Error: ${err.message}` + secOutput, isError: true });
       }
     });
   });
@@ -224,7 +235,6 @@ function truncateOutput(output: string, maxLen = 10000): string {
   return `${output.slice(0, half)}\n\n... [${output.length - maxLen} chars truncated] ...\n\n${output.slice(-half)}`;
 }
 
-/** Temel ANSI kaçış kodu temizleyici */
 function stripAnsiCodes(str: string): string {
   // eslint-disable-next-line no-control-regex
   return str.replace(/\x1b\[[0-9;]*[a-zA-Z]/g, '')

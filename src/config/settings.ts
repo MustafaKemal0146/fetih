@@ -4,6 +4,8 @@
  */
 
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
+import { createRequire } from 'module';
+const _require = createRequire(import.meta.url);
 import { join } from 'path';
 import { homedir } from 'os';
 import type { SETHConfig, ProviderName } from '../types.js';
@@ -91,7 +93,7 @@ export function loadConfig(overrides?: Partial<SETHConfig>): SETHConfig {
   // 3. Load .env if exists in cwd
   try {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const dotenv = require('dotenv') as { config: () => void };
+    const dotenv = _require('dotenv') as { config: () => void };
     dotenv.config();
   } catch {
     // dotenv optional — not critical if missing
