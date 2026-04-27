@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Versiyon-3.9.4-b91c1c?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Versiyon-3.9.6-b91c1c?style=flat-square"/>
   <img src="https://img.shields.io/badge/Node.js-%3E%3D20-339933?style=flat-square&logo=node.js&logoColor=white"/>
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square&logo=typescript&logoColor=white"/>
   <img src="https://img.shields.io/badge/Lisans-AGPL--3.0-blue?style=flat-square"/>
@@ -88,15 +88,27 @@ SETH: src/ taranıyor... middleware.ts bulundu
 
 ## Kurulum
 
-```bash
-npm install -g github:MustafaKemal0146/seth
-```
+### Geliştirme Ortamı
 
 ```bash
-seth                                    # Etkileşimli mod
-seth --provider groq                    # Belirli sağlayıcı ile başlat
-seth -p "bu projeyi özetle"            # Tek seferlik (headless) mod
-seth --auto -p "testleri çalıştır"     # Onaysız otonom mod
+# Depoyu klonla
+git clone https://github.com/MustafaKemal0146/seth.git
+cd seth
+
+# Bağımlılıkları yükle
+npm install
+
+# Projeyi derle
+npm run build
+
+# Geliştirme modunda çalıştır
+npm run dev
+```
+
+### Global Kurulum
+
+```bash
+npm install -g github:MustafaKemal0146/seth
 ```
 
 ### Hızlı Başlangıç
@@ -109,10 +121,31 @@ export ANTHROPIC_API_KEY=sk-ant-...
 cd benim-projem/
 
 # 3. Başlatın
-seth
+seth                                    # Etkileşimli mod
+seth --provider groq                    # Belirli sağlayıcı ile başlat
+seth -p "bu projeyi özetle"            # Tek seferlik (headless) mod
+seth --auto -p "testleri çalıştır"     # Onaysız otonom mod
 
 # Ortam sağlığını kontrol edin
 /doktor
+```
+
+### Konteyner ile Çalıştırma (laction)
+
+Projeyi izole konteyner ortamında çalıştırmak için:
+
+```bash
+# Varsayılan profil (build)
+laction .
+
+# Test profili
+laction . test
+
+# Lint profili
+laction . lint
+
+# Dev profili
+laction . dev
 ```
 
 ---
