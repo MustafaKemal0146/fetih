@@ -123,6 +123,12 @@ export async function createProvider(
       const { OpenAIProvider } = await import('./openai.js');
       return new OpenAIProvider(apiKey, 'https://api-inference.huggingface.co/v1');
     }
+    case 'nvidia': {
+      const apiKey = resolveProviderApiKey(resolved, config);
+      if (!apiKey) throw new ProviderError('NVIDIA_API_KEY is not set.', resolved);
+      const { OpenAIProvider } = await import('./openai.js');
+      return new OpenAIProvider(apiKey, 'https://integrate.api.nvidia.com/v1');
+    }
     default: {
       throw new ProviderError(`Unknown provider: ${name as string}`, name as string);
     }

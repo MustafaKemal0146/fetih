@@ -517,6 +517,7 @@ SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcı
       together:   'TOGETHER_API_KEY',
       perplexity: 'PERPLEXITY_API_KEY',
       huggingface:'HF_API_KEY',
+      nvidia:     'NVIDIA_API_KEY',
     };
 
     // API anahtarı eksikse sor ve settings.json'a kaydet
@@ -623,7 +624,7 @@ SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcı
       return saglaySec(p as ProviderName);
     }
 
-    const validProviders: ProviderName[] = ['anthropic', 'google', 'openai', 'ollama', 'groq', 'deepseek', 'mistral', 'xai', 'lmstudio', 'openrouter', 'github-copilot', 'claude', 'gemini', 'copilot', 'fireworks', 'together', 'perplexity', 'huggingface'];
+    const validProviders: ProviderName[] = ['anthropic', 'google', 'openai', 'ollama', 'groq', 'deepseek', 'mistral', 'xai', 'lmstudio', 'openrouter', 'github-copilot', 'nvidia', 'claude', 'gemini', 'copilot', 'fireworks', 'together', 'perplexity', 'huggingface'];
     if (!validProviders.includes(name)) {
       return { output: chalk.red(`Bilinmeyen sağlayıcı: ${name}`) };
     }

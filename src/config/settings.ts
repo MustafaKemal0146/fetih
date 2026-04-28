@@ -207,6 +207,7 @@ export function resolveProviderApiKey(provider: ProviderName, config: SETHConfig
     together: 'TOGETHER_API_KEY',
     perplexity: 'PERPLEXITY_API_KEY',
     huggingface: 'HF_API_KEY',
+    nvidia: 'NVIDIA_API_KEY',
   };
 
   const envKey = envMap[provider];

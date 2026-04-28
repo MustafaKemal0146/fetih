@@ -44,6 +44,9 @@ function providerBaseUrl(name: ProviderName, config?: ProviderConfig): string | 
     case 'litellm':       return `${config?.baseUrl ?? 'http://localhost:4000'}/v1`;
     case 'github-copilot': return `${config?.baseUrl ?? 'http://localhost:3000'}/v1`;
 
+    // === NVIDIA NIM ===
+    case 'nvidia': return config?.baseUrl ?? 'https://integrate.api.nvidia.com/v1';
+
     default: return null;
   }
 }
@@ -89,6 +92,7 @@ export async function listModels(name: ProviderName, config?: ProviderConfig): P
     case 'lmstudio':
     case 'litellm':
     case 'github-copilot':
+    case 'nvidia':
     case 'fireworks':
     case 'together':
     case 'perplexity':

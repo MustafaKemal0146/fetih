@@ -34,6 +34,7 @@ export async function runOnboardingIfNeeded(): Promise<void> {
       { value: 'anthropic', label: 'Anthropic Claude', hint: 'Önerilen: claude-sonnet-4' },
       { value: 'openai', label: 'OpenAI (ChatGPT)', hint: 'Önerilen: gpt-4o' },
       { value: 'google', label: 'Google Gemini', hint: 'Önerilen: gemini-2.5-pro' },
+      { value: 'nvidia', label: 'NVIDIA NIM', hint: '136+ model, OpenAI uyumlu' },
     ],
   });
 
