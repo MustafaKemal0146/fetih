@@ -170,7 +170,7 @@ async function checkAudio(): Promise<HealthCheck> {
 
 async function checkProviderKeys(config?: SETHConfig): Promise<HealthCheck> {
   const start = Date.now();
-  const providers: ProviderName[] = ['claude', 'gemini', 'openai', 'deepseek', 'groq'];
+  const providers: ProviderName[] = ['anthropic', 'google', 'openai', 'deepseek', 'groq'];
   const available = providers.filter(p => config?.providers?.[p]?.apiKey);
   
   return {

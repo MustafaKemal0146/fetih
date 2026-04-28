@@ -7,8 +7,8 @@ import type { LLMProvider, ChatMessage, ChatOptions, ChatResponse, StreamEvent, 
 import { ProviderError } from '../core/errors.js';
 import { normalizeContent } from '../core/message.js';
 
-export class ClaudeProvider implements LLMProvider {
-  readonly name = 'claude' as const;
+export class AnthropicProvider implements LLMProvider {
+  readonly name = 'anthropic' as const;
   readonly supportsTools = true;
   readonly supportsStreaming = true;
   readonly supportsVision = true;

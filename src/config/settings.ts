@@ -101,8 +101,8 @@ export function loadConfig(overrides?: Partial<SETHConfig>): SETHConfig {
 
   // 4. Environment variable overrides
   const envKeys: Record<string, string> = {
-    ANTHROPIC_API_KEY: 'claude',
-    GEMINI_API_KEY: 'gemini',
+    ANTHROPIC_API_KEY: 'anthropic',
+    GEMINI_API_KEY: 'google',
     OPENAI_API_KEY: 'openai',
     OLLAMA_BASE_URL: 'ollama',
     OPENROUTER_API_KEY: 'openrouter',
@@ -188,6 +188,8 @@ export function resolveProviderApiKey(provider: ProviderName, config: SETHConfig
   if (providerConfig?.apiKey) return providerConfig.apiKey;
 
   const envMap: Record<ProviderName, string> = {
+    anthropic: 'ANTHROPIC_API_KEY',
+    google: 'GEMINI_API_KEY',
     claude: 'ANTHROPIC_API_KEY',
     gemini: 'GEMINI_API_KEY',
     openai: 'OPENAI_API_KEY',
@@ -199,7 +201,12 @@ export function resolveProviderApiKey(provider: ProviderName, config: SETHConfig
     xai: 'XAI_API_KEY',
     lmstudio: '',
     litellm: 'LITELLM_API_KEY',
+    'github-copilot': '',
     copilot: '',
+    fireworks: 'FIREWORKS_API_KEY',
+    together: 'TOGETHER_API_KEY',
+    perplexity: 'PERPLEXITY_API_KEY',
+    huggingface: 'HF_API_KEY',
   };
 
   const envKey = envMap[provider];

@@ -401,7 +401,7 @@ SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcı
   'provider-test': async (args, ctx) => {
     const auto = args.includes('--auto');
     const cfg = loadConfig();
-    const localProviders: ProviderName[] = ['ollama', 'lmstudio', 'copilot'];
+    const localProviders: ProviderName[] = ['ollama', 'lmstudio', 'github-copilot'];
     const providers = Object.keys(cfg.providers) as ProviderName[];
     const testable = providers.filter((p) => localProviders.includes(p) || Boolean(cfg.providers[p]?.apiKey));
 
@@ -504,13 +504,19 @@ SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcı
     // API anahtarı gereken sağlayıcılar ve env değişkenleri
     const API_KEY_ENV: Partial<Record<ProviderName, string>> = {
       claude:     'ANTHROPIC_API_KEY',
+      anthropic:  'ANTHROPIC_API_KEY',
       openai:     'OPENAI_API_KEY',
       gemini:     'GEMINI_API_KEY',
+      google:     'GEMINI_API_KEY',
       groq:       'GROQ_API_KEY',
       mistral:    'MISTRAL_API_KEY',
       xai:        'XAI_API_KEY',
       openrouter: 'OPENROUTER_API_KEY',
       deepseek:   'DEEPSEEK_API_KEY',
+      fireworks:  'FIREWORKS_API_KEY',
+      together:   'TOGETHER_API_KEY',
+      perplexity: 'PERPLEXITY_API_KEY',
+      huggingface:'HF_API_KEY',
     };
 
     // API anahtarı eksikse sor ve settings.json'a kaydet
@@ -601,8 +607,8 @@ SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcı
       const p = await select({
         message: 'Sağlayıcı seçin:',
         options: [
-          { value: 'claude',     label: 'Claude (Anthropic)' },
-          { value: 'gemini',     label: 'Gemini (Google)' },
+          { value: 'anthropic',  label: 'Anthropic Claude' },
+          { value: 'google',     label: 'Google Gemini' },
           { value: 'openai',     label: 'OpenAI' },
           { value: 'ollama',     label: 'Ollama (Yerel)' },
           { value: 'groq',       label: 'Groq' },
@@ -617,7 +623,7 @@ SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcı
       return saglaySec(p as ProviderName);
     }
 
-    const validProviders: ProviderName[] = ['claude', 'openai', 'gemini', 'ollama', 'groq', 'deepseek', 'mistral', 'xai', 'lmstudio', 'openrouter', 'copilot'];
+    const validProviders: ProviderName[] = ['anthropic', 'google', 'openai', 'ollama', 'groq', 'deepseek', 'mistral', 'xai', 'lmstudio', 'openrouter', 'github-copilot', 'claude', 'gemini', 'copilot', 'fireworks', 'together', 'perplexity', 'huggingface'];
     if (!validProviders.includes(name)) {
       return { output: chalk.red(`Bilinmeyen sağlayıcı: ${name}`) };
     }
@@ -793,7 +799,7 @@ SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcı
   },
 
   'api-yaz': async (_args, _ctx) => {
-    const allProviders: ProviderName[] = ['claude', 'openai', 'gemini', 'deepseek', 'openrouter', 'groq', 'mistral', 'xai', 'copilot'];
+    const allProviders: ProviderName[] = ['anthropic', 'google', 'openai', 'deepseek', 'openrouter', 'groq', 'mistral', 'xai', 'github-copilot', 'claude', 'gemini', 'copilot'];
     const chosen = await select({
       message: 'Hangi sağlayıcı için API anahtarı ekleyeceksiniz?',
       options: allProviders.map(p => ({ value: p, label: p })),
@@ -826,8 +832,10 @@ SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcı
     return { output: chalk.green(`✓ Context bütçesi ayarlandı: ${value.toLocaleString()} token`) };
   },
 
-  temizle: (_args, _ctx) => {
-    return { clearTerminal: true, output: chalk.dim('Terminal temizlendi.') };
+  temizle: async (_args, ctx) => {
+    const { renderWelcomeAnimation } = await import('./welcome.js');
+    renderWelcomeAnimation(ctx.currentProvider, ctx.currentModel);
+    return { output: '' };
   },
 
   'context-temizle': async (_args, ctx) => {

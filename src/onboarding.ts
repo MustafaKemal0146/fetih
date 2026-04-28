@@ -31,9 +31,9 @@ export async function runOnboardingIfNeeded(): Promise<void> {
       { value: 'mistral', label: 'Mistral AI', hint: 'Önerilen: mistral-large-latest' },
       { value: 'xai', label: 'xAI (Grok)', hint: 'Önerilen: grok-3-latest' },
       { value: 'openrouter', label: 'OpenRouter (300+ Model)', hint: 'Önerilen: openai/gpt-4o' },
-      { value: 'claude', label: 'Anthropic Claude', hint: 'Önerilen: claude-sonnet-4' },
+      { value: 'anthropic', label: 'Anthropic Claude', hint: 'Önerilen: claude-sonnet-4' },
       { value: 'openai', label: 'OpenAI (ChatGPT)', hint: 'Önerilen: gpt-4o' },
-      { value: 'gemini', label: 'Google Gemini', hint: 'Önerilen: gemini-2.5-pro' },
+      { value: 'google', label: 'Google Gemini', hint: 'Önerilen: gemini-2.5-pro' },
     ],
   });
 
@@ -105,9 +105,9 @@ export async function runOnboardingIfNeeded(): Promise<void> {
           } else { defaultModel = 'local-model'; }
         } else { s.stop('LM Studio bağlantısı kurulamadı.'); defaultModel = 'local-model'; }
       } catch { s.stop('LM Studio hatası.'); defaultModel = 'local-model'; }
-    } else if (pName === 'claude') defaultModel = 'claude-sonnet-4-20250514';
+    } else if (pName === 'claude' || pName === 'anthropic') defaultModel = 'claude-sonnet-4-20250514';
     else if (pName === 'openai') defaultModel = 'gpt-4o';
-    else if (pName === 'gemini') defaultModel = 'gemini-2.5-pro';
+    else if (pName === 'gemini' || pName === 'google') defaultModel = 'gemini-2.5-pro';
     else if (pName === 'groq') defaultModel = 'llama-3.3-70b-versatile';
     else if (pName === 'deepseek') defaultModel = 'deepseek-chat';
     else if (pName === 'mistral') defaultModel = 'mistral-large-latest';

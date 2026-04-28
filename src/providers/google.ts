@@ -8,8 +8,8 @@ import { ProviderError } from '../core/errors.js';
 import { normalizeContent } from '../core/message.js';
 import { generateId } from '../utils/id.js';
 
-export class GeminiProvider implements LLMProvider {
-  readonly name = 'gemini' as const;
+export class GoogleProvider implements LLMProvider {
+  readonly name = 'google' as const;
   readonly supportsTools = true;
   readonly supportsStreaming = true;
   readonly supportsVision = true;

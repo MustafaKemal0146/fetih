@@ -7,7 +7,7 @@
 // Provider
 // ---------------------------------------------------------------------------
 
-export type ProviderName = 'claude' | 'gemini' | 'openai' | 'ollama' | 'openrouter' | 'groq' | 'mistral' | 'deepseek' | 'xai' | 'lmstudio' | 'litellm' | 'copilot';
+export type ProviderName = 'anthropic' | 'google' | 'openai' | 'ollama' | 'openrouter' | 'groq' | 'mistral' | 'deepseek' | 'xai' | 'lmstudio' | 'litellm' | 'github-copilot' | 'fireworks' | 'together' | 'perplexity' | 'huggingface' | 'claude' | 'gemini' | 'copilot';
 
 export interface ProviderCapabilities {
   readonly supportsTools: boolean;
