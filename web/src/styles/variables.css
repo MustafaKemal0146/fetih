@@ -1,0 +1,24 @@
+:root {
+  --bg: #060608;
+  --bg-secondary: #0d0d10;
+  --bg-card: #111116;
+  --bg-hover: #1a1a22;
+  --border: #1e1e28;
+  --accent: #dc2626;
+  --accent-dim: rgba(220, 38, 38, 0.15);
+  --accent-hover: #ef4444;
+  --text: #e8e8f0;
+  --text-dim: #6b6b80;
+  --text-muted: #3a3a4a;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --info: #3b82f6;
+  --font-sans: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'Fira Code', 'Cascadia Code', monospace;
+  --radius: 8px;
+  --radius-sm: 4px;
+  --radius-lg: 12px;
+  --transition: 0.18s ease;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+}

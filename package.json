@@ -1,6 +1,6 @@
 {
   "name": "seth",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Terminalde çalışan yapay zeka kodlama ajanı. Claude, Gemini, OpenAI, Ollama. Türkçe arayüz. HİÇBİR SİSTEM GÜVENLİ DEĞİLDİR.",
   "type": "module",
   "main": "dist/cli.js",
@@ -22,6 +22,10 @@
     "lint": "tsc --noEmit",
     "release:linux": "bash scripts/release-linux.sh",
     "release:linux:dry-run": "bash scripts/release-linux.sh --dry-run",
+    "dev:web": "cd web && npx vite",
+    "build:web": "cd web && npx vite build",
+    "daemon": "node dist/cli.js daemon start",
+    "install:daemon": "bash scripts/install-daemon.sh",
     "prepublishOnly": "npm run build"
   },
   "keywords": [

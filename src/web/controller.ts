@@ -1,5 +1,6 @@
 import { type WebSocket as WS, WebSocketServer } from 'ws';
-import type { ChatMessage } from '../types.js';
+import type { ChatMessage, ProviderName } from '../types.js';
+import { loadConfig, saveConfig, deleteApiKey, resolveProviderApiKey } from '../config/settings.js';
 
 export interface WebUIEvent {
   type: 'init' | 'text' | 'tool_call' | 'tool_result' | 'history' | 'status' | 'stats' | 'abort' | 'command_result' | 'effort' | 'settings' | 'models' | 'diff' | 'plan_proposal' | 'tasks' | 'warning' | 'dashboard_data' | 'a2ui_render' | 'a2ui_clear' | 'get_usage';
@@ -12,6 +13,7 @@ class WebUIController {
   private commandCallback: ((text: string) => void) | null = null;
   private abortCallback: (() => void) | null = null;
   private getModelsCallback: ((provider: string) => void) | null = null;
+  private apiKeysCache: Record<string, { hasKey: boolean }> = {};
 
   // State cache for hydration on reconnect
   private currentHistory: ChatMessage[] = [];
@@ -27,6 +29,7 @@ class WebUIController {
     
     // Yeni bir client bağlandığında mevcut durumu gönder (Hydration)
     this.wss.on('connection', (ws: WS) => {
+      const apiKeyStatus = this.getApiKeyStatus();
       const initPayload = JSON.stringify({
         type: 'init',
         data: {
@@ -39,6 +42,7 @@ class WebUIController {
             securityProfile: this.currentSecurityProfile,
             theme: this.currentTheme,
           },
+          apiKeys: apiKeyStatus.keys,
         }
       });
       ws.send(initPayload);
@@ -86,6 +90,41 @@ class WebUIController {
   handleGetModels(provider: string) {
     if (this.getModelsCallback) {
       this.getModelsCallback(provider);
+    }
+  }
+
+  // ── API Key Management ──────────────────────────────────
+
+  /** Mevcut API anahtarlarının durumunu döndürür (maskeli) */
+  getApiKeyStatus(): { keys: Record<string, { hasKey: boolean }> } {
+    const cfg = loadConfig();
+    const providers = ['deepseek', 'anthropic', 'google', 'openai', 'ollama', 'nvidia',
+      'openrouter', 'groq', 'mistral', 'xai', 'fireworks', 'together', 'perplexity', 'huggingface'];
+    const keys: Record<string, { hasKey: boolean }> = {};
+    for (const p of providers) {
+      const key = resolveProviderApiKey(p as ProviderName, cfg);
+      keys[p] = { hasKey: !!key };
+    }
+    this.apiKeysCache = keys;
+    return { keys };
+  }
+
+  /** API anahtarı kaydeder */
+  setApiKey(provider: string, apiKey: string): { success: boolean; error?: string } {
+    if (!provider || !apiKey) {
+      return { success: false, error: 'Provider ve API anahtarı gerekli' };
+    }
+    try {
+      saveConfig({
+        providers: {
+          [provider]: { apiKey },
+        } as any,
+      });
+      // Update cache
+      this.apiKeysCache[provider] = { hasKey: true };
+      return { success: true };
+    } catch (err) {
+      return { success: false, error: String(err) };
     }
   }
 

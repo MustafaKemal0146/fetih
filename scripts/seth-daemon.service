@@ -1,0 +1,21 @@
+[Unit]
+Description=SETH AI Agent Daemon
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=%i
+ExecStart=/usr/local/bin/seth daemon start
+ExecStop=/usr/local/bin/seth daemon stop
+ExecReload=/usr/local/bin/seth daemon restart
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+Environment=NODE_ENV=production
+Environment=SETH_HOME=%h/.seth
+StandardOutput=append:%h/.seth/daemon.log
+StandardError=append:%h/.seth/daemon.log
+
+[Install]
+WantedBy=multi-user.target

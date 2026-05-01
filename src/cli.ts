@@ -18,6 +18,49 @@ async function main(): Promise<void> {
   let noTools = false;
   let autoApprove = false;
   let resumeId: string | undefined;
+  let daemonMode = false;
+  let daemonPort: number | undefined;
+
+  // daemon subcommand: seth daemon start|stop|status|restart
+  if (args[0] === 'daemon') {
+    const subCmd = args[1];
+    const portIdx = args.indexOf('--port');
+    const port = portIdx !== -1 ? parseInt(args[portIdx + 1], 10) : undefined;
+
+    const { startDaemon, stopDaemon, getDaemonStatus } = await import('./daemon.js');
+
+    switch (subCmd) {
+      case 'start':
+        await startDaemon(port ? { port } : {});
+        break;
+      case 'stop':
+        await stopDaemon(port ? { port } : {});
+        break;
+      case 'status': {
+        const status = await getDaemonStatus(port ? { port } : {});
+        if (status.running) {
+          console.log(chalk.green(`SETH daemon çalışıyor`));
+          console.log(`  PID:       ${status.pid}`);
+          console.log(`  Port:      ${status.port}`);
+          console.log(`  Uptime:    ${status.uptime}s`);
+          console.log(`  Sessions:  ${status.sessions}`);
+          console.log(`  Başlama:   ${status.startedAt}`);
+        } else {
+          console.log(chalk.red('SETH daemon çalışmıyor.'));
+        }
+        break;
+      }
+      case 'restart': {
+        await stopDaemon(port ? { port } : {});
+        await new Promise((r) => setTimeout(r, 1000));
+        await startDaemon(port ? { port } : {});
+        break;
+      }
+      default:
+        console.log('Kullanım: seth daemon <start|stop|status|restart> [--port PORT]');
+    }
+    return;
+  }
 
   for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
@@ -40,6 +83,13 @@ async function main(): Promise<void> {
         break;
       case '--resume':
         resumeId = args[++i];
+        break;
+      case '-d':
+      case '--daemon':
+        daemonMode = true;
+        break;
+      case '--port':
+        daemonPort = parseInt(args[++i], 10);
         break;
       case '-v':
       case '--version':
@@ -65,6 +115,13 @@ async function main(): Promise<void> {
         });
         break;
     }
+  }
+
+  // --daemon flag: daemon olarak başlat
+  if (daemonMode) {
+    const { startDaemon } = await import('./daemon.js');
+    await startDaemon(daemonPort ? { port: daemonPort } : {});
+    return;
   }
 
   const configOverrides: { -readonly [K in keyof SETHConfig]?: SETHConfig[K] } = { debug, autoApprove };
