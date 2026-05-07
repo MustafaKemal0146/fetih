@@ -1,5 +1,5 @@
 /**
- * @fileoverview SETH — Terminal çıktı işlemcisi.
+ * @fileoverview FETIH — Terminal çıktı işlemcisi.
  */
 
 import chalk from 'chalk';
@@ -193,7 +193,7 @@ export function renderWelcome(provider: string, model: string): string {
 
   return [
     '',
-    navyBright(chalk.bold('  SETH')) + navyDim(` v${VERSION}`),
+    navyBright(chalk.bold('  FETIH')) + navyDim(` v${VERSION}`),
     navyBright(`  ✦ ${provider}/${shortModel}`),
     navyMuted(`  ⌂ ${cwd}`),
     '',

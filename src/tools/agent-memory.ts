@@ -2,14 +2,14 @@ import type { ToolDefinition, ToolResult } from '../types.js';
 import { stat, readFile, writeFile, mkdir } from 'fs/promises';
 import * as path from 'path';
 
-// .seth/memory.md format.
+// .fetih/memory.md format.
 function getMemoryPath(cwd: string): string {
-  return path.join(cwd, '.seth', 'memory.md');
+  return path.join(cwd, '.fetih', 'memory.md');
 }
 
 export const memoryReadTool: ToolDefinition = {
   name: 'memory_read',
-  description: 'Proje kalıcı belleğini (.seth/memory.md) okur. Kararlar, sistem durumu ve unutulmaması gereken notlar burada tutulur.',
+  description: 'Proje kalıcı belleğini (.fetih/memory.md) okur. Kararlar, sistem durumu ve unutulmaması gereken notlar burada tutulur.',
   inputSchema: { type: 'object', properties: {} },
   async execute(_input: Record<string, unknown>, cwd: string): Promise<ToolResult> {
     const memoryFile = getMemoryPath(cwd);
@@ -25,7 +25,7 @@ export const memoryReadTool: ToolDefinition = {
 
 export const memoryWriteTool: ToolDefinition = {
   name: 'memory_write',
-  description: 'Projenin kalıcı belleğine (.seth/memory.md) not ekler veya günceller. Unutulmamasi gereken bilgileri kalıcı belleğe kazımak için kullan.',
+  description: 'Projenin kalıcı belleğine (.fetih/memory.md) not ekler veya günceller. Unutulmamasi gereken bilgileri kalıcı belleğe kazımak için kullan.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -35,7 +35,7 @@ export const memoryWriteTool: ToolDefinition = {
   },
   async execute(input: Record<string, unknown>, cwd: string): Promise<ToolResult> {
     const content = typeof input.content === 'string' ? input.content : '';
-    const memoryDir = path.join(cwd, '.seth');
+    const memoryDir = path.join(cwd, '.fetih');
     const memoryFile = path.join(memoryDir, 'memory.md');
 
     try {

@@ -1,5 +1,5 @@
 /**
- * Hook sistemi — ~/.seth/hooks.json
+ * Hook sistemi — ~/.fetih/hooks.json
  * PreToolUse / PostToolUse / OnResponse hook'ları
  */
 
@@ -8,7 +8,7 @@ import { join } from 'path';
 import { homedir } from 'os';
 import { execSync, exec } from 'child_process';
 
-const HOOKS_FILE = join(homedir(), '.seth', 'hooks.json');
+const HOOKS_FILE = join(homedir(), '.fetih', 'hooks.json');
 
 export type HookEvent = 'PreToolUse' | 'PostToolUse' | 'OnResponse' | 'OnStart';
 
@@ -59,6 +59,6 @@ export function getHooksExample(): string {
   return JSON.stringify([
     { event: 'PreToolUse', tool: 'file_write', command: 'echo "Dosya yazılıyor: $path"' },
     { event: 'PostToolUse', tool: 'shell', command: 'echo "Komut tamamlandı"', async: true },
-    { event: 'OnResponse', command: 'notify-send "SETH" "Yanıt hazır"', async: true },
+    { event: 'OnResponse', command: 'notify-send "FETİH" "Yanıt hazır"', async: true },
   ], null, 2);
 }

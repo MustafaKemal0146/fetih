@@ -11,11 +11,11 @@ import { SYSTEM_PROMPT_TR } from './prompts/system.js';
 const MAX_INSTRUCTION_CHARS = 24_000;
 
 const INSTRUCTION_FILES: { label: string; relativePath: string }[] = [
-  { label: 'SETH.md', relativePath: 'SETH.md' },
+  { label: 'FETIH.md', relativePath: 'FETIH.md' },
   { label: 'CLAUDE.md', relativePath: 'CLAUDE.md' },
   { label: 'AGENTS.md', relativePath: 'AGENTS.md' },
-  { label: '.seth/instructions.md', relativePath: join('.seth', 'instructions.md') },
-  { label: 'KALICI BELLEK', relativePath: join('.seth', 'memory.md') },
+  { label: '.fetih/instructions.md', relativePath: join('.fetih', 'instructions.md') },
+  { label: 'KALICI BELLEK', relativePath: join('.fetih', 'memory.md') },
 ];
 
 function readIfPresent(cwd: string, rel: string): string | null {
@@ -88,7 +88,7 @@ function getGitStatus(cwd: string): string {
 
     return `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nGİT DURUMU\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\nGeçerli dal: ${branch}\nDurum:\n${status || '(temiz)'}\n\nSon commitler:\n${log}\n`;
   } catch (err) {
-    if (process.env.SETH_DEBUG) console.error('[seth:project-instructions] getGitStatus failed', err);
+    if (process.env.FETIH_DEBUG) console.error('[fetih:project-instructions] getGitStatus failed', err);
     return '';
   }
 }

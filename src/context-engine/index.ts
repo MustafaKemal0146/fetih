@@ -1,5 +1,5 @@
 /**
- * @fileoverview SETH Context Engine — v3.9.5
+ * @fileoverview FETIH Context Engine — v3.9.5
  * AGPL-3.0
  * Token-aware context windowing, prioritization, compression.
  * AGPL-3.0

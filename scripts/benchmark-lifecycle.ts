@@ -4,7 +4,7 @@ import * as path from 'path';
 import * as os from 'os';
 
 async function run() {
-  const tmpDir = path.join(os.tmpdir(), 'seth-benchmark-' + Date.now());
+  const tmpDir = path.join(os.tmpdir(), 'fetih-benchmark-' + Date.now());
   await fs.mkdir(tmpDir, { recursive: true });
 
   console.log(`Creating 5000 dummy files in ${tmpDir}...`);

@@ -1,5 +1,5 @@
 /**
- * Seth Parameter Optimizer — Tool parametrelerini hedefe göre otomatik optimize eder
+ * Fetih Parameter Optimizer — Tool parametrelerini hedefe göre otomatik optimize eder
  * Teknoloji tespiti, rate limit algılama ve profil bazlı ayarlama içerir.
  */
 

@@ -1,10 +1,10 @@
 /**
- * @fileoverview Headless (non-interactive) mode for SETH.
- * Usage: seth -p "your question"
+ * @fileoverview Headless (non-interactive) mode for FETIH.
+ * Usage: fetih -p "your question"
  */
 
 import chalk from 'chalk';
-import type { SETHConfig, ProviderName } from './types.js';
+import type { FetihConfig, ProviderName } from './types.js';
 import { createProvider } from './providers/base.js';
 import { createDefaultRegistry, ToolRegistry } from './tools/registry.js';
 import { ToolExecutor } from './tools/executor.js';
@@ -56,12 +56,12 @@ export async function runHeadless(
       debug: config.debug,
       onTurnStart: config.debug
         ? (turn, max) => {
-            process.stderr.write(`[seth] tur ${turn}/${max}\n`);
+            process.stderr.write(`[fetih] tur ${turn}/${max}\n`);
           }
         : undefined,
       onTurnEnd: config.debug
         ? (turn, max) => {
-            process.stderr.write(`[seth] tur bitti ${turn}/${max}\n`);
+            process.stderr.write(`[fetih] tur bitti ${turn}/${max}\n`);
           }
         : undefined,
       onText: (text: string) => process.stdout.write(text),

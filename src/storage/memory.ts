@@ -1,5 +1,5 @@
 /**
- * Bellek sistemi — ~/.seth/memory/
+ * Bellek sistemi — ~/.fetih/memory/
  * user.md, project.md, feedback.md, reference.md
  */
 
@@ -7,7 +7,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 
-const MEMORY_DIR = join(homedir(), '.seth', 'memory');
+const MEMORY_DIR = join(homedir(), '.fetih', 'memory');
 
 export type MemoryType = 'user' | 'project' | 'feedback' | 'reference';
 

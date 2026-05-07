@@ -189,7 +189,7 @@ export async function startWebServer(port = 4321) {
 
   return new Promise<void>((resolve: () => void, reject) => {
     server.listen(port, 'localhost', async () => {
-      console.log(chalk.green(`\n  ✓ SETH Web Sunucusu çalışıyor: http://localhost:${port}`));
+      console.log(chalk.green(`\n  ✓ FETIH Web Sunucusu çalışıyor: http://localhost:${port}`));
       try {
         await open(`http://localhost:${port}`);
       } catch {

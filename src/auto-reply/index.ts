@@ -1,5 +1,5 @@
 /**
- * @fileoverview SETH Auto-Reply Sistemi — v3.9.5
+ * @fileoverview FETIH Auto-Reply Sistemi — v3.9.5
  * AGPL-3.0
  * Gelen mesajlara otonom yanıt verme, tetikleyiciler, kısıtlama.
  * AGPL-3.0
@@ -71,7 +71,7 @@ export interface AutoReplyResult {
 // Sabitler
 // ---------------------------------------------------------------------------
 
-const AUTO_REPLY_DIR = join(homedir(), '.seth', 'auto-reply');
+const AUTO_REPLY_DIR = join(homedir(), '.fetih', 'auto-reply');
 const RULES_FILE = join(AUTO_REPLY_DIR, 'rules.json');
 const COUNTERS_FILE = join(AUTO_REPLY_DIR, 'counters.json');
 
@@ -99,7 +99,7 @@ let responseCounters: { timestamps: number[] } = { timestamps: [] };
 // ---------------------------------------------------------------------------
 
 function log(msg: string): void {
-  process.stderr.write(`[seth:auto-reply] ${msg}\n`);
+  process.stderr.write(`[fetih:auto-reply] ${msg}\n`);
 }
 
 function generateRuleId(): string {

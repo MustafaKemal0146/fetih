@@ -7,7 +7,7 @@ let pythonWorker: ChildProcess | null = null;
 function getWorker() {
   if (pythonWorker) return pythonWorker;
   
-  pythonWorker = spawn('python3', ['SETH-Apps/Core/SETH_Engine.py'], {
+  pythonWorker = spawn('python3', ['FETIH-Apps/Core/FETIH_Engine.py'], {
     stdio: ['pipe', 'pipe', 'inherit']
   });
   
@@ -20,7 +20,7 @@ function getWorker() {
             const parsed = JSON.parse(line);
             if (parsed.type === 'log') {
               const color = parsed.level === 'SUCCESS' ? '\x1b[32m' : parsed.level === 'ERROR' ? '\x1b[31m' : '\x1b[36m';
-              console.log(`${color}[SETH-WORKER] [${parsed.timestamp}] [${parsed.level}] ${parsed.message}\x1b[0m`);
+              console.log(`${color}[FETIH-WORKER] [${parsed.timestamp}] [${parsed.level}] ${parsed.message}\x1b[0m`);
             }
           } catch (e) {
             // JSON değilse yoksay
@@ -33,13 +33,13 @@ function getWorker() {
   return pythonWorker;
 }
 
-export const sethEngineSchema = z.object({
+export const fetihEngineSchema = z.object({
   target: z.string().describe('Operasyon yapılacak hedef IP veya domain'),
   action: z.enum(['nmap', 'nuclei', 'sqlmap', 'bypass_cloudflare', 'subdomain', 'whatweb', 'brute_force', 'dir_search', 'exploit_search', 'lateral_movement', 'config_audit', 'service_integrity', 'campaign', 'breach_query', 'get_map', 'exit']).describe('Yürütülecek siber operasyon eylemi'),
 });
 
-export async function sethEngine(input: Record<string, unknown>): Promise<ToolResult> {
-  const args = sethEngineSchema.parse(input);
+export async function fetihEngine(input: Record<string, unknown>): Promise<ToolResult> {
+  const args = fetihEngineSchema.parse(input);
   const { target, action } = args;
   const worker = getWorker();
   
@@ -69,9 +69,9 @@ export async function sethEngine(input: Record<string, unknown>): Promise<ToolRe
   });
 }
 
-export const sethEngineTool: ToolDefinition = {
-  name: 'sethEngine',
-  description: 'SETH Otonom Operasyon Motoru. Python Worker üzerinden Nmap, Nuclei ve Cloudflare Bypass araçlarını kontrol eder.',
+export const fetihEngineTool: ToolDefinition = {
+  name: 'fetihEngine',
+  description: 'FETIH Otonom Operasyon Motoru. Python Worker üzerinden Nmap, Nuclei ve Cloudflare Bypass araçlarını kontrol eder.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -84,5 +84,5 @@ export const sethEngineTool: ToolDefinition = {
     },
     required: ['target', 'action'],
   },
-  execute: sethEngine,
+  execute: fetihEngine,
 };

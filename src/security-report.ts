@@ -84,7 +84,7 @@ ${data.rawOutput.slice(0, 3000)}
 
 \\pagestyle{fancy}
 \\fancyhf{}
-\\rhead{\\textcolor{sethblue}{\\textbf{SETH Güvenlik Raporu}}}
+\\rhead{\\textcolor{sethblue}{\\textbf{FETIH Güvenlik Raporu}}}
 \\lhead{${escapeLaTeX(data.target)}}
 \\rfoot{Sayfa \\thepage}
 \\lfoot{${escapeLaTeX(data.date)}}
@@ -96,17 +96,17 @@ ${data.rawOutput.slice(0, 3000)}
 \\begin{titlepage}
 \\centering
 \\vspace*{1.5cm}
-{\\ttfamily\\Huge\\bfseries\\color{sethred} SETH}\\\\[0.3cm]
-{\\small\\color{gray}\\url{https://github.com/MustafaKemal0146/seth}}\\\\[1cm]
+{\\ttfamily\\Huge\\bfseries\\color{sethred} FETIH}\\\\[0.3cm]
+{\\small\\color{gray}\\url{https://github.com/MustafaKemal0146/fetih}}\\\\[1cm]
 {\\Huge\\bfseries\\color{sethblue} SİBER GÜVENLİK\\\\[0.5em]TARAMA RAPORU}\\\\[2cm]
 \\begin{tabular}{rl}
 \\textbf{Hedef:} & ${escapeLaTeX(data.target)} \\\\[0.3em]
 \\textbf{Tarih:} & ${escapeLaTeX(data.date)} \\\\[0.3em]
 \\textbf{Analist:} & ${escapeLaTeX(data.analyst)} \\\\[0.3em]
-\\textbf{Araç:} & SETH v${VERSION} \\\\
+\\textbf{Araç:} & FETIH v${VERSION} \\\\
 \\end{tabular}
 \\vfill
-{\\small\\color{gray} Bu rapor SETH yapay zeka ajanı tarafından otomatik oluşturulmuştur.}
+{\\small\\color{gray} Bu rapor FETIH yapay zeka ajanı tarafından otomatik oluşturulmuştur.}
 \\end{titlepage}
 
 \\tableofcontents
@@ -137,7 +137,7 @@ export async function exportSecurityReport(
   const data: SecurityReportData = {
     target: extractTarget(reportText),
     date,
-    analyst: 'SETH Otomatik Tarama',
+    analyst: 'FETIH Otomatik Tarama',
     summary: extractSummary(reportText),
     findings: extractFindings(reportText),
     rawOutput: reportText.slice(0, 5000),

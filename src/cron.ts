@@ -6,7 +6,7 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 
-const CRON_FILE = join(homedir(), '.seth', 'cron.json');
+const CRON_FILE = join(homedir(), '.fetih', 'cron.json');
 
 export interface CronJob {
   id: string;
@@ -24,7 +24,7 @@ function loadJobs(): CronJob[] {
 }
 
 function saveJobs(jobs: CronJob[]): void {
-  const dir = join(homedir(), '.seth');
+  const dir = join(homedir(), '.fetih');
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
   writeFileSync(CRON_FILE, JSON.stringify(jobs, null, 2), 'utf-8');
 }

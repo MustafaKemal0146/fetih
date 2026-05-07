@@ -1,5 +1,5 @@
 /**
- * @fileoverview SETH Hızlı Alias Sistemi — v3.9.6
+ * @fileoverview FETIH Hızlı Alias Sistemi — v3.9.6
  * AGPL-3.0
  */
 
@@ -7,7 +7,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 
-const ALIAS_FILE = join(homedir(), '.seth', 'aliases.json');
+const ALIAS_FILE = join(homedir(), '.fetih', 'aliases.json');
 
 interface AliasEntry {
   icerik: string;
@@ -16,7 +16,7 @@ interface AliasEntry {
 }
 
 function ensureFile(): void {
-  const dir = join(homedir(), '.seth');
+  const dir = join(homedir(), '.fetih');
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
   if (!existsSync(ALIAS_FILE)) writeFileSync(ALIAS_FILE, '{}', 'utf-8');
 }

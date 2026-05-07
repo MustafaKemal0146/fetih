@@ -5,7 +5,7 @@
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd seth
+cd fetih
 
 # Install dependencies
 npm install
@@ -32,14 +32,14 @@ npm start
 
 - Node.js >= 20.0.0
 - npm (comes with Node.js)
-- Python 3.8+ (Seth Engine modülü için)
+- Python 3.8+ (Fetih Engine modülü için)
 - Python paketleri: `pip install flask requests aiohttp beautifulsoup4 selenium mitmproxy psutil mcp`
 
 ## First Run
 
 After installation, run:
 ```bash
-seth
+fetih
 ```
 
 The application will guide you through initial setup.

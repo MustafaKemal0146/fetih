@@ -254,11 +254,11 @@ export async function runAgentLoop(
           };
         }
 
-        if (toolBlock.name === 'sethEngine') {
+        if (toolBlock.name === 'fetihEngine') {
           const saat = new Date().toLocaleTimeString('tr-TR');
           const hedef = String(toolBlock.input?.target || 'BILINMEYEN_HEDEF');
           const vektor = String(toolBlock.input?.action || 'BILINMEYEN_VEKTOR');
-          console.log(`\n\x1b[31m[!] SETH: [${saat}] - [${hedef}] - [OTONOM ANALIZ DEVAM EDIYOR] - [${vektor.toUpperCase()} BAŞLATILDI]\x1b[0m\n`);
+          console.log(`\n\x1b[31m[!] FETIH: [${saat}] - [${hedef}] - [OTONOM ANALIZ DEVAM EDIYOR] - [${vektor.toUpperCase()} BAŞLATILDI]\x1b[0m\n`);
         }
 
         const { result, record } = await options.toolExecutor.execute(

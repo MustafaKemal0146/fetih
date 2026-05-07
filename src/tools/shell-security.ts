@@ -1,6 +1,6 @@
 /**
- * @fileoverview SETH Shell Güvenlik Denetleyicisi — v3.9.6
- * Claude Code bash-parser'dan ilham alınmış, Seth'in CTF/pentest odağına uygun
+ * @fileoverview FETIH Shell Güvenlik Denetleyicisi — v3.9.6
+ * Claude Code bash-parser'dan ilham alınmış, Fetih'in CTF/pentest odağına uygun
  * hafif ve etkili shell komut güvenlik analizörü.
  * AGPL-3.0
  *

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Seth CTF Görsel Steganografi — LSB, Alpha, Renk Kanalı, Histogram
+ * @fileoverview Fetih CTF Görsel Steganografi — LSB, Alpha, Renk Kanalı, Histogram
  */
 
 import { readFileSync, existsSync } from 'fs';

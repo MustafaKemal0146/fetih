@@ -54,7 +54,7 @@ function renderContent(content: string | ContentBlock[]): string {
 export const ChatMessage = React.memo(function ChatMessage({ message, isStreaming }: ChatMessageProps) {
   const isUser = message.role === 'user';
   const roleLabel = isUser ? ' > ' : ' ≻ ';
-  const roleName = isUser ? 'KULLANICI' : 'SETH';
+  const roleName = isUser ? 'KULLANICI' : 'FETİH';
   const roleColor = isUser ? 'cyan' : 'red';
 
   // ⚡ Bolt Optimization: Memoize expensive markdown parsing based on message content identity

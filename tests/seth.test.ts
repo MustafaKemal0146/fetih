@@ -29,7 +29,7 @@ describe('system prompt', () => {
   });
 
   it('Türkçe içermeli', () => {
-    expect(SYSTEM_PROMPT_TR).toContain('SETH');
+    expect(SYSTEM_PROMPT_TR).toContain('FETİH');
   });
 
   it('kurucu sadakat protokolü içermemeli', () => {
@@ -183,7 +183,7 @@ describe('ToolExecutor', () => {
 // ─── Session Recovery ────────────────────────────────────────────────────────
 
 describe('session recovery', () => {
-  const recoveryFile = join(homedir(), '.seth', 'recovery.json');
+  const recoveryFile = join(homedir(), '.fetih', 'recovery.json');
 
   beforeEach(() => {
     clearRecovery();

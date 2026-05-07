@@ -1,5 +1,5 @@
 /**
- * Seth Error Handler — Akıllı hata sınıflandırma ve otomatik kurtarma
+ * Fetih Error Handler — Akıllı hata sınıflandırma ve otomatik kurtarma
  * Hata tipini tespit eder, en uygun recovery stratejisini seçer.
  */
 

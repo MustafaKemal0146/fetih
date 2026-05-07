@@ -1,5 +1,5 @@
 /**
- * @fileoverview İsimlendirilmiş takım meta dosyası oluşturur (~/.seth/teams/).
+ * @fileoverview İsimlendirilmiş takım meta dosyası oluşturur (~/.fetih/teams/).
  */
 
 import { writeFileSync } from 'fs';
@@ -16,7 +16,7 @@ function sanitizeName(name: string): string {
 export const takimOlusturTool: ToolDefinition = {
   name: 'takim_olustur',
   description:
-    'İsimlendirilmiş bir takım kaydı oluşturur (paralel iş / ajanda). Dosya ~/.seth/teams/ altında saklanır.',
+    'İsimlendirilmiş bir takım kaydı oluşturur (paralel iş / ajanda). Dosya ~/.fetih/teams/ altında saklanır.',
   inputSchema: {
     type: 'object',
     properties: {

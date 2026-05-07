@@ -1,5 +1,5 @@
 /**
- * @fileoverview Daemon handler — SETH engine'i web UI için başlatır.
+ * @fileoverview Daemon handler — FETIH engine'i web UI için başlatır.
  * Daemon modunda REPL olmadan agent loop'u web'den yönetir.
  */
 
@@ -14,7 +14,7 @@ import { createSession, saveSession } from './storage/session.js';
 import { runAgentLoop, type AgentLoopOptions } from './agent/loop.js';
 import { webUIController } from './web/controller.js';
 import { getDaemonLogger } from './daemon.js';
-import type { ProviderName, SETHConfig, ChatMessage, LLMProvider, SessionData } from './types.js';
+import type { ProviderName, FetihConfig, ChatMessage, LLMProvider, SessionData } from './types.js';
 import { buildSystemPrompt } from './project-instructions.js';
 
 let daemonProvider: LLMProvider | null = null;
@@ -22,7 +22,7 @@ let daemonModel: string = '';
 let daemonToolRegistry: ToolRegistry | null = null;
 let daemonToolExecutor: ToolExecutor | null = null;
 let daemonSession: SessionData | null = null;
-let daemonConfig: SETHConfig | null = null;
+let daemonConfig: FetihConfig | null = null;
 let daemonProcessing = false;
 let daemonAbortController: AbortController | null = null;
 let daemonCurrentCwd = process.cwd();
@@ -30,14 +30,14 @@ let daemonEffort = 'medium';
 
 export async function initializeDaemonHandler(): Promise<void> {
   const logger = getDaemonLogger();
-  logger?.info('SETH engine başlatılıyor...');
+  logger?.info('FETIH engine başlatılıyor...');
 
   const { setupGracefulShutdown, startBackgroundCleanup } = await import('./lifecycle.js');
   setupGracefulShutdown();
-  void startBackgroundCleanup(join(homedir(), '.seth', 'sessions'));
+  void startBackgroundCleanup(join(homedir(), '.fetih', 'sessions'));
 
-  // Seth Engine arka plan sunucusunu başlat
-  const { startSethEngine } = await import('./seth-engine/bridge.js');
+  // Fetih Engine arka plan sunucusunu başlat
+  const { startSethEngine } = await import('./fetih-engine/bridge.js');
   startSethEngine();
 
   daemonConfig = loadConfig();
@@ -167,8 +167,8 @@ export async function initializeDaemonHandler(): Promise<void> {
 
   webUIController.sendStatus('ready', false);
 
-  logger?.info(`SETH engine hazır. Provider: ${daemonConfig?.defaultProvider}, Model: ${daemonModel}`);
-  console.log(chalk.green(`  ✓ SETH engine hazır: ${daemonConfig?.defaultProvider} / ${daemonModel}`));
+  logger?.info(`FETIH engine hazır. Provider: ${daemonConfig?.defaultProvider}, Model: ${daemonModel}`);
+  console.log(chalk.green(`  ✓ FETIH engine hazır: ${daemonConfig?.defaultProvider} / ${daemonModel}`));
 }
 
 async function runDaemonAgentTurn(text: string): Promise<void> {

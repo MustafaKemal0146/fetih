@@ -1,9 +1,9 @@
-# SETH — Proje Rehberi ve Geliştirme Notları
+# FETİH — Proje Rehberi ve Geliştirme Notları
 
-Bu belge (hakkinda.md), "SETH" projesinin ne olduğunu, şimdiye kadarki geliştirilme sürecini, mevcut mimarisini ve gelecekteki olası (daha gelişmiş) asistanlar tarafından devralınması halinde ihtiyaç duyacakları teknik bağlamı içermektedir.
+Bu belge (hakkinda.md), "FETİH" projesinin ne olduğunu, şimdiye kadarki geliştirilme sürecini, mevcut mimarisini ve gelecekteki olası (daha gelişmiş) asistanlar tarafından devralınması halinde ihtiyaç duyacakları teknik bağlamı içermektedir.
 
-## 1. SETH Nedir?
-**SETH**, *Anthropic Claude Code* ve *Qwen Code* gibi araçlardan ilham alınarak, terminal ortamında yerelden (`ollama`) veya bulut üzerinden (`claude`, `openai`, `gemini`) çalışabilen interaktif, soğuk, otoriter ve direktif odaklı bir **Yapay Zeka Kod Asistanı** (AI Coding Agent) replikasıdır. 
+## 1. FETİH Nedir?
+**FETİH**, *Anthropic Claude Code* ve *Qwen Code* gibi araçlardan ilham alınarak, terminal ortamında yerelden (`ollama`) veya bulut üzerinden (`claude`, `openai`, `gemini`) çalışabilen interaktif, soğuk, otoriter ve direktif odaklı bir **Yapay Zeka Kod Asistanı** (AI Coding Agent) replikasıdır. 
 Proje, kullanıcıya dosya işlemleri, terminal komut çalıştırma (`shell`) ve arama (`grep` vb.) gibi araçlar sunarak, otomatize edilmiş "Otonom Yazılım Geliştirici" hissi veren bir CLI arayüzüne sahiptir. Sloganı "HİÇBİR SİSTEM GÜVENLİ DEĞİLDİR"dir.
 
 ## 2. Kullanılan Stack & Altyapı
@@ -16,18 +16,18 @@ Proje, kullanıcıya dosya işlemleri, terminal komut çalıştırma (`shell`) v
 - **Ajans Mimarisi:** Temel bir "Ajan Döngüsü" (Agent Loop) bulunmaktadır. LLM araç kullanım (tool_use) döndüğünde, sistem parçayı işler ve geri cevap verir. `runAgentLoop` => `repl.ts` => `tools/executor.ts`.
 
 ## 3. Dizindeki Temel İskelet (Klasör Yapısı)
-* `src/cli.ts`: Ana giriş, argümanları ayrıştırır. `seth` komutunun kalbidir.
+* `src/cli.ts`: Ana giriş, argümanları ayrıştırır. `fetih` komutunun kalbidir.
 * `src/headless.ts`: Etkileşimsiz, tek komutluk `-p "soru"` modu.
 * `src/repl.ts`: Sınırsız sohbet (REPL) döngüsüdür. `readline` ve süreç işlemleri burada yürür.
 * `src/onboarding.ts`: Uygulama ilk açıldığında çalışan **Kurulum Sihirbazı**. Kullanıcıya favori modelini sorar.
 * `src/agent/loop.ts`: Ajan döngüsü. Maksimum döngü ve token bütçesi izlenir.
 * `src/tools/`: Asistanın gerçek dünya yetenekleri. (Dosya okuma, komut çağırma (`executor.ts`), arama vb.)
-* `src/providers/`: Ollama, OpenAI, Google ve Claude için entegrasyon API modülleri. SETH bu servislere evrensel bir formatla ileti yollar.
-* `src/config/settings.ts`: Konfigürasyon yönetimi. Configler `~/.seth/settings.json` lokasyonunda tutulur.
+* `src/providers/`: Ollama, OpenAI, Google ve Claude için entegrasyon API modülleri. FETİH bu servislere evrensel bir formatla ileti yollar.
+* `src/config/settings.ts`: Konfigürasyon yönetimi. Configler `~/.fetih/settings.json` lokasyonunda tutulur.
 * `src/renderer.ts`: Renklendirme ve spinnner modülüdür. *Son haldeki "çift yazdırma" hataları burada onarıldı.*
 
 ## 4. Mevcut Araçlar (Tools)
-SETH artık **40+ yerleşik araç** ile geliyor (dosya, arama, web, git, bellek, alt-ajan, MCP, siber araçlar ve browser otomasyonu dahil).
+FETİH artık **40+ yerleşik araç** ile geliyor (dosya, arama, web, git, bellek, alt-ajan, MCP, siber araçlar ve browser otomasyonu dahil).
 Aşağıdaki tablo yalnızca temel çekirdek araçları örneklemek içindir:
 
 | Araç | Açıklama |
@@ -51,7 +51,7 @@ Proje sıfırdan geliştirildikten sonra son birkaç oturumda uygulanan **kritik
 - **Onboarding Sihirbazı:** İlk defa çalıştırtıldığında (config dosyası yok ise) otomatik menü kurulumuna geçiş yapıldı.
 - **Yeni Araçlar (v1.1):** `list_directory`, `glob`, `batch_read` araçları eklendi. `search` aracı geliştirildi (context lines, file type filter, max depth, exclude pattern).
 - **Renkli Diff Çıktısı:** `file_edit` aracı artık değişiklikleri renkli diff formatında gösteriyor.
-- **Rebranding - SETH:** Proje EdaCode'dan alınıp SETH ismine dönüştürüldü. ANSI kırmızı logolar oluşturuldu, otoriter ton adapte edildi, logger formatı "SETH: ... yapılıyor" olarak güncellendi ve tüm dosya yolları `.seth`'e çekildi.
+- **Rebranding - FETİH:** Proje EdaCode'dan alınıp FETİH ismine dönüştürüldü. ANSI kırmızı logolar oluşturuldu, otoriter ton adapte edildi, logger formatı "FETİH: ... yapılıyor" olarak güncellendi ve tüm dosya yolları `.fetih`'e çekildi.
 
 ## 6. Gelecekteki veya Gelişmiş "Yapay Zeka" Modeline Notlar (Yaklaşım Rehberi)
 Sonraki asistanlar projenin bu halini devraldığında şunları yapabilir:

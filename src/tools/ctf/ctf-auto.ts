@@ -1,5 +1,5 @@
 /**
- * @fileoverview Seth CTF Otomasyon — Otomatik yönlendirme + paralel analiz + rapor
+ * @fileoverview Fetih CTF Otomasyon — Otomatik yönlendirme + paralel analiz + rapor
  */
 
 import { existsSync, readFileSync } from 'fs';
@@ -172,7 +172,7 @@ function extractBestResult(results: Partial<AutoReport>): { flag: string | null;
 
 function buildMarkdown(report: AutoReport): string {
   const lines: string[] = [
-    '## 🤖 Seth Otomatik Analiz Raporu',
+    '## 🤖 Fetih Otomatik Analiz Raporu',
     `**Input Türü:** ${report.auto_detected_type}`,
     `**Çalışan Modüller:** ${report.modules_run.join(', ')}`,
     `**Süre:** ${report.total_duration_ms}ms`,
@@ -235,7 +235,7 @@ export async function autoAnalyze(input: string): Promise<AutoReport> {
 export const ctfAutoTool: ToolDefinition = {
   name: 'ctf_auto',
   description:
-    'Seth CTF otomatik analiz motoru. Input türünü otomatik tespit eder ve doğru modülü çalıştırır. ' +
+    'Fetih CTF otomatik analiz motoru. Input türünü otomatik tespit eder ve doğru modülü çalıştırır. ' +
     'Dosya path\'i, URL, şifreli metin, Nmap çıktısı, HTTP header — her şeyi kabul eder. ' +
     'Markdown rapor + flag + güven skoru döndürür.',
   inputSchema: {
@@ -255,7 +255,7 @@ export const ctfAutoTool: ToolDefinition = {
     const report = await autoAnalyze(input);
 
     const lines: string[] = [
-      '┌─ SETH OTOMATİK ANALİZ ──────────────────────────────────────┐',
+      '┌─ FETIH OTOMATİK ANALİZ ──────────────────────────────────────┐',
       `│ Tür: ${report.auto_detected_type.padEnd(20)} Modüller: ${report.modules_run.join(', ').slice(0, 25)}`,
       `│ Süre: ${report.total_duration_ms}ms`,
       '└─────────────────────────────────────────────────────────────┘',

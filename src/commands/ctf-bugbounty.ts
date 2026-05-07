@@ -1,5 +1,5 @@
 /**
- * Seth CTF & Bug Bounty Workflow'ları
+ * Fetih CTF & Bug Bounty Workflow'ları
  * /ctf ve /bugbounty komutları için özel iş akışları
  */
 

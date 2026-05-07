@@ -1,5 +1,5 @@
 /**
- * @fileoverview ~/.seth/mcp.json — standart MCP sunucu tanımları.
+ * @fileoverview ~/.fetih/mcp.json — standart MCP sunucu tanımları.
  */
 
 import { existsSync, readFileSync } from 'fs';
@@ -16,7 +16,7 @@ export interface McpConfigFile {
   readonly servers?: Record<string, McpServerEntry>;
 }
 
-const MCP_FILE = join(homedir(), '.seth', 'mcp.json');
+const MCP_FILE = join(homedir(), '.fetih', 'mcp.json');
 
 export function loadMcpConfig(): McpConfigFile | null {
   if (!existsSync(MCP_FILE)) return null;

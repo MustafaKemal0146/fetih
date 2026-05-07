@@ -27,7 +27,7 @@ export async function compactMessages(
 
   try {
     const transcript = toSummarize
-      .map(m => `${m.role === 'user' ? 'Kullanıcı' : 'SETH'}: ${typeof m.content === 'string' ? m.content.slice(0, 600) : '[araç çağrısı/sonucu]'}`)
+      .map(m => `${m.role === 'user' ? 'Kullanıcı' : 'FETİH'}: ${typeof m.content === 'string' ? m.content.slice(0, 600) : '[araç çağrısı/sonucu]'}`)
       .join('\n\n');
 
     const summaryResponse = await provider.chat(
@@ -84,7 +84,7 @@ export async function applyRollingSummary(
 
   try {
     const transcript = toSummarize
-      .map(m => `${m.role === 'user' ? 'Kullanıcı' : 'SETH'}: ${typeof m.content === 'string' ? m.content.slice(0, 500) : '[araç çağrısı]'}`)
+      .map(m => `${m.role === 'user' ? 'Kullanıcı' : 'FETİH'}: ${typeof m.content === 'string' ? m.content.slice(0, 500) : '[araç çağrısı]'}`)
       .join('\n\n');
 
     const summaryResponse = await provider.chat(

@@ -1,7 +1,7 @@
-# SETH Daemon + Web UI Geliştirme SPEC
+# FETİH Daemon + Web UI Geliştirme SPEC
 
 ## Hedef
-SETH'e daemon modu eklemek ve web UI'ı OpenClaw kalitesine yükseltmek.
+FETİH'e daemon modu eklemek ve web UI'ı OpenClaw kalitesine yükseltmek.
 
 ---
 
@@ -15,9 +15,9 @@ Yeni dosya: `src/daemon.ts`
 export interface DaemonConfig {
   port: number;          // Web sunucu portu (default: 4321)
   host: string;          // Bağlanılacak host (default: 'localhost')
-  pidFile: string;       // PID dosya yolu (default: ~/.seth/seth.pid)
-  logFile: string;       // Log dosya yolu (default: ~/.seth/daemon.log)
-  stateDir: string;      // State dizini (default: ~/.seth/)
+  pidFile: string;       // PID dosya yolu (default: ~/.fetih/fetih.pid)
+  logFile: string;       // Log dosya yolu (default: ~/.fetih/daemon.log)
+  stateDir: string;      // State dizini (default: ~/.fetih/)
 }
 
 export interface DaemonStatus {
@@ -32,12 +32,12 @@ export interface DaemonStatus {
 
 Fonksiyonlar:
 - `startDaemon(config?: Partial<DaemonConfig>): Promise<void>`
-  - PID dosyası yaz (`~/.seth/seth.pid`)
-  - process.title = 'seth-daemon'
+  - PID dosyası yaz (`~/.fetih/fetih.pid`)
+  - process.title = 'fetih-daemon'
   - Web server'ı başlat
   - WebSocket server'ı başlat
   - SIGHUP/SIGTERM/SIGINT handler'ları (graceful shutdown)
-  - Log: `~/.seth/daemon.log` (timestamp'li, rotatable)
+  - Log: `~/.fetih/daemon.log` (timestamp'li, rotatable)
 
 - `stopDaemon(): Promise<void>`
   - PID dosyasından PID oku
@@ -52,24 +52,24 @@ Fonksiyonlar:
 - `isDaemonRunning(): Promise<boolean>`
 
 - `setupDaemonDirectories(stateDir: string): Promise<void>`
-  - `~/.seth/` dizinini oluştur (yoksa)
+  - `~/.fetih/` dizinini oluştur (yoksa)
 
 ### 1.2 CLI Flag'leri — `src/cli.ts`
 
 Yeni flag'ler:
 
 ```
-seth daemon start     → startDaemon() çağır
-seth daemon stop      → stopDaemon() çağır
-seth daemon status    → getDaemonStatus() çağır, çıktıyı göster
-seth daemon restart   → stop → start
-seth --daemon         → Direkt daemon olarak başlat (REPL yerine)
-seth --port 4321      → Daemon port override
+fetih daemon start     → startDaemon() çağır
+fetih daemon stop      → stopDaemon() çağır
+fetih daemon status    → getDaemonStatus() çağır, çıktıyı göster
+fetih daemon restart   → stop → start
+fetih --daemon         → Direkt daemon olarak başlat (REPL yerine)
+fetih --port 4321      → Daemon port override
 ```
 
 CLI arg parsing'ine ekle:
 ```typescript
-case 'daemon':   // seth daemon ...
+case 'daemon':   // fetih daemon ...
 case '--daemon':
 case '-d':
 case '--port':
@@ -85,7 +85,7 @@ Mevcut server'a ekle:
   - `GET /api/stats` — Kullanım istatistikleri
   - `POST /api/abort` — Mevcut işlemi iptal et
 - CORS desteği (opsiyonel, development için)
-- API anahtarı desteği (opsiyonel, `~/.seth/api-key.txt`)
+- API anahtarı desteği (opsiyonel, `~/.fetih/api-key.txt`)
 - Daemon modunda sadece localhost'ta dinle (güvenlik)
 - WebSocket'e ek event'ler: `daemon_status`, `daemon_log`
 
@@ -104,18 +104,18 @@ export function createDaemonLogger(logFile: string): {
 
 Log formatı: `[2026-04-30T18:55:00+03:00] [INFO] Mesaj`
 
-### 1.5 systemd Service Dosyası — `scripts/seth-daemon.service`
+### 1.5 systemd Service Dosyası — `scripts/fetih-daemon.service`
 
 ```ini
 [Unit]
-Description=SETH AI Agent Daemon
+Description=FETİH AI Agent Daemon
 After=network.target
 
 [Service]
 Type=simple
 User=%i
-ExecStart=/usr/local/bin/seth daemon start
-ExecStop=/usr/local/bin/seth daemon stop
+ExecStart=/usr/local/bin/fetih daemon start
+ExecStop=/usr/local/bin/fetih daemon stop
 Restart=on-failure
 RestartSec=5
 Environment=NODE_ENV=production
@@ -127,7 +127,7 @@ WantedBy=multi-user.target
 ### 1.6 Kurulum Scripti — `scripts/install-daemon.sh`
 
 - systemd service'i kur
-- `~/.seth/` dizinini oluştur
+- `~/.fetih/` dizinini oluştur
 - Gerekli izinleri ayarla
 
 ---
@@ -172,7 +172,7 @@ web/
 ### 2.2 Tasarım Hedefleri
 
 - **OpenClaw kalitesi:** Temiz, minimal, koyu tema, grid arka plan
-- **Renk paleti:** Mevcut SETH paletini koru (bg: #060608, accent: #dc2626)
+- **Renk paleti:** Mevcut FETİH paletini koru (bg: #060608, accent: #dc2626)
 - **Font:** Space Grotesk (başlıklar), Fira Code (kod)
 - **Responsive:** Mobil, tablet, masaüstü
 - **Animasyonlar:** Geçişlerde subtle fade/slide, loading state'leri
@@ -263,9 +263,9 @@ const publicPath = existsSync(join(__dirname, '..', '..', 'dist', 'web'))
 
 ## Teslimat Kriterleri
 
-1. `seth daemon start` → Web server + WebSocket çalışıyor, PID dosyası yazılmış
-2. `seth daemon stop` → Graceful shutdown, PID dosyası silinmiş
-3. `seth daemon status` → Doğru durum bilgisi (çalışıyor/PID/uptime)
+1. `fetih daemon start` → Web server + WebSocket çalışıyor, PID dosyası yazılmış
+2. `fetih daemon stop` → Graceful shutdown, PID dosyası silinmiş
+3. `fetih daemon status` → Doğru durum bilgisi (çalışıyor/PID/uptime)
 4. `curl http://localhost:4321/api/status` → JSON dönüyor
 5. `curl -X POST http://localhost:4321/api/chat -d '{"message":"merhaba"}'` → Yanıt dönüyor
 6. Web UI: Chat çalışıyor, dashboard daemon durumunu gösteriyor

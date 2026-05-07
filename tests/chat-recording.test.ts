@@ -27,9 +27,9 @@ describe('chat-recording', () => {
 
       recordMessage('session-1', { role: 'user', content: 'hello world' }, 10);
 
-      expect(fs.mkdirSync).toHaveBeenCalledWith('/mock/home/.seth/recordings', { recursive: true });
+      expect(fs.mkdirSync).toHaveBeenCalledWith('/mock/home/.fetih/recordings', { recursive: true });
       expect(fs.appendFileSync).toHaveBeenCalledWith(
-        '/mock/home/.seth/recordings/session-1.jsonl',
+        '/mock/home/.fetih/recordings/session-1.jsonl',
         JSON.stringify({
           timestamp: mockDate.toISOString(),
           sessionId: 'session-1',
@@ -88,7 +88,7 @@ describe('chat-recording', () => {
 
       const result = readRecording('missing-session');
 
-      expect(fs.existsSync).toHaveBeenCalledWith('/mock/home/.seth/recordings/missing-session.jsonl');
+      expect(fs.existsSync).toHaveBeenCalledWith('/mock/home/.fetih/recordings/missing-session.jsonl');
       expect(result).toEqual([]);
     });
 
@@ -103,7 +103,7 @@ describe('chat-recording', () => {
 
       const result = readRecording('s-1');
 
-      expect(fs.readFileSync).toHaveBeenCalledWith('/mock/home/.seth/recordings/s-1.jsonl', 'utf-8');
+      expect(fs.readFileSync).toHaveBeenCalledWith('/mock/home/.fetih/recordings/s-1.jsonl', 'utf-8');
       expect(result).toEqual([record1, record2]);
     });
 

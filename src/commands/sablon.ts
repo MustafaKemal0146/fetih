@@ -1,5 +1,5 @@
 /**
- * @fileoverview SETH Prompt Şablon Kütüphanesi — v3.9.6
+ * @fileoverview FETIH Prompt Şablon Kütüphanesi — v3.9.6
  * AGPL-3.0
  */
 
@@ -7,7 +7,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 
-const TEMPLATES_FILE = join(homedir(), '.seth', 'templates.json');
+const TEMPLATES_FILE = join(homedir(), '.fetih', 'templates.json');
 
 interface TemplateEntry {
   prompt: string;
@@ -34,7 +34,7 @@ const DEFAULT_TEMPLATES: Record<string, TemplateEntry> = {
 };
 
 function ensureFile(): void {
-  const dir = join(homedir(), '.seth');
+  const dir = join(homedir(), '.fetih');
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
   if (!existsSync(TEMPLATES_FILE)) {
     writeFileSync(TEMPLATES_FILE, JSON.stringify(DEFAULT_TEMPLATES, null, 2), 'utf-8');

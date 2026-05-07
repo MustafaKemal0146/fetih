@@ -4,12 +4,12 @@
 
 ### 🚀 Yeni Özellikler
 
-- **Seth Engine** (`src/seth-engine/`): SETH'e gömülü gelişmiş siber güvenlik motoru.
+- **Fetih Engine** (`src/fetih-engine/`): FETİH'e gömülü gelişmiş siber güvenlik motoru.
   - 150 yeni MCP tool (toplam 210+ araç)
   - 54 sınıf ile otomatik pentest, CTF çözümü, exploit üretimi
   - AI destekli karar motoru ve parametre optimizasyonu
-  - MCP protokolü ile SETH tool registry'sine otomatik entegrasyon
-  - SETH ile birlikte otomatik başlar ve kapanır
+  - MCP protokolü ile FETİH tool registry'sine otomatik entegrasyon
+  - FETİH ile birlikte otomatik başlar ve kapanır
 
 - **Yeni Tool Kategorileri:**
   - Binary exploitation: ghidra, gdb, radare2, angr, pwntools
@@ -28,9 +28,9 @@
 
 ### 🚀 Yeni Özellikler
 
-- **Self-Update Sistemi** (`src/update-check.ts`): SETH artık kendi kendini güncelleyebiliyor!
+- **Self-Update Sistemi** (`src/update-check.ts`): FETİH artık kendi kendini güncelleyebiliyor!
   - `/güncelle --auto` ile REPL içinden otomatik güncelleme
-  - `seth --update` / `seth -u` ile CLI'dan direkt güncelleme
+  - `fetih --update` / `fetih -u` ile CLI'dan direkt güncelleme
   - Git clone ortamında: `git fetch` → `git pull` → `npm run build`
   - npm global ortamında: `npm install -g`
   - Yerel değişiklikleri otomatik stash'leme ve geri alma
@@ -55,7 +55,7 @@
 
 ### 🧪 Testler
 
-- **Yeni test dosyası** (`tests/seth.test.ts`): 27 yeni test eklendi.
+- **Yeni test dosyası** (`tests/fetih.test.ts`): 27 yeni test eklendi.
   - Sistem istemi bütünlüğü (sadakat protokolü kaldırma kontrolü dahil)
   - `ToolRegistry`: kayıt, tekrar kayıt engeli, şema dönüşümü, silme
   - `ToolExecutor`: bilinmeyen araç, başarılı çalıştırma, exception yönetimi, engellenen araç

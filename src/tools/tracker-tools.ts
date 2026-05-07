@@ -8,7 +8,7 @@ import { join } from 'path';
 import { homedir } from 'os';
 import type { ToolDefinition, ToolResult } from '../types.js';
 
-const TRACKER_FILE = join(homedir(), '.seth', 'tracker.json');
+const TRACKER_FILE = join(homedir(), '.fetih', 'tracker.json');
 
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled' | 'blocked';
 
@@ -28,7 +28,7 @@ function loadTasks(): TrackerTask[] {
 }
 
 function saveTasks(tasks: TrackerTask[]): void {
-  const dir = join(homedir(), '.seth');
+  const dir = join(homedir(), '.fetih');
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
   writeFileSync(TRACKER_FILE, JSON.stringify(tasks, null, 2), 'utf-8');
 }

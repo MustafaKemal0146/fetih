@@ -14,7 +14,7 @@ export function createMessageElement(role, content) {
   div.innerHTML = `
     <div class="message-avatar">${isUser ? '👤' : '0️'}</div>
     <div class="message-content">
-      <div class="message-author">${isUser ? 'Sen' : 'SETH'}</div>
+      <div class="message-author">${isUser ? 'Sen' : 'FETİH'}</div>
       <div class="message-bubble">${rendered}</div>
     </div>
   `;

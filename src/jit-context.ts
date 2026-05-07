@@ -1,13 +1,13 @@
 /**
  * @fileoverview JIT (Just-In-Time) Context — araç bir dizine eriştiğinde
- * o dizindeki SETH.md/GEMINI.md/CLAUDE.md dosyalarını otomatik yükler.
+ * o dizindeki FETIH.md/GEMINI.md/CLAUDE.md dosyalarını otomatik yükler.
  * gemini-cli'nin jit-context.ts'inden ilham alınmıştır.
  */
 
 import { existsSync, readFileSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 
-const JIT_FILES = ['SETH.md', 'GEMINI.md', 'CLAUDE.md', '.seth/instructions.md'];
+const JIT_FILES = ['FETIH.md', 'GEMINI.md', 'CLAUDE.md', '.fetih/instructions.md'];
 const MAX_JIT_CHARS = 8000;
 
 /**

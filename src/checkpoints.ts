@@ -7,7 +7,7 @@ import { join } from 'path';
 import { homedir } from 'os';
 import type { ChatMessage, TokenUsage } from './types.js';
 
-const CHECKPOINTS_DIR = join(homedir(), '.seth', 'checkpoints');
+const CHECKPOINTS_DIR = join(homedir(), '.fetih', 'checkpoints');
 
 export interface CheckpointData {
   name: string;

@@ -13,7 +13,7 @@ import { resolve, join } from 'path';
 import { homedir } from 'os';
 import type {
   ProviderName,
-  SETHConfig,
+  FetihConfig,
   ChatMessage,
   PermissionLevel,
   ThinkingStyle,
@@ -25,7 +25,7 @@ import { todoListesiniOku } from './session-runtime.js';
 import { runRepoOzetSummary } from './tools/repo-ozet.js';
 import { runSorWizard } from './sor-wizard.js';
 import { runNasilCalisirAnimation } from './nasilcalisir.js';
-import { sethEngine } from './tools/seth-engine.js';
+import { fetihEngine } from './tools/fetih-engine.js';
 import { readMemory, writeMemory, appendMemory, loadAllMemories, type MemoryType } from './storage/memory.js';
 import { loadHooks, getHooksExample } from './hooks.js';
 import { loadHistory } from './storage/history.js';
@@ -49,7 +49,7 @@ import { formatKeybindingsTable, loadKeybindings } from './keybindings.js';
 import { getActiveSubAgentCount } from './agent/coordinator.js';
 
 export interface CommandContext {
-  config: SETHConfig;
+  config: FetihConfig;
   currentProvider: ProviderName;
   currentModel: string;
   toolsEnabled: boolean;
@@ -112,8 +112,8 @@ interface CommandHelpItem {
 
 const COMMAND_HELP_CONTRACT: readonly CommandHelpItem[] = [
   { section: 'Bilgi & Analiz', name: 'yardım', description: 'Tüm komutları göster' },
-  { section: 'Bilgi & Analiz', name: 'özellikler', description: 'SETH yetenek raporunu göster' },
-  { section: 'Bilgi & Analiz', name: 'harita', description: 'Canlı operasyon haritası (SETH Engine)' },
+  { section: 'Bilgi & Analiz', name: 'özellikler', description: 'FETIH yetenek raporunu göster' },
+  { section: 'Bilgi & Analiz', name: 'harita', description: 'Canlı operasyon haritası (FETİH Engine)' },
   { section: 'Bilgi & Analiz', name: 'istatistikler', description: 'Token kullanımı, maliyet tahmini, günlük kullanım' },
   { section: 'Bilgi & Analiz', name: 'kullanım', description: 'Bugünkü kullanım limitinizi göster' },
   { section: 'Bilgi & Analiz', name: 'bağlam', description: 'Token dağılımı, araç kullanım analizi' },
@@ -168,7 +168,7 @@ const COMMAND_HELP_CONTRACT: readonly CommandHelpItem[] = [
   { section: 'Araçlar & Sistem', name: 'cikis', description: 'Uygulamadan çık' },
   // v3.9.2
   { section: 'Bilgi & Analiz', name: 'maliyet', description: 'Oturum maliyet tablosu (token × birim fiyat, saatlik tahmin)' },
-  { section: 'Bellek & Oturum', name: 'paylaş', usage: '[son <N>] [json]', description: 'Konuşmayı ~/.seth/exports/ klasörüne aktar' },
+  { section: 'Bellek & Oturum', name: 'paylaş', usage: '[son <N>] [json]', description: 'Konuşmayı ~/.fetih/exports/ klasörüne aktar' },
   { section: 'Bilgi & Analiz', name: 'incele', usage: '[--staged|--head|<dosya>]', description: 'Staged/head diff\'i AI ile incele (code review)' },
   { section: 'Araçlar & Sistem', name: 'skills', description: 'Kullanılabilir skill\'leri listele' },
   { section: 'Araçlar & Sistem', name: 'skill', usage: '<ad> [parametreler]', description: 'Belirtilen skill\'i çalıştır' },
@@ -217,7 +217,7 @@ function parseTokenBudget(input: string): number | null {
 export const COMMANDS: Record<string, (args: string, ctx: CommandContext) => Promise<CommandResult> | CommandResult> = {
   yardım: (_args, ctx) => ({
     output: [
-      chalk.bold(`SETH v${VERSION} — Komut Rehberi`),
+      chalk.bold(`FETIH v${VERSION} — Komut Rehberi`),
       '',
       ...formatHelpLines(),
       chalk.dim('  ─── Kısayollar ───────────────────────────────────────────────'),
@@ -233,7 +233,7 @@ export const COMMANDS: Record<string, (args: string, ctx: CommandContext) => Pro
   }),
   özellikler: async () => ({
     output: `
-🎯 SETH v${VERSION} 'LEVIATHAN' — Yetenek Raporu (v3.8.18)
+🎯 FETIH v${VERSION} 'LEVIATHAN' — Yetenek Raporu (v3.8.18)
 
 1. Siber Harekat (Multi-Target Campaign)
    • IP aralıkları (CIDR) ve wildcard alan adları (*.site.com) üzerinde otonom harekat.
@@ -251,12 +251,12 @@ export const COMMANDS: Record<string, (args: string, ctx: CommandContext) => Pro
    • bypass_cloudflare: Gerçek IP tespiti.
    • brute_force & exploit_search: Otonom sızma ve derinlemesine istismar (John/Hashcat).
 
-SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcısı: Mustafa Kemal Çıngıl 😈🐍🔥
+FETIH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcısı: Mustafa Kemal Çıngıl 😈🐍🔥
 `,
   }),
 
   harita: async () => {
-    const res = await sethEngine({ target: 'STATE', action: 'get_map' });
+    const res = await fetihEngine({ target: 'STATE', action: 'get_map' });
     if (res.isError) return { output: chalk.red('Harita verisi alınamadı.') };
     
     interface OperationTarget {
@@ -274,7 +274,7 @@ SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcı
       leaks: LeakRecord[];
     }
     const state = (JSON.parse(res.output) as { data: OperationState }).data;
-    let output = `\n${chalk.bold.cyan('🌐 SETH CANLI OPERASYON HARİTASI')}\n`;
+    let output = `\n${chalk.bold.cyan('🌐 FETIH CANLI OPERASYON HARİTASI')}\n`;
     output += `${chalk.dim('Başlangıç:')} ${state.start_time}\n`;
     output += `─`.repeat(40) + '\n';
 
@@ -379,7 +379,7 @@ SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcı
           lines.push(chalk.green(updateResult.message.split('\n')[0]!));
           lines.push(chalk.cyan(`  v${updateResult.previousVersion} → v${updateResult.newVersion}`));
           lines.push('');
-          lines.push(chalk.yellow('  🔄 SETH yeniden başlatılmalı! (Ctrl+C → tekrar seth)'));
+          lines.push(chalk.yellow('  🔄 FETIH yeniden başlatılmalı! (Ctrl+C → tekrar fetih)'));
         }
       } else {
         lines.push(chalk.red(updateResult.message));
@@ -393,7 +393,7 @@ SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcı
     lines.push(chalk.dim(`    /güncelle --auto`));
     lines.push('');
     lines.push(chalk.dim('  Elle güncelleme:'));
-    lines.push(chalk.dim('    npm install -g seth'));
+    lines.push(chalk.dim('    npm install -g fetih'));
 
     return { output: lines.join('\n') };
   },
@@ -781,7 +781,7 @@ SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcı
       if (!providerArg || !providers.includes(providerArg) || !key) {
         return { output: chalk.red('Kullanım: /apikey set <provider> <key>') };
       }
-      saveConfig({ providers: { [providerArg]: { apiKey: key } } as SETHConfig['providers'] });
+      saveConfig({ providers: { [providerArg]: { apiKey: key } } as FetihConfig['providers'] });
       return { output: chalk.green(`✓ ${providerArg} API anahtarı kaydedildi.`) };
     }
 
@@ -864,13 +864,13 @@ SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcı
     let content = '';
     if (fmt === 'html') {
       const rows = messages.map(m => {
-        const role = m.role === 'user' ? 'Sen' : 'SETH';
+        const role = m.role === 'user' ? 'Sen' : 'FETİH';
         const cls = m.role === 'user' ? 'user' : 'assistant';
         const text = typeof m.content === 'string' ? m.content : JSON.stringify(m.content);
         return `<div class="msg ${cls}"><span class="role">${role}</span><pre>${text}</pre></div>`;
       }).join('\n');
       
-      content = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>SETH Chat</title>
+      content = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>FETIH Chat</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:#0d0d0d;color:#e0e0e0;font-family:'Courier New',monospace;max-width:900px;margin:0 auto;padding:24px}
@@ -885,7 +885,7 @@ SETH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıcı
 </style>
 </head>
 <body>
-<h1>🐍 SETH — Sohbet Kaydı</h1>
+<h1>🐍 FETIH — Sohbet Kaydı</h1>
 ${rows}
 </body></html>`;
     } else if (fmt === 'txt') {
@@ -923,23 +923,23 @@ ${rows}
         })),
       }, null, 2);
     } else if (fmt === 'obsidian') {
-      const fm = `---\ntitle: SETH Oturum Kaydı\ntags: [seth, ai-session, security]\nprovider: ${ctx.currentProvider}\nmodel: ${ctx.currentModel}\ndate: ${new Date().toISOString()}\n---\n\n`;
+      const fm = `---\ntitle: FETIH Oturum Kaydı\ntags: [fetih, ai-session, security]\nprovider: ${ctx.currentProvider}\nmodel: ${ctx.currentModel}\ndate: ${new Date().toISOString()}\n---\n\n`;
       content = fm + messages.map(m => {
-        const role = m.role === 'user' ? '# User' : '# SETH';
+        const role = m.role === 'user' ? '# User' : '# FETIH';
         const text = typeof m.content === 'string' ? m.content : JSON.stringify(m.content, null, 2);
         return `${role}\n\n${text}`;
       }).join('\n\n---\n\n');
     } else if (fmt === 'md') {
-      const header = `# SETH Oturum Kaydı\n\n**Provider:** ${ctx.currentProvider} / ${ctx.currentModel}  \n**Tarih:** ${new Date().toLocaleString('tr-TR')}  \n**Mesaj:** ${stats.messages}  \n\n---\n\n`;
+      const header = `# FETIH Oturum Kaydı\n\n**Provider:** ${ctx.currentProvider} / ${ctx.currentModel}  \n**Tarih:** ${new Date().toLocaleString('tr-TR')}  \n**Mesaj:** ${stats.messages}  \n\n---\n\n`;
       content = header + messages.map(m => {
-        const role = m.role === 'user' ? '**Sen**' : '**SETH**';
+        const role = m.role === 'user' ? '**Sen**' : '**FETIH**';
         const text = typeof m.content === 'string' ? m.content : JSON.stringify(m.content, null, 2);
         return `${role}\n\n${text}`;
       }).join('\n\n---\n\n');
     } else {
       // HTML
       const rows = messages.map(m => {
-        const role = m.role === 'user' ? 'Sen' : 'SETH';
+        const role = m.role === 'user' ? 'Sen' : 'FETİH';
         const cls = m.role === 'user' ? 'user' : 'assistant';
         const text = typeof m.content === 'string' ? m.content : JSON.stringify(m.content);
         return `<div class="msg ${cls}"><span class="role">${role}</span><pre>${text}</pre></div>`;
@@ -992,7 +992,7 @@ ${rows}
         : '';
       if (content.toLowerCase().includes(query)) {
         const preview = content.slice(0, 120).replace(/\n/g, ' ');
-        const role = msg.role === 'user' ? chalk.cyan('Sen') : chalk.green('SETH');
+        const role = msg.role === 'user' ? chalk.cyan('Sen') : chalk.green('FETİH');
         results.push(`  ${chalk.dim(`#${i + 1}`)} ${role}: ${preview}…`);
       }
     });
@@ -1091,7 +1091,7 @@ ${rows}
 
   hook: async (args) => {
     const sub = args.trim().toLowerCase();
-    if (sub === 'örnek') return { output: `Hook örneği (~/.seth/hooks.json):\n\n${JSON.stringify(getHooksExample(), null, 2)}` };
+    if (sub === 'örnek') return { output: `Hook örneği (~/.fetih/hooks.json):\n\n${JSON.stringify(getHooksExample(), null, 2)}` };
     
     const hooks = loadHooks();
     if (hooks.length === 0) return { output: chalk.gray('Tanımlı hook yok. Örnek için: /hook örnek') };
@@ -1138,7 +1138,7 @@ ${rows}
     const costUSD = calculateCostUSD(s.inputTokens, s.outputTokens, ctx.currentModel, ctx.currentProvider);
 
     const lines = [
-      chalk.bold('📊 SETH İstatistikleri'),
+      chalk.bold('📊 FETIH İstatistikleri'),
       '',
       `  Sağlayıcı     : ${chalk.cyan(ctx.currentProvider)} / ${chalk.cyan(ctx.currentModel)}`,
       `  Mesaj sayısı  : ${chalk.cyan(s.messages)}`,
@@ -1170,7 +1170,7 @@ ${rows}
       const { readFile } = await import('fs/promises');
       const { join } = await import('path');
       const { homedir } = await import('os');
-      const summaryPath = join(homedir(), '.seth', 'metrics', 'tool-metrics-summary.json');
+      const summaryPath = join(homedir(), '.fetih', 'metrics', 'tool-metrics-summary.json');
       const raw = await readFile(summaryPath, 'utf-8').catch(() => null);
       if (raw) {
         const data = JSON.parse(raw);
@@ -1395,7 +1395,7 @@ ${rows}
 
   yapımcı: () => ({
     output: `
-${chalk.bold.red('🐍 SETH v' + VERSION + ' — Strategic Exploitation & Tactical Hybrid')}
+${chalk.bold.red('🐍 FETIH v' + VERSION + ' — Strategic Exploitation & Tactical Hybrid')}
 
 ${chalk.bold.cyan('👨‍💻 Yapımcı:')} ${chalk.bold('Mustafa Kemal Çıngıl')}
 ${chalk.dim('GitHub:')} ${chalk.underline('https://github.com/MustafaKemal0146')}
@@ -1426,7 +1426,7 @@ ${chalk.magenta('🌐 İletişim:')}
 
 ${chalk.dim('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')}
 
-${chalk.red.bold('⚡ SETH')} — Teknoloji ile hayatı kolaylaştıran, etik hacker ruhuyla geliştirilmiş
+${chalk.red.bold('⚡ FETIH')} — Teknoloji ile hayatı kolaylaştıran, etik hacker ruhuyla geliştirilmiş
 otonom siber operasyon aracı. Bitlis'ten dünyaya açılan bir yapay zeka projesi.
 
 ${chalk.dim('Yanıt süresi: 24 saat içinde • Çalışma dili: Türkçe, İngilizce')}
@@ -1622,7 +1622,7 @@ ${chalk.dim('Yanıt süresi: 24 saat içinde • Çalışma dili: Türkçe, İng
     const history = ctx.getHistory();
     const messages = lastN > 0 ? history.slice(-lastN) : history;
 
-    const exportDir = pjoin(phome(), '.seth', 'exports');
+    const exportDir = pjoin(phome(), '.fetih', 'exports');
     await mkdir(exportDir, { recursive: true });
 
     const now = new Date();
@@ -1640,7 +1640,7 @@ ${chalk.dim('Yanıt süresi: 24 saat içinde • Çalışma dili: Türkçe, İng
         '',
       ];
       for (const m of messages) {
-        const role = m.role === 'user' ? '## Kullanıcı' : '## SETH';
+        const role = m.role === 'user' ? '## Kullanıcı' : '## FETIH';
         const content = typeof m.content === 'string' ? m.content : JSON.stringify(m.content, null, 2);
         lines.push(role, '', content, '');
       }
@@ -1737,7 +1737,7 @@ ${chalk.dim('Yanıt süresi: 24 saat içinde • Çalışma dili: Türkçe, İng
       const { unlink } = await import('fs/promises');
       const { join: pjoin } = await import('path');
       const { homedir: phome } = await import('os');
-      const kbPath = pjoin(phome(), '.seth', 'keybindings.json');
+      const kbPath = pjoin(phome(), '.fetih', 'keybindings.json');
       try {
         await unlink(kbPath);
         return { output: chalk.green('  ✓ Keybindinglar varsayılana sıfırlandı.') };

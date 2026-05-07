@@ -1,11 +1,11 @@
 /**
- * @fileoverview SETH v3.9.5 — Tüm yeni modüllerin inisiyalizasyonu.
+ * @fileoverview FETIH v3.9.5 — Tüm yeni modüllerin inisiyalizasyonu.
  * AGPL-3.0
  */
 
-import type { SETHConfig } from './types.js';
+import type { FetihConfig } from './types.js';
 
-export async function initNewModules(config: SETHConfig): Promise<void> {
+export async function initNewModules(config: FetihConfig): Promise<void> {
   // 1. Güvenlik denetimi — en önce başlamalı
   const { initSecurity } = await import('./security/index.js');
   initSecurity(config);

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Seth CTF Solver — Recursive çok katmanlı şifre/encoding çözücü
+ * @fileoverview Fetih CTF Solver — Recursive çok katmanlı şifre/encoding çözücü
  * Encoding, hash, klasik kripto, modern kripto ve steganografi destekler.
  * Maksimum 7 katman derinliğe kadar recursive çalışır.
  */

@@ -1,5 +1,5 @@
 /**
- * @fileoverview SETH Görev Sistemi (Tasks) — v3.9.5
+ * @fileoverview FETIH Görev Sistemi (Tasks) — v3.9.5
  * AGPL-3.0
  */
 
@@ -56,13 +56,13 @@ export interface TaskQuery {
 // Sabitler
 // ---------------------------------------------------------------------------
 
-const TASKS_DIR = join(homedir(), '.seth', 'tasks');
+const TASKS_DIR = join(homedir(), '.fetih', 'tasks');
 const TASKS_FILE = join(TASKS_DIR, 'tasks.json');
 let tasks: TaskDefinition[] = [];
 let loaded = false;
 
 function log(msg: string): void {
-  process.stderr.write(`[seth:tasks] ${msg}\n`);
+  process.stderr.write(`[fetih:tasks] ${msg}\n`);
 }
 
 function generateId(): string {
@@ -231,7 +231,7 @@ export function runInBackground(taskId: string): void {
 // ---------------------------------------------------------------------------
 
 export function registerCronTasks(): void {
-  const cronFile = join(homedir(), '.seth', 'cron.json');
+  const cronFile = join(homedir(), '.fetih', 'cron.json');
 
   if (!existsSync(cronFile)) return;
 
@@ -259,7 +259,7 @@ export function initTaskSystem(): void {
   const running = tasks.filter(t => t.status === 'running');
   for (const task of running) {
     task.status = 'failed';
-    task.error = 'Seth yeniden başlatıldı, görev iptal oldu';
+    task.error = 'Fetih yeniden başlatıldı, görev iptal oldu';
     task.completedAt = new Date().toISOString();
   }
   if (running.length > 0) {

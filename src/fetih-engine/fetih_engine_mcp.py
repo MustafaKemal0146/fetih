@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SethEngine AI MCP Client - Enhanced AI Agent Communication Interface
+FetihEngine AI MCP Client - Enhanced AI Agent Communication Interface
 
 Enhanced with AI-Powered Intelligence & Automation
 🚀 Bug Bounty | CTF | Red Team | Security Research
@@ -13,7 +13,7 @@ RECENT ENHANCEMENTS (v6.0):
 ✅ 100+ security tools with intelligent parameter optimization
 ✅ Advanced logging with colored output and emojis
 
-Architecture: MCP Client for AI agent communication with SethEngine server
+Architecture: MCP Client for AI agent communication with FetihEngine server
 Framework: FastMCP integration for tool orchestration
 """
 
@@ -28,7 +28,7 @@ from datetime import datetime
 
 from mcp.server.fastmcp import FastMCP
 
-class SethEngineColors:
+class FetihEngineColors:
     """Enhanced color palette matching the server's ModernVisualEngine.COLORS"""
 
     # Basic colors (for backward compatibility)
@@ -92,17 +92,17 @@ class SethEngineColors:
     TOOL_RECOVERY = '\033[38;5;129m\033[1m'  # Bold purple
 
 # Backward compatibility alias
-Colors = SethEngineColors
+Colors = FetihEngineColors
 
 class ColoredFormatter(logging.Formatter):
     """Enhanced formatter with colors and emojis for MCP client - matches server styling"""
 
     COLORS = {
-        'DEBUG': SethEngineColors.DEBUG,
-        'INFO': SethEngineColors.SUCCESS,
-        'WARNING': SethEngineColors.WARNING,
-        'ERROR': SethEngineColors.ERROR,
-        'CRITICAL': SethEngineColors.CRITICAL
+        'DEBUG': FetihEngineColors.DEBUG,
+        'INFO': FetihEngineColors.SUCCESS,
+        'WARNING': FetihEngineColors.WARNING,
+        'ERROR': FetihEngineColors.ERROR,
+        'CRITICAL': FetihEngineColors.CRITICAL
     }
 
     EMOJIS = {
@@ -115,16 +115,16 @@ class ColoredFormatter(logging.Formatter):
 
     def format(self, record):
         emoji = self.EMOJIS.get(record.levelname, '📝')
-        color = self.COLORS.get(record.levelname, SethEngineColors.BRIGHT_WHITE)
+        color = self.COLORS.get(record.levelname, FetihEngineColors.BRIGHT_WHITE)
 
         # Add color and emoji to the message
-        record.msg = f"{color}{emoji} {record.msg}{SethEngineColors.RESET}"
+        record.msg = f"{color}{emoji} {record.msg}{FetihEngineColors.RESET}"
         return super().format(record)
 
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
-    format="[🔥 SethEngine MCP] %(asctime)s [%(levelname)s] %(message)s",
+    format="[🔥 FetihEngine MCP] %(asctime)s [%(levelname)s] %(message)s",
     handlers=[
         logging.StreamHandler(sys.stderr)
     ]
@@ -133,26 +133,26 @@ logging.basicConfig(
 # Apply colored formatter
 for handler in logging.getLogger().handlers:
     handler.setFormatter(ColoredFormatter(
-        "[🔥 SethEngine MCP] %(asctime)s [%(levelname)s] %(message)s",
+        "[🔥 FetihEngine MCP] %(asctime)s [%(levelname)s] %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S"
     ))
 
 logger = logging.getLogger(__name__)
 
 # Default configuration
-DEFAULT_SETH_ENGINE_SERVER = "http://127.0.0.1:8888"  # Default SethEngine server URL
+DEFAULT_FETIH_ENGINE_SERVER = "http://127.0.0.1:8888"  # Default FetihEngine server URL
 DEFAULT_REQUEST_TIMEOUT = 300  # 5 minutes default timeout for API requests
 MAX_RETRIES = 3  # Maximum number of retries for connection attempts
 
-class SethEngineClient:
-    """Enhanced client for communicating with the SethEngine AI API Server"""
+class FetihEngineClient:
+    """Enhanced client for communicating with the FetihEngine AI API Server"""
 
     def __init__(self, server_url: str, timeout: int = DEFAULT_REQUEST_TIMEOUT):
         """
-        Initialize the SethEngine AI Client
+        Initialize the FetihEngine AI Client
 
         Args:
-            server_url: URL of the SethEngine AI API Server
+            server_url: URL of the FetihEngine AI API Server
             timeout: Request timeout in seconds
         """
         self.server_url = server_url.rstrip("/")
@@ -163,19 +163,19 @@ class SethEngineClient:
         connected = False
         for i in range(MAX_RETRIES):
             try:
-                logger.info(f"🔗 Attempting to connect to SethEngine AI API at {server_url} (attempt {i+1}/{MAX_RETRIES})")
+                logger.info(f"🔗 Attempting to connect to FetihEngine AI API at {server_url} (attempt {i+1}/{MAX_RETRIES})")
                 # First try a direct connection test before using the health endpoint
                 try:
                     test_response = self.session.get(f"{self.server_url}/health", timeout=5)
                     test_response.raise_for_status()
                     health_check = test_response.json()
                     connected = True
-                    logger.info(f"🎯 Successfully connected to SethEngine AI API Server at {server_url}")
+                    logger.info(f"🎯 Successfully connected to FetihEngine AI API Server at {server_url}")
                     logger.info(f"🏥 Server health status: {health_check.get('status', 'unknown')}")
                     logger.info(f"📊 Server version: {health_check.get('version', 'unknown')}")
                     break
                 except requests.exceptions.ConnectionError:
-                    logger.warning(f"🔌 Connection refused to {server_url}. Make sure the SethEngine AI server is running.")
+                    logger.warning(f"🔌 Connection refused to {server_url}. Make sure the FetihEngine AI server is running.")
                     time.sleep(2)  # Wait before retrying
                 except Exception as e:
                     logger.warning(f"⚠️  Connection test failed: {str(e)}")
@@ -185,7 +185,7 @@ class SethEngineClient:
                 time.sleep(2)  # Wait before retrying
 
         if not connected:
-            error_msg = f"Failed to establish connection to SethEngine AI API Server at {server_url} after {MAX_RETRIES} attempts"
+            error_msg = f"Failed to establish connection to FetihEngine AI API Server at {server_url} after {MAX_RETRIES} attempts"
             logger.error(error_msg)
             # We'll continue anyway to allow the MCP server to start, but tools will likely fail
 
@@ -199,7 +199,7 @@ class SethEngineClient:
     def __del__(self) -> None:
         self.close()
 
-    def __enter__(self) -> "SethEngineClient":
+    def __enter__(self) -> "FetihEngineClient":
         return self
 
     def __exit__(self, exc_type, exc, tb) -> None:
@@ -260,7 +260,7 @@ class SethEngineClient:
 
     def execute_command(self, command: str, use_cache: bool = True) -> Dict[str, Any]:
         """
-        Execute a generic command on the SethEngine server
+        Execute a generic command on the FetihEngine server
 
         Args:
             command: Command to execute
@@ -273,24 +273,24 @@ class SethEngineClient:
 
     def check_health(self) -> Dict[str, Any]:
         """
-        Check the health of the SethEngine AI API Server
+        Check the health of the FetihEngine AI API Server
 
         Returns:
             Health status information
         """
         return self.safe_get("health")
 
-def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
+def setup_mcp_server(fetih_engine_client: FetihEngineClient) -> FastMCP:
     """
     Set up the MCP server with all enhanced tool functions
 
     Args:
-        seth_engine_client: Initialized SethEngineClient
+        fetih_engine_client: Initialized FetihEngineClient
 
     Returns:
         Configured FastMCP instance
     """
-    mcp = FastMCP("seth_engine-ai-mcp")
+    mcp = FastMCP("fetih_engine-ai-mcp")
 
     # ============================================================================
     # CORE NETWORK SCANNING TOOLS
@@ -316,26 +316,26 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "ports": ports,
             "additional_args": additional_args
         }
-        logger.info(f"{SethEngineColors.FIRE_RED}🔍 Initiating Nmap scan: {target}{SethEngineColors.RESET}")
+        logger.info(f"{FetihEngineColors.FIRE_RED}🔍 Initiating Nmap scan: {target}{FetihEngineColors.RESET}")
 
         # Use enhanced error handling by default
         data["use_recovery"] = True
-        result = seth_engine_client.safe_post("api/tools/nmap", data)
+        result = fetih_engine_client.safe_post("api/tools/nmap", data)
 
         if result.get("success"):
-            logger.info(f"{SethEngineColors.SUCCESS}✅ Nmap scan completed successfully for {target}{SethEngineColors.RESET}")
+            logger.info(f"{FetihEngineColors.SUCCESS}✅ Nmap scan completed successfully for {target}{FetihEngineColors.RESET}")
 
             # Check for recovery information
             if result.get("recovery_info", {}).get("recovery_applied"):
                 recovery_info = result["recovery_info"]
                 attempts = recovery_info.get("attempts_made", 1)
-                logger.info(f"{SethEngineColors.HIGHLIGHT_YELLOW} Recovery applied: {attempts} attempts made {SethEngineColors.RESET}")
+                logger.info(f"{FetihEngineColors.HIGHLIGHT_YELLOW} Recovery applied: {attempts} attempts made {FetihEngineColors.RESET}")
         else:
-            logger.error(f"{SethEngineColors.ERROR}❌ Nmap scan failed for {target}{SethEngineColors.RESET}")
+            logger.error(f"{FetihEngineColors.ERROR}❌ Nmap scan failed for {target}{FetihEngineColors.RESET}")
 
             # Check for human escalation
             if result.get("human_escalation"):
-                logger.error(f"{SethEngineColors.CRITICAL} HUMAN ESCALATION REQUIRED {SethEngineColors.RESET}")
+                logger.error(f"{FetihEngineColors.CRITICAL} HUMAN ESCALATION REQUIRED {FetihEngineColors.RESET}")
 
         return result
 
@@ -359,27 +359,27 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "wordlist": wordlist,
             "additional_args": additional_args
         }
-        logger.info(f"{SethEngineColors.CRIMSON}📁 Starting Gobuster {mode} scan: {url}{SethEngineColors.RESET}")
+        logger.info(f"{FetihEngineColors.CRIMSON}📁 Starting Gobuster {mode} scan: {url}{FetihEngineColors.RESET}")
 
         # Use enhanced error handling by default
         data["use_recovery"] = True
-        result = seth_engine_client.safe_post("api/tools/gobuster", data)
+        result = fetih_engine_client.safe_post("api/tools/gobuster", data)
 
         if result.get("success"):
-            logger.info(f"{SethEngineColors.SUCCESS}✅ Gobuster scan completed for {url}{SethEngineColors.RESET}")
+            logger.info(f"{FetihEngineColors.SUCCESS}✅ Gobuster scan completed for {url}{FetihEngineColors.RESET}")
 
             # Check for recovery information
             if result.get("recovery_info", {}).get("recovery_applied"):
                 recovery_info = result["recovery_info"]
                 attempts = recovery_info.get("attempts_made", 1)
-                logger.info(f"{SethEngineColors.HIGHLIGHT_YELLOW} Recovery applied: {attempts} attempts made {SethEngineColors.RESET}")
+                logger.info(f"{FetihEngineColors.HIGHLIGHT_YELLOW} Recovery applied: {attempts} attempts made {FetihEngineColors.RESET}")
         else:
-            logger.error(f"{SethEngineColors.ERROR}❌ Gobuster scan failed for {url}{SethEngineColors.RESET}")
+            logger.error(f"{FetihEngineColors.ERROR}❌ Gobuster scan failed for {url}{FetihEngineColors.RESET}")
 
             # Check for alternative tool suggestion
             if result.get("alternative_tool_suggested"):
                 alt_tool = result["alternative_tool_suggested"]
-                logger.info(f"{SethEngineColors.HIGHLIGHT_BLUE} Alternative tool suggested: {alt_tool} {SethEngineColors.RESET}")
+                logger.info(f"{FetihEngineColors.HIGHLIGHT_BLUE} Alternative tool suggested: {alt_tool} {FetihEngineColors.RESET}")
 
         return result
 
@@ -405,28 +405,28 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "template": template,
             "additional_args": additional_args
         }
-        logger.info(f"{SethEngineColors.BLOOD_RED}🔬 Starting Nuclei vulnerability scan: {target}{SethEngineColors.RESET}")
+        logger.info(f"{FetihEngineColors.BLOOD_RED}🔬 Starting Nuclei vulnerability scan: {target}{FetihEngineColors.RESET}")
 
         # Use enhanced error handling by default
         data["use_recovery"] = True
-        result = seth_engine_client.safe_post("api/tools/nuclei", data)
+        result = fetih_engine_client.safe_post("api/tools/nuclei", data)
 
         if result.get("success"):
-            logger.info(f"{SethEngineColors.SUCCESS}✅ Nuclei scan completed for {target}{SethEngineColors.RESET}")
+            logger.info(f"{FetihEngineColors.SUCCESS}✅ Nuclei scan completed for {target}{FetihEngineColors.RESET}")
 
             # Enhanced vulnerability reporting
             if result.get("stdout") and "CRITICAL" in result["stdout"]:
-                logger.warning(f"{SethEngineColors.CRITICAL} CRITICAL vulnerabilities detected! {SethEngineColors.RESET}")
+                logger.warning(f"{FetihEngineColors.CRITICAL} CRITICAL vulnerabilities detected! {FetihEngineColors.RESET}")
             elif result.get("stdout") and "HIGH" in result["stdout"]:
-                logger.warning(f"{SethEngineColors.FIRE_RED} HIGH severity vulnerabilities found! {SethEngineColors.RESET}")
+                logger.warning(f"{FetihEngineColors.FIRE_RED} HIGH severity vulnerabilities found! {FetihEngineColors.RESET}")
 
             # Check for recovery information
             if result.get("recovery_info", {}).get("recovery_applied"):
                 recovery_info = result["recovery_info"]
                 attempts = recovery_info.get("attempts_made", 1)
-                logger.info(f"{SethEngineColors.HIGHLIGHT_YELLOW} Recovery applied: {attempts} attempts made {SethEngineColors.RESET}")
+                logger.info(f"{FetihEngineColors.HIGHLIGHT_YELLOW} Recovery applied: {attempts} attempts made {FetihEngineColors.RESET}")
         else:
-            logger.error(f"{SethEngineColors.ERROR}❌ Nuclei scan failed for {target}{SethEngineColors.RESET}")
+            logger.error(f"{FetihEngineColors.ERROR}❌ Nuclei scan failed for {target}{FetihEngineColors.RESET}")
 
         return result
 
@@ -461,7 +461,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"☁️  Starting Prowler {provider} security assessment")
-        result = seth_engine_client.safe_post("api/tools/prowler", data)
+        result = fetih_engine_client.safe_post("api/tools/prowler", data)
         if result.get("success"):
             logger.info(f"✅ Prowler assessment completed")
         else:
@@ -493,7 +493,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting Trivy {scan_type} scan: {target}")
-        result = seth_engine_client.safe_post("api/tools/trivy", data)
+        result = fetih_engine_client.safe_post("api/tools/trivy", data)
         if result.get("success"):
             logger.info(f"✅ Trivy scan completed for {target}")
         else:
@@ -531,7 +531,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"☁️  Starting Scout Suite {provider} assessment")
-        result = seth_engine_client.safe_post("api/tools/scout-suite", data)
+        result = fetih_engine_client.safe_post("api/tools/scout-suite", data)
         if result.get("success"):
             logger.info(f"✅ Scout Suite assessment completed")
         else:
@@ -560,7 +560,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"☁️  Starting CloudMapper {action}")
-        result = seth_engine_client.safe_post("api/tools/cloudmapper", data)
+        result = fetih_engine_client.safe_post("api/tools/cloudmapper", data)
         if result.get("success"):
             logger.info(f"✅ CloudMapper {action} completed")
         else:
@@ -568,7 +568,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         return result
 
     @mcp.tool()
-    def pacu_exploitation(session_name: str = "seth_engine_session", modules: str = "",
+    def pacu_exploitation(session_name: str = "fetih_engine_session", modules: str = "",
                          data_services: str = "", regions: str = "",
                          additional_args: str = "") -> Dict[str, Any]:
         """
@@ -592,7 +592,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"☁️  Starting Pacu AWS exploitation")
-        result = seth_engine_client.safe_post("api/tools/pacu", data)
+        result = fetih_engine_client.safe_post("api/tools/pacu", data)
         if result.get("success"):
             logger.info(f"✅ Pacu exploitation completed")
         else:
@@ -628,7 +628,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"☁️  Starting kube-hunter Kubernetes scan")
-        result = seth_engine_client.safe_post("api/tools/kube-hunter", data)
+        result = fetih_engine_client.safe_post("api/tools/kube-hunter", data)
         if result.get("success"):
             logger.info(f"✅ kube-hunter scan completed")
         else:
@@ -659,7 +659,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"☁️  Starting kube-bench CIS benchmark")
-        result = seth_engine_client.safe_post("api/tools/kube-bench", data)
+        result = fetih_engine_client.safe_post("api/tools/kube-bench", data)
         if result.get("success"):
             logger.info(f"✅ kube-bench benchmark completed")
         else:
@@ -689,7 +689,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🐳 Starting Docker Bench Security assessment")
-        result = seth_engine_client.safe_post("api/tools/docker-bench-security", data)
+        result = fetih_engine_client.safe_post("api/tools/docker-bench-security", data)
         if result.get("success"):
             logger.info(f"✅ Docker Bench Security completed")
         else:
@@ -718,7 +718,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🐳 Starting Clair vulnerability scan: {image}")
-        result = seth_engine_client.safe_post("api/tools/clair", data)
+        result = fetih_engine_client.safe_post("api/tools/clair", data)
         if result.get("success"):
             logger.info(f"✅ Clair scan completed for {image}")
         else:
@@ -750,7 +750,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🛡️  Starting Falco runtime monitoring for {duration}s")
-        result = seth_engine_client.safe_post("api/tools/falco", data)
+        result = fetih_engine_client.safe_post("api/tools/falco", data)
         if result.get("success"):
             logger.info(f"✅ Falco monitoring completed")
         else:
@@ -784,7 +784,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting Checkov IaC scan: {directory}")
-        result = seth_engine_client.safe_post("api/tools/checkov", data)
+        result = fetih_engine_client.safe_post("api/tools/checkov", data)
         if result.get("success"):
             logger.info(f"✅ Checkov scan completed")
         else:
@@ -818,7 +818,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting Terrascan IaC scan: {iac_dir}")
-        result = seth_engine_client.safe_post("api/tools/terrascan", data)
+        result = fetih_engine_client.safe_post("api/tools/terrascan", data)
         if result.get("success"):
             logger.info(f"✅ Terrascan scan completed")
         else:
@@ -832,7 +832,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
     @mcp.tool()
     def create_file(filename: str, content: str, binary: bool = False) -> Dict[str, Any]:
         """
-        Create a file with specified content on the SethEngine server.
+        Create a file with specified content on the FetihEngine server.
 
         Args:
             filename: Name of the file to create
@@ -848,7 +848,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "binary": binary
         }
         logger.info(f"📄 Creating file: {filename}")
-        result = seth_engine_client.safe_post("api/files/create", data)
+        result = fetih_engine_client.safe_post("api/files/create", data)
         if result.get("success"):
             logger.info(f"✅ File created successfully: {filename}")
         else:
@@ -858,7 +858,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
     @mcp.tool()
     def modify_file(filename: str, content: str, append: bool = False) -> Dict[str, Any]:
         """
-        Modify an existing file on the SethEngine server.
+        Modify an existing file on the FetihEngine server.
 
         Args:
             filename: Name of the file to modify
@@ -874,7 +874,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "append": append
         }
         logger.info(f"✏️  Modifying file: {filename}")
-        result = seth_engine_client.safe_post("api/files/modify", data)
+        result = fetih_engine_client.safe_post("api/files/modify", data)
         if result.get("success"):
             logger.info(f"✅ File modified successfully: {filename}")
         else:
@@ -884,7 +884,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
     @mcp.tool()
     def delete_file(filename: str) -> Dict[str, Any]:
         """
-        Delete a file or directory on the SethEngine server.
+        Delete a file or directory on the FetihEngine server.
 
         Args:
             filename: Name of the file or directory to delete
@@ -896,7 +896,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "filename": filename
         }
         logger.info(f"🗑️  Deleting file: {filename}")
-        result = seth_engine_client.safe_post("api/files/delete", data)
+        result = fetih_engine_client.safe_post("api/files/delete", data)
         if result.get("success"):
             logger.info(f"✅ File deleted successfully: {filename}")
         else:
@@ -906,7 +906,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
     @mcp.tool()
     def list_files(directory: str = ".") -> Dict[str, Any]:
         """
-        List files in a directory on the SethEngine server.
+        List files in a directory on the FetihEngine server.
 
         Args:
             directory: Directory to list (relative to server's base directory)
@@ -915,7 +915,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             Directory listing results
         """
         logger.info(f"📂 Listing files in directory: {directory}")
-        result = seth_engine_client.safe_get("api/files/list", {"directory": directory})
+        result = fetih_engine_client.safe_get("api/files/list", {"directory": directory})
         if result.get("success"):
             file_count = len(result.get("files", []))
             logger.info(f"✅ Listed {file_count} files in {directory}")
@@ -946,7 +946,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             data["filename"] = filename
 
         logger.info(f"🎯 Generating {payload_type} payload: {size} bytes")
-        result = seth_engine_client.safe_post("api/payloads/generate", data)
+        result = fetih_engine_client.safe_post("api/payloads/generate", data)
         if result.get("success"):
             logger.info(f"✅ Payload generated successfully")
         else:
@@ -960,7 +960,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
     @mcp.tool()
     def install_python_package(package: str, env_name: str = "default") -> Dict[str, Any]:
         """
-        Install a Python package in a virtual environment on the SethEngine server.
+        Install a Python package in a virtual environment on the FetihEngine server.
 
         Args:
             package: Name of the Python package to install
@@ -974,7 +974,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "env_name": env_name
         }
         logger.info(f"📦 Installing Python package: {package} in env {env_name}")
-        result = seth_engine_client.safe_post("api/python/install", data)
+        result = fetih_engine_client.safe_post("api/python/install", data)
         if result.get("success"):
             logger.info(f"✅ Package {package} installed successfully")
         else:
@@ -984,7 +984,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
     @mcp.tool()
     def execute_python_script(script: str, env_name: str = "default", filename: str = "") -> Dict[str, Any]:
         """
-        Execute a Python script in a virtual environment on the SethEngine server.
+        Execute a Python script in a virtual environment on the FetihEngine server.
 
         Args:
             script: Python script content to execute
@@ -1002,7 +1002,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             data["filename"] = filename
 
         logger.info(f"🐍 Executing Python script in env {env_name}")
-        result = seth_engine_client.safe_post("api/python/execute", data)
+        result = fetih_engine_client.safe_post("api/python/execute", data)
         if result.get("success"):
             logger.info(f"✅ Python script executed successfully")
         else:
@@ -1032,7 +1032,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"📁 Starting Dirb scan: {url}")
-        result = seth_engine_client.safe_post("api/tools/dirb", data)
+        result = fetih_engine_client.safe_post("api/tools/dirb", data)
         if result.get("success"):
             logger.info(f"✅ Dirb scan completed for {url}")
         else:
@@ -1056,7 +1056,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔬 Starting Nikto scan: {target}")
-        result = seth_engine_client.safe_post("api/tools/nikto", data)
+        result = fetih_engine_client.safe_post("api/tools/nikto", data)
         if result.get("success"):
             logger.info(f"✅ Nikto scan completed for {target}")
         else:
@@ -1082,7 +1082,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"💉 Starting SQLMap scan: {url}")
-        result = seth_engine_client.safe_post("api/tools/sqlmap", data_payload)
+        result = fetih_engine_client.safe_post("api/tools/sqlmap", data_payload)
         if result.get("success"):
             logger.info(f"✅ SQLMap scan completed for {url}")
         else:
@@ -1106,7 +1106,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "options": options
         }
         logger.info(f"🚀 Starting Metasploit module: {module}")
-        result = seth_engine_client.safe_post("api/tools/metasploit", data)
+        result = fetih_engine_client.safe_post("api/tools/metasploit", data)
         if result.get("success"):
             logger.info(f"✅ Metasploit module completed: {module}")
         else:
@@ -1148,7 +1148,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔑 Starting Hydra attack: {target}:{service}")
-        result = seth_engine_client.safe_post("api/tools/hydra", data)
+        result = fetih_engine_client.safe_post("api/tools/hydra", data)
         if result.get("success"):
             logger.info(f"✅ Hydra attack completed for {target}")
         else:
@@ -1181,7 +1181,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔐 Starting John the Ripper: {hash_file}")
-        result = seth_engine_client.safe_post("api/tools/john", data)
+        result = fetih_engine_client.safe_post("api/tools/john", data)
         if result.get("success"):
             logger.info(f"✅ John the Ripper completed")
         else:
@@ -1205,7 +1205,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting WPScan: {url}")
-        result = seth_engine_client.safe_post("api/tools/wpscan", data)
+        result = fetih_engine_client.safe_post("api/tools/wpscan", data)
         if result.get("success"):
             logger.info(f"✅ WPScan completed for {url}")
         else:
@@ -1229,7 +1229,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting Enum4linux: {target}")
-        result = seth_engine_client.safe_post("api/tools/enum4linux", data)
+        result = fetih_engine_client.safe_post("api/tools/enum4linux", data)
         if result.get("success"):
             logger.info(f"✅ Enum4linux completed for {target}")
         else:
@@ -1259,7 +1259,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting FFuf {mode} fuzzing: {url}")
-        result = seth_engine_client.safe_post("api/tools/ffuf", data)
+        result = fetih_engine_client.safe_post("api/tools/ffuf", data)
         if result.get("success"):
             logger.info(f"✅ FFuf fuzzing completed for {url}")
         else:
@@ -1293,7 +1293,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting NetExec {protocol} scan: {target}")
-        result = seth_engine_client.safe_post("api/tools/netexec", data)
+        result = fetih_engine_client.safe_post("api/tools/netexec", data)
         if result.get("success"):
             logger.info(f"✅ NetExec scan completed for {target}")
         else:
@@ -1319,7 +1319,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting Amass {mode}: {domain}")
-        result = seth_engine_client.safe_post("api/tools/amass", data)
+        result = fetih_engine_client.safe_post("api/tools/amass", data)
         if result.get("success"):
             logger.info(f"✅ Amass completed for {domain}")
         else:
@@ -1351,7 +1351,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔐 Starting Hashcat attack: mode {attack_mode}")
-        result = seth_engine_client.safe_post("api/tools/hashcat", data)
+        result = fetih_engine_client.safe_post("api/tools/hashcat", data)
         if result.get("success"):
             logger.info(f"✅ Hashcat attack completed")
         else:
@@ -1379,7 +1379,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting Subfinder: {domain}")
-        result = seth_engine_client.safe_post("api/tools/subfinder", data)
+        result = fetih_engine_client.safe_post("api/tools/subfinder", data)
         if result.get("success"):
             logger.info(f"✅ Subfinder completed for {domain}")
         else:
@@ -1409,7 +1409,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting SMBMap: {target}")
-        result = seth_engine_client.safe_post("api/tools/smbmap", data)
+        result = fetih_engine_client.safe_post("api/tools/smbmap", data)
         if result.get("success"):
             logger.info(f"✅ SMBMap completed for {target}")
         else:
@@ -1449,7 +1449,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"⚡ Starting Rustscan: {target}")
-        result = seth_engine_client.safe_post("api/tools/rustscan", data)
+        result = fetih_engine_client.safe_post("api/tools/rustscan", data)
         if result.get("success"):
             logger.info(f"✅ Rustscan completed for {target}")
         else:
@@ -1487,7 +1487,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🚀 Starting Masscan: {target} at rate {rate}")
-        result = seth_engine_client.safe_post("api/tools/masscan", data)
+        result = fetih_engine_client.safe_post("api/tools/masscan", data)
         if result.get("success"):
             logger.info(f"✅ Masscan completed for {target}")
         else:
@@ -1530,7 +1530,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting Advanced Nmap: {target}")
-        result = seth_engine_client.safe_post("api/tools/nmap-advanced", data)
+        result = fetih_engine_client.safe_post("api/tools/nmap-advanced", data)
         if result.get("success"):
             logger.info(f"✅ Advanced Nmap completed for {target}")
         else:
@@ -1567,7 +1567,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔄 Starting AutoRecon: {target}")
-        result = seth_engine_client.safe_post("api/tools/autorecon", data)
+        result = fetih_engine_client.safe_post("api/tools/autorecon", data)
         if result.get("success"):
             logger.info(f"✅ AutoRecon completed for {target}")
         else:
@@ -1608,7 +1608,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting Enum4linux-ng: {target}")
-        result = seth_engine_client.safe_post("api/tools/enum4linux-ng", data)
+        result = fetih_engine_client.safe_post("api/tools/enum4linux-ng", data)
         if result.get("success"):
             logger.info(f"✅ Enum4linux-ng completed for {target}")
         else:
@@ -1642,7 +1642,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting rpcclient: {target}")
-        result = seth_engine_client.safe_post("api/tools/rpcclient", data)
+        result = fetih_engine_client.safe_post("api/tools/rpcclient", data)
         if result.get("success"):
             logger.info(f"✅ rpcclient completed for {target}")
         else:
@@ -1671,7 +1671,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting nbtscan: {target}")
-        result = seth_engine_client.safe_post("api/tools/nbtscan", data)
+        result = fetih_engine_client.safe_post("api/tools/nbtscan", data)
         if result.get("success"):
             logger.info(f"✅ nbtscan completed for {target}")
         else:
@@ -1704,7 +1704,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting arp-scan: {target if target else 'local network'}")
-        result = seth_engine_client.safe_post("api/tools/arp-scan", data)
+        result = fetih_engine_client.safe_post("api/tools/arp-scan", data)
         if result.get("success"):
             logger.info(f"✅ arp-scan completed")
         else:
@@ -1741,7 +1741,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting Responder on interface: {interface}")
-        result = seth_engine_client.safe_post("api/tools/responder", data)
+        result = fetih_engine_client.safe_post("api/tools/responder", data)
         if result.get("success"):
             logger.info(f"✅ Responder completed")
         else:
@@ -1769,7 +1769,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🧠 Starting Volatility analysis: {plugin}")
-        result = seth_engine_client.safe_post("api/tools/volatility", data)
+        result = fetih_engine_client.safe_post("api/tools/volatility", data)
         if result.get("success"):
             logger.info(f"✅ Volatility analysis completed")
         else:
@@ -1801,7 +1801,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🚀 Starting MSFVenom payload generation: {payload}")
-        result = seth_engine_client.safe_post("api/tools/msfvenom", data)
+        result = fetih_engine_client.safe_post("api/tools/msfvenom", data)
         if result.get("success"):
             logger.info(f"✅ MSFVenom payload generated")
         else:
@@ -1833,7 +1833,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔧 Starting GDB analysis: {binary}")
-        result = seth_engine_client.safe_post("api/tools/gdb", data)
+        result = fetih_engine_client.safe_post("api/tools/gdb", data)
         if result.get("success"):
             logger.info(f"✅ GDB analysis completed for {binary}")
         else:
@@ -1859,7 +1859,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔧 Starting Radare2 analysis: {binary}")
-        result = seth_engine_client.safe_post("api/tools/radare2", data)
+        result = fetih_engine_client.safe_post("api/tools/radare2", data)
         if result.get("success"):
             logger.info(f"✅ Radare2 analysis completed for {binary}")
         else:
@@ -1885,7 +1885,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔧 Starting Binwalk analysis: {file_path}")
-        result = seth_engine_client.safe_post("api/tools/binwalk", data)
+        result = fetih_engine_client.safe_post("api/tools/binwalk", data)
         if result.get("success"):
             logger.info(f"✅ Binwalk analysis completed for {file_path}")
         else:
@@ -1911,7 +1911,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔧 Starting ROPgadget search: {binary}")
-        result = seth_engine_client.safe_post("api/tools/ropgadget", data)
+        result = fetih_engine_client.safe_post("api/tools/ropgadget", data)
         if result.get("success"):
             logger.info(f"✅ ROPgadget search completed for {binary}")
         else:
@@ -1933,7 +1933,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "binary": binary
         }
         logger.info(f"🔧 Starting Checksec analysis: {binary}")
-        result = seth_engine_client.safe_post("api/tools/checksec", data)
+        result = fetih_engine_client.safe_post("api/tools/checksec", data)
         if result.get("success"):
             logger.info(f"✅ Checksec analysis completed for {binary}")
         else:
@@ -1961,7 +1961,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔧 Starting XXD hex dump: {file_path}")
-        result = seth_engine_client.safe_post("api/tools/xxd", data)
+        result = fetih_engine_client.safe_post("api/tools/xxd", data)
         if result.get("success"):
             logger.info(f"✅ XXD hex dump completed for {file_path}")
         else:
@@ -1987,7 +1987,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔧 Starting Strings extraction: {file_path}")
-        result = seth_engine_client.safe_post("api/tools/strings", data)
+        result = fetih_engine_client.safe_post("api/tools/strings", data)
         if result.get("success"):
             logger.info(f"✅ Strings extraction completed for {file_path}")
         else:
@@ -2013,7 +2013,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔧 Starting Objdump analysis: {binary}")
-        result = seth_engine_client.safe_post("api/tools/objdump", data)
+        result = fetih_engine_client.safe_post("api/tools/objdump", data)
         if result.get("success"):
             logger.info(f"✅ Objdump analysis completed for {binary}")
         else:
@@ -2025,7 +2025,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
     # ============================================================================
 
     @mcp.tool()
-    def ghidra_analysis(binary: str, project_name: str = "seth_engine_analysis",
+    def ghidra_analysis(binary: str, project_name: str = "fetih_engine_analysis",
                        script_file: str = "", analysis_timeout: int = 300,
                        output_format: str = "xml", additional_args: str = "") -> Dict[str, Any]:
         """
@@ -2051,7 +2051,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔧 Starting Ghidra analysis: {binary}")
-        result = seth_engine_client.safe_post("api/tools/ghidra", data)
+        result = fetih_engine_client.safe_post("api/tools/ghidra", data)
         if result.get("success"):
             logger.info(f"✅ Ghidra analysis completed for {binary}")
         else:
@@ -2085,7 +2085,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔧 Starting Pwntools exploit: {exploit_type}")
-        result = seth_engine_client.safe_post("api/tools/pwntools", data)
+        result = fetih_engine_client.safe_post("api/tools/pwntools", data)
         if result.get("success"):
             logger.info(f"✅ Pwntools exploit completed")
         else:
@@ -2111,7 +2111,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔧 Starting one_gadget analysis: {libc_path}")
-        result = seth_engine_client.safe_post("api/tools/one-gadget", data)
+        result = fetih_engine_client.safe_post("api/tools/one-gadget", data)
         if result.get("success"):
             logger.info(f"✅ one_gadget analysis completed")
         else:
@@ -2140,7 +2140,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔧 Starting libc-database {action}: {symbols or libc_id}")
-        result = seth_engine_client.safe_post("api/tools/libc-database", data)
+        result = fetih_engine_client.safe_post("api/tools/libc-database", data)
         if result.get("success"):
             logger.info(f"✅ libc-database {action} completed")
         else:
@@ -2171,7 +2171,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔧 Starting GDB-PEDA analysis: {binary or f'PID {attach_pid}' or core_file}")
-        result = seth_engine_client.safe_post("api/tools/gdb-peda", data)
+        result = fetih_engine_client.safe_post("api/tools/gdb-peda", data)
         if result.get("success"):
             logger.info(f"✅ GDB-PEDA analysis completed")
         else:
@@ -2205,7 +2205,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔧 Starting angr analysis: {binary}")
-        result = seth_engine_client.safe_post("api/tools/angr", data)
+        result = fetih_engine_client.safe_post("api/tools/angr", data)
         if result.get("success"):
             logger.info(f"✅ angr analysis completed")
         else:
@@ -2239,7 +2239,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔧 Starting ropper analysis: {binary}")
-        result = seth_engine_client.safe_post("api/tools/ropper", data)
+        result = fetih_engine_client.safe_post("api/tools/ropper", data)
         if result.get("success"):
             logger.info(f"✅ ropper analysis completed")
         else:
@@ -2270,7 +2270,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔧 Starting pwninit setup: {binary}")
-        result = seth_engine_client.safe_post("api/tools/pwninit", data)
+        result = fetih_engine_client.safe_post("api/tools/pwninit", data)
         if result.get("success"):
             logger.info(f"✅ pwninit setup completed")
         else:
@@ -2298,7 +2298,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting Feroxbuster scan: {url}")
-        result = seth_engine_client.safe_post("api/tools/feroxbuster", data)
+        result = fetih_engine_client.safe_post("api/tools/feroxbuster", data)
         if result.get("success"):
             logger.info(f"✅ Feroxbuster scan completed for {url}")
         else:
@@ -2324,7 +2324,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting DotDotPwn scan: {target}")
-        result = seth_engine_client.safe_post("api/tools/dotdotpwn", data)
+        result = fetih_engine_client.safe_post("api/tools/dotdotpwn", data)
         if result.get("success"):
             logger.info(f"✅ DotDotPwn scan completed for {target}")
         else:
@@ -2350,7 +2350,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting XSSer scan: {url}")
-        result = seth_engine_client.safe_post("api/tools/xsser", data)
+        result = fetih_engine_client.safe_post("api/tools/xsser", data)
         if result.get("success"):
             logger.info(f"✅ XSSer scan completed for {url}")
         else:
@@ -2376,7 +2376,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting Wfuzz scan: {url}")
-        result = seth_engine_client.safe_post("api/tools/wfuzz", data)
+        result = fetih_engine_client.safe_post("api/tools/wfuzz", data)
         if result.get("success"):
             logger.info(f"✅ Wfuzz scan completed for {url}")
         else:
@@ -2414,7 +2414,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"📁 Starting Dirsearch scan: {url}")
-        result = seth_engine_client.safe_post("api/tools/dirsearch", data)
+        result = fetih_engine_client.safe_post("api/tools/dirsearch", data)
         if result.get("success"):
             logger.info(f"✅ Dirsearch scan completed for {url}")
         else:
@@ -2448,7 +2448,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"⚔️  Starting Katana crawl: {url}")
-        result = seth_engine_client.safe_post("api/tools/katana", data)
+        result = fetih_engine_client.safe_post("api/tools/katana", data)
         if result.get("success"):
             logger.info(f"✅ Katana crawl completed for {url}")
         else:
@@ -2480,7 +2480,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"📡 Starting Gau URL discovery: {domain}")
-        result = seth_engine_client.safe_post("api/tools/gau", data)
+        result = fetih_engine_client.safe_post("api/tools/gau", data)
         if result.get("success"):
             logger.info(f"✅ Gau URL discovery completed for {domain}")
         else:
@@ -2509,7 +2509,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🕰️  Starting Waybackurls discovery: {domain}")
-        result = seth_engine_client.safe_post("api/tools/waybackurls", data)
+        result = fetih_engine_client.safe_post("api/tools/waybackurls", data)
         if result.get("success"):
             logger.info(f"✅ Waybackurls discovery completed for {domain}")
         else:
@@ -2545,7 +2545,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🎯 Starting Arjun parameter discovery: {url}")
-        result = seth_engine_client.safe_post("api/tools/arjun", data)
+        result = fetih_engine_client.safe_post("api/tools/arjun", data)
         if result.get("success"):
             logger.info(f"✅ Arjun parameter discovery completed for {url}")
         else:
@@ -2577,7 +2577,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🕷️  Starting ParamSpider mining: {domain}")
-        result = seth_engine_client.safe_post("api/tools/paramspider", data)
+        result = fetih_engine_client.safe_post("api/tools/paramspider", data)
         if result.get("success"):
             logger.info(f"✅ ParamSpider mining completed for {domain}")
         else:
@@ -2611,7 +2611,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting x8 parameter discovery: {url}")
-        result = seth_engine_client.safe_post("api/tools/x8", data)
+        result = fetih_engine_client.safe_post("api/tools/x8", data)
         if result.get("success"):
             logger.info(f"✅ x8 parameter discovery completed for {url}")
         else:
@@ -2645,7 +2645,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔬 Starting Jaeles vulnerability scan: {url}")
-        result = seth_engine_client.safe_post("api/tools/jaeles", data)
+        result = fetih_engine_client.safe_post("api/tools/jaeles", data)
         if result.get("success"):
             logger.info(f"✅ Jaeles vulnerability scan completed for {url}")
         else:
@@ -2681,7 +2681,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🎯 Starting Dalfox XSS scan: {url if url else 'pipe mode'}")
-        result = seth_engine_client.safe_post("api/tools/dalfox", data)
+        result = fetih_engine_client.safe_post("api/tools/dalfox", data)
         if result.get("success"):
             logger.info(f"✅ Dalfox XSS scan completed")
         else:
@@ -2722,7 +2722,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🌍 Starting httpx probe: {target}")
-        result = seth_engine_client.safe_post("api/tools/httpx", data)
+        result = fetih_engine_client.safe_post("api/tools/httpx", data)
         if result.get("success"):
             logger.info(f"✅ httpx probe completed for {target}")
         else:
@@ -2749,7 +2749,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info("📝 Starting anew data processing")
-        result = seth_engine_client.safe_post("api/tools/anew", data)
+        result = fetih_engine_client.safe_post("api/tools/anew", data)
         if result.get("success"):
             logger.info("✅ anew data processing completed")
         else:
@@ -2776,7 +2776,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info("🔄 Starting qsreplace parameter replacement")
-        result = seth_engine_client.safe_post("api/tools/qsreplace", data)
+        result = fetih_engine_client.safe_post("api/tools/qsreplace", data)
         if result.get("success"):
             logger.info("✅ qsreplace parameter replacement completed")
         else:
@@ -2805,7 +2805,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info("🔍 Starting uro URL filtering")
-        result = seth_engine_client.safe_post("api/tools/uro", data)
+        result = fetih_engine_client.safe_post("api/tools/uro", data)
         if result.get("success"):
             logger.info("✅ uro URL filtering completed")
         else:
@@ -2837,7 +2837,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "url": url
         }
         logger.info(f"🤖 Generating AI payloads for {attack_type} attack")
-        result = seth_engine_client.safe_post("api/ai/generate_payload", data)
+        result = fetih_engine_client.safe_post("api/ai/generate_payload", data)
 
         if result.get("success"):
             payload_data = result.get("ai_payload_generation", {})
@@ -2876,7 +2876,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "method": method
         }
         logger.info(f"🧪 Testing AI payload against {target_url}")
-        result = seth_engine_client.safe_post("api/ai/test_payload", data)
+        result = fetih_engine_client.safe_post("api/ai/test_payload", data)
 
         if result.get("success"):
             analysis = result.get("ai_analysis", {})
@@ -2975,7 +2975,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         }
 
         logger.info(f"🔍 Starting API fuzzing: {base_url}")
-        result = seth_engine_client.safe_post("api/tools/api_fuzzer", data)
+        result = fetih_engine_client.safe_post("api/tools/api_fuzzer", data)
 
         if result.get("success"):
             fuzzing_type = result.get("fuzzing_type", "unknown")
@@ -3011,7 +3011,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         }
 
         logger.info(f"🔍 Starting GraphQL security scan: {endpoint}")
-        result = seth_engine_client.safe_post("api/tools/graphql_scanner", data)
+        result = fetih_engine_client.safe_post("api/tools/graphql_scanner", data)
 
         if result.get("success"):
             scan_results = result.get("graphql_scan_results", {})
@@ -3049,7 +3049,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         }
 
         logger.info(f"🔍 Starting JWT security analysis")
-        result = seth_engine_client.safe_post("api/tools/jwt_analyzer", data)
+        result = fetih_engine_client.safe_post("api/tools/jwt_analyzer", data)
 
         if result.get("success"):
             analysis = result.get("jwt_analysis_results", {})
@@ -3088,7 +3088,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         }
 
         logger.info(f"🔍 Starting API schema analysis: {schema_url}")
-        result = seth_engine_client.safe_post("api/tools/api_schema_analyzer", data)
+        result = fetih_engine_client.safe_post("api/tools/api_schema_analyzer", data)
 
         if result.get("success"):
             analysis = result.get("schema_analysis_results", {})
@@ -3234,7 +3234,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🧠 Starting Volatility3 analysis: {plugin}")
-        result = seth_engine_client.safe_post("api/tools/volatility3", data)
+        result = fetih_engine_client.safe_post("api/tools/volatility3", data)
         if result.get("success"):
             logger.info(f"✅ Volatility3 analysis completed")
         else:
@@ -3262,7 +3262,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"📁 Starting Foremost file carving: {input_file}")
-        result = seth_engine_client.safe_post("api/tools/foremost", data)
+        result = fetih_engine_client.safe_post("api/tools/foremost", data)
         if result.get("success"):
             logger.info(f"✅ Foremost carving completed")
         else:
@@ -3294,7 +3294,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🖼️ Starting Steghide {action}: {cover_file}")
-        result = seth_engine_client.safe_post("api/tools/steghide", data)
+        result = fetih_engine_client.safe_post("api/tools/steghide", data)
         if result.get("success"):
             logger.info(f"✅ Steghide {action} completed")
         else:
@@ -3322,7 +3322,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"📷 Starting ExifTool analysis: {file_path}")
-        result = seth_engine_client.safe_post("api/tools/exiftool", data)
+        result = fetih_engine_client.safe_post("api/tools/exiftool", data)
         if result.get("success"):
             logger.info(f"✅ ExifTool analysis completed")
         else:
@@ -3352,7 +3352,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔐 Starting HashPump attack")
-        result = seth_engine_client.safe_post("api/tools/hashpump", data)
+        result = fetih_engine_client.safe_post("api/tools/hashpump", data)
         if result.get("success"):
             logger.info(f"✅ HashPump attack completed")
         else:
@@ -3397,7 +3397,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🕷️ Starting Hakrawler crawling: {url}")
-        result = seth_engine_client.safe_post("api/tools/hakrawler", data)
+        result = fetih_engine_client.safe_post("api/tools/hakrawler", data)
         if result.get("success"):
             logger.info(f"✅ Hakrawler crawling completed")
         else:
@@ -3433,7 +3433,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🌐 Starting HTTPx probing")
-        result = seth_engine_client.safe_post("api/tools/httpx", data)
+        result = fetih_engine_client.safe_post("api/tools/httpx", data)
         if result.get("success"):
             logger.info(f"✅ HTTPx probing completed")
         else:
@@ -3463,7 +3463,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting ParamSpider discovery: {domain}")
-        result = seth_engine_client.safe_post("api/tools/paramspider", data)
+        result = fetih_engine_client.safe_post("api/tools/paramspider", data)
         if result.get("success"):
             logger.info(f"✅ ParamSpider discovery completed")
         else:
@@ -3503,7 +3503,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting Burp Suite scan")
-        result = seth_engine_client.safe_post("api/tools/burpsuite", data)
+        result = fetih_engine_client.safe_post("api/tools/burpsuite", data)
         if result.get("success"):
             logger.info(f"✅ Burp Suite scan completed")
         else:
@@ -3541,7 +3541,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting ZAP scan: {target}")
-        result = seth_engine_client.safe_post("api/tools/zap", data)
+        result = fetih_engine_client.safe_post("api/tools/zap", data)
         if result.get("success"):
             logger.info(f"✅ ZAP scan completed for {target}")
         else:
@@ -3575,7 +3575,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting Arjun parameter discovery: {url}")
-        result = seth_engine_client.safe_post("api/tools/arjun", data)
+        result = fetih_engine_client.safe_post("api/tools/arjun", data)
         if result.get("success"):
             logger.info(f"✅ Arjun completed for {url}")
         else:
@@ -3599,7 +3599,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🛡️ Starting Wafw00f WAF detection: {target}")
-        result = seth_engine_client.safe_post("api/tools/wafw00f", data)
+        result = fetih_engine_client.safe_post("api/tools/wafw00f", data)
         if result.get("success"):
             logger.info(f"✅ Wafw00f completed for {target}")
         else:
@@ -3625,7 +3625,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting Fierce DNS recon: {domain}")
-        result = seth_engine_client.safe_post("api/tools/fierce", data)
+        result = fetih_engine_client.safe_post("api/tools/fierce", data)
         if result.get("success"):
             logger.info(f"✅ Fierce completed for {domain}")
         else:
@@ -3653,7 +3653,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting DNSenum: {domain}")
-        result = seth_engine_client.safe_post("api/tools/dnsenum", data)
+        result = fetih_engine_client.safe_post("api/tools/dnsenum", data)
         if result.get("success"):
             logger.info(f"✅ DNSenum completed for {domain}")
         else:
@@ -3791,7 +3791,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "additional_args": additional_args
         }
         logger.info(f"🔍 Starting AutoRecon comprehensive enumeration: {target}")
-        result = seth_engine_client.safe_post("api/tools/autorecon", data)
+        result = fetih_engine_client.safe_post("api/tools/autorecon", data)
         if result.get("success"):
             logger.info(f"✅ AutoRecon comprehensive enumeration completed for {target}")
         else:
@@ -3805,13 +3805,13 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
     @mcp.tool()
     def server_health() -> Dict[str, Any]:
         """
-        Check the health status of the SethEngine AI server.
+        Check the health status of the FetihEngine AI server.
 
         Returns:
             Server health information with tool availability and telemetry
         """
-        logger.info(f"🏥 Checking SethEngine AI server health")
-        result = seth_engine_client.check_health()
+        logger.info(f"🏥 Checking FetihEngine AI server health")
+        result = fetih_engine_client.check_health()
         if result.get("status") == "healthy":
             logger.info(f"✅ Server is healthy - {result.get('total_tools_available', 0)} tools available")
         else:
@@ -3821,13 +3821,13 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
     @mcp.tool()
     def get_cache_stats() -> Dict[str, Any]:
         """
-        Get cache statistics from the SethEngine AI server.
+        Get cache statistics from the FetihEngine AI server.
 
         Returns:
             Cache performance statistics
         """
         logger.info(f"💾 Getting cache statistics")
-        result = seth_engine_client.safe_get("api/cache/stats")
+        result = fetih_engine_client.safe_get("api/cache/stats")
         if "hit_rate" in result:
             logger.info(f"📊 Cache hit rate: {result.get('hit_rate', 'unknown')}")
         return result
@@ -3835,13 +3835,13 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
     @mcp.tool()
     def clear_cache() -> Dict[str, Any]:
         """
-        Clear the cache on the SethEngine AI server.
+        Clear the cache on the FetihEngine AI server.
 
         Returns:
             Cache clear operation results
         """
         logger.info(f"🧹 Clearing server cache")
-        result = seth_engine_client.safe_post("api/cache/clear", {})
+        result = fetih_engine_client.safe_post("api/cache/clear", {})
         if result.get("success"):
             logger.info(f"✅ Cache cleared successfully")
         else:
@@ -3851,13 +3851,13 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
     @mcp.tool()
     def get_telemetry() -> Dict[str, Any]:
         """
-        Get system telemetry from the SethEngine AI server.
+        Get system telemetry from the FetihEngine AI server.
 
         Returns:
             System performance and usage telemetry
         """
         logger.info(f"📈 Getting system telemetry")
-        result = seth_engine_client.safe_get("api/telemetry")
+        result = fetih_engine_client.safe_get("api/telemetry")
         if "commands_executed" in result:
             logger.info(f"📊 Commands executed: {result.get('commands_executed', 0)}")
         return result
@@ -3869,13 +3869,13 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
     @mcp.tool()
     def list_active_processes() -> Dict[str, Any]:
         """
-        List all active processes on the SethEngine AI server.
+        List all active processes on the FetihEngine AI server.
 
         Returns:
             List of active processes with their status and progress
         """
         logger.info("📊 Listing active processes")
-        result = seth_engine_client.safe_get("api/processes/list")
+        result = fetih_engine_client.safe_get("api/processes/list")
         if result.get("success"):
             logger.info(f"✅ Found {result.get('total_count', 0)} active processes")
         else:
@@ -3894,7 +3894,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             Process status information including progress and runtime
         """
         logger.info(f"🔍 Checking status of process {pid}")
-        result = seth_engine_client.safe_get(f"api/processes/status/{pid}")
+        result = fetih_engine_client.safe_get(f"api/processes/status/{pid}")
         if result.get("success"):
             logger.info(f"✅ Process {pid} status retrieved")
         else:
@@ -3913,7 +3913,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             Success status of the termination operation
         """
         logger.info(f"🛑 Terminating process {pid}")
-        result = seth_engine_client.safe_post(f"api/processes/terminate/{pid}", {})
+        result = fetih_engine_client.safe_post(f"api/processes/terminate/{pid}", {})
         if result.get("success"):
             logger.info(f"✅ Process {pid} terminated successfully")
         else:
@@ -3932,7 +3932,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             Success status of the pause operation
         """
         logger.info(f"⏸️ Pausing process {pid}")
-        result = seth_engine_client.safe_post(f"api/processes/pause/{pid}", {})
+        result = fetih_engine_client.safe_post(f"api/processes/pause/{pid}", {})
         if result.get("success"):
             logger.info(f"✅ Process {pid} paused successfully")
         else:
@@ -3951,7 +3951,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             Success status of the resume operation
         """
         logger.info(f"▶️ Resuming process {pid}")
-        result = seth_engine_client.safe_post(f"api/processes/resume/{pid}", {})
+        result = fetih_engine_client.safe_post(f"api/processes/resume/{pid}", {})
         if result.get("success"):
             logger.info(f"✅ Process {pid} resumed successfully")
         else:
@@ -3967,7 +3967,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             Real-time dashboard with progress bars, system metrics, and process status
         """
         logger.info("📊 Getting process dashboard")
-        result = seth_engine_client.safe_get("api/processes/dashboard")
+        result = fetih_engine_client.safe_get("api/processes/dashboard")
         if result.get("success", True) and "total_processes" in result:
             total = result.get("total_processes", 0)
             logger.info(f"✅ Dashboard retrieved: {total} active processes")
@@ -3984,7 +3984,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
     @mcp.tool()
     def execute_command(command: str, use_cache: bool = True) -> Dict[str, Any]:
         """
-        Execute an arbitrary command on the SethEngine AI server with enhanced logging.
+        Execute an arbitrary command on the FetihEngine AI server with enhanced logging.
 
         Args:
             command: The command to execute
@@ -3995,7 +3995,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         """
         try:
             logger.info(f"⚡ Executing command: {command}")
-            result = seth_engine_client.execute_command(command, use_cache)
+            result = fetih_engine_client.execute_command(command, use_cache)
             if "error" in result:
                 logger.error(f"❌ Command failed: {result['error']}")
                 return {
@@ -4047,7 +4047,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "keywords": keywords
         }
         logger.info(f"🔍 Monitoring CVE feeds for last {hours} hours | Severity: {severity_filter}")
-        result = seth_engine_client.safe_post("api/vuln-intel/cve-monitor", data)
+        result = fetih_engine_client.safe_post("api/vuln-intel/cve-monitor", data)
 
         if result.get("success"):
             cve_count = len(result.get("cve_monitoring", {}).get("cves", []))
@@ -4082,7 +4082,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "evasion_level": evasion_level
         }
         logger.info(f"🤖 Generating {exploit_type} exploit for {cve_id} | Target: {target_os} {target_arch}")
-        result = seth_engine_client.safe_post("api/vuln-intel/exploit-generate", data)
+        result = fetih_engine_client.safe_post("api/vuln-intel/exploit-generate", data)
 
         if result.get("success"):
             cve_analysis = result.get("cve_analysis", {})
@@ -4117,7 +4117,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "include_zero_days": include_zero_days
         }
         logger.info(f"🔗 Discovering attack chains for {target_software} | Depth: {attack_depth} | Zero-days: {include_zero_days}")
-        result = seth_engine_client.safe_post("api/vuln-intel/attack-chains", data)
+        result = fetih_engine_client.safe_post("api/vuln-intel/attack-chains", data)
 
         if result.get("success"):
             chains = result.get("attack_chain_discovery", {}).get("attack_chains", [])
@@ -4154,7 +4154,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "source_code_url": source_code_url
         }
         logger.info(f"🔬 Researching zero-day opportunities in {target_software} | Depth: {analysis_depth}")
-        result = seth_engine_client.safe_post("api/vuln-intel/zero-day-research", data)
+        result = fetih_engine_client.safe_post("api/vuln-intel/zero-day-research", data)
 
         if result.get("success"):
             research = result.get("zero_day_research", {})
@@ -4200,7 +4200,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "sources": sources
         }
         logger.info(f"🧠 Correlating threat intelligence for {len(indicator_list)} indicators | Timeframe: {timeframe}")
-        result = seth_engine_client.safe_post("api/vuln-intel/threat-feeds", data)
+        result = fetih_engine_client.safe_post("api/vuln-intel/threat-feeds", data)
 
         if result.get("success"):
             threat_intel = result.get("threat_intelligence", {})
@@ -4248,7 +4248,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         if target_context:
             logger.info(f"🎯 Target Context: {target_context}")
 
-        result = seth_engine_client.safe_post("api/ai/advanced-payload-generation", data)
+        result = fetih_engine_client.safe_post("api/ai/advanced-payload-generation", data)
 
         if result.get("success"):
             payload_gen = result.get("advanced_payload_generation", {})
@@ -4274,14 +4274,14 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         logger.info("📊 Generating vulnerability intelligence dashboard")
 
         # Get latest critical CVEs
-        latest_cves = seth_engine_client.safe_post("api/vuln-intel/cve-monitor", {
+        latest_cves = fetih_engine_client.safe_post("api/vuln-intel/cve-monitor", {
             "hours": 24,
             "severity_filter": "CRITICAL",
             "keywords": ""
         })
 
         # Get trending attack types
-        trending_research = seth_engine_client.safe_post("api/vuln-intel/zero-day-research", {
+        trending_research = fetih_engine_client.safe_post("api/vuln-intel/zero-day-research", {
             "target_software": "web applications",
             "analysis_depth": "quick"
         })
@@ -4433,7 +4433,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             Live dashboard with visual process monitoring and system metrics
         """
         logger.info("📊 Fetching live process dashboard")
-        result = seth_engine_client.safe_get("api/processes/dashboard")
+        result = fetih_engine_client.safe_get("api/processes/dashboard")
         if result.get("success", True):
             logger.info("✅ Live dashboard retrieved successfully")
         else:
@@ -4467,7 +4467,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             # Create individual vulnerability cards
             vulnerability_cards = []
             for vuln in vuln_data:
-                card_result = seth_engine_client.safe_post("api/visual/vulnerability-card", vuln)
+                card_result = fetih_engine_client.safe_post("api/visual/vulnerability-card", vuln)
                 if card_result.get("success"):
                     vulnerability_cards.append(card_result.get("vulnerability_card", ""))
 
@@ -4479,7 +4479,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
                 "execution_time": 0
             }
 
-            summary_result = seth_engine_client.safe_post("api/visual/summary-report", summary_data)
+            summary_result = fetih_engine_client.safe_post("api/visual/summary-report", summary_data)
 
             logger.info("✅ Vulnerability report created successfully")
             return {
@@ -4515,7 +4515,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "success": success
         }
 
-        result = seth_engine_client.safe_post("api/visual/tool-output", data)
+        result = fetih_engine_client.safe_post("api/visual/tool-output", data)
         if result.get("success"):
             logger.info(f"✅ Tool output formatted successfully for {tool_name}")
         else:
@@ -4551,7 +4551,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "findings": findings
         }
 
-        result = seth_engine_client.safe_post("api/visual/summary-report", summary_data)
+        result = fetih_engine_client.safe_post("api/visual/summary-report", summary_data)
         if result.get("success"):
             logger.info("✅ Scan summary created successfully")
         else:
@@ -4570,7 +4570,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         logger.info("📈 Fetching system metrics")
 
         # Get telemetry data
-        telemetry_result = seth_engine_client.safe_get("api/telemetry")
+        telemetry_result = fetih_engine_client.safe_get("api/telemetry")
 
         if telemetry_result.get("success", True):
             logger.info("✅ System metrics retrieved successfully")
@@ -4622,7 +4622,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         logger.info(f"🧠 Analyzing target intelligence for: {target}")
 
         data = {"target": target}
-        result = seth_engine_client.safe_post("api/intelligence/analyze-target", data)
+        result = fetih_engine_client.safe_post("api/intelligence/analyze-target", data)
 
         if result.get("success"):
             profile = result.get("target_profile", {})
@@ -4650,7 +4650,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "target": target,
             "objective": objective
         }
-        result = seth_engine_client.safe_post("api/intelligence/select-tools", data)
+        result = fetih_engine_client.safe_post("api/intelligence/select-tools", data)
 
         if result.get("success"):
             tools = result.get("selected_tools", [])
@@ -4687,7 +4687,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "tool": tool,
             "context": context_dict
         }
-        result = seth_engine_client.safe_post("api/intelligence/optimize-parameters", data)
+        result = fetih_engine_client.safe_post("api/intelligence/optimize-parameters", data)
 
         if result.get("success"):
             params = result.get("optimized_parameters", {})
@@ -4715,7 +4715,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "target": target,
             "objective": objective
         }
-        result = seth_engine_client.safe_post("api/intelligence/create-attack-chain", data)
+        result = fetih_engine_client.safe_post("api/intelligence/create-attack-chain", data)
 
         if result.get("success"):
             chain = result.get("attack_chain", {})
@@ -4742,14 +4742,14 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         Returns:
             Results from AI-optimized scanning with tool execution summary
         """
-        logger.info(f"{SethEngineColors.FIRE_RED}🚀 Starting intelligent smart scan for {target}{SethEngineColors.RESET}")
+        logger.info(f"{FetihEngineColors.FIRE_RED}🚀 Starting intelligent smart scan for {target}{FetihEngineColors.RESET}")
 
         data = {
             "target": target,
             "objective": objective,
             "max_tools": max_tools
         }
-        result = seth_engine_client.safe_post("api/intelligence/smart-scan", data)
+        result = fetih_engine_client.safe_post("api/intelligence/smart-scan", data)
 
         if result.get("success"):
             scan_results = result.get("scan_results", {})
@@ -4757,8 +4757,8 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             execution_summary = scan_results.get("execution_summary", {})
 
             # Enhanced logging with detailed results
-            logger.info(f"{SethEngineColors.SUCCESS}✅ Intelligent scan completed for {target}{SethEngineColors.RESET}")
-            logger.info(f"{SethEngineColors.CYBER_ORANGE}📊 Execution Summary:{SethEngineColors.RESET}")
+            logger.info(f"{FetihEngineColors.SUCCESS}✅ Intelligent scan completed for {target}{FetihEngineColors.RESET}")
+            logger.info(f"{FetihEngineColors.CYBER_ORANGE}📊 Execution Summary:{FetihEngineColors.RESET}")
             logger.info(f"   • Tools executed: {execution_summary.get('successful_tools', 0)}/{execution_summary.get('total_tools', 0)}")
             logger.info(f"   • Success rate: {execution_summary.get('success_rate', 0):.1f}%")
             logger.info(f"   • Total vulnerabilities: {scan_results.get('total_vulnerabilities', 0)}")
@@ -4767,18 +4767,18 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             # Log successful tools
             successful_tools = [t['tool'] for t in tools_executed if t.get('success')]
             if successful_tools:
-                logger.info(f"{SethEngineColors.HIGHLIGHT_GREEN} Successful tools: {', '.join(successful_tools)} {SethEngineColors.RESET}")
+                logger.info(f"{FetihEngineColors.HIGHLIGHT_GREEN} Successful tools: {', '.join(successful_tools)} {FetihEngineColors.RESET}")
 
             # Log failed tools
             failed_tools = [t['tool'] for t in tools_executed if not t.get('success')]
             if failed_tools:
-                logger.warning(f"{SethEngineColors.HIGHLIGHT_RED} Failed tools: {', '.join(failed_tools)} {SethEngineColors.RESET}")
+                logger.warning(f"{FetihEngineColors.HIGHLIGHT_RED} Failed tools: {', '.join(failed_tools)} {FetihEngineColors.RESET}")
 
             # Log vulnerabilities found
             if scan_results.get('total_vulnerabilities', 0) > 0:
-                logger.warning(f"{SethEngineColors.VULN_HIGH}🚨 {scan_results['total_vulnerabilities']} vulnerabilities detected!{SethEngineColors.RESET}")
+                logger.warning(f"{FetihEngineColors.VULN_HIGH}🚨 {scan_results['total_vulnerabilities']} vulnerabilities detected!{FetihEngineColors.RESET}")
         else:
-            logger.error(f"{SethEngineColors.ERROR}❌ Intelligent scan failed for {target}: {result.get('error', 'Unknown error')}{SethEngineColors.RESET}")
+            logger.error(f"{FetihEngineColors.ERROR}❌ Intelligent scan failed for {target}: {result.get('error', 'Unknown error')}{FetihEngineColors.RESET}")
 
         return result
 
@@ -4796,7 +4796,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         logger.info(f"🔍 Detecting technologies for {target}")
 
         data = {"target": target}
-        result = seth_engine_client.safe_post("api/intelligence/technology-detection", data)
+        result = fetih_engine_client.safe_post("api/intelligence/technology-detection", data)
 
         if result.get("success"):
             technologies = result.get("detected_technologies", [])
@@ -4829,14 +4829,14 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         logger.info(f"🕵️  Starting AI reconnaissance workflow for {target} (depth: {depth})")
 
         # First analyze the target
-        analysis_result = seth_engine_client.safe_post("api/intelligence/analyze-target", {"target": target})
+        analysis_result = fetih_engine_client.safe_post("api/intelligence/analyze-target", {"target": target})
 
         if not analysis_result.get("success"):
             return analysis_result
 
         # Create attack chain for reconnaissance
         objective = "comprehensive" if depth == "deep" else "quick" if depth == "surface" else "comprehensive"
-        chain_result = seth_engine_client.safe_post("api/intelligence/create-attack-chain", {
+        chain_result = fetih_engine_client.safe_post("api/intelligence/create-attack-chain", {
             "target": target,
             "objective": objective
         })
@@ -4845,7 +4845,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             return chain_result
 
         # Execute the reconnaissance
-        scan_result = seth_engine_client.safe_post("api/intelligence/smart-scan", {
+        scan_result = fetih_engine_client.safe_post("api/intelligence/smart-scan", {
             "target": target,
             "objective": objective,
             "max_tools": 8 if depth == "deep" else 3 if depth == "surface" else 5
@@ -4878,7 +4878,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         logger.info(f"🔬 Starting AI vulnerability assessment for {target}")
 
         # Analyze target first
-        analysis_result = seth_engine_client.safe_post("api/intelligence/analyze-target", {"target": target})
+        analysis_result = fetih_engine_client.safe_post("api/intelligence/analyze-target", {"target": target})
 
         if not analysis_result.get("success"):
             return analysis_result
@@ -4897,7 +4897,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             objective = "quick"
 
         # Execute vulnerability assessment
-        scan_result = seth_engine_client.safe_post("api/intelligence/smart-scan", {
+        scan_result = fetih_engine_client.safe_post("api/intelligence/smart-scan", {
             "target": target,
             "objective": objective,
             "max_tools": 6
@@ -4946,7 +4946,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         }
 
         logger.info(f"🎯 Creating reconnaissance workflow for {domain}")
-        result = seth_engine_client.safe_post("api/bugbounty/reconnaissance-workflow", data)
+        result = fetih_engine_client.safe_post("api/bugbounty/reconnaissance-workflow", data)
 
         if result.get("success"):
             workflow = result.get("workflow", {})
@@ -4977,7 +4977,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         }
 
         logger.info(f"🎯 Creating vulnerability hunting workflow for {domain}")
-        result = seth_engine_client.safe_post("api/bugbounty/vulnerability-hunting-workflow", data)
+        result = fetih_engine_client.safe_post("api/bugbounty/vulnerability-hunting-workflow", data)
 
         if result.get("success"):
             workflow = result.get("workflow", {})
@@ -5005,7 +5005,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         }
 
         logger.info(f"🎯 Creating business logic testing workflow for {domain}")
-        result = seth_engine_client.safe_post("api/bugbounty/business-logic-workflow", data)
+        result = fetih_engine_client.safe_post("api/bugbounty/business-logic-workflow", data)
 
         if result.get("success"):
             workflow = result.get("workflow", {})
@@ -5030,7 +5030,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         data = {"domain": domain}
 
         logger.info(f"🎯 Creating OSINT gathering workflow for {domain}")
-        result = seth_engine_client.safe_post("api/bugbounty/osint-workflow", data)
+        result = fetih_engine_client.safe_post("api/bugbounty/osint-workflow", data)
 
         if result.get("success"):
             workflow = result.get("workflow", {})
@@ -5055,7 +5055,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         data = {"target_url": target_url}
 
         logger.info(f"🎯 Creating file upload testing workflow for {target_url}")
-        result = seth_engine_client.safe_post("api/bugbounty/file-upload-testing", data)
+        result = fetih_engine_client.safe_post("api/bugbounty/file-upload-testing", data)
 
         if result.get("success"):
             workflow = result.get("workflow", {})
@@ -5093,7 +5093,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         }
 
         logger.info(f"🎯 Creating comprehensive bug bounty assessment for {domain}")
-        result = seth_engine_client.safe_post("api/bugbounty/comprehensive-assessment", data)
+        result = fetih_engine_client.safe_post("api/bugbounty/comprehensive-assessment", data)
 
         if result.get("success"):
             assessment = result.get("assessment", {})
@@ -5195,18 +5195,18 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "action": action
         }
 
-        logger.info(f"{SethEngineColors.FIRE_RED}🔥 Starting HTTP Framework {action}: {url}{SethEngineColors.RESET}")
-        result = seth_engine_client.safe_post("api/tools/http-framework", data_payload)
+        logger.info(f"{FetihEngineColors.FIRE_RED}🔥 Starting HTTP Framework {action}: {url}{FetihEngineColors.RESET}")
+        result = fetih_engine_client.safe_post("api/tools/http-framework", data_payload)
 
         if result.get("success"):
-            logger.info(f"{SethEngineColors.SUCCESS}✅ HTTP Framework {action} completed for {url}{SethEngineColors.RESET}")
+            logger.info(f"{FetihEngineColors.SUCCESS}✅ HTTP Framework {action} completed for {url}{FetihEngineColors.RESET}")
 
             # Enhanced logging for vulnerabilities found
             if result.get("result", {}).get("vulnerabilities"):
                 vuln_count = len(result["result"]["vulnerabilities"])
-                logger.info(f"{SethEngineColors.HIGHLIGHT_RED} Found {vuln_count} potential vulnerabilities {SethEngineColors.RESET}")
+                logger.info(f"{FetihEngineColors.HIGHLIGHT_RED} Found {vuln_count} potential vulnerabilities {FetihEngineColors.RESET}")
         else:
-            logger.error(f"{SethEngineColors.ERROR}❌ HTTP Framework {action} failed for {url}{SethEngineColors.RESET}")
+            logger.error(f"{FetihEngineColors.ERROR}❌ HTTP Framework {action} failed for {url}{FetihEngineColors.RESET}")
 
         return result
 
@@ -5236,11 +5236,11 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "active_tests": active_tests
         }
 
-        logger.info(f"{SethEngineColors.CRIMSON}🌐 Starting Browser Agent {action}: {url}{SethEngineColors.RESET}")
-        result = seth_engine_client.safe_post("api/tools/browser-agent", data_payload)
+        logger.info(f"{FetihEngineColors.CRIMSON}🌐 Starting Browser Agent {action}: {url}{FetihEngineColors.RESET}")
+        result = fetih_engine_client.safe_post("api/tools/browser-agent", data_payload)
 
         if result.get("success"):
-            logger.info(f"{SethEngineColors.SUCCESS}✅ Browser Agent {action} completed for {url}{SethEngineColors.RESET}")
+            logger.info(f"{FetihEngineColors.SUCCESS}✅ Browser Agent {action} completed for {url}{FetihEngineColors.RESET}")
 
             # Enhanced logging for security analysis
             if action == "navigate" and result.get("result", {}).get("security_analysis"):
@@ -5249,11 +5249,11 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
                 security_score = security_analysis.get("security_score", 0)
 
                 if issues_count > 0:
-                    logger.warning(f"{SethEngineColors.HIGHLIGHT_YELLOW} Security Issues: {issues_count} | Score: {security_score}/100 {SethEngineColors.RESET}")
+                    logger.warning(f"{FetihEngineColors.HIGHLIGHT_YELLOW} Security Issues: {issues_count} | Score: {security_score}/100 {FetihEngineColors.RESET}")
                 else:
-                    logger.info(f"{SethEngineColors.HIGHLIGHT_GREEN} No security issues found | Score: {security_score}/100 {SethEngineColors.RESET}")
+                    logger.info(f"{FetihEngineColors.HIGHLIGHT_GREEN} No security issues found | Score: {security_score}/100 {FetihEngineColors.RESET}")
         else:
-            logger.error(f"{SethEngineColors.ERROR}❌ Browser Agent {action} failed for {url}{SethEngineColors.RESET}")
+            logger.error(f"{FetihEngineColors.ERROR}❌ Browser Agent {action} failed for {url}{FetihEngineColors.RESET}")
 
         return result
 
@@ -5263,19 +5263,19 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         """Set match/replace rules used to rewrite parts of URL/query/headers/body before sending.
         Rule format: {'where':'url|query|headers|body','pattern':'regex','replacement':'string'}"""
         payload = {"action": "set_rules", "rules": rules}
-        return seth_engine_client.safe_post("api/tools/http-framework", payload)
+        return fetih_engine_client.safe_post("api/tools/http-framework", payload)
 
     @mcp.tool()
     def http_set_scope(host: str, include_subdomains: bool = True) -> Dict[str, Any]:
         """Define in-scope host (and optionally subdomains) so out-of-scope requests are skipped."""
         payload = {"action": "set_scope", "host": host, "include_subdomains": include_subdomains}
-        return seth_engine_client.safe_post("api/tools/http-framework", payload)
+        return fetih_engine_client.safe_post("api/tools/http-framework", payload)
 
     @mcp.tool()
     def http_repeater(request_spec: dict) -> Dict[str, Any]:
         """Send a crafted request (Burp Repeater equivalent). request_spec keys: url, method, headers, cookies, data."""
         payload = {"action": "repeater", "request": request_spec}
-        return seth_engine_client.safe_post("api/tools/http-framework", payload)
+        return fetih_engine_client.safe_post("api/tools/http-framework", payload)
 
     @mcp.tool()
     def http_intruder(url: str, method: str = "GET", location: str = "query", params: list = None,
@@ -5292,7 +5292,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "base_data": base_data or {},
             "max_requests": max_requests
         }
-        return seth_engine_client.safe_post("api/tools/http-framework", payload)
+        return fetih_engine_client.safe_post("api/tools/http-framework", payload)
 
     @mcp.tool()
     def burpsuite_alternative_scan(target: str, scan_type: str = "comprehensive",
@@ -5319,11 +5319,11 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "max_pages": max_pages
         }
 
-        logger.info(f"{SethEngineColors.BLOOD_RED}🔥 Starting Burp Suite Alternative {scan_type} scan: {target}{SethEngineColors.RESET}")
-        result = seth_engine_client.safe_post("api/tools/burpsuite-alternative", data_payload)
+        logger.info(f"{FetihEngineColors.BLOOD_RED}🔥 Starting Burp Suite Alternative {scan_type} scan: {target}{FetihEngineColors.RESET}")
+        result = fetih_engine_client.safe_post("api/tools/burpsuite-alternative", data_payload)
 
         if result.get("success"):
-            logger.info(f"{SethEngineColors.SUCCESS}✅ Burp Suite Alternative scan completed for {target}{SethEngineColors.RESET}")
+            logger.info(f"{FetihEngineColors.SUCCESS}✅ Burp Suite Alternative scan completed for {target}{FetihEngineColors.RESET}")
 
             # Enhanced logging for comprehensive results
             if result.get("result", {}).get("summary"):
@@ -5332,7 +5332,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
                 pages_analyzed = summary.get("pages_analyzed", 0)
                 security_score = summary.get("security_score", 0)
 
-                logger.info(f"{SethEngineColors.HIGHLIGHT_BLUE} SCAN SUMMARY {SethEngineColors.RESET}")
+                logger.info(f"{FetihEngineColors.HIGHLIGHT_BLUE} SCAN SUMMARY {FetihEngineColors.RESET}")
                 logger.info(f"  📊 Pages Analyzed: {pages_analyzed}")
                 logger.info(f"  🚨 Vulnerabilities: {total_vulns}")
                 logger.info(f"  🛡️  Security Score: {security_score}/100")
@@ -5342,16 +5342,16 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
                 for severity, count in vuln_breakdown.items():
                     if count > 0:
                         color = {
-                                    'critical': SethEngineColors.CRITICAL,
-        'high': SethEngineColors.FIRE_RED,
-        'medium': SethEngineColors.CYBER_ORANGE,
-        'low': SethEngineColors.YELLOW,
-        'info': SethEngineColors.INFO
-    }.get(severity.lower(), SethEngineColors.WHITE)
+                                    'critical': FetihEngineColors.CRITICAL,
+        'high': FetihEngineColors.FIRE_RED,
+        'medium': FetihEngineColors.CYBER_ORANGE,
+        'low': FetihEngineColors.YELLOW,
+        'info': FetihEngineColors.INFO
+    }.get(severity.lower(), FetihEngineColors.WHITE)
 
-                        logger.info(f"  {color}{severity.upper()}: {count}{SethEngineColors.RESET}")
+                        logger.info(f"  {color}{severity.upper()}: {count}{FetihEngineColors.RESET}")
         else:
-            logger.error(f"{SethEngineColors.ERROR}❌ Burp Suite Alternative scan failed for {target}{SethEngineColors.RESET}")
+            logger.error(f"{FetihEngineColors.ERROR}❌ Burp Suite Alternative scan failed for {target}{FetihEngineColors.RESET}")
 
         return result
 
@@ -5363,26 +5363,26 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
         Returns:
             Error handling statistics and patterns
         """
-        logger.info(f"{SethEngineColors.ELECTRIC_PURPLE}📊 Retrieving error handling statistics{SethEngineColors.RESET}")
-        result = seth_engine_client.safe_get("api/error-handling/statistics")
+        logger.info(f"{FetihEngineColors.ELECTRIC_PURPLE}📊 Retrieving error handling statistics{FetihEngineColors.RESET}")
+        result = fetih_engine_client.safe_get("api/error-handling/statistics")
 
         if result.get("success"):
             stats = result.get("statistics", {})
             total_errors = stats.get("total_errors", 0)
             recent_errors = stats.get("recent_errors_count", 0)
 
-            logger.info(f"{SethEngineColors.SUCCESS}✅ Error statistics retrieved{SethEngineColors.RESET}")
+            logger.info(f"{FetihEngineColors.SUCCESS}✅ Error statistics retrieved{FetihEngineColors.RESET}")
             logger.info(f"  📈 Total Errors: {total_errors}")
             logger.info(f"  🕒 Recent Errors: {recent_errors}")
 
             # Log error breakdown by type
             error_counts = stats.get("error_counts_by_type", {})
             if error_counts:
-                logger.info(f"{SethEngineColors.HIGHLIGHT_BLUE} ERROR BREAKDOWN {SethEngineColors.RESET}")
+                logger.info(f"{FetihEngineColors.HIGHLIGHT_BLUE} ERROR BREAKDOWN {FetihEngineColors.RESET}")
                 for error_type, count in error_counts.items():
-                                          logger.info(f"  {SethEngineColors.FIRE_RED}{error_type}: {count}{SethEngineColors.RESET}")
+                                          logger.info(f"  {FetihEngineColors.FIRE_RED}{error_type}: {count}{FetihEngineColors.RESET}")
         else:
-            logger.error(f"{SethEngineColors.ERROR}❌ Failed to retrieve error statistics{SethEngineColors.RESET}")
+            logger.error(f"{FetihEngineColors.ERROR}❌ Failed to retrieve error statistics{FetihEngineColors.RESET}")
 
         return result
 
@@ -5406,15 +5406,15 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             "target": target
         }
 
-        logger.info(f"{SethEngineColors.RUBY}🧪 Testing error recovery for {tool_name} with {error_type}{SethEngineColors.RESET}")
-        result = seth_engine_client.safe_post("api/error-handling/test-recovery", data_payload)
+        logger.info(f"{FetihEngineColors.RUBY}🧪 Testing error recovery for {tool_name} with {error_type}{FetihEngineColors.RESET}")
+        result = fetih_engine_client.safe_post("api/error-handling/test-recovery", data_payload)
 
         if result.get("success"):
             recovery_strategy = result.get("recovery_strategy", {})
             action = recovery_strategy.get("action", "unknown")
             success_prob = recovery_strategy.get("success_probability", 0)
 
-            logger.info(f"{SethEngineColors.SUCCESS}✅ Error recovery test completed{SethEngineColors.RESET}")
+            logger.info(f"{FetihEngineColors.SUCCESS}✅ Error recovery test completed{FetihEngineColors.RESET}")
             logger.info(f"  🔧 Recovery Action: {action}")
             logger.info(f"  📊 Success Probability: {success_prob:.2%}")
 
@@ -5423,7 +5423,7 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
             if alternatives:
                 logger.info(f"  🔄 Alternative Tools: {', '.join(alternatives)}")
         else:
-            logger.error(f"{SethEngineColors.ERROR}❌ Error recovery test failed{SethEngineColors.RESET}")
+            logger.error(f"{FetihEngineColors.ERROR}❌ Error recovery test failed{FetihEngineColors.RESET}")
 
         return result
 
@@ -5431,9 +5431,9 @@ def setup_mcp_server(seth_engine_client: SethEngineClient) -> FastMCP:
 
 def parse_args():
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="Run the SethEngine AI MCP Client")
-    parser.add_argument("--server", type=str, default=DEFAULT_SETH_ENGINE_SERVER,
-                      help=f"SethEngine AI API server URL (default: {DEFAULT_SETH_ENGINE_SERVER})")
+    parser = argparse.ArgumentParser(description="Run the FetihEngine AI MCP Client")
+    parser.add_argument("--server", type=str, default=DEFAULT_FETIH_ENGINE_SERVER,
+                      help=f"FetihEngine AI API server URL (default: {DEFAULT_FETIH_ENGINE_SERVER})")
     parser.add_argument("--timeout", type=int, default=DEFAULT_REQUEST_TIMEOUT,
                       help=f"Request timeout in seconds (default: {DEFAULT_REQUEST_TIMEOUT})")
     parser.add_argument("--debug", action="store_true", help="Enable debug logging")
@@ -5449,31 +5449,31 @@ def main():
         logger.debug("🔍 Debug logging enabled")
 
     # MCP compatibility: No banner output to avoid JSON parsing issues
-    logger.info(f"🚀 Starting SethEngine AI MCP Client v6.0")
+    logger.info(f"🚀 Starting FetihEngine AI MCP Client v6.0")
     logger.info(f"🔗 Connecting to: {args.server}")
 
     try:
-        # Initialize the SethEngine AI client
-        seth_engine_client = SethEngineClient(args.server, args.timeout)
+        # Initialize the FetihEngine AI client
+        fetih_engine_client = FetihEngineClient(args.server, args.timeout)
 
         # Check server health and log the result
-        health = seth_engine_client.check_health()
+        health = fetih_engine_client.check_health()
         if "error" in health:
-            logger.warning(f"⚠️  Unable to connect to SethEngine AI API server at {args.server}: {health['error']}")
+            logger.warning(f"⚠️  Unable to connect to FetihEngine AI API server at {args.server}: {health['error']}")
             logger.warning("🚀 MCP server will start, but tool execution may fail")
         else:
-            logger.info(f"🎯 Successfully connected to SethEngine AI API server at {args.server}")
+            logger.info(f"🎯 Successfully connected to FetihEngine AI API server at {args.server}")
             logger.info(f"🏥 Server health status: {health['status']}")
             logger.info(f"📊 Version: {health.get('version', 'unknown')}")
             if not health.get("all_essential_tools_available", False):
-                logger.warning("⚠️  Not all essential tools are available on the SethEngine server")
+                logger.warning("⚠️  Not all essential tools are available on the FetihEngine server")
                 missing_tools = [tool for tool, available in health.get("tools_status", {}).items() if not available]
                 if missing_tools:
                     logger.warning(f"❌ Missing tools: {', '.join(missing_tools[:5])}{'...' if len(missing_tools) > 5 else ''}")
 
         # Set up and run the MCP server
-        mcp = setup_mcp_server(seth_engine_client)
-        logger.info("🚀 Starting SethEngine AI MCP server")
+        mcp = setup_mcp_server(fetih_engine_client)
+        logger.info("🚀 Starting FetihEngine AI MCP server")
         logger.info("🤖 Ready to serve AI agents with enhanced cybersecurity capabilities")
         mcp.run()
     except Exception as e:

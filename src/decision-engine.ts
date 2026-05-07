@@ -1,5 +1,5 @@
 /**
- * Seth Decision Engine — Hedef analizi ve akıllı tool seçimi
+ * Fetih Decision Engine — Hedef analizi ve akıllı tool seçimi
  * Hedef tipini belirler, en uygun araçları seçer, attack chain oluşturur.
  */
 

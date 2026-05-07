@@ -1,5 +1,5 @@
 /**
- * @fileoverview SETH Akışlar (Flows) — v3.9.5
+ * @fileoverview FETIH Akışlar (Flows) — v3.9.5
  * AGPL-3.0
  * Setup wizard, health check, provider yapılandırma akışları.
  * AGPL-3.0
@@ -8,7 +8,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
-import type { ProviderName, SETHConfig } from '../types.js';
+import type { ProviderName, FetihConfig } from '../types.js';
 import { generateId as makeId } from '../utils/id.js';
 
 // ---------------------------------------------------------------------------
@@ -69,14 +69,14 @@ export interface HealthCheck {
 // Sabitler
 // ---------------------------------------------------------------------------
 
-const FLOWS_DIR = join(homedir(), '.seth', 'flows');
+const FLOWS_DIR = join(homedir(), '.fetih', 'flows');
 
 // ---------------------------------------------------------------------------
 // Yardımcılar
 // ---------------------------------------------------------------------------
 
 function log(msg: string): void {
-  process.stderr.write(`[seth:flows] ${msg}\n`);
+  process.stderr.write(`[fetih:flows] ${msg}\n`);
 }
 
 function generateFlowId(): string {
@@ -93,7 +93,7 @@ function ensureDir(): void {
 // Health Check
 // ---------------------------------------------------------------------------
 
-export async function runHealthCheck(config?: SETHConfig): Promise<HealthCheckResult> {
+export async function runHealthCheck(config?: FetihConfig): Promise<HealthCheckResult> {
   const checks: HealthCheck[] = [];
   const start = Date.now();
 
@@ -121,7 +121,7 @@ export async function runHealthCheck(config?: SETHConfig): Promise<HealthCheckRe
     checks.push({ name: 'disk_space', status: 'fail', message: String(err), duration: 0 });
   }
 
-  // 4. Seth dizin yapısı
+  // 4. Fetih dizin yapısı
   try {
     const hc = await checkSethDirectory();
     checks.push(hc);
@@ -168,7 +168,7 @@ async function checkAudio(): Promise<HealthCheck> {
   }
 }
 
-async function checkProviderKeys(config?: SETHConfig): Promise<HealthCheck> {
+async function checkProviderKeys(config?: FetihConfig): Promise<HealthCheck> {
   const start = Date.now();
   const providers: ProviderName[] = ['anthropic', 'google', 'openai', 'deepseek', 'groq'];
   const available = providers.filter(p => config?.providers?.[p]?.apiKey);
@@ -202,18 +202,18 @@ async function checkDiskSpace(): Promise<HealthCheck> {
 
 async function checkSethDirectory(): Promise<HealthCheck> {
   const start = Date.now();
-  const homeDir = join(homedir(), '.seth');
+  const homeDir = join(homedir(), '.fetih');
   const dirs = ['plugins', 'tasks', 'sessions', 'audit', 'auto-reply', 'flows', 'sandbox'];
 
   const missing = dirs.filter(d => !existsSync(join(homeDir, d)));
   if (missing.length === 0) {
-    return { name: 'Seth Dizini', status: 'pass', message: 'Tüm dizinler mevcut', duration: Date.now() - start };
+    return { name: 'Fetih Dizini', status: 'pass', message: 'Tüm dizinler mevcut', duration: Date.now() - start };
   }
 
   for (const d of missing) {
     mkdirSync(join(homeDir, d), { recursive: true });
   }
-  return { name: 'Seth Dizini', status: 'pass', message: `${missing.length} eksik dizin oluşturuldu`, duration: Date.now() - start };
+  return { name: 'Fetih Dizini', status: 'pass', message: `${missing.length} eksik dizin oluşturuldu`, duration: Date.now() - start };
 }
 
 async function checkGit(): Promise<HealthCheck> {
@@ -271,7 +271,7 @@ export async function runProviderSetup(provider: ProviderName): Promise<FlowRun>
 const SETUP_FLOWS: Record<string, Omit<FlowDefinition, 'id'>> = {
   'initial-setup': {
     name: 'İlk Kurulum',
-    description: 'Seth\'in ilk çalıştırma yapılandırması',
+    description: 'Fetih\'in ilk çalıştırma yapılandırması',
     kind: 'setup',
     steps: [],
     required: false,
@@ -279,7 +279,7 @@ const SETUP_FLOWS: Record<string, Omit<FlowDefinition, 'id'>> = {
   },
   'security-audit': {
     name: 'Güvenlik Denetimi',
-    description: 'Seth güvenlik yapılandırması ve denetimi',
+    description: 'Fetih güvenlik yapılandırması ve denetimi',
     kind: 'maintenance',
     steps: [],
     required: false,

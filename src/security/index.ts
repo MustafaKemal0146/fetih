@@ -1,5 +1,5 @@
 /**
- * @fileoverview SETH Güvenlik Denetim Sistemi (Audit) — v3.9.5
+ * @fileoverview FETIH Güvenlik Denetim Sistemi (Audit) — v3.9.5
  * AGPL-3.0
  * Tüm araç çağrılarını loglar, izin politikalarını uygular.
  * AGPL-3.0
@@ -8,7 +8,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
-import type { SETHConfig, SecurityProfile } from '../types.js';
+import type { FetihConfig, SecurityProfile } from '../types.js';
 import { generateId as makeId } from '../utils/id.js';
 
 // ---------------------------------------------------------------------------
@@ -75,7 +75,7 @@ export interface AuditStats {
 // Sabitler
 // ---------------------------------------------------------------------------
 
-const AUDIT_DIR = join(homedir(), '.seth', 'audit');
+const AUDIT_DIR = join(homedir(), '.fetih', 'audit');
 const AUDIT_FILE = join(AUDIT_DIR, 'audit.log.json');
 const MAX_EVENTS = 10_000;
 
@@ -105,7 +105,7 @@ let policy: AuditPolicy = {
 // ---------------------------------------------------------------------------
 
 function log(msg: string): void {
-  process.stderr.write(`[seth:security] ${msg}\n`);
+  process.stderr.write(`[fetih:security] ${msg}\n`);
 }
 
 function generateId(): string {
@@ -320,7 +320,7 @@ export function checkCommandSafety(command: string): { safe: boolean; reason?: s
 // İnisiyalizasyon
 // ---------------------------------------------------------------------------
 
-export function initSecurity(config?: SETHConfig): void {
+export function initSecurity(config?: FetihConfig): void {
   loadEvents();
 
   if (config?.tools) {

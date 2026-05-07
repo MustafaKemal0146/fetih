@@ -1,7 +1,7 @@
 /**
- * Seth Engine — SETH için arka plan sunucu yöneticisi
+ * Fetih Engine — FETIH için arka plan sunucu yöneticisi
  *
- * SETH açılırken Seth Engine server'ını background'da başlatır,
+ * FETIH açılırken Fetih Engine server'ını background'da başlatır,
  * MCP config'e otomatik ekler, kapanırken temizler.
  */
 
@@ -18,13 +18,13 @@ const ENGINE_DIR = dirname(fileURLToPath(import.meta.url));
 let serverProcess: ChildProcess | null = null;
 
 /**
- * Seth Engine server'ını background'da başlat.
- * SETH lifecycle'ında çağrılır.
+ * Fetih Engine server'ını background'da başlat.
+ * FETIH lifecycle'ında çağrılır.
  */
 export function startSethEngine(): void {
   if (serverProcess) return;
 
-  const serverScript = join(ENGINE_DIR, 'seth_engine_server.py');
+  const serverScript = join(ENGINE_DIR, 'fetih_engine_server.py');
   if (!existsSync(serverScript)) return;
 
   try {
@@ -32,7 +32,7 @@ export function startSethEngine(): void {
       stdio: 'pipe',
       env: {
         ...process.env,
-        SETH_ENGINE_PORT: String(ENGINE_PORT),
+        FETIH_ENGINE_PORT: String(ENGINE_PORT),
         PYTHONUNBUFFERED: '1',
       },
       detached: false,
@@ -51,7 +51,7 @@ export function startSethEngine(): void {
 }
 
 /**
- * Seth Engine server'ını durdur.
+ * Fetih Engine server'ını durdur.
  */
 export function stopSethEngine(): void {
   if (serverProcess) {
@@ -66,10 +66,10 @@ export function stopSethEngine(): void {
 }
 
 /**
- * ~/.seth/mcp.json dosyasına Seth Engine girişini ekle.
+ * ~/.fetih/mcp.json dosyasına Fetih Engine girişini ekle.
  */
 function registerEngineMcp(): void {
-  const configDir = join(homedir(), '.seth');
+  const configDir = join(homedir(), '.fetih');
   const configPath = join(configDir, 'mcp.json');
 
   if (!existsSync(configDir)) {
@@ -83,9 +83,9 @@ function registerEngineMcp(): void {
 
   const servers: Record<string, unknown> = (config.mcpServers as Record<string, unknown>) ?? {};
 
-  if (!servers['seth-engine']) {
-    const mcpScript = join(ENGINE_DIR, 'seth_engine_mcp.py');
-    servers['seth-engine'] = {
+  if (!servers['fetih-engine']) {
+    const mcpScript = join(ENGINE_DIR, 'fetih_engine_mcp.py');
+    servers['fetih-engine'] = {
       command: 'python3',
       args: [mcpScript, '--server', `http://localhost:${ENGINE_PORT}`],
     };

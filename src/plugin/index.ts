@@ -1,5 +1,5 @@
 /**
- * @fileoverview SETH Plugin Sistemi — v3.9.5
+ * @fileoverview FETIH Plugin Sistemi — v3.9.5
  * AGPL-3.0
  * AGPL-3.0
  */
@@ -9,7 +9,7 @@ import { join, basename, extname } from 'path';
 import { homedir } from 'os';
 import { createHash } from 'crypto';
 import { pathToFileURL } from 'url';
-import type { ToolDefinition, SETHConfig, SecurityProfile } from '../types.js';
+import type { ToolDefinition, FetihConfig, SecurityProfile } from '../types.js';
 
 // ---------------------------------------------------------------------------
 // Tipler
@@ -52,7 +52,7 @@ export interface PluginRegistryState {
 // Sabitler
 // ---------------------------------------------------------------------------
 
-const PLUGIN_DIR = join(homedir(), '.seth', 'plugins');
+const PLUGIN_DIR = join(homedir(), '.fetih', 'plugins');
 const REGISTRY_FILE = join(PLUGIN_DIR, 'registry.json');
 const ALL_PERMISSIONS: Set<PluginPermission> = new Set(['read_fs', 'write_fs', 'network', 'exec', 'audio', 'video']);
 
@@ -77,7 +77,7 @@ function sha256File(filePath: string): string {
 }
 
 function log(msg: string): void {
-  process.stderr.write(`[seth:plugin] ${msg}\n`);
+  process.stderr.write(`[fetih:plugin] ${msg}\n`);
 }
 
 // ---------------------------------------------------------------------------
@@ -164,7 +164,7 @@ export function discoverPlugins(): string[] {
 
 export async function loadPlugin(
   fileName: string,
-  config?: SETHConfig,
+  config?: FetihConfig,
 ): Promise<ToolDefinition | null> {
   const pluginDir = getPluginDir();
   const pluginPath = join(pluginDir, fileName);
@@ -252,7 +252,7 @@ export async function loadPlugin(
 // Toplu Plugin Yükleme
 // ---------------------------------------------------------------------------
 
-export async function loadAllPlugins(config?: SETHConfig): Promise<ToolDefinition[]> {
+export async function loadAllPlugins(config?: FetihConfig): Promise<ToolDefinition[]> {
   const files = discoverPlugins();
   
   const loadPromises = files.map(file => loadPlugin(file, config));
@@ -357,7 +357,7 @@ export function stopWatching(): void {
 // İnisiyalizasyon
 // ---------------------------------------------------------------------------
 
-export async function initPluginSystem(config?: SETHConfig): Promise<ToolDefinition[]> {
+export async function initPluginSystem(config?: FetihConfig): Promise<ToolDefinition[]> {
   getRegistryState();
   return loadAllPlugins(config);
 }

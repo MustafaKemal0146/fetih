@@ -1,5 +1,5 @@
 /**
- * SETH Web UI — Main Entry Point
+ * FETIH Web UI — Main Entry Point
  * Vite-based modular application.
  */
 

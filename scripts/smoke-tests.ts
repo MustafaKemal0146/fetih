@@ -6,7 +6,7 @@ const requiredFiles = [
   'dist/cli.js',
   'dist/version.js',
   'dist/prompts/system.js',
-  'SETH-Apps/Core/SETH_Engine.py',
+  'FETIH-Apps/Core/FETIH_Engine.py',
 ];
 
 let failed = false;

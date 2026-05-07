@@ -40,7 +40,7 @@ if [[ -z "${COMMITS}" ]]; then
   COMMITS="- Commit özeti bulunamadı."
 fi
 cat > "$CHANGELOG_FILE" <<EOF
-# SETH v${VERSION} — Release Özeti
+# FETIH v${VERSION} — Release Özeti
 
 - Tarih: $(date -u +"%Y-%m-%dT%H:%M:%SZ")
 - Mod: $([[ "$DRY_RUN" == "true" ]] && echo "dry-run" || echo "release")

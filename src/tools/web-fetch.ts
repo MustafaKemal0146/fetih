@@ -132,7 +132,7 @@ export const webFetchTool: ToolDefinition = {
       const res = await fetch(url, {
         signal: controller.signal,
         headers: {
-          'User-Agent': `SETH/${VERSION} (Terminal AI Agent)`,
+          'User-Agent': `FETIH/${VERSION} (Terminal AI Agent)`,
           Accept: 'text/html,text/markdown,text/plain,*/*',
         },
         redirect: 'follow',
@@ -162,7 +162,7 @@ export const webFetchTool: ToolDefinition = {
       if (contentType.startsWith('image/')) {
         const imgRes = await fetch(url, {
           signal: controller.signal,
-          headers: { 'User-Agent': `SETH/${VERSION} (Terminal AI Agent)` },
+          headers: { 'User-Agent': `FETIH/${VERSION} (Terminal AI Agent)` },
         });
         const buf = await imgRes.arrayBuffer();
         const b64 = Buffer.from(buf).toString('base64');

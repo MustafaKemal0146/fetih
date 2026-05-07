@@ -1,5 +1,5 @@
 /**
- * Seth Process Pool — Otomatik ölçeklenen paralel işlem havuzu
+ * Fetih Process Pool — Otomatik ölçeklenen paralel işlem havuzu
  * Görevleri kuyruğa alır, worker thread'lerle paralel çalıştırır.
  */
 

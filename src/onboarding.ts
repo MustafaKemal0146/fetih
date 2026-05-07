@@ -3,7 +3,7 @@ import { existsSync, writeFileSync, mkdirSync } from 'fs';
 import { dirname } from 'path';
 import chalk from 'chalk';
 import { getSettingsPath, getConfigDir } from './config/settings.js';
-import { sethLog } from './welcome.js';
+import { fetihLog } from './welcome.js';
 import type { ProviderName } from './types.js';
 
 export async function runOnboardingIfNeeded(): Promise<void> {
@@ -18,7 +18,7 @@ export async function runOnboardingIfNeeded(): Promise<void> {
     mkdirSync(configDir, { recursive: true });
   }
 
-  intro(chalk.bgRed.white.bold(' ↯ SETH — İLK KURULUM ↯ '));
+  intro(chalk.bgRed.white.bold(' ↯ FETIH — İLK KURULUM ↯ '));
   process.stdout.write(chalk.dim('  Yapılandırma eksik. Sistem hazırlanıyor.\n\n'));
 
   const provider = await select({
@@ -49,7 +49,7 @@ export async function runOnboardingIfNeeded(): Promise<void> {
 
   if (pName === 'ollama') {
     const s = spinner();
-    s.start('SETH: Yerel Ollama modelleri taranıyor...');
+    s.start('FETIH: Yerel Ollama modelleri taranıyor...');
     try {
       const res = await fetch('http://localhost:11434/api/tags').catch(() => null);
       if (res && res.ok) {
@@ -119,8 +119,8 @@ export async function runOnboardingIfNeeded(): Promise<void> {
   partialConfig.defaultModel = defaultModel;
   partialConfig.providers[pName].model = defaultModel;
 
-  sethLog('Yapılandırma kalıcı hale getirme');
+  fetihLog('Yapılandırma kalıcı hale getirme');
   writeFileSync(settingsPath, JSON.stringify(partialConfig, null, 2), 'utf-8');
 
-  outro(chalk.red.bold(`SETH kurulumu tamamlandı. Sistem aktif. (${pName} / ${defaultModel})`));
+  outro(chalk.red.bold(`FETIH kurulumu tamamlandı. Sistem aktif. (${pName} / ${defaultModel})`));
 }

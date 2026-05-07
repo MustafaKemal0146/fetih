@@ -22,7 +22,7 @@ const SECURITY_TOOLS = new Set([
   'sqlmap', 'nmap', 'nikto', 'gobuster', 'whatweb', 'ffuf', 'nuclei',
   'masscan', 'nc', 'wpscan', 'subfinder', 'john', 'hashcat',
   'ctf_auto', 'ctf_solver', 'ctf_stego', 'ctf_file_analyzer', 'ctf_web_analyzer', 'ctf_network_analyzer',
-  'sethEngine',
+  'fetihEngine',
 ]);
 
 export function isToolAllowed(

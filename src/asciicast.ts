@@ -15,7 +15,7 @@ export function exportAsAsciicast(messages: ChatMessage[], provider: string, mod
     width,
     height,
     timestamp: Math.floor(startTime),
-    title: `SETH — ${provider}/${model}`,
+    title: `FETIH — ${provider}/${model}`,
     env: { TERM: 'xterm-256color', SHELL: '/bin/bash' },
   });
 

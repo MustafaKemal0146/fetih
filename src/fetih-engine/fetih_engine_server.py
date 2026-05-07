@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-SethEngine AI - Advanced Penetration Testing Framework Server
+FetihEngine AI - Advanced Penetration Testing Framework Server
 
 Enhanced with AI-Powered Intelligence & Automation
 🚀 Bug Bounty | CTF | Red Team | Security Research
@@ -14,7 +14,7 @@ RECENT ENHANCEMENTS (v6.0):
 ✅ AI-driven decision engine for tool selection
 ✅ Advanced error handling and recovery systems
 
-Architecture: Two-script system (seth_engine_server.py + seth_engine_mcp.py)
+Architecture: Two-script system (fetih_engine_server.py + fetih_engine_mcp.py)
 Framework: FastMCP integration for AI agent communication
 """
 
@@ -76,7 +76,7 @@ try:
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
             logging.StreamHandler(sys.stdout),
-            logging.FileHandler('seth_engine.log')
+            logging.FileHandler('fetih_engine.log')
         ]
     )
 except PermissionError:
@@ -95,8 +95,8 @@ app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 
 # API Configuration
-API_PORT = int(os.environ.get('SETH_ENGINE_PORT', 8888))
-API_HOST = os.environ.get('SETH_ENGINE_HOST', '127.0.0.1')
+API_PORT = int(os.environ.get('FETIH_ENGINE_PORT', 8888))
+API_HOST = os.environ.get('FETIH_ENGINE_HOST', '127.0.0.1')
 
 # ============================================================================
 # MODERN VISUAL ENGINE (v2.0 ENHANCEMENT)
@@ -172,7 +172,7 @@ class ModernVisualEngine:
 
     @staticmethod
     def create_banner() -> str:
-        """Create the enhanced SethEngine banner"""
+        """Create the enhanced FetihEngine banner"""
         # Build a blood-red themed border using primary/gradient alternation
         border_color = ModernVisualEngine.COLORS['PRIMARY_BORDER']
         accent = ModernVisualEngine.COLORS['ACCENT_LINE']
@@ -190,7 +190,7 @@ class ModernVisualEngine:
 ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚══════╝
 {RESET}
 {border_color}┌─────────────────────────────────────────────────────────────────────┐
-│  {ModernVisualEngine.COLORS['BRIGHT_WHITE']}🚀 SethEngine AI - Blood-Red Offensive Intelligence Core{border_color}        │
+│  {ModernVisualEngine.COLORS['BRIGHT_WHITE']}🚀 FetihEngine AI - Blood-Red Offensive Intelligence Core{border_color}        │
 │  {accent}⚡ AI-Automated Recon | Exploitation | Analysis Pipeline{border_color}          │
 │  {gradient}🎯 Bug Bounty | CTF | Red Team | Zero-Day Research{border_color}              │
 └─────────────────────────────────────────────────────────────────────┘{RESET}
@@ -280,7 +280,7 @@ class ModernVisualEngine:
         if not processes:
             return f"""
 {ModernVisualEngine.COLORS['PRIMARY_BORDER']}╭─────────────────────────────────────────────────────────────────────────────╮
-│ {ModernVisualEngine.COLORS['ACCENT_LINE']}📊 SETH_ENGINE LIVE DASHBOARD{ModernVisualEngine.COLORS['PRIMARY_BORDER']}                                           │
+│ {ModernVisualEngine.COLORS['ACCENT_LINE']}📊 FETIH_ENGINE LIVE DASHBOARD{ModernVisualEngine.COLORS['PRIMARY_BORDER']}                                           │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ {ModernVisualEngine.COLORS['TERMINAL_GRAY']}No active processes currently running{ModernVisualEngine.COLORS['PRIMARY_BORDER']}                                    │
 ╰─────────────────────────────────────────────────────────────────────────────╯{ModernVisualEngine.COLORS['RESET']}
@@ -288,7 +288,7 @@ class ModernVisualEngine:
 
         dashboard_lines = [
             f"{ModernVisualEngine.COLORS['PRIMARY_BORDER']}╭─────────────────────────────────────────────────────────────────────────────╮",
-            f"│ {ModernVisualEngine.COLORS['ACCENT_LINE']}📊 SETH_ENGINE LIVE DASHBOARD{ModernVisualEngine.COLORS['PRIMARY_BORDER']}                                           │",
+            f"│ {ModernVisualEngine.COLORS['ACCENT_LINE']}📊 FETIH_ENGINE LIVE DASHBOARD{ModernVisualEngine.COLORS['PRIMARY_BORDER']}                                           │",
             f"├─────────────────────────────────────────────────────────────────────────────┤"
         ]
 
@@ -1309,7 +1309,7 @@ class IntelligentDecisionEngine:
 
         # Set project name based on binary
         binary_name = os.path.basename(profile.target).replace('.', '_')
-        params["project_name"] = f"seth_engine_{binary_name}"
+        params["project_name"] = f"fetih_engine_{binary_name}"
 
         return params
 
@@ -5710,7 +5710,7 @@ class ProcessManager:
 class PythonEnvironmentManager:
     """Manage Python virtual environments and dependencies"""
 
-    def __init__(self, base_dir: str = "/tmp/seth_engine_envs"):
+    def __init__(self, base_dir: str = "/tmp/fetih_engine_envs"):
         self.base_dir = Path(base_dir)
         self.base_dir.mkdir(exist_ok=True)
 
@@ -6657,7 +6657,7 @@ def setup_logging():
     # Console handler with colors
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setFormatter(ColoredFormatter(
-        "[🔥 SethEngine AI] %(asctime)s [%(levelname)s] %(message)s",
+        "[🔥 FetihEngine AI] %(asctime)s [%(levelname)s] %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S"
     ))
     logger.addHandler(console_handler)
@@ -6670,7 +6670,7 @@ COMMAND_TIMEOUT = 300  # 5 minutes default timeout
 CACHE_SIZE = 1000
 CACHE_TTL = 3600  # 1 hour
 
-class SethEngineCache:
+class FetihEngineCache:
     """Advanced caching system for command results"""
 
     def __init__(self, max_size: int = CACHE_SIZE, ttl: int = CACHE_TTL):
@@ -6736,7 +6736,7 @@ class SethEngineCache:
         }
 
 # Global cache instance
-cache = SethEngineCache()
+cache = FetihEngineCache()
 
 class TelemetryCollector:
     """Collect and manage system telemetry"""
@@ -8938,7 +8938,7 @@ def _determine_operation_type(tool_name: str) -> str:
 class FileOperationsManager:
     """Handle file operations with security and validation"""
 
-    def __init__(self, base_dir: str = "/tmp/seth_engine_files"):
+    def __init__(self, base_dir: str = "/tmp/fetih_engine_files"):
         self.base_dir = Path(base_dir)
         self.base_dir.mkdir(exist_ok=True)
         self.max_file_size = 100 * 1024 * 1024  # 100MB
@@ -9132,7 +9132,7 @@ def health_check():
 
     return jsonify({
         "status": "healthy",
-        "message": "SethEngine AI Tools API Server is operational",
+        "message": "FetihEngine AI Tools API Server is operational",
         "version": "6.0.0",
         "tools_status": tools_status,
         "all_essential_tools_available": all_essential_tools_available,
@@ -10667,7 +10667,7 @@ def pacu():
     """Execute Pacu for AWS exploitation framework"""
     try:
         params = request.json
-        session_name = params.get("session_name", "seth_engine_session")
+        session_name = params.get("session_name", "fetih_engine_session")
         modules = params.get("modules", "")
         data_services = params.get("data_services", "")
         regions = params.get("regions", "")
@@ -12268,7 +12268,7 @@ def ghidra():
     try:
         params = request.json
         binary = params.get("binary", "")
-        project_name = params.get("project_name", "seth_engine_analysis")
+        project_name = params.get("project_name", "fetih_engine_analysis")
         script_file = params.get("script_file", "")
         analysis_timeout = params.get("analysis_timeout", 300)
         output_format = params.get("output_format", "xml")
@@ -13295,7 +13295,7 @@ class HTTPTestingFramework:
     def __init__(self):
         self.session = requests.Session()
         self.session.headers.update({
-            'User-Agent': 'SethEngine-HTTP-Framework/1.0 (Advanced Security Testing)'
+            'User-Agent': 'FetihEngine-HTTP-Framework/1.0 (Advanced Security Testing)'
         })
         self.proxy_history = []
         self.vulnerabilities = []
@@ -13652,7 +13652,7 @@ class BrowserAgent:
             chrome_options.add_argument('--disable-dev-shm-usage')
             chrome_options.add_argument('--disable-gpu')
             chrome_options.add_argument('--window-size=1920,1080')
-            chrome_options.add_argument('--user-agent=SethEngine-BrowserAgent/1.0 (Security Testing)')
+            chrome_options.add_argument('--user-agent=FetihEngine-BrowserAgent/1.0 (Security Testing)')
 
             # Enable logging
             chrome_options.add_argument('--enable-logging')
@@ -13695,7 +13695,7 @@ class BrowserAgent:
             time.sleep(wait_time)
 
             # Take screenshot
-            screenshot_path = f"/tmp/seth_engine_screenshot_{int(time.time())}.png"
+            screenshot_path = f"/tmp/fetih_engine_screenshot_{int(time.time())}.png"
             self.driver.save_screenshot(screenshot_path)
             self.screenshots.append(screenshot_path)
 
@@ -13827,7 +13827,7 @@ class BrowserAgent:
             modules.append('console_log_capture')
         return {'issues': issues, 'modules': modules}
 
-    def run_active_tests(self, page_info: dict, payload: str = '<seth_engineXSSTest123>') -> dict:
+    def run_active_tests(self, page_info: dict, payload: str = '<fetih_engineXSSTest123>') -> dict:
         """Very lightweight active tests (reflection check) - safe mode.
         Only GET forms with text inputs to avoid state-changing operations."""
         findings = []
@@ -14197,7 +14197,7 @@ def browser_agent_endpoint():
                     400,
                 )
 
-            screenshot_path = f"/tmp/seth_engine_screenshot_{int(time.time())}.png"
+            screenshot_path = f"/tmp/fetih_engine_screenshot_{int(time.time())}.png"
             browser_agent.driver.save_screenshot(screenshot_path)
 
             return jsonify(
@@ -17268,7 +17268,7 @@ if __name__ == "__main__":
     # Display the beautiful new banner
     print(BANNER)
 
-    parser = argparse.ArgumentParser(description="Run the SethEngine AI API Server")
+    parser = argparse.ArgumentParser(description="Run the FetihEngine AI API Server")
     parser.add_argument("--debug", action="store_true", help="Enable debug mode")
     parser.add_argument("--port", type=int, default=API_PORT, help=f"Port for the API server (default: {API_PORT})")
     args = parser.parse_args()
@@ -17283,7 +17283,7 @@ if __name__ == "__main__":
     # Enhanced startup messages with beautiful formatting
     startup_info = f"""
 {ModernVisualEngine.COLORS['MATRIX_GREEN']}{ModernVisualEngine.COLORS['BOLD']}╭─────────────────────────────────────────────────────────────────────────────╮{ModernVisualEngine.COLORS['RESET']}
-{ModernVisualEngine.COLORS['BOLD']}│{ModernVisualEngine.COLORS['RESET']} {ModernVisualEngine.COLORS['NEON_BLUE']}🚀 Starting SethEngine AI Tools API Server{ModernVisualEngine.COLORS['RESET']}
+{ModernVisualEngine.COLORS['BOLD']}│{ModernVisualEngine.COLORS['RESET']} {ModernVisualEngine.COLORS['NEON_BLUE']}🚀 Starting FetihEngine AI Tools API Server{ModernVisualEngine.COLORS['RESET']}
 {ModernVisualEngine.COLORS['BOLD']}├─────────────────────────────────────────────────────────────────────────────┤{ModernVisualEngine.COLORS['RESET']}
 {ModernVisualEngine.COLORS['BOLD']}│{ModernVisualEngine.COLORS['RESET']} {ModernVisualEngine.COLORS['CYBER_ORANGE']}🌐 Port:{ModernVisualEngine.COLORS['RESET']} {API_PORT}
 {ModernVisualEngine.COLORS['BOLD']}│{ModernVisualEngine.COLORS['RESET']} {ModernVisualEngine.COLORS['WARNING']}🔧 Debug Mode:{ModernVisualEngine.COLORS['RESET']} {DEBUG_MODE}

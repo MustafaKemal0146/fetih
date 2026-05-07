@@ -1,5 +1,5 @@
 /**
- * @fileoverview Skills sistemi — .seth/skills/ dizininden özel komutlar yükler.
+ * @fileoverview Skills sistemi — .fetih/skills/ dizininden özel komutlar yükler.
  * gemini-cli'nin skillLoader.ts'inden ilham alınmıştır.
  *
  * Skill formatı (markdown frontmatter):
@@ -35,12 +35,12 @@ function parseFrontmatter(content: string): { name: string; description: string 
 
 /**
  * Skills dizinlerinden skill'leri yükle.
- * Sıra: ~/.seth/skills/ → ./.seth/skills/
+ * Sıra: ~/.fetih/skills/ → ./.fetih/skills/
  */
 export function loadSkills(cwd: string): SkillDefinition[] {
   const dirs = [
-    join(homedir(), '.seth', 'skills'),
-    join(cwd, '.seth', 'skills'),
+    join(homedir(), '.fetih', 'skills'),
+    join(cwd, '.fetih', 'skills'),
   ];
 
   const skills: SkillDefinition[] = [];
@@ -113,8 +113,8 @@ export function listAllSkills(): SkillDefinition[] {
     } catch { /* ignore */ }
   }
 
-  // Kullanıcı skill'leri: ~/.seth/skills/
-  const userDir = join(homedir(), '.seth', 'skills');
+  // Kullanıcı skill'leri: ~/.fetih/skills/
+  const userDir = join(homedir(), '.fetih', 'skills');
   if (!existsSync(userDir)) {
     try { mkdirSync(userDir, { recursive: true }); } catch { /* ignore */ }
   }
@@ -158,7 +158,7 @@ export function formatSkillsTable(skills: SkillDefinition[]): string {
   if (skills.length === 0) {
     return [
       '  Skill bulunamadı.',
-      '  Kendi skill\'lerinizi eklemek için: ~/.seth/skills/<ad>.md',
+      '  Kendi skill\'lerinizi eklemek için: ~/.fetih/skills/<ad>.md',
     ].join('\n');
   }
   const lines: string[] = ['  Skill\'ler\n  ' + '─'.repeat(40)];
@@ -177,6 +177,6 @@ export function formatSkillsTable(skills: SkillDefinition[]): string {
       lines.push(`    \x1b[36m/skill ${s.name}\x1b[0m${' '.repeat(Math.max(1, 22 - s.name.length))}${s.description}`);
     }
   }
-  lines.push(`\n  Yeni skill: ~/.seth/skills/<ad>.md`);
+  lines.push(`\n  Yeni skill: ~/.fetih/skills/<ad>.md`);
   return lines.join('\n');
 }

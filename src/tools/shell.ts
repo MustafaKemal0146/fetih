@@ -63,7 +63,7 @@ export const shellTool: ToolDefinition = {
     const isWindows = platform() === 'win32';
     const shell = isWindows ? 'powershell.exe' : 'bash';
 
-    const cwdFile = join(tmpdir(), `seth-cwd-${randomUUID()}`);
+    const cwdFile = join(tmpdir(), `fetih-cwd-${randomUUID()}`);
     let command: string;
 
     if (isWindows) {

@@ -2,7 +2,7 @@
  * @fileoverview Tool registry — manages tool definitions and converts to LLM schemas.
  */
 
-import type { ToolDefinition, ToolSchema, SETHConfig } from '../types.js';
+import type { ToolDefinition, ToolSchema, FetihConfig } from '../types.js';
 import { kayitliAraclariKaydet } from '../session-runtime.js';
 
 /** arac_ara aracı için güncel araç adı + açıklama özetini yazar. */
@@ -58,7 +58,7 @@ export class ToolRegistry {
 }
 
 /** Create and populate a registry with the default built-in tools. */
-export async function createDefaultRegistry(config?: SETHConfig): Promise<ToolRegistry> {
+export async function createDefaultRegistry(config?: FetihConfig): Promise<ToolRegistry> {
   const registry = new ToolRegistry();
 
   const { shellTool } = await import('./shell.js');
@@ -89,7 +89,7 @@ export async function createDefaultRegistry(config?: SETHConfig): Promise<ToolRe
   const { agentSpawnTool } = await import('./agent-spawn.js');
   const { memoryReadTool, memoryWriteTool } = await import('./agent-memory.js');
   const { lspDiagnosticsTool } = await import('./lsp.js');
-  const { sethEngineTool } = await import('./seth-engine.js');
+  const { fetihEngineTool } = await import('./fetih-engine.js');
   const { gitWorktreeTool } = await import('./git/git-worktree.js');
   const { topicTool } = await import('./topic-tool.js');
   const { trackerReadTool, trackerWriteTool } = await import('./tracker-tools.js');
@@ -141,7 +141,7 @@ export async function createDefaultRegistry(config?: SETHConfig): Promise<ToolRe
   registry.register(memoryReadTool);
   registry.register(memoryWriteTool);
   registry.register(lspDiagnosticsTool);
-  registry.register(sethEngineTool);
+  registry.register(fetihEngineTool);
   registry.register(gitWorktreeTool);
   registry.register(topicTool);
   registry.register(trackerReadTool);
@@ -181,7 +181,7 @@ export async function createDefaultRegistry(config?: SETHConfig): Promise<ToolRe
   registry.register(shodanTool);
 
   // === v3.9.5 YENİ ÖZELLİKLER ===
-  // Plugin Sistemi — ~/.seth/plugins/ dizininden plugin yükle
+  // Plugin Sistemi — ~/.fetih/plugins/ dizininden plugin yükle
   const { initPluginSystem } = await import('../plugin/index.js');
   const pluginTools = await initPluginSystem(config);
   for (const tool of pluginTools) {
@@ -199,8 +199,8 @@ export async function createDefaultRegistry(config?: SETHConfig): Promise<ToolRe
   registry.register(taskGetTool);
   registry.register(taskStopTool);
 
-  // Seth Engine tool'larını keşfet ve kaydet (arka planda)
-  const { registerSethEngineTools } = await import('../seth-engine/registry.js');
+  // Fetih Engine tool'larını keşfet ve kaydet (arka planda)
+  const { registerSethEngineTools } = await import('../fetih-engine/registry.js');
   registerSethEngineTools(registry).then(eklenen => {
     if (eklenen > 0) {
       snapshotToolRegistry(registry);

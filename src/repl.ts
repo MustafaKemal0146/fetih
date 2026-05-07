@@ -41,7 +41,7 @@ import {
   clearSpinner,
   getToolSpinnerText,
 } from './renderer.js';
-import { renderWelcomeAnimation, sethLog } from './welcome.js';
+import { renderWelcomeAnimation, fetihLog } from './welcome.js';
 import { createReplStreamingController, resolveStreamMode } from './repl-streaming.js';
 import {
   isPlanWaitingApproval,
@@ -65,13 +65,13 @@ import { runHistorySearch } from './history-search.js';
 import { runHooks } from './hooks.js';
 import { webUIController } from './web/controller.js';
 
-import type { ProviderName, SETHConfig, ChatMessage, PermissionLevel, ThinkingStyle, LLMProvider } from './types.js';
+import type { ProviderName, FetihConfig, ChatMessage, PermissionLevel, ThinkingStyle, LLMProvider } from './types.js';
 import { executeCommand, COMMANDS, type CommandContext } from './commands.js';
 import { runAgentLoop, type AgentLoopOptions } from './agent/loop.js';
 
 // ─── REPL Implementation ──────────────────────────────────────────────────────
 
-export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelcome = false, resumeSessionId?: string, userEmail?: string): Promise<void> {
+export async function startRepl(configOverrides?: Partial<FetihConfig>, skipWelcome = false, resumeSessionId?: string, userEmail?: string): Promise<void> {
   let appConfig = loadConfig(configOverrides);
   let currentCwd = process.cwd();
   
@@ -82,10 +82,10 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
   // Graceful shutdown kur
   const { setupGracefulShutdown, startBackgroundCleanup } = await import('./lifecycle.js');
   setupGracefulShutdown();
-  void startBackgroundCleanup(pathJoin(homedir(), '.seth', 'sessions'));
+  void startBackgroundCleanup(pathJoin(homedir(), '.fetih', 'sessions'));
 
-  // Seth Engine arka plan sunucusunu başlat
-  const { startSethEngine } = await import('./seth-engine/bridge.js');
+  // Fetih Engine arka plan sunucusunu başlat
+  const { startSethEngine } = await import('./fetih-engine/bridge.js');
   startSethEngine();
 
   let currentProvider: ProviderName = appConfig.defaultProvider;
@@ -799,19 +799,19 @@ export async function startRepl(configOverrides?: Partial<SETHConfig>, skipWelco
         rl!.question(chalk.dim('  GitHub\'dan güncellemek ister misiniz? [E/h] '), (answer) => {
           const yes = answer.trim() === '' || answer.trim().toLowerCase() === 'e';
           if (yes) {
-            process.stdout.write(chalk.dim('\n  Çalıştırılıyor: npm install -g seth\n\n'));
-            const child = spawn('npm', ['install', '-g', 'github:MustafaKemal0146/seth'], { stdio: 'inherit' });
+            process.stdout.write(chalk.dim('\n  Çalıştırılıyor: npm install -g fetih\n\n'));
+            const child = spawn('npm', ['install', '-g', 'github:MustafaKemal0146/fetih'], { stdio: 'inherit' });
             child.on('close', (code) => {
               if (code === 0) {
-                process.stdout.write(chalk.green('\n  ✓ Güncelleme tamamlandı! Yeniden başlatın: seth\n\n'));
+                process.stdout.write(chalk.green('\n  ✓ Güncelleme tamamlandı! Yeniden başlatın: fetih\n\n'));
               } else {
-                process.stdout.write(chalk.red('\n  ✗ Güncelleme başarısız. Manuel: npm install -g seth\n\n'));
+                process.stdout.write(chalk.red('\n  ✗ Güncelleme başarısız. Manuel: npm install -g fetih\n\n'));
               }
               if (rl && !processing) rl.prompt();
               resolve();
             });
             child.on('error', () => {
-              process.stdout.write(chalk.red('\n  ✗ npm bulunamadı. Manuel: npm install -g seth\n\n'));
+              process.stdout.write(chalk.red('\n  ✗ npm bulunamadı. Manuel: npm install -g fetih\n\n'));
               if (rl && !processing) rl.prompt();
               resolve();
             });

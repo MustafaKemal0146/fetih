@@ -8,7 +8,7 @@
  * - Maksimum derinlik: 4
  */
 
-import type { ToolDefinition, ToolResult, SETHConfig, ProviderName, LLMProvider } from '../types.js';
+import type { ToolDefinition, ToolResult, FetihConfig, ProviderName, LLMProvider } from '../types.js';
 import { runAgentLoop } from '../agent/loop.js';
 import { createDefaultRegistry } from './registry.js';
 import { ToolExecutor } from './executor.js';
@@ -94,7 +94,7 @@ export const agentSpawnTool: ToolDefinition = {
 
     // Derinliği artır
     currentAgentDepth++;
-    process.stderr.write(`[seth] Alt-ajan başlatıldı (derinlik ${currentAgentDepth}): ${task.slice(0, 80)}\n`);
+    process.stderr.write(`[fetih] Alt-ajan başlatıldı (derinlik ${currentAgentDepth}): ${task.slice(0, 80)}\n`);
 
     try {
       // Aynı provider'ı kullan veya yenisini oluştur
@@ -131,7 +131,7 @@ export const agentSpawnTool: ToolDefinition = {
         debug: false,
         onText: (text) => {
           // Alt-ajan çıktısını stderr'e yaz (debug)
-          if (process.env.SETH_DEBUG_SUBAGENT) {
+          if (process.env.FETIH_DEBUG_SUBAGENT) {
             process.stderr.write(`[alt-ajan-${currentAgentDepth}] ${text}`);
           }
         },

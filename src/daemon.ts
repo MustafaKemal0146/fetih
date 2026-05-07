@@ -20,14 +20,14 @@ export interface DaemonStatus {
   startedAt: string | null;
 }
 
-const DEFAULT_STATE_DIR = join(homedir(), '.seth');
+const DEFAULT_STATE_DIR = join(homedir(), '.fetih');
 
 export function getDefaultConfig(overrides?: Partial<DaemonConfig>): DaemonConfig {
   const stateDir = overrides?.stateDir ?? DEFAULT_STATE_DIR;
   return {
     port: 4321,
     host: 'localhost',
-    pidFile: join(stateDir, 'seth.pid'),
+    pidFile: join(stateDir, 'fetih.pid'),
     logFile: join(stateDir, 'daemon.log'),
     stateDir,
     ...overrides,
@@ -126,22 +126,22 @@ export async function startDaemon(config?: Partial<DaemonConfig>): Promise<void>
   const pid = readPid(cfg.pidFile);
   if (pid !== null && isProcessRunning(pid)) {
     logger.warn(`Daemon already running with PID ${pid}`);
-    console.log(`SETH daemon zaten çalışıyor (PID: ${pid})`);
+    console.log(`FETIH daemon zaten çalışıyor (PID: ${pid})`);
     return;
   }
 
-  process.title = 'seth-daemon';
+  process.title = 'fetih-daemon';
   daemonStartedAt = new Date();
   writePid(cfg.pidFile, process.pid);
 
-  logger.info(`SETH daemon başlatılıyor... PID: ${process.pid}, Port: ${cfg.port}`);
+  logger.info(`FETIH daemon başlatılıyor... PID: ${process.pid}, Port: ${cfg.port}`);
 
   const { startWebServer } = await import('./web/server.js');
   await startWebServer(cfg.port);
 
   logger.info(`Web sunucusu başlatıldı: http://${cfg.host}:${cfg.port}`);
 
-  // SETH engine'i başlat (provider, tools, Web UI callback'leri)
+  // FETIH engine'i başlat (provider, tools, Web UI callback'leri)
   const { initializeDaemonHandler } = await import('./daemon-handler.js');
   await initializeDaemonHandler();
 
@@ -167,17 +167,17 @@ export async function stopDaemon(config?: Partial<DaemonConfig>): Promise<void> 
   const pid = readPid(cfg.pidFile);
 
   if (pid === null) {
-    console.log('SETH daemon çalışmıyor (PID dosyası bulunamadı).');
+    console.log('FETIH daemon çalışmıyor (PID dosyası bulunamadı).');
     return;
   }
 
   if (!isProcessRunning(pid)) {
-    console.log(`SETH daemon çalışmıyor. Eski PID dosyası temizleniyor...`);
+    console.log(`FETIH daemon çalışmıyor. Eski PID dosyası temizleniyor...`);
     removePid(cfg.pidFile);
     return;
   }
 
-  console.log(`SETH daemon durduruluyor (PID: ${pid})...`);
+  console.log(`FETIH daemon durduruluyor (PID: ${pid})...`);
   try {
     process.kill(pid, 'SIGTERM');
   } catch (err) {
@@ -191,7 +191,7 @@ export async function stopDaemon(config?: Partial<DaemonConfig>): Promise<void> 
     await new Promise((r) => setTimeout(r, 200));
     if (!isProcessRunning(pid)) {
       removePid(cfg.pidFile);
-      console.log('SETH daemon başarıyla durduruldu.');
+      console.log('FETIH daemon başarıyla durduruldu.');
       return;
     }
   }
@@ -201,5 +201,5 @@ export async function stopDaemon(config?: Partial<DaemonConfig>): Promise<void> 
     process.kill(pid, 'SIGKILL');
   } catch { /* already dead */ }
   removePid(cfg.pidFile);
-  console.log('SETH daemon zorla durduruldu.');
+  console.log('FETIH daemon zorla durduruldu.');
 }

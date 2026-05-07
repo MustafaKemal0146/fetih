@@ -1,5 +1,5 @@
 /**
- * @fileoverview SETH Token/Maliyet Takibi — v3.9.6
+ * @fileoverview FETIH Token/Maliyet Takibi — v3.9.6
  * AGPL-3.0
  */
 
@@ -8,7 +8,7 @@ import { join } from 'path';
 import { homedir } from 'os';
 import type { TokenUsage } from '../types.js';
 
-const USAGE_FILE = join(homedir(), '.seth', 'usage.json');
+const USAGE_FILE = join(homedir(), '.fetih', 'usage.json');
 
 interface UsageRecord {
   timestamp: string;
@@ -40,7 +40,7 @@ function getPrice(model: string): { input: number; output: number } {
 }
 
 function ensureFile(): void {
-  const dir = join(homedir(), '.seth');
+  const dir = join(homedir(), '.fetih');
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
   if (!existsSync(USAGE_FILE)) {
     writeFileSync(USAGE_FILE, JSON.stringify({ records: [] }), 'utf-8');

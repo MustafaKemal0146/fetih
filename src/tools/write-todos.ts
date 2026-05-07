@@ -8,7 +8,7 @@ import { writeFileSync, readFileSync, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { homedir } from 'os';
 
-const TODOS_FILE = join(homedir(), '.seth', 'todos.json');
+const TODOS_FILE = join(homedir(), '.fetih', 'todos.json');
 
 export type TodoStatus = 'pending' | 'in_progress' | 'completed' | 'cancelled';
 
@@ -25,7 +25,7 @@ function loadTodos(): Todo[] {
 }
 
 function saveTodos(todos: Todo[]): void {
-  const dir = join(homedir(), '.seth');
+  const dir = join(homedir(), '.fetih');
   if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
   writeFileSync(TODOS_FILE, JSON.stringify(todos, null, 2), 'utf-8');
 }

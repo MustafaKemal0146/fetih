@@ -1,6 +1,6 @@
 /**
  * @fileoverview Keybinding konfigürasyon sistemi.
- * ~/.seth/keybindings.json üzerinden özelleştirilebilir tuş kısayolları.
+ * ~/.fetih/keybindings.json üzerinden özelleştirilebilir tuş kısayolları.
  */
 
 import { readFileSync, existsSync } from 'node:fs';
@@ -38,10 +38,10 @@ export const DEFAULT_KEYBINDINGS: Keybinding[] = [
 ];
 
 /**
- * ~/.seth/keybindings.json yükle; yoksa varsayılan döndür.
+ * ~/.fetih/keybindings.json yükle; yoksa varsayılan döndür.
  */
 export function loadKeybindings(): Keybinding[] {
-  const path = join(homedir(), '.seth', 'keybindings.json');
+  const path = join(homedir(), '.fetih', 'keybindings.json');
   if (!existsSync(path)) return DEFAULT_KEYBINDINGS;
 
   try {
@@ -103,6 +103,6 @@ export function formatKeybindingsTable(bindings: Keybinding[]): string {
       .join('+');
     lines.push(`  ${keyStr.padEnd(20)} → ${b.action}`);
   }
-  lines.push(`\n  Özelleştirmek için: ~/.seth/keybindings.json`);
+  lines.push(`\n  Özelleştirmek için: ~/.fetih/keybindings.json`);
   return lines.join('\n');
 }

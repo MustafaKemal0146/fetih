@@ -9,7 +9,7 @@ import { writeFile, readFile, appendFile, mkdir } from 'node:fs/promises';
 
 // ─── Bash completion script ───────────────────────────────────────────────────
 
-const BASH_COMPLETION = `# Seth bash completion
+const BASH_COMPLETION = `# Fetih bash completion
 _seth_complete() {
   local cur="\${COMP_WORDS[COMP_CWORD]}"
   local prev="\${COMP_WORDS[COMP_CWORD-1]}"
@@ -27,12 +27,12 @@ _seth_complete() {
 
   COMPREPLY=( \$(compgen -f -- "\${cur}") )
 }
-complete -F _seth_complete seth
+complete -F _seth_complete fetih
 `;
 
 // ─── Zsh completion script ────────────────────────────────────────────────────
 
-const ZSH_COMPLETION = `# Seth zsh completion
+const ZSH_COMPLETION = `# Fetih zsh completion
 _seth() {
   local -a opts
   opts=(
@@ -44,21 +44,21 @@ _seth() {
     '--debug:Hata ayıklama modunu aç'
     '--headless:Etkileşimsiz mod (-p ile)'
   )
-  _describe 'seth seçenekleri' opts
+  _describe 'fetih seçenekleri' opts
 }
-compdef _seth seth
+compdef _seth fetih
 `;
 
 // ─── Fish completion script ───────────────────────────────────────────────────
 
-const FISH_COMPLETION = `# Seth fish completion
-complete -c seth -s h -l help    -d 'Yardımı göster'
-complete -c seth -s V -l version -d 'Sürümü göster'
-complete -c seth      -l provider -d 'Sağlayıcı seç' -xa 'ollama claude openai gemini groq deepseek mistral xai lmstudio openrouter'
-complete -c seth      -l model    -d 'Model adını belirt'
-complete -c seth -s y -l auto    -d 'Tüm araç onaylarını otomatik kabul et'
-complete -c seth      -l debug   -d 'Hata ayıklama modunu aç'
-complete -c seth -s p -l prompt  -d 'Etkileşimsiz mod ile sorgu'
+const FISH_COMPLETION = `# Fetih fish completion
+complete -c fetih -s h -l help    -d 'Yardımı göster'
+complete -c fetih -s V -l version -d 'Sürümü göster'
+complete -c fetih      -l provider -d 'Sağlayıcı seç' -xa 'ollama claude openai gemini groq deepseek mistral xai lmstudio openrouter'
+complete -c fetih      -l model    -d 'Model adını belirt'
+complete -c fetih -s y -l auto    -d 'Tüm araç onaylarını otomatik kabul et'
+complete -c fetih      -l debug   -d 'Hata ayıklama modunu aç'
+complete -c fetih -s p -l prompt  -d 'Etkileşimsiz mod ile sorgu'
 `;
 
 // ─── Kurulum ──────────────────────────────────────────────────────────────────
@@ -66,29 +66,29 @@ complete -c seth -s p -l prompt  -d 'Etkileşimsiz mod ile sorgu'
 export async function setupShellCompletion(): Promise<{ success: boolean; lines: string[] }> {
   const shell = (process.env.SHELL ?? '').toLowerCase();
   const home  = homedir();
-  const sethDir = join(home, '.seth');
+  const fetihDir = join(home, '.fetih');
   const lines: string[] = [];
 
-  await mkdir(sethDir, { recursive: true });
+  await mkdir(fetihDir, { recursive: true });
 
   if (shell.includes('fish')) {
     const fishDir  = join(home, '.config', 'fish', 'completions');
-    const fishFile = join(fishDir, 'seth.fish');
+    const fishFile = join(fishDir, 'fetih.fish');
     await mkdir(fishDir, { recursive: true });
     await writeFile(fishFile, FISH_COMPLETION, 'utf-8');
     lines.push(`✓ Fish tamamlama yazıldı: ${fishFile}`);
     lines.push('  Yeni terminal açtığında otomatik yüklenir.');
 
   } else if (shell.includes('zsh')) {
-    const scriptPath = join(sethDir, 'completion.zsh');
+    const scriptPath = join(fetihDir, 'completion.zsh');
     await writeFile(scriptPath, ZSH_COMPLETION, 'utf-8');
 
     const rcPath   = join(home, '.zshrc');
     const existing = await readFile(rcPath, 'utf-8').catch(() => '');
-    const marker   = '# Seth shell tamamlama';
+    const marker   = '# Fetih shell tamamlama';
 
     if (!existing.includes(marker)) {
-      await appendFile(rcPath, `\n${marker}\n[ -f ~/.seth/completion.zsh ] && source ~/.seth/completion.zsh\n`);
+      await appendFile(rcPath, `\n${marker}\n[ -f ~/.fetih/completion.zsh ] && source ~/.fetih/completion.zsh\n`);
       lines.push(`✓ .zshrc güncellendi`);
     } else {
       lines.push(`  .zshrc zaten yapılandırılmış`);
@@ -98,15 +98,15 @@ export async function setupShellCompletion(): Promise<{ success: boolean; lines:
 
   } else {
     // Bash (default)
-    const scriptPath = join(sethDir, 'completion.bash');
+    const scriptPath = join(fetihDir, 'completion.bash');
     await writeFile(scriptPath, BASH_COMPLETION, 'utf-8');
 
     const rcPath   = join(home, '.bashrc');
     const existing = await readFile(rcPath, 'utf-8').catch(() => '');
-    const marker   = '# Seth shell tamamlama';
+    const marker   = '# Fetih shell tamamlama';
 
     if (!existing.includes(marker)) {
-      await appendFile(rcPath, `\n${marker}\n[ -f ~/.seth/completion.bash ] && source ~/.seth/completion.bash\n`);
+      await appendFile(rcPath, `\n${marker}\n[ -f ~/.fetih/completion.bash ] && source ~/.fetih/completion.bash\n`);
       lines.push(`✓ .bashrc güncellendi`);
     } else {
       lines.push(`  .bashrc zaten yapılandırılmış`);
@@ -116,6 +116,6 @@ export async function setupShellCompletion(): Promise<{ success: boolean; lines:
   }
 
   lines.push('');
-  lines.push('Kullanım: terminalde  seth [Tab]  yazarak tamamlamayı test et.');
+  lines.push('Kullanım: terminalde  fetih [Tab]  yazarak tamamlamayı test et.');
   return { success: true, lines };
 }

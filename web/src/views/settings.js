@@ -18,7 +18,7 @@ export function initializeSettingsView() {
   }, { once: true });
 
   if (providerSel) {
-    // SETH'in desteklediği provider'lar — tam liste
+    // FETIH'in desteklediği provider'lar — tam liste
     const providers = ['deepseek', 'anthropic', 'google', 'openai', 'ollama', 'nvidia'];
     providers.forEach(p => {
       const opt = document.createElement('option');

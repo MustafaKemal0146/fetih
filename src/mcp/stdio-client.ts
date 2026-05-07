@@ -36,7 +36,7 @@ export class McpStdioClient {
     this.proc.stdout.on('data', (chunk: string) => this.onStdout(chunk));
     this.proc.stderr.on('data', (chunk: Buffer) => {
       // MCP logları stderr’e gider — hata ayıklamada kullanılır
-      if (process.env.SETH_MCP_DEBUG) {
+      if (process.env.FETIH_MCP_DEBUG) {
         process.stderr.write(`[mcp stderr] ${chunk.toString()}`);
       }
     });
@@ -51,7 +51,7 @@ export class McpStdioClient {
     await this.request('initialize', {
       protocolVersion: '2024-11-05',
       capabilities: {},
-      clientInfo: { name: 'seth', version: '1.0.0' },
+      clientInfo: { name: 'fetih', version: '1.0.0' },
     });
 
     await this.notify('notifications/initialized', {});

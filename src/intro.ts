@@ -15,7 +15,7 @@ async function checkForUpdatesAsync(): Promise<void> {
   }
 }
 
-const SETH_LINES = [
+const FETIH_LINES = [
   ' ███████╗███████╗████████╗██╗  ██╗',
   ' ██╔════╝██╔════╝╚══██╔══╝██║  ██║',
   ' ███████╗█████╗     ██║   ███████║',
@@ -107,9 +107,9 @@ export async function playIntro(provider: string, model: string, userEmail: stri
     let tongueFrame = 0;
 
     function renderLetters(upTo: number) {
-      for (let i = 0; i <= upTo && i < SETH_LINES.length; i++) {
+      for (let i = 0; i <= upTo && i < FETIH_LINES.length; i++) {
         moveTo(TOP + i, LEFT);
-        process.stdout.write(chalk.red.bold(SETH_LINES[i]!));
+        process.stdout.write(chalk.red.bold(FETIH_LINES[i]!));
       }
     }
 
@@ -143,7 +143,7 @@ export async function playIntro(provider: string, model: string, userEmail: stri
       if (phase === 'letters') {
         renderLetters(letterRow);
         letterRow++;
-        if (letterRow >= SETH_LINES.length) phase = 'snake';
+        if (letterRow >= FETIH_LINES.length) phase = 'snake';
         return;
       }
 
@@ -154,9 +154,9 @@ export async function playIntro(provider: string, model: string, userEmail: stri
           if (ni >= 0 && SNAKE_PATH[ni]?.depth === 'front') renderSnakeNode(ni, i);
         }
         // harfleri yeniden çiz (behind'ı örter)
-        for (let i = 0; i < SETH_LINES.length; i++) {
+        for (let i = 0; i < FETIH_LINES.length; i++) {
           moveTo(TOP + i, LEFT);
-          process.stdout.write(chalk.red.bold(SETH_LINES[i]!));
+          process.stdout.write(chalk.red.bold(FETIH_LINES[i]!));
         }
         // front tekrar üste
         for (let i = 0; i < SNAKE_VISIBLE; i++) {
@@ -171,12 +171,12 @@ export async function playIntro(provider: string, model: string, userEmail: stri
           clearInterval(interval);
 
           // Subtitle
-          moveTo(TOP + SETH_LINES.length + 1, LEFT);
+          moveTo(TOP + FETIH_LINES.length + 1, LEFT);
           process.stdout.write(chalk.red.dim(SUBTITLE));
 
           setTimeout(() => {
             // Bilgi satırları
-            const base = TOP + SETH_LINES.length + 3;
+            const base = TOP + FETIH_LINES.length + 3;
             moveTo(base,     LEFT); process.stdout.write(`\x1b[2;31m  v${VERSION}\x1b[0m`);
             moveTo(base + 1, LEFT); process.stdout.write(`\x1b[38;5;75m  ✦ ${provider}/${model}\x1b[0m`);
             moveTo(base + 2, LEFT); process.stdout.write(`\x1b[2;38;5;75m  ⌂ ${shortenPath(process.cwd())}\x1b[0m`);

@@ -30,7 +30,7 @@ interface ToolMetricsSummary {
   tools: Record<string, MetricBucket>;
 }
 
-const METRICS_DIR = join(homedir(), '.seth', 'metrics');
+const METRICS_DIR = join(homedir(), '.fetih', 'metrics');
 const EVENTS_FILE = join(METRICS_DIR, 'tool-events.jsonl');
 const SUMMARY_FILE = join(METRICS_DIR, 'tool-metrics-summary.json');
 let pendingSummaryEvents: ToolMetricEvent[] = [];
@@ -71,7 +71,7 @@ export async function logToolMetric(event: ToolMetricEvent): Promise<void> {
     pendingSummaryEvents.push(event);
     scheduleSummaryFlush();
   } catch (err) {
-    if (process.env.SETH_DEBUG) console.error('[seth:tool-metrics] logToolMetric failed', err);
+    if (process.env.FETIH_DEBUG) console.error('[fetih:tool-metrics] logToolMetric failed', err);
   }
 }
 
@@ -79,7 +79,7 @@ function scheduleSummaryFlush(): void {
   if (summaryFlushInFlight) return;
   summaryFlushInFlight = flushSummaryEvents()
     .catch((err) => {
-      if (process.env.SETH_DEBUG) console.error('[seth:tool-metrics] summary flush failed', err);
+      if (process.env.FETIH_DEBUG) console.error('[fetih:tool-metrics] summary flush failed', err);
     })
     .finally(() => {
       summaryFlushInFlight = null;

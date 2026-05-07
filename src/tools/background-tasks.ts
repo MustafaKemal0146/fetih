@@ -26,7 +26,7 @@ const activeChildren = new Map<string, ChildProcess>();
 let taskCounter = Date.now();
 let loaded = false;
 
-const TASKS_DIR = join(homedir(), '.seth', 'tasks');
+const TASKS_DIR = join(homedir(), '.fetih', 'tasks');
 const TASKS_FILE = join(TASKS_DIR, 'background-tasks.json');
 const MAX_OUTPUT_CHARS = 200_000;
 

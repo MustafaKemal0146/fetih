@@ -1,5 +1,5 @@
 /**
- * @fileoverview SETH Sandbox Sistemi — v3.9.5
+ * @fileoverview FETIH Sandbox Sistemi — v3.9.5
  * AGPL-3.0
  * AGPL-3.0
  */
@@ -36,14 +36,14 @@ export interface SandboxResult {
 // Sabitler
 // ---------------------------------------------------------------------------
 
-const SANDBOX_DIR = join(homedir(), '.seth', 'sandbox');
+const SANDBOX_DIR = join(homedir(), '.fetih', 'sandbox');
 
 // ---------------------------------------------------------------------------
 // Yardımcılar
 // ---------------------------------------------------------------------------
 
 function log(msg: string): void {
-  process.stderr.write(`[seth:sandbox] ${msg}\n`);
+  process.stderr.write(`[fetih:sandbox] ${msg}\n`);
 }
 
 function generateSandboxId(): string {
@@ -267,7 +267,7 @@ export function sandboxListFiles(sandboxDir: string): string[] {
         }
       }
     } catch (err) {
-      if (process.env.SETH_DEBUG) console.error('[seth:sandbox] walk error', err);
+      if (process.env.FETIH_DEBUG) console.error('[fetih:sandbox] walk error', err);
     }
     return files;
   }

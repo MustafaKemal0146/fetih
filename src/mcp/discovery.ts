@@ -51,7 +51,7 @@ export async function discoverMcpServers(): Promise<McpServerInfo[]> {
  * MCP config dosyasına server ekle.
  */
 export function addMcpServerToConfig(server: McpServerInfo, args: string[] = []): void {
-  const configPath = join(homedir(), '.seth', 'mcp.json');
+  const configPath = join(homedir(), '.fetih', 'mcp.json');
   let config: Record<string, unknown> = {};
   if (existsSync(configPath)) {
     try { config = JSON.parse(readFileSync(configPath, 'utf-8')); } catch { /* ignore */ }

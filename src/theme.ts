@@ -1,5 +1,5 @@
 /**
- * Seth tema sistemi — lazy renk hesaplama
+ * Fetih tema sistemi — lazy renk hesaplama
  *
  * Sorun: modül yüklenince sabit değer atanıyordu, setTheme sonrası güncellenmiyordu.
  * Çözüm: tüm renk fonksiyonları lazy — her çağrıda getCurrentTheme()'den hesaplar.

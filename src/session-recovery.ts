@@ -7,7 +7,7 @@ import { join } from 'path';
 import { homedir } from 'os';
 import type { SessionData, ChatMessage } from './types.js';
 
-const RECOVERY_FILE = join(homedir(), '.seth', 'recovery.json');
+const RECOVERY_FILE = join(homedir(), '.fetih', 'recovery.json');
 
 /**
  * Aktif oturumu recovery dosyasına yaz (her turda çağrılır).
@@ -15,7 +15,7 @@ const RECOVERY_FILE = join(homedir(), '.seth', 'recovery.json');
  */
 export function writeRecoveryCheckpoint(session: SessionData): void {
   try {
-    const dir = join(homedir(), '.seth');
+    const dir = join(homedir(), '.fetih');
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
     writeFileSync(RECOVERY_FILE, JSON.stringify({
       sessionId: session.id,

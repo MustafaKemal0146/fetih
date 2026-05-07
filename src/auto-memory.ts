@@ -7,7 +7,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync } from 
 import { homedir } from 'os';
 import type { ChatMessage, LLMProvider, ChatOptions } from './types.js';
 
-const MEMORY_DIR = join(homedir(), '.seth', 'auto-memory');
+const MEMORY_DIR = join(homedir(), '.fetih', 'auto-memory');
 const MIN_MESSAGES_FOR_EXTRACT = 4; // En az bu kadar mesaj olsun
 
 /**
@@ -25,7 +25,7 @@ export async function extractAndSaveMemories(
     const transcript = messages
       .filter(m => m.role !== 'system')
       .slice(-20) // Son 20 mesaj
-      .map(m => `${m.role === 'user' ? 'Kullanıcı' : 'SETH'}: ${typeof m.content === 'string' ? m.content : JSON.stringify(m.content)}`)
+      .map(m => `${m.role === 'user' ? 'Kullanıcı' : 'FETİH'}: ${typeof m.content === 'string' ? m.content : JSON.stringify(m.content)}`)
       .join('\n\n');
 
     const extractPrompt = `Aşağıdaki konuşmadan gelecekte hatırlanması gereken önemli bilgileri çıkar.
@@ -101,13 +101,13 @@ ${content}
  * Proje bazlı otomatik bellek oluşturma (v3.8.17).
  */
 export async function ensureProjectMetadata(cwd: string, provider: LLMProvider, model: string): Promise<void> {
-  const sethDir = join(cwd, '.seth');
-  const projectMd = join(sethDir, 'project.md');
+  const fetihDir = join(cwd, '.fetih');
+  const projectMd = join(fetihDir, 'project.md');
 
   if (existsSync(projectMd)) return;
 
   try {
-    if (!existsSync(sethDir)) mkdirSync(sethDir, { recursive: true });
+    if (!existsSync(fetihDir)) mkdirSync(fetihDir, { recursive: true });
 
     const analyzePrompt = `Mevcut dizindeki dosyaları incele ve projenin ne olduğunu, hangi teknolojileri kullandığını, 
 yapısını ve amacını özetleyen bir 'project.md' içeriği hazırla.

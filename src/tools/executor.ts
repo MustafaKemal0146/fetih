@@ -127,9 +127,9 @@ export class ToolExecutor {
       }
     }
 
-    // .env bağlamı: SETH_LOAD_ENV=false ile devre dışı bırakılabilir
+    // .env bağlamı: FETIH_LOAD_ENV=false ile devre dışı bırakılabilir
     let envSnapshot: Record<string, string | undefined> = {};
-    if (process.env['SETH_LOAD_ENV'] !== 'false' && ENV_INJECT_TOOLS.has(toolName)) {
+    if (process.env['FETIH_LOAD_ENV'] !== 'false' && ENV_INJECT_TOOLS.has(toolName)) {
       envSnapshot = await this.loadDotEnv(cwd);
     }
 

@@ -20,7 +20,7 @@ export const topicTool: ToolDefinition = {
     const topic = String(input.topic ?? '').slice(0, 60);
     if (!topic) return { output: 'Konu boş olamaz.', isError: true };
     // Terminal başlığını güncelle
-    process.stdout.write(`\x1b]0;SETH — ${topic}\x07`);
+    process.stdout.write(`\x1b]0;FETIH — ${topic}\x07`);
     return { output: `Konu güncellendi: ${topic}` };
   },
 };

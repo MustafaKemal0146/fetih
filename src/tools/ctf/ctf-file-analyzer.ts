@@ -1,5 +1,5 @@
 /**
- * @fileoverview Seth CTF Dosya Analizi — Magic bytes, EXIF, strings, file carving
+ * @fileoverview Fetih CTF Dosya Analizi — Magic bytes, EXIF, strings, file carving
  */
 
 import { readFileSync, existsSync } from 'fs';
@@ -201,7 +201,7 @@ export const ctfFileAnalyzerTool: ToolDefinition = {
   description:
     'CTF dosya analizi: magic bytes tespiti, EXIF/metadata okuma, string extraction, ' +
     'file carving (gizli dosya tespiti), ZIP içerik listesi. ' +
-    'Dosya path\'i ver, Seth gerçek türünü, gizli verileri ve flag\'leri bulur.',
+    'Dosya path\'i ver, Fetih gerçek türünü, gizli verileri ve flag\'leri bulur.',
   inputSchema: {
     type: 'object',
     properties: {

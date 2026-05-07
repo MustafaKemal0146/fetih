@@ -4,18 +4,18 @@ import { navyBright, navyDim, navyMuted } from './theme.js';
 import { VERSION } from './version.js';
 import { updateStatus } from './renderer.js';
 
-// ─── SETH Merkezi Loglama Sistemi ────────────────────────────────────────────
+// ─── FETIH Merkezi Loglama Sistemi ────────────────────────────────────────────
 
-export function sethLog(operation: string): void {
+export function fetihLog(operation: string): void {
   // Terminale yeni satır basmak yerine spinner veya durum çubuğunu günceller.
   // Bu sayede ekran kirliliği önlenir ve otonom hissi pekişir.
   updateStatus(operation);
 }
 
-// ─── SETH ANSI Kırmızı Figlet Logo ───────────────────────────────────────────
+// ─── FETIH ANSI Kırmızı Figlet Logo ───────────────────────────────────────────
 
 // Her karakter ayrı ayrı çizildi — figlet "block" fontu türevleri
-const SETH_LOGO = [
+const FETIH_LOGO = [
   ' ███████╗███████╗████████╗██╗  ██╗',
   ' ██╔════╝██╔════╝╚══██╔══╝██║  ██║',
   ' ███████╗█████╗     ██║   ███████║',
@@ -44,14 +44,14 @@ export function renderWelcomeAnimation(provider: string, model: string, userEmai
   const lines: string[] = [''];
 
   if (showAscii) {
-    // ANSI kırmızı SETH figlet logosu
-    for (const l of SETH_LOGO) {
+    // ANSI kırmızı FETIH figlet logosu
+    for (const l of FETIH_LOGO) {
       lines.push(l);
     }
     lines.push(SLOGAN);
     lines.push(navyDim(`  v${VERSION}`));
   } else {
-    lines.push(`\x1b[1;31m  SETH\x1b[0m` + navyDim(` v${VERSION}`));
+    lines.push(`\x1b[1;31m  FETIH\x1b[0m` + navyDim(` v${VERSION}`));
     lines.push(SLOGAN);
   }
 

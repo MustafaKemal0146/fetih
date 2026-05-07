@@ -1,11 +1,11 @@
 {
-  "name": "seth",
+  "name": "fetih",
   "version": "4.0.2",
   "description": "Terminalde çalışan yapay zeka kodlama ajanı. Claude, Gemini, OpenAI, Ollama. Türkçe arayüz. HİÇBİR SİSTEM GÜVENLİ DEĞİLDİR.",
   "type": "module",
   "main": "dist/cli.js",
   "bin": {
-    "seth": "dist/cli.js"
+    "fetih": "dist/cli.js"
   },
   "files": [
     "dist/",
@@ -40,7 +40,7 @@
     "ollama",
     "llm",
     "tool-use",
-    "seth"
+    "fetih"
   ],
   "author": "",
   "license": "AGPL-3.0",

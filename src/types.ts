@@ -1,5 +1,5 @@
 /**
- * @fileoverview SETH — Tüm paylaşımlı tip tanımları.
+ * @fileoverview FETIH — Tüm paylaşımlı tip tanımları.
  * Açık çoklu-ajan ve qwen-code mimarilerinden ilham alınmış temiz-oda uygulaması.
  */
 
@@ -213,7 +213,7 @@ export interface ReplUiConfig {
   readonly vimMode?: boolean;
 }
 
-export interface SETHConfig {
+export interface FetihConfig {
   readonly defaultProvider: ProviderName;
   readonly defaultModel: string;
   readonly providers: Partial<Record<ProviderName, ProviderConfig>>;

@@ -3,7 +3,7 @@
  * Clean-room implementation — provider-agnostic abstraction layer.
  */
 
-import type { LLMProvider, ProviderName, SETHConfig } from '../types.js';
+import type { LLMProvider, ProviderName, FetihConfig } from '../types.js';
 import { ProviderError } from '../core/errors.js';
 import { resolveProviderApiKey } from '../config/settings.js';
 
@@ -23,7 +23,7 @@ function resolveName(name: ProviderName): ProviderName {
  */
 export async function createProvider(
   name: ProviderName,
-  config: SETHConfig,
+  config: FetihConfig,
 ): Promise<LLMProvider> {
   const resolved = resolveName(name);
   const errPrefix = resolved === 'anthropic' ? 'anthropic' : resolved === 'google' ? 'google' : resolved;

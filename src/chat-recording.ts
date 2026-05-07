@@ -2,7 +2,7 @@
  * @fileoverview Chat Recording — konuşmaları JSONL formatında kaydeder.
  * gemini-cli'nin chatRecordingService.ts'inden ilham alınmıştır.
  *
- * Her mesaj ~/.seth/recordings/<session-id>.jsonl dosyasına eklenir.
+ * Her mesaj ~/.fetih/recordings/<session-id>.jsonl dosyasına eklenir.
  * Analiz, arama ve replay için kullanılabilir.
  */
 
@@ -11,7 +11,7 @@ import { join } from 'path';
 import { homedir } from 'os';
 import type { ChatMessage } from './types.js';
 
-const RECORDINGS_DIR = join(homedir(), '.seth', 'recordings');
+const RECORDINGS_DIR = join(homedir(), '.fetih', 'recordings');
 
 export interface MessageRecord {
   timestamp: string;

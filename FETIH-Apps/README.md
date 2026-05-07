@@ -1,4 +1,4 @@
-## SETH-Apps entegrasyon notu
+## FETİH-Apps entegrasyon notu
 
 CLI tarafında aktif olarak kullanılan modüller:
 

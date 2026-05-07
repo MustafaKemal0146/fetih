@@ -1,5 +1,5 @@
 /**
- * @fileoverview Seth CTF Network Analizi
+ * @fileoverview Fetih CTF Network Analizi
  * PCAP analizi, HTTP header kontrolü, port tarama çıktısı analizi
  */
 

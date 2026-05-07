@@ -1,6 +1,6 @@
 /**
- * @fileoverview Configuration loader for SETH.
- * Loads from: ~/.seth/settings.json → .env → environment variables → CLI flags
+ * @fileoverview Configuration loader for FETIH.
+ * Loads from: ~/.fetih/settings.json → .env → environment variables → CLI flags
  */
 
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
@@ -8,9 +8,9 @@ import { createRequire } from 'module';
 const _require = createRequire(import.meta.url);
 import { join } from 'path';
 import { homedir } from 'os';
-import type { SETHConfig, ProviderName } from '../types.js';
+import type { FetihConfig, ProviderName } from '../types.js';
 
-const CONFIG_DIR = join(homedir(), '.seth');
+const CONFIG_DIR = join(homedir(), '.fetih');
 const SETTINGS_FILE = join(CONFIG_DIR, 'settings.json');
 const SESSIONS_DIR = join(CONFIG_DIR, 'sessions');
 
@@ -25,7 +25,7 @@ export function getSessionsDir(): string {
   return SESSIONS_DIR;
 }
 
-/** Takım dosyaları (~/.seth/teams/) */
+/** Takım dosyaları (~/.fetih/teams/) */
 export function getTeamsDir(): string {
   const d = join(CONFIG_DIR, 'teams');
   if (!existsSync(d)) {
@@ -38,7 +38,7 @@ export function getSettingsPath(): string {
   return SETTINGS_FILE;
 }
 
-const DEFAULT_CONFIG: SETHConfig = {
+const DEFAULT_CONFIG: FetihConfig = {
   defaultProvider: 'ollama',
   defaultModel: 'qwen3-coder',
   providers: {
@@ -75,7 +75,7 @@ const DEFAULT_CONFIG: SETHConfig = {
   debug: false,
 };
 
-export function loadConfig(overrides?: Partial<SETHConfig>): SETHConfig {
+export function loadConfig(overrides?: Partial<FetihConfig>): FetihConfig {
   // 1. Start with defaults
   let config = { ...DEFAULT_CONFIG };
 
@@ -83,7 +83,7 @@ export function loadConfig(overrides?: Partial<SETHConfig>): SETHConfig {
   if (existsSync(SETTINGS_FILE)) {
     try {
       const raw = readFileSync(SETTINGS_FILE, 'utf-8');
-      const fileConfig = JSON.parse(raw) as Partial<SETHConfig>;
+      const fileConfig = JSON.parse(raw) as Partial<FetihConfig>;
       config = deepMerge(config, fileConfig);
     } catch {
       // Ignore parse errors, use defaults
@@ -129,7 +129,7 @@ export function loadConfig(overrides?: Partial<SETHConfig>): SETHConfig {
   }
 
   // 5. Debug mode from env
-  if (process.env.SETH_DEBUG === '1' || process.env.SETH_DEBUG === 'true') {
+  if (process.env.FETIH_DEBUG === '1' || process.env.FETIH_DEBUG === 'true') {
     (config as Record<string, unknown>).debug = true;
   }
 
@@ -141,7 +141,7 @@ export function loadConfig(overrides?: Partial<SETHConfig>): SETHConfig {
   return config;
 }
 
-export function saveConfig(config: Partial<SETHConfig>): void {
+export function saveConfig(config: Partial<FetihConfig>): void {
   if (!existsSync(CONFIG_DIR)) {
     mkdirSync(CONFIG_DIR, { recursive: true });
   }
@@ -183,7 +183,7 @@ function deepMerge<T extends Record<string, any>>(target: T, source: Partial<T>)
   return result;
 }
 
-export function resolveProviderApiKey(provider: ProviderName, config: SETHConfig): string | undefined {
+export function resolveProviderApiKey(provider: ProviderName, config: FetihConfig): string | undefined {
   const providerConfig = config.providers[provider];
   if (providerConfig?.apiKey) return providerConfig.apiKey;
 
@@ -215,7 +215,7 @@ export function resolveProviderApiKey(provider: ProviderName, config: SETHConfig
   return undefined;
 }
 
-export function resolveModel(provider: ProviderName, config: SETHConfig, modelOverride?: string): string {
+export function resolveModel(provider: ProviderName, config: FetihConfig, modelOverride?: string): string {
   if (modelOverride) return modelOverride;
   const providerConfig = config.providers[provider];
   if (providerConfig?.model) return providerConfig.model;
@@ -231,7 +231,7 @@ export function persistModelForProvider(provider: ProviderName, model: string): 
     defaultModel: model,
     providers: {
       [provider]: { model },
-    } as SETHConfig['providers'],
+    } as FetihConfig['providers'],
   });
 }
 
@@ -242,7 +242,7 @@ export function persistProviderAndModel(provider: ProviderName, model: string): 
     defaultModel: model,
     providers: {
       [provider]: { model },
-    } as SETHConfig['providers'],
+    } as FetihConfig['providers'],
   });
 }
 
@@ -261,6 +261,6 @@ export function deleteApiKey(provider: ProviderName): void {
 }
 
 /** Oturum toplam token üst sınırı; `contextBudgetTokens` yoksa `agent.maxTokens`. */
-export function getEffectiveContextBudgetTokens(config: SETHConfig): number {
+export function getEffectiveContextBudgetTokens(config: FetihConfig): number {
   return config.contextBudgetTokens ?? config.agent.maxTokens;
 }

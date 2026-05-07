@@ -1,5 +1,5 @@
 /**
- * Kalıcı komut geçmişi — ~/.seth/history.jsonl
+ * Kalıcı komut geçmişi — ~/.fetih/history.jsonl
  * Oturumlar arası ↑↓ ok tuşu geçmişi ve paste store.
  */
 
@@ -8,14 +8,14 @@ import { join } from 'path';
 import { createHash } from 'crypto';
 import { homedir } from 'os';
 
-const SETH_DIR = join(homedir(), '.seth');
-const HISTORY_FILE = join(SETH_DIR, 'history.jsonl');
-const PASTE_DIR = join(SETH_DIR, 'paste-store');
+const FETIH_DIR = join(homedir(), '.fetih');
+const HISTORY_FILE = join(FETIH_DIR, 'history.jsonl');
+const PASTE_DIR = join(FETIH_DIR, 'paste-store');
 const MAX_HISTORY = 500;
 const PASTE_INLINE_LIMIT = 1024; // Bu kadardan büyükse dosyaya yaz
 
 function ensureDirs() {
-  if (!existsSync(SETH_DIR)) mkdirSync(SETH_DIR, { recursive: true });
+  if (!existsSync(FETIH_DIR)) mkdirSync(FETIH_DIR, { recursive: true });
   if (!existsSync(PASTE_DIR)) mkdirSync(PASTE_DIR, { recursive: true });
 }
 

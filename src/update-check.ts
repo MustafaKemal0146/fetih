@@ -9,8 +9,8 @@ import { join, dirname } from 'path';
 import { homedir } from 'os';
 import { fileURLToPath } from 'url';
 
-const REPO = 'MustafaKemal0146/seth';
-const REPO_URL = 'https://github.com/MustafaKemal0146/seth';
+const REPO = 'MustafaKemal0146/fetih';
+const REPO_URL = 'https://github.com/MustafaKemal0146/fetih';
 const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 saat
 const CACHE_FILE = '.last-update-check';
 
@@ -25,7 +25,7 @@ export interface UpdateResult {
 
 /**
  * Proje kök dizinini bul (package.json'un olduğu yer).
- * SETH'in dist/ ya da src/ içinden çağrıldığı durumları ele alır.
+ * FETIH'in dist/ ya da src/ içinden çağrıldığı durumları ele alır.
  */
 function findProjectRoot(): string | null {
   try {
@@ -59,8 +59,8 @@ function detectInstallType(projectRoot: string): 'git' | 'npm' | 'unknown' {
     }
     
     // npm global install kontrolü
-    const sethBin = execSync('which seth 2>/dev/null || echo ""', { encoding: 'utf-8' }).trim();
-    if (sethBin && sethBin.includes('node_modules')) {
+    const fetihBin = execSync('which fetih 2>/dev/null || echo ""', { encoding: 'utf-8' }).trim();
+    if (fetihBin && fetihBin.includes('node_modules')) {
       return 'npm';
     }
     
@@ -76,7 +76,7 @@ function detectInstallType(projectRoot: string): 'git' | 'npm' | 'unknown' {
 async function getLatestVersionFromGitHub(): Promise<string | null> {
   try {
     const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, {
-      headers: { 'User-Agent': 'seth-cli' },
+      headers: { 'User-Agent': 'fetih-cli' },
       signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) return null;
@@ -93,7 +93,7 @@ async function getLatestVersionFromGitHub(): Promise<string | null> {
 async function getDefaultBranch(): Promise<string> {
   try {
     const res = await fetch(`https://api.github.com/repos/${REPO}`, {
-      headers: { 'User-Agent': 'seth-cli' },
+      headers: { 'User-Agent': 'fetih-cli' },
       signal: AbortSignal.timeout(3000),
     });
     if (res.ok) {
@@ -107,7 +107,7 @@ async function getDefaultBranch(): Promise<string> {
 /**
  * KENDİ KENDİNE GÜNCELLEME 🔄
  * 
- * SETH bulunduğu ortama göre kendini günceller:
+ * FETIH bulunduğu ortama göre kendini günceller:
  * - Git clone: git pull + rebuild
  * - npm global: npm install -g
  * 
@@ -127,7 +127,7 @@ export async function performSelfUpdate(
       previousVersion,
       newVersion: previousVersion,
       method: 'none',
-      message: 'Proje kök dizini bulunamadı. Elle güncelleme yapmalısın:\n  npm install -g seth',
+      message: 'Proje kök dizini bulunamadı. Elle güncelleme yapmalısın:\n  npm install -g fetih',
     };
   }
 
@@ -245,9 +245,9 @@ export async function performSelfUpdate(
         newVersion: newVer || latestVersion,
         method: 'git',
         message: [
-          `✅ SETH başarıyla güncellendi!`,
+          `✅ FETIH başarıyla güncellendi!`,
           `  v${previousVersion} → v${newVer || latestVersion}`,
-          `  🔄 SETH'i yeniden başlat (Ctrl+C) — yeni sürüm aktif!`,
+          `  🔄 FETIH'i yeniden başlat (Ctrl+C) — yeni sürüm aktif!`,
         ].join('\n'),
       };
     } catch (err) {
@@ -286,9 +286,9 @@ export async function performSelfUpdate(
         newVersion: latestVersion,
         method: 'npm',
         message: [
-          `✅ SETH başarıyla güncellendi!`,
+          `✅ FETIH başarıyla güncellendi!`,
           `  v${previousVersion} → v${latestVersion}`,
-          `  🔄 SETH'i yeniden başlat — yeni sürüm aktif!`,
+          `  🔄 FETIH'i yeniden başlat — yeni sürüm aktif!`,
         ].join('\n'),
       };
     } catch (err) {
@@ -320,7 +320,7 @@ export async function performSelfUpdate(
       `Kurulum tipin tespit edilemedi. Elle güncelle:`,
       `  1. npm install -g ${REPO_URL}`,
       `  ya da`,
-      `  2. git clone ${REPO_URL}.git && cd seth && npm run build`,
+      `  2. git clone ${REPO_URL}.git && cd fetih && npm run build`,
     ].join('\n'),
   };
 }
@@ -348,7 +348,7 @@ function readVersionFromDist(): string | null {
  */
 export async function checkForUpdates(): Promise<{ hasUpdate: boolean; latestVersion: string } | null> {
   try {
-    const cacheDir = join(homedir(), '.seth');
+    const cacheDir = join(homedir(), '.fetih');
     const cachePath = join(cacheDir, CACHE_FILE);
     
     if (existsSync(cachePath)) {
@@ -359,7 +359,7 @@ export async function checkForUpdates(): Promise<{ hasUpdate: boolean; latestVer
     }
 
     const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, {
-      headers: { 'User-Agent': 'seth-cli' },
+      headers: { 'User-Agent': 'fetih-cli' },
       signal: AbortSignal.timeout(3000),
     });
 

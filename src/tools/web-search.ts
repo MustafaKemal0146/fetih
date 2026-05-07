@@ -14,7 +14,7 @@
 import type { ToolDefinition, ToolResult } from '../types.js';
 import { VERSION } from '../version.js';
 
-const UA = `SETH/${VERSION} (+https://github.com)`;
+const UA = `FETIH/${VERSION} (+https://github.com)`;
 
 // ─── Brave Search ─────────────────────────────────────────────────────────────
 

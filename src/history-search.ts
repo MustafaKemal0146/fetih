@@ -1,6 +1,6 @@
 /**
  * Ctrl+R — Geçmiş fuzzy arama
- * ~/.seth/history.jsonl üzerinde interaktif arama
+ * ~/.fetih/history.jsonl üzerinde interaktif arama
  */
 
 import * as readline from 'readline';

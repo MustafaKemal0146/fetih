@@ -1,5 +1,5 @@
 /**
- * @fileoverview /nasılçalışır — SETH canlı demo (typewriter animasyonu)
+ * @fileoverview /nasılçalışır — FETIH canlı demo (typewriter animasyonu)
  */
 
 import chalk from 'chalk';
@@ -26,7 +26,7 @@ function buildSteps(): Seg[][] {
     // ─── Başlık ───────────────────────────────────────────────────────────
     [
       nl(),
-      seg(`  SETH v${VERSION}`, (s) => chalk.bold(navy(s))),
+      seg(`  FETIH v${VERSION}`, (s) => chalk.bold(navy(s))),
       seg('  —  Türkçe Yapay Zeka Kodlama Ajanı', dim),
       nl(),
       seg('  Claude · Gemini · OpenAI · Ollama desteği', dim),

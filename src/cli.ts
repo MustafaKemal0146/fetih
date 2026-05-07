@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * @fileoverview SETH CLI entry point.
+ * @fileoverview FETIH CLI entry point.
  */
 
-import type { ProviderName, SETHConfig } from './types.js';
+import type { ProviderName, FetihConfig } from './types.js';
 import { VERSION } from './version.js';
 import chalk from 'chalk';
 
@@ -21,7 +21,7 @@ async function main(): Promise<void> {
   let daemonMode = false;
   let daemonPort: number | undefined;
 
-  // daemon subcommand: seth daemon start|stop|status|restart
+  // daemon subcommand: fetih daemon start|stop|status|restart
   if (args[0] === 'daemon') {
     const subCmd = args[1];
     const portIdx = args.indexOf('--port');
@@ -39,14 +39,14 @@ async function main(): Promise<void> {
       case 'status': {
         const status = await getDaemonStatus(port ? { port } : {});
         if (status.running) {
-          console.log(chalk.green(`SETH daemon çalışıyor`));
+          console.log(chalk.green(`FETIH daemon çalışıyor`));
           console.log(`  PID:       ${status.pid}`);
           console.log(`  Port:      ${status.port}`);
           console.log(`  Uptime:    ${status.uptime}s`);
           console.log(`  Sessions:  ${status.sessions}`);
           console.log(`  Başlama:   ${status.startedAt}`);
         } else {
-          console.log(chalk.red('SETH daemon çalışmıyor.'));
+          console.log(chalk.red('FETIH daemon çalışmıyor.'));
         }
         break;
       }
@@ -57,7 +57,7 @@ async function main(): Promise<void> {
         break;
       }
       default:
-        console.log('Kullanım: seth daemon <start|stop|status|restart> [--port PORT]');
+        console.log('Kullanım: fetih daemon <start|stop|status|restart> [--port PORT]');
     }
     return;
   }
@@ -93,14 +93,14 @@ async function main(): Promise<void> {
         break;
       case '-v':
       case '--version':
-        console.log(`seth v${VERSION}`);
+        console.log(`fetih v${VERSION}`);
         process.exit(0);
         break;
       case '-u':
       case '--update':
         (async () => {
           const { performSelfUpdate } = await import('./update-check.js');
-          console.log(chalk.cyan('🔄 SETH Self-Update başlatılıyor...\n'));
+          console.log(chalk.cyan('🔄 FETIH Self-Update başlatılıyor...\n'));
           const result = await performSelfUpdate((msg) => console.log(chalk.dim(`  ${msg}`)));
           console.log('');
           if (result.success && result.method !== 'none') {
@@ -124,7 +124,7 @@ async function main(): Promise<void> {
     return;
   }
 
-  const configOverrides: { -readonly [K in keyof SETHConfig]?: SETHConfig[K] } = { debug, autoApprove };
+  const configOverrides: { -readonly [K in keyof FetihConfig]?: FetihConfig[K] } = { debug, autoApprove };
   if (providerArg) configOverrides.defaultProvider = providerArg as ProviderName;
   if (modelArg) configOverrides.defaultModel = modelArg;
 

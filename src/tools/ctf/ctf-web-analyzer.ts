@@ -1,5 +1,5 @@
 /**
- * @fileoverview Seth CTF Web Güvenliği Analizi
+ * @fileoverview Fetih CTF Web Güvenliği Analizi
  * SQLi, XSS, LFI, IDOR tespiti + dizin keşfi önerileri
  */
 

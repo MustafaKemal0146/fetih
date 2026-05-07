@@ -17,7 +17,7 @@ describe('system prompt', () => {
   });
 
   it('Türkçe içermeli', () => {
-    expect(SYSTEM_PROMPT_TR).toContain('SETH');
+    expect(SYSTEM_PROMPT_TR).toContain('FETİH');
   });
 });
 

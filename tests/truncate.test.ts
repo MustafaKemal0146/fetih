@@ -26,7 +26,7 @@ describe('truncatePathMiddle', () => {
   });
 
   it('should truncate middle for long Windows paths', () => {
-    const path = 'C:\\Users\\Admin\\Documents\\Projects\\Seth\\src\\main.ts';
+    const path = 'C:\\Users\\Admin\\Documents\\Projects\\Fetih\\src\\main.ts';
     const maxLength = 30;
     const result = truncatePathMiddle(path, maxLength);
 

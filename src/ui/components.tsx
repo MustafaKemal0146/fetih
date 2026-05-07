@@ -1,5 +1,5 @@
 /**
- * @fileoverview SETH UI — React+Ink bileşen sistemi.
+ * @fileoverview FETIH UI — React+Ink bileşen sistemi.
  * Spinner, ToolCall, ToolResult, Stats, StatusBar, ContextBar bileşenleri.
  */
 

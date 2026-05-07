@@ -80,7 +80,7 @@ export async function runDoktor(ctx: CommandContext): Promise<CommandResult> {
   const hasApt  = checkCmd('apt');
 
   const lines: string[] = [
-    chalk.bold('🏥 SETH Sistem Sağlık Kontrolü'),
+    chalk.bold('🏥 FETIH Sistem Sağlık Kontrolü'),
     `  Versiyon : ${VERSION}`,
     `  Sağlayıcı: ${ctx.currentProvider}`,
     `  Model    : ${ctx.currentModel}`,

@@ -1,5 +1,5 @@
 /**
- * @fileoverview Takım meta dosyasını okur (~/.seth/teams/).
+ * @fileoverview Takım meta dosyasını okur (~/.fetih/teams/).
  */
 
 import { readFileSync, existsSync } from 'fs';

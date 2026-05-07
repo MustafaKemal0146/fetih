@@ -1,5 +1,5 @@
 /**
- * @fileoverview Seth CTF Shared Utilities
+ * @fileoverview Fetih CTF Shared Utilities
  * ctf-solver, ctf-stego, ctf-file-analyzer tarafından ortak kullanılan yardımcı fonksiyonlar.
  */
 

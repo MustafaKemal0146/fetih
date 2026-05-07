@@ -1,5 +1,5 @@
 /**
- * @fileoverview Seth Shodan Integration tool.
+ * @fileoverview Fetih Shodan Integration tool.
  * Provides access to Shodan API for OSINT and network reconnaissance.
  */
 
