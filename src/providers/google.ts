@@ -128,6 +128,9 @@ export class GoogleProvider implements LLMProvider {
 
       for (const b of blocks) {
         if (b.type === 'text') parts.push({ text: b.text });
+        else if (b.type === 'image') {
+          parts.push({ inlineData: { mimeType: b.source.media_type, data: b.source.data } });
+        }
         else if (b.type === 'tool_use') {
           parts.push({ functionCall: { name: b.name, args: b.input } });
         } else if (b.type === 'tool_result') {

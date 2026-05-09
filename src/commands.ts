@@ -1117,12 +1117,6 @@ ${rows}
 
   pwd: (_args, ctx) => ({ output: ctx.getCwd() }),
 
-  'web-aç': async () => {
-    const { startWebServer } = await import('./web/server.js');
-    await startWebServer();
-    return { output: chalk.cyan('  🌐 Web arayüzü başlatılıyor...') };
-  },
-
   nasılçalışır: async () => {
     await runNasilCalisirAnimation();
     return { output: '' };

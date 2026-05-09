@@ -155,8 +155,24 @@ export class OpenAIProvider implements LLMProvider {
         const nonTool = blocks.filter(b => b.type !== 'tool_result');
         const toolResults = blocks.filter(b => b.type === 'tool_result');
         if (nonTool.length > 0) {
-          const text = nonTool.filter(b => b.type === 'text').map(b => (b as TextBlock).text).join('');
-          if (text) result.push({ role: 'user', content: text });
+          const hasImage = nonTool.some(b => b.type === 'image');
+          if (hasImage) {
+            // Multimodal mesaj: parts array (text + image_url)
+            const parts: OpenAI.Chat.ChatCompletionContentPart[] = [];
+            for (const b of nonTool) {
+              if (b.type === 'text') parts.push({ type: 'text', text: b.text });
+              else if (b.type === 'image') {
+                parts.push({
+                  type: 'image_url',
+                  image_url: { url: `data:${b.source.media_type};base64,${b.source.data}` },
+                });
+              }
+            }
+            if (parts.length > 0) result.push({ role: 'user', content: parts });
+          } else {
+            const text = nonTool.filter(b => b.type === 'text').map(b => (b as TextBlock).text).join('');
+            if (text) result.push({ role: 'user', content: text });
+          }
         }
         for (const tr of toolResults) {
           if (tr.type === 'tool_result') {

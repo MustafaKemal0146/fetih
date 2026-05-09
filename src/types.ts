@@ -43,7 +43,16 @@ export interface ReasoningBlock {
   readonly reasoning: string;
 }
 
-export type ContentBlock = TextBlock | ToolUseBlock | ToolResultBlock | ReasoningBlock;
+export interface ImageBlock {
+  readonly type: 'image';
+  readonly source: {
+    readonly type: 'base64';
+    readonly media_type: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
+    readonly data: string;
+  };
+}
+
+export type ContentBlock = TextBlock | ToolUseBlock | ToolResultBlock | ReasoningBlock | ImageBlock;
 
 // ---------------------------------------------------------------------------
 // Messages

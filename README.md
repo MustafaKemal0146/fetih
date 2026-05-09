@@ -626,7 +626,6 @@ src/
 │   ├── fetih_engine_mcp.py
 │   ├── bridge.ts           # FETİH lifecycle entegrasyonu
 │   └── registry.ts         # Tool keşfi ve kaydı
-├── web/                    # WebSocket tabanlı tarayıcı arayüzü
 ├── auto-memory.ts          # Otomatik bellek çıkarma ve sıkıştırma
 ├── cron.ts                 # Periyodik görev sistemi
 ├── model-cost.ts           # Gerçek model fiyat tablosu

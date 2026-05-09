@@ -9,6 +9,8 @@ import { analyzeWeb, type WebAnalysisResult } from './ctf-web-analyzer.js';
 import { analyzeNetwork, type NetworkAnalysisResult } from './ctf-network-analyzer.js';
 import { analyzeFile, type FileAnalysisResult } from './ctf-file-analyzer.js';
 import { analyzeSteganography, type StegoAnalysis } from './ctf-stego.js';
+import { analyzeAudio, type AudioAnalysisReport } from './ctf-audio-analyzer.js';
+import { analyzeBinary, type BinaryAnalysisReport } from './ctf-binary-analyzer.js';
 
 // ─── Tipler ──────────────────────────────────────────────────────────────────
 
@@ -24,15 +26,17 @@ export interface AutoReport {
   stego_result?: StegoAnalysis;
   web_result?: WebAnalysisResult;
   network_result?: NetworkAnalysisResult;
+  audio_result?: AudioAnalysisReport;
+  binary_result?: BinaryAnalysisReport;
   summary_markdown: string;
 }
 
 // ─── 3.1 Input Türü Tespiti ──────────────────────────────────────────────────
 
 type InputType =
-  | 'file_image' | 'file_pcap' | 'file_zip' | 'file_pdf' | 'file_other'
+  | 'file_image' | 'file_pcap' | 'file_zip' | 'file_pdf' | 'file_audio' | 'file_binary' | 'file_other'
   | 'url_or_http' | 'rsa_params' | 'nmap_output' | 'pcap_text'
-  | 'encoding' | 'unknown';
+  | 'hash' | 'encoding' | 'unknown';
 
 function detectInputType(input: string): InputType {
   const trimmed = input.trim();
@@ -41,15 +45,29 @@ function detectInputType(input: string): InputType {
   if ((trimmed.startsWith('/') || /^[A-Za-z]:\\/.test(trimmed)) && existsSync(trimmed)) {
     const buf = readFileSync(trimmed);
     const magic4 = buf.slice(0, 4);
+    const head4 = buf.slice(0, 4).toString('ascii');
+    const head4to8 = buf.length >= 12 ? buf.slice(8, 12).toString('ascii') : '';
     if (magic4[0] === 0xFF && magic4[1] === 0xD8) return 'file_image';
     if (magic4[0] === 0x89 && magic4[1] === 0x50) return 'file_image'; // PNG
     if (magic4[0] === 0x47 && magic4[1] === 0x49) return 'file_image'; // GIF
     if (magic4[0] === 0xA1 || magic4[0] === 0xD4) return 'file_pcap';
     if (magic4[0] === 0x0A && magic4[1] === 0x0D) return 'file_pcap'; // pcapng
+    // Audio: WAV/OGG/FLAC/MP3/M4A
+    if (head4 === 'RIFF' && head4to8 === 'WAVE') return 'file_audio';
+    if (head4 === 'OggS' || head4 === 'fLaC') return 'file_audio';
+    if (head4to8 === 'ftyp') return 'file_audio';
+    if (head4.startsWith('ID3') || (magic4[0] === 0xFF && (magic4[1]! & 0xE0) === 0xE0)) return 'file_audio';
+    // Binary: ELF / PE
+    if (magic4[0] === 0x7F && magic4[1] === 0x45 && magic4[2] === 0x4C && magic4[3] === 0x46) return 'file_binary';
+    if (magic4[0] === 0x4D && magic4[1] === 0x5A) return 'file_binary'; // PE/EXE
     if (magic4[0] === 0x50 && magic4[1] === 0x4B) return 'file_zip';
     if (magic4[0] === 0x25 && magic4[1] === 0x50) return 'file_pdf';
     return 'file_other';
   }
+
+  // Hash formatı (length-based hex veya $-prefix)
+  if (/^\$[0-9aybs]/i.test(trimmed) && trimmed.length > 10) return 'hash';
+  if (/^[0-9a-fA-F]{32,128}$/.test(trimmed) && [32, 40, 56, 64, 96, 128].includes(trimmed.length)) return 'hash';
 
   // RSA parametreleri
   if (/p\s*=\s*\d+/i.test(trimmed) && /q\s*=\s*\d+/i.test(trimmed)) return 'rsa_params';
@@ -93,6 +111,18 @@ async function runModules(input: string, inputType: InputType): Promise<{
       break;
     }
 
+    case 'file_audio': {
+      modules.push('ctf_audio_analyzer');
+      results.audio_result = await analyzeAudio(input);
+      break;
+    }
+
+    case 'file_binary': {
+      modules.push('ctf_binary_analyzer');
+      results.binary_result = await analyzeBinary(input);
+      break;
+    }
+
     case 'file_pcap':
     case 'pcap_text': {
       modules.push('ctf_network_analyzer');
@@ -117,6 +147,25 @@ async function runModules(input: string, inputType: InputType): Promise<{
     case 'nmap_output': {
       modules.push('ctf_network_analyzer');
       results.network_result = analyzeNetwork(input);
+      break;
+    }
+
+    case 'hash': {
+      modules.push('ctf_hash');
+      const { crackHash } = await import('./ctf-hash.js');
+      const hashRes = await crackHash(input);
+      // hash sonucunu solver_result formatına yansıt (tek alan üzerinden raporlamak için)
+      results.solver_result = {
+        flag: hashRes.cracked,
+        technique: `Hash crack (${hashRes.format.name})`,
+        explanation: hashRes.cracked
+          ? `Wordlist eşleşmesi: ${hashRes.attempts} deneme`
+          : `Dahili crack başarısız — john/hashcat öner`,
+        layers: [],
+        confidence: hashRes.cracked ? 100 : 20,
+        alternatives: [],
+        recommendations: hashRes.externalCommands,
+      };
       break;
     }
 
@@ -162,6 +211,12 @@ function extractBestResult(results: Partial<AutoReport>): { flag: string | null;
   }
   if (results.network_result?.flags_found?.length) {
     candidates.push({ flag: results.network_result.flags_found[0]!, confidence: 85 });
+  }
+  if (results.audio_result?.bestFlag) {
+    candidates.push({ flag: results.audio_result.bestFlag, confidence: 85 });
+  }
+  if (results.binary_result?.flagsFound?.length) {
+    candidates.push({ flag: results.binary_result.flagsFound[0]!, confidence: 85 });
   }
 
   if (candidates.length === 0) return { flag: null, confidence: 0 };

@@ -61,6 +61,19 @@ CTF MODU
 
 Kullanıcı CTF sorusu, dosya veya resim verdiğinde OTOMATİK CTF moduna gir.
 
+⚡ ÖNCE TEK ÇAĞRI DENE: ctf_auto aracı dosya tipini otomatik tespit edip doğru
+modülü çalıştırır. Hızlıca flag bulamazsa aşağıdaki spesifik araçlara geç:
+
+  • ctf_solver           → encoding/kripto (Base64, ROT, Caesar, Hex, ASCII, RSA)
+  • ctf_file_analyzer    → magic bytes, EXIF (derin), strings, file carving, ZIP
+  • ctf_stego            → PNG/JPEG LSB, alpha kanal, kanal ayrıştırma
+  • ctf_audio_analyzer   → WAV LSB, DTMF, Morse, ffmpeg spektogram + vision
+  • ctf_binary_analyzer  → ELF/PE: strings/objdump/readelf/nm, format string, ROP gadget
+  • ctf_hash             → MD5/SHA/bcrypt format auto-detect + rockyou wordlist
+  • ctf_web_analyzer     → SQLi/XSS/LFI/IDOR + dizin keşfi
+  • ctf_network_analyzer → PCAP, HTTP header, Basic Auth, DNS TXT
+  • image_analyze        → captcha, fotoğraftaki yazı/QR, gizli metin (VLM)
+
 1. STEGANOGRAFİ (PNG/JPG/WAV verildiğinde)
    a) file → dosya tipi doğrula
    b) exiftool → GPS, yorum, gizli EXIF tag

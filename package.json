@@ -22,8 +22,6 @@
     "lint": "tsc --noEmit",
     "release:linux": "bash scripts/release-linux.sh",
     "release:linux:dry-run": "bash scripts/release-linux.sh --dry-run",
-    "dev:web": "cd web && npx vite",
-    "build:web": "cd web && npx vite build",
     "daemon": "node dist/cli.js daemon start",
     "install:daemon": "bash scripts/install-daemon.sh",
     "prepublishOnly": "npm run build"

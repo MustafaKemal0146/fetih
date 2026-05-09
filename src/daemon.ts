@@ -134,14 +134,11 @@ export async function startDaemon(config?: Partial<DaemonConfig>): Promise<void>
   daemonStartedAt = new Date();
   writePid(cfg.pidFile, process.pid);
 
-  logger.info(`FETIH daemon başlatılıyor... PID: ${process.pid}, Port: ${cfg.port}`);
+  logger.info(`FETIH daemon başlatılıyor... PID: ${process.pid}`);
 
-  const { startWebServer } = await import('./web/server.js');
-  await startWebServer(cfg.port);
+  // Web UI v4.x'te kaldırıldı. Daemon sadece arka plan engine olarak çalışır.
 
-  logger.info(`Web sunucusu başlatıldı: http://${cfg.host}:${cfg.port}`);
-
-  // FETIH engine'i başlat (provider, tools, Web UI callback'leri)
+  // FETIH engine'i başlat (provider, tools, callback'ler)
   const { initializeDaemonHandler } = await import('./daemon-handler.js');
   await initializeDaemonHandler();
 

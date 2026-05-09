@@ -14,6 +14,10 @@ import { analyzeSteganography } from '../src/tools/ctf/ctf-stego.js';
 import { analyzeWeb } from '../src/tools/ctf/ctf-web-analyzer.js';
 import { analyzeNetwork } from '../src/tools/ctf/ctf-network-analyzer.js';
 import { ctfAutoTool, autoAnalyze } from '../src/tools/ctf/ctf-auto.js';
+import { analyzeAudio } from '../src/tools/ctf/ctf-audio-analyzer.js';
+import { analyzeBinary } from '../src/tools/ctf/ctf-binary-analyzer.js';
+import { detectHashFormat, crackHash } from '../src/tools/ctf/ctf-hash.js';
+import { createHash } from 'crypto';
 
 const FIXTURE_DIR = join(process.cwd(), 'tests', 'fixtures', 'ctf-tmp');
 
@@ -255,4 +259,202 @@ describe('CTF: Auto Dispatcher', () => {
     expect(result.isError).toBeFalsy();
     expect(result.output).toContain(flag);
   });
+});
+
+// ─── 7. EXIF derin tarama (JPEG COM marker) ─────────────────────────────────
+
+describe('CTF: EXIF Derin Tarama', () => {
+  test('JPEG COM marker içinde gizli flag', async () => {
+    const flag = 'flag{exif_com_marker}';
+    // Minimal JPEG: SOI + COM(flag) + APP0/JFIF + EOI
+    const soi = Buffer.from([0xFF, 0xD8]);
+    const flagBytes = Buffer.from(flag, 'utf8');
+    const comLen = flagBytes.length + 2; // length field includes itself
+    const comLenBuf = Buffer.alloc(2); comLenBuf.writeUInt16BE(comLen, 0);
+    const comMarker = Buffer.concat([
+      Buffer.from([0xFF, 0xFE]), comLenBuf, flagBytes,
+    ]);
+    const app0 = Buffer.from([
+      0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00,
+      0x00, 0x01, 0x00, 0x01, 0x00, 0x00,
+    ]);
+    const eoi = Buffer.from([0xFF, 0xD9]);
+    const buf = Buffer.concat([soi, comMarker, app0, eoi]);
+    const path = join(FIXTURE_DIR, 'exif_com.jpg');
+    writeFileSync(path, buf);
+
+    const r = await analyzeFile(path);
+    expect(r.detectedType).toBe('JPEG');
+    expect(r.flagsFound).toContain(flag);
+  });
+});
+
+// ─── 8. Audio analyzer (WAV LSB) ────────────────────────────────────────────
+
+describe('CTF: Audio Analyzer', () => {
+  test('WAV LSB sample bytes flag tespiti', async () => {
+    const flag = 'flag{wav_lsb}';
+    // Minimal 16-bit mono WAV, sample LSB'lerine flag bit'lerini göm
+    const message = flag + '\0';
+    const bits: number[] = [];
+    for (const ch of Buffer.from(message, 'utf8')) {
+      for (let b = 7; b >= 0; b--) bits.push((ch >> b) & 1);
+    }
+    const sampleRate = 8000;
+    const sampleCount = Math.max(bits.length, 1024);
+    const dataSize = sampleCount * 2; // 16-bit = 2 bytes per sample
+
+    // RIFF header
+    const buf = Buffer.alloc(44 + dataSize);
+    buf.write('RIFF', 0);
+    buf.writeUInt32LE(36 + dataSize, 4);
+    buf.write('WAVE', 8);
+    buf.write('fmt ', 12);
+    buf.writeUInt32LE(16, 16);          // fmt chunk size
+    buf.writeUInt16LE(1, 20);           // PCM
+    buf.writeUInt16LE(1, 22);           // mono
+    buf.writeUInt32LE(sampleRate, 24);
+    buf.writeUInt32LE(sampleRate * 2, 28); // byte rate
+    buf.writeUInt16LE(2, 32);           // block align
+    buf.writeUInt16LE(16, 34);          // bits per sample
+    buf.write('data', 36);
+    buf.writeUInt32LE(dataSize, 40);
+
+    // Samples — düşük amplitüd, LSB'leri mesaj
+    for (let i = 0; i < sampleCount; i++) {
+      const bit = i < bits.length ? bits[i]! : 0;
+      const sampleValue = 0x0100 | bit; // small positive sample with bit in LSB
+      buf.writeInt16LE(sampleValue, 44 + i * 2);
+    }
+
+    const path = join(FIXTURE_DIR, 'lsb.wav');
+    writeFileSync(path, buf);
+
+    const r = await analyzeAudio(path);
+    expect(r.detectedFormat).toBe('WAV');
+    const lsbModule = r.modules.find(m => m.module === 'WAV-LSB');
+    expect(lsbModule).toBeDefined();
+    expect(lsbModule!.flagsFound).toContain(flag);
+  }, 60_000);
+});
+
+// ─── 9. Binary analyzer (gerçek ELF: Node binary) ───────────────────────────
+
+describe('CTF: Binary Analyzer', () => {
+  test('gerçek küçük ELF binary tespiti ve sembol analizi', async () => {
+    // Küçük bir sistem binary'si seç (büyük node binary timeout yapabilir)
+    const candidates = ['/bin/ls', '/bin/cat', '/bin/echo', '/usr/bin/whoami'];
+    const realBin = candidates.find(p => existsSync(p));
+    if (!realBin) {
+      console.log('Test skip: hiçbir küçük ELF binary bulunamadı');
+      return;
+    }
+    const r = await analyzeBinary(realBin);
+    expect(r.fileType.toLowerCase()).toContain('elf');
+    const strSec = r.sections.find(s => s.module === 'strings');
+    expect(strSec).toBeDefined();
+    expect(strSec!.ok).toBe(true);
+    const readelfSec = r.sections.find(s => s.module === 'readelf -h -l');
+    expect(readelfSec).toBeDefined();
+  }, 30_000);
+
+  test('flag içeren binary (ham buffer)', async () => {
+    const flag = 'flag{binary_strings}';
+    // ELF magic + dummy + flag string + dummy
+    const buf = Buffer.concat([
+      Buffer.from([0x7F, 0x45, 0x4C, 0x46, 0x02, 0x01, 0x01, 0x00]),
+      Buffer.alloc(64, 0x00),
+      Buffer.from(flag, 'utf8'),
+      Buffer.alloc(64, 0xFF),
+    ]);
+    const path = join(FIXTURE_DIR, 'fake.elf');
+    writeFileSync(path, buf);
+
+    const r = await analyzeBinary(path);
+    expect(r.flagsFound).toContain(flag);
+  });
+});
+
+// ─── 10. Hash crack ──────────────────────────────────────────────────────────
+
+describe('CTF: Hash Crack', () => {
+  test('format detection: MD5 (32 hex)', () => {
+    const r = detectHashFormat('5d41402abc4b2a76b9719d911017c592'); // md5("hello")
+    expect(r.name).toBe('MD5');
+    expect(r.fastCrackable).toBe(true);
+    expect(r.hashcatMode).toBe(0);
+  });
+
+  test('format detection: SHA256 (64 hex)', () => {
+    const r = detectHashFormat(createHash('sha256').update('test').digest('hex'));
+    expect(r.name).toBe('SHA256');
+    expect(r.hashcatMode).toBe(1400);
+  });
+
+  test('format detection: bcrypt prefix', () => {
+    const r = detectHashFormat('$2b$12$abcdefghijklmnopqrstuvwxyz0123456789012345678901234');
+    expect(r.name).toBe('bcrypt');
+    expect(r.fastCrackable).toBe(false);
+  });
+
+  test('MD5 dahili wordlist crack — "password"', async () => {
+    const target = createHash('md5').update('password').digest('hex');
+    const r = await crackHash(target);
+    expect(r.format.name).toBe('MD5');
+    expect(r.cracked).toBe('password');
+    expect(r.attempts).toBeGreaterThan(0);
+  });
+
+  test('SHA1 dahili wordlist crack — "admin"', async () => {
+    const target = createHash('sha1').update('admin').digest('hex');
+    const r = await crackHash(target);
+    expect(r.format.name).toBe('SHA1');
+    expect(r.cracked).toBe('admin');
+  });
+});
+
+// ─── 11. Auto dispatcher: hash & binary route ───────────────────────────────
+
+describe('CTF: Auto Dispatcher Yeni Tipler', () => {
+  test('hash girdisini ctf_hash modülüne yönlendirir', async () => {
+    const target = createHash('md5').update('letmein').digest('hex');
+    const report = await autoAnalyze(target);
+    expect(report.auto_detected_type).toBe('hash');
+    expect(report.modules_run).toContain('ctf_hash');
+    expect(report.flag).toBe('letmein');
+  });
+
+  test('ELF dosyasını binary analyzer\'a yönlendirir', async () => {
+    const flag = 'flag{auto_binary}';
+    const buf = Buffer.concat([
+      Buffer.from([0x7F, 0x45, 0x4C, 0x46, 0x02, 0x01, 0x01, 0x00]),
+      Buffer.alloc(32, 0x00),
+      Buffer.from(flag, 'utf8'),
+      Buffer.alloc(32, 0xFF),
+    ]);
+    const path = join(FIXTURE_DIR, 'auto.elf');
+    writeFileSync(path, buf);
+
+    const report = await autoAnalyze(path);
+    expect(report.auto_detected_type).toBe('file_binary');
+    expect(report.modules_run).toContain('ctf_binary_analyzer');
+    expect(report.flag).toBe(flag);
+  });
+
+  test('WAV dosyasını audio analyzer\'a yönlendirir', async () => {
+    // Yeni dosya — basitleştirilmiş WAV (sadece tip tespiti için, flag aramayız)
+    const sampleRate = 8000, sampleCount = 256, dataSize = sampleCount * 2;
+    const buf = Buffer.alloc(44 + dataSize);
+    buf.write('RIFF', 0); buf.writeUInt32LE(36 + dataSize, 4); buf.write('WAVE', 8);
+    buf.write('fmt ', 12); buf.writeUInt32LE(16, 16); buf.writeUInt16LE(1, 20);
+    buf.writeUInt16LE(1, 22); buf.writeUInt32LE(sampleRate, 24);
+    buf.writeUInt32LE(sampleRate * 2, 28); buf.writeUInt16LE(2, 32); buf.writeUInt16LE(16, 34);
+    buf.write('data', 36); buf.writeUInt32LE(dataSize, 40);
+    const path = join(FIXTURE_DIR, 'auto.wav');
+    writeFileSync(path, buf);
+
+    const report = await autoAnalyze(path);
+    expect(report.auto_detected_type).toBe('file_audio');
+    expect(report.modules_run).toContain('ctf_audio_analyzer');
+  }, 60_000);
 });

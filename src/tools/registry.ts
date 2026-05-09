@@ -180,6 +180,16 @@ export async function createDefaultRegistry(config?: FetihConfig): Promise<ToolR
   registry.register(ctfAutoTool);
   registry.register(shodanTool);
 
+  // CTF v4.x: yeni tool'lar
+  const { ctfAudioAnalyzerTool } = await import('./ctf/ctf-audio-analyzer.js');
+  const { ctfBinaryAnalyzerTool } = await import('./ctf/ctf-binary-analyzer.js');
+  const { ctfHashTool } = await import('./ctf/ctf-hash.js');
+  const { imageAnalyzeTool } = await import('./image-analyze.js');
+  registry.register(ctfAudioAnalyzerTool);
+  registry.register(ctfBinaryAnalyzerTool);
+  registry.register(ctfHashTool);
+  registry.register(imageAnalyzeTool);
+
   // === v3.9.5 YENİ ÖZELLİKLER ===
   // Plugin Sistemi — ~/.fetih/plugins/ dizininden plugin yükle
   const { initPluginSystem } = await import('../plugin/index.js');

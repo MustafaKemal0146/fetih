@@ -172,6 +172,7 @@ export class AnthropicProvider implements LLMProvider {
       case 'text': return { type: 'text', text: block.text };
       case 'tool_use': return { type: 'tool_use', id: block.id, name: block.name, input: block.input };
       case 'tool_result': return { type: 'tool_result', tool_use_id: block.tool_use_id, content: block.content, is_error: block.is_error };
+      case 'image': return { type: 'image', source: { type: 'base64', media_type: block.source.media_type, data: block.source.data } };
       case 'reasoning': return null; // Claude'da reasoning_content yok, görmezden gel
     }
   }

@@ -163,22 +163,74 @@ export async function analyzeFile(filePath: string): Promise<FileAnalysisResult>
     if (encrypted.length > 0) notes.push(`🔒 ${encrypted.length} şifreli dosya var`);
   }
 
-  // EXIF
+  // EXIF — derin recursive tarama (XMP/IPTC/ICC/GPS dahil)
   let exif: Record<string, unknown> | undefined;
   if (detectedType === 'JPEG' || detectedType === 'PNG') {
     exif = await readExif(buf);
     if (exif) {
-      // Flag arama - EXIF alanlarında
-      const ctfFields = ['Comment', 'UserComment', 'Copyright', 'Artist', 'Software', 'ImageDescription', 'Make', 'Model'];
-      for (const field of ctfFields) {
-        const val = String(exif[field] ?? '');
-        if (/flag\{/i.test(val)) {
-          flagsFound.push(val.match(/flag\{[^}]+\}/i)![0]);
-          notes.push(`🎯 EXIF ${field} alanında flag bulundu!`);
+      const seen = new Set<string>();
+      const scan = (obj: unknown, path: string): void => {
+        if (obj === null || obj === undefined) return;
+        if (typeof obj === 'string') {
+          const matches = obj.match(/(?:flag|ctf)\{[^}]+\}/gi);
+          if (matches) {
+            for (const m of matches) {
+              if (!seen.has(m)) {
+                seen.add(m);
+                flagsFound.push(m);
+                notes.push(`🎯 EXIF ${path}: ${m}`);
+              }
+            }
+          }
+          // Hex/Base64 şüphesi: 16+ karakter, EXIF değerinde gizli encoding
+          if (obj.length >= 16 && obj.length <= 2048) {
+            const hexLike = /^[0-9a-fA-F\s]+$/.test(obj.trim()) && obj.replace(/\s/g, '').length % 2 === 0;
+            const b64Like = /^[A-Za-z0-9+/]+=*$/.test(obj.trim().replace(/\s/g, ''));
+            if (hexLike || b64Like) notes.push(`🔍 EXIF ${path}: şüpheli encoding (${hexLike ? 'hex' : 'base64'})`);
+          }
+        } else if (Array.isArray(obj)) {
+          obj.forEach((item, i) => scan(item, `${path}[${i}]`));
+        } else if (typeof obj === 'object') {
+          for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+            if (k === 'thumbnail' || k === 'image') continue; // binary buffer'ları atla
+            scan(v, path ? `${path}.${k}` : k);
+          }
         }
-      }
+      };
+      scan(exif, '');
       if (exif['latitude'] && exif['longitude']) {
         notes.push(`📍 GPS: ${exif['latitude']}, ${exif['longitude']}`);
+      }
+    }
+
+    // JPEG ham marker tarama: COM (FF FE) ve APP1 (FF E1) — exifr atlayabilir
+    if (detectedType === 'JPEG') {
+      let i = 2; // SOI sonrası
+      while (i < buf.length - 4) {
+        if (buf[i] !== 0xFF) { i++; continue; }
+        const marker = buf[i + 1]!;
+        if (marker === 0xD9) break; // EOI
+        if (marker === 0xFE || marker === 0xE1 || marker === 0xED) {
+          const segLen = buf.readUInt16BE(i + 2);
+          const segData = buf.slice(i + 4, i + 2 + segLen);
+          const text = segData.toString('utf8');
+          const matches = text.match(/(?:flag|ctf)\{[^}]+\}/gi);
+          if (matches) {
+            for (const m of matches) {
+              if (!flagsFound.includes(m)) {
+                flagsFound.push(m);
+                notes.push(`🎯 JPEG marker 0x${marker.toString(16).toUpperCase()}: ${m}`);
+              }
+            }
+          }
+          i += 2 + segLen;
+        } else {
+          // Diğer marker'ları atla
+          if (marker >= 0xD0 && marker <= 0xD7) { i += 2; continue; }
+          if (marker === 0x00 || marker === 0xFF) { i++; continue; }
+          if (i + 2 < buf.length) i += 2 + buf.readUInt16BE(i + 2);
+          else break;
+        }
       }
     }
   }
