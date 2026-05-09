@@ -185,6 +185,12 @@ function tryROT47(input: string): LayerResult | null {
 
 function tryCaesar(input: string): LayerResult | null {
   if (!/[a-zA-Z]/.test(input)) return null;
+  // Önce flag pattern üreten shift'i ara
+  for (let shift = 1; shift <= 25; shift++) {
+    const decoded = rot(input, shift);
+    if (looksLikeFlag(decoded)) return { decoded, technique: `Caesar (shift=${shift})` };
+  }
+  // Bulunamadıysa ilk anlamlı sonuca düş
   for (let shift = 1; shift <= 25; shift++) {
     const decoded = rot(input, shift);
     if (isMeaningful(decoded)) return { decoded, technique: `Caesar (shift=${shift})` };
@@ -526,6 +532,17 @@ export function solve(input: string, maxLayers = 7): SolveResult {
 
     // Derinlik > 1'de yeniden skor hesapla
     const fns = depth === 1 ? orderedFns : scoreInput(data).map(s => s.fn);
+
+    // Pass 1: Tüm teknikleri dene, doğrudan flag üreteni hemen döndür
+    // (Aksi halde "anlamlı ama flag değil" bir sonuç recursion'ı yanlış yola sokar)
+    for (const fn of fns) {
+      const result = fn(data);
+      if (!result || usedTechniques.has(result.technique)) continue;
+      if (looksLikeFlag(result.decoded)) {
+        layers.push(result.technique);
+        return result.decoded;
+      }
+    }
 
     for (const fn of fns) {
       const result = fn(data);
