@@ -190,6 +190,28 @@ export async function createDefaultRegistry(config?: FetihConfig): Promise<ToolR
   registry.register(ctfHashTool);
   registry.register(imageAnalyzeTool);
 
+  // CTF Canavarı v4.1: pwn, ocr, jwt, rsa, aes, forensics, mobile, interactive, classify
+  const { ctfPwnTool } = await import('./ctf/ctf-pwn.js');
+  const { pwnSessionTool } = await import('./ctf/pwn-session.js');
+  const { ctfOcrTool } = await import('./ctf/ctf-ocr.js');
+  const { ctfJwtTool } = await import('./ctf/ctf-jwt.js');
+  const { ctfRsaTool } = await import('./ctf/ctf-rsa.js');
+  const { ctfAesHelperTool } = await import('./ctf/ctf-aes-helper.js');
+  const { ctfForensicsTool } = await import('./ctf/ctf-forensics.js');
+  const { ctfMobileTool } = await import('./ctf/ctf-mobile.js');
+  const { interactiveSessionTool } = await import('./ctf/interactive-session.js');
+  const { ctfClassifyTool } = await import('./ctf/ctf-classify.js');
+  registry.register(ctfPwnTool);
+  registry.register(pwnSessionTool);
+  registry.register(ctfOcrTool);
+  registry.register(ctfJwtTool);
+  registry.register(ctfRsaTool);
+  registry.register(ctfAesHelperTool);
+  registry.register(ctfForensicsTool);
+  registry.register(ctfMobileTool);
+  registry.register(interactiveSessionTool);
+  registry.register(ctfClassifyTool);
+
   // === v3.9.5 YENİ ÖZELLİKLER ===
   // Plugin Sistemi — ~/.fetih/plugins/ dizininden plugin yükle
   const { initPluginSystem } = await import('../plugin/index.js');
