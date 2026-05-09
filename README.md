@@ -9,13 +9,14 @@
 
 <p align="center">
   <strong>Terminalde çalışan otonom yapay zeka kodlama ve siber güvenlik ajanı.</strong><br/>
-  Türkçe arayüz · 12 AI sağlayıcı · 210+ araç · Fetih Engine · CTF motoru · Kalıcı bellek
+  Türkçe arayüz · 13 AI sağlayıcı · 230+ araç · Fetih Engine · <strong>CTF Canavarı</strong> · Vision · Kalıcı bellek
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Versiyon-3.9.7-b91c1c?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Versiyon-4.1.0-b91c1c?style=flat-square"/>
   <img src="https://img.shields.io/badge/Node.js-%3E%3D20-339933?style=flat-square&logo=node.js&logoColor=white"/>
   <img src="https://img.shields.io/badge/TypeScript-5.x-3178c6?style=flat-square&logo=typescript&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Test-149%2F149-22c55e?style=flat-square"/>
   <img src="https://img.shields.io/badge/Lisans-AGPL--3.0-blue?style=flat-square"/>
   <img src="https://img.shields.io/badge/Dil-Türkçe-red?style=flat-square"/>
 </p>
@@ -23,6 +24,7 @@
 <p align="center">
   <a href="https://fetih.mustafakemalcingil.site">Web Sitesi</a> ·
   <a href="#-kurulum">Kurulum</a> ·
+  <a href="#-ctf-canavarı">CTF Canavarı</a> ·
   <a href="#-komutlar">Komutlar</a> ·
   <a href="#-desteklenen-ai-sağlayıcıları">Sağlayıcılar</a>
 </p>
@@ -78,15 +80,79 @@ FETİH: src/ taranıyor... middleware.ts bulundu
 
 | | FETİH | ChatGPT | Copilot | Cursor |
 |---|---|---|---|---|
-| AI Sağlayıcı | **12** | 1 | çoklu | çoklu |
+| AI Sağlayıcı | **13** | 1 | çoklu | çoklu |
 | Terminal / CLI | ✓ | ✗ | ✗ | ✗ |
 | Offline / Yerel | ✓ | ✗ | ✗ | kısmi |
-| Fetih Engine | **210+ araç** | ✗ | ✗ | ✗ |
-| CTF & Pentest | ✓ | ✗ | ✗ | ✗ |
+| Fetih Engine | **230+ araç** | ✗ | ✗ | ✗ |
+| CTF Canavarı (24 tool) | ✓ | ✗ | ✗ | ✗ |
+| PWN / Exploit toolkit | ✓ | ✗ | ✗ | ✗ |
+| Vision / OCR / QR | ✓ | kısmi | ✗ | ✗ |
 | Multi-Agent | ✓ | ✗ | kısmi | kısmi |
 | Kalıcı Hafıza | ✓ | kısmi | ✗ | kısmi |
 | Checkpoint | ✓ | ✗ | ✗ | ✗ |
 | Açık Kaynak | ✓ | ✗ | ✗ | ✗ |
+
+---
+
+## CTF Canavarı
+
+FETİH v4.1 ile gelen **24 spesifik CTF aracı** — Jeopardy, Attack/Defense ve Boot2Root tarzı sınavlar için. Her tool kendi alanında: dış araç varsa çağırır, yoksa **graceful fallback** ile çalışır (dahili implementasyon veya VLM).
+
+### Kategori Bazında Araç Haritası
+
+| Kategori | Araçlar | Ne yapar? |
+|----------|---------|-----------|
+| **Otomatik Yönlendirme** | `ctf_auto`, `ctf_classify` | Dosya tipini magic byte ile, challenge metnini regex+keyword ile sınıflandırır → doğru tool zincirini önerir |
+| **Encoding / Klasik Kripto** | `ctf_solver` | Base64/32, Hex, Binary, ROT13/47, Caesar, Atbash, Morse, Polybius, Bacon, Rail Fence, XOR, ASCII decimal — **7 katmana kadar recursive** çözüm |
+| **Modern Kripto (RSA)** | `ctf_rsa` | Fermat factorization, **Wiener attack** (küçük d), **factordb.com** online lookup, common modulus, küçük e cube root — `auto` modu zincir saldırı dener |
+| **AES Analizi** | `ctf_aes_helper` | ECB pattern detection, ECB decrypt, **padding oracle** Python attack template, CBC bit-flipping rehberi |
+| **Hash Crack** | `ctf_hash` | MD5/SHA1/SHA224/256/384/512, NTLM, bcrypt, sha256/512crypt, argon2 **format auto-detect** + rockyou.txt destekli dahili crack + hashcat/john komut üretimi |
+| **JWT Toolkit** | `ctf_jwt` | Decode, `alg:none` saldırı forge, **HMAC HS256/384/512 brute-force**, kid/jku/x5u analiz, claim forge (custom imza) |
+| **Steganografi** | `ctf_stego`, `ctf_audio_analyzer` | PNG LSB (R/RGB/RGBA/2bit), alpha kanal, kanal ayrıştırma; **WAV LSB**, **DTMF tone decoder (Goertzel)**, Morse, ffmpeg spektogram + vision LLM |
+| **OCR / QR** | `ctf_ocr`, `image_analyze` | tesseract (eng+tur) ile OCR, zbarimg ile QR/Barcode — yoksa VLM fallback. Captcha & QR fotoğraflar için |
+| **Dosya / Forensics** | `ctf_file_analyzer`, `ctf_forensics` | Magic bytes, **derin EXIF tarama** (XMP/IPTC/ICC/COM marker), file carving, **binary PCAP parser** (pure Node), volatility/foremost wrapper, büyük dosya strings sweep |
+| **Binary / RE** | `ctf_binary_analyzer`, `ctf_pwn` | strings/objdump/readelf/nm/binwalk + RWX/NX/PIE tespiti, format string vuln, ROP gadget arama; **cyclic pattern (de Bruijn)**, format string exploit gen, shellcode katalogu, checksec |
+| **Remote PWN** | `pwn_session`, `interactive_session` | pwntools.remote() benzeri TCP socket (connect/send/recv_until); gdb/msfconsole/nc için child_process spawn — paralel session yönetimi |
+| **Web** | `ctf_web_analyzer` | SQLi (error-based + tırnak), XSS, LFI/Path Traversal, IDOR, dizin keşfi, payload önerileri |
+| **Network** | `ctf_network_analyzer` | HTTP Basic Auth decode, FTP/SMTP cleartext, DNS TXT flag arama, Nmap çıktısı + port saldırı vektörleri |
+| **Mobile** | `ctf_mobile` | APK/IPA ZIP entry parser, AndroidManifest/dex/Info.plist tespit, apktool & jadx wrapper |
+
+### Tek Komut Akışı
+
+```bash
+# Bilinmeyen challenge metni:
+ctf_classify "Buffer overflow vulnerable binary, nc challenge.tld 1337"
+# → Kategori: pwn (84 puan), önerilen: ctf_pwn → pwn_session → interactive_session
+
+# Dosya verildiğinde:
+ctf_auto /path/to/challenge.png
+# → Magic detect → file_image → ctf_file_analyzer + ctf_stego paralel → flag
+
+# RSA challenge:
+ctf_rsa action=auto n=... e=... c=...
+# → factordb → Fermat → Wiener zincir saldırı, ilk başarılıdan flag
+
+# JWT crack:
+ctf_jwt action=brute token=eyJ...
+# → rockyou (varsa) veya dahili 50+ secret → "secret" gibi zayıf secret bulunca crack
+```
+
+### Örnek Senaryo
+
+```bash
+fetih
+/güvenlik pentest
+
+sen: "şu klasörde 6 challenge var, hepsini sırayla çöz: /home/sınav"
+
+# FETİH yapar:
+#  [chal1.png]    ctf_auto → file_image → stego LSB → flag{lsb_red}
+#  [audio.wav]    ctf_auto → file_audio → DTMF decode → flag{0258#}
+#  [token.txt]    ctf_classify → jwt → ctf_jwt brute → secret crack → forge admin
+#  [pwn1]         ctf_auto → file_binary → ctf_pwn checksec + cyclic + ROP
+#  [enc.txt]      ctf_solver → 3 katman çöz → flag
+#  [meta.jpg]     ctf_file_analyzer derin EXIF → COM marker → flag
+```
 
 ---
 
@@ -295,9 +361,19 @@ Başlatırken: `fetih --provider groq` · Çalışırken: `/sağlayıcı groq`
 
 | Komut | Açıklama |
 |-------|----------|
-| `/ctf --dosya <dosya>` | CTF analiz motorunu başlat |
-| `/ctf --kategori <web\|crypto\|pwn\|forensics\|rev\|stego\|osint>` | Kategori belirt |
+| `/ctf --dosya <dosya>` | CTF analiz motorunu başlat (ctf_auto) |
+| `/ctf --kategori <web\|crypto\|pwn\|forensics\|rev\|stego\|osint\|jwt\|mobile>` | Kategori belirt |
 | `/güvenlik pentest` | Pentest profilini etkinleştir |
+
+CTF Canavarı doğrudan tool çağrılarıyla da kullanılabilir; AI bunları sistem promptundan tanır:
+```
+ctf_classify "<challenge metni>"           # kategori tahmini + tool zinciri
+ctf_auto <dosya path>                      # otomatik dispatch
+ctf_rsa action=auto n=... e=... c=...      # Wiener/Fermat/factordb zinciri
+ctf_jwt action=brute token=eyJ...          # HMAC secret brute-force
+ctf_pwn action=checksec path=./binary      # NX/PIE/RELRO/Canary
+pwn_session action=connect host=... port=...  # Remote PWN socket
+```
 
 ### Kısayollar
 
@@ -450,9 +526,19 @@ NORMAL modda: `h/j/k/l` · `w/b/e` · `0/$` · `dd/dw` · `cc/cw` · `.` (dot-re
 /cron sil <id>
 ```
 
-### Web Arayüzü
+### Vision (Görsel Analiz)
 
-Fetih'i tarayıcıdan da yönetebilirsin. WebSocket tabanlı gerçek zamanlı akış, araç görünürlüğü, plan onayı ve diff görselleştirme.
+`image_analyze` ile herhangi bir görseli aktif provider'ın vision modeline yollar. Anthropic (claude-opus-4-7, claude-sonnet-4-6), OpenAI (gpt-4o), Google (gemini-2.5-pro) hepsi destekleniyor. JPEG/PNG/GIF/WebP, max 8 MB.
+
+```bash
+sen: "captcha.png'deki yazıyı oku"
+# image_analyze → VLM yanıtı → "X9K7AP"
+
+sen: "fotoğraftaki QR kodu çöz"
+# ctf_ocr action=qr → zbarimg veya VLM fallback
+```
+
+CTF kullanımı: spektogram okuma (`ctf_audio_analyzer` otomatik çağırır), captcha çözümü, fotoğraftaki kod/QR/yazı, gizli/silik metin tespiti.
 
 ---
 
@@ -476,8 +562,14 @@ Fetih'i tarayıcıdan da yönetebilirsin. WebSocket tabanlı gerçek zamanlı ak
 ### Fetih Engine (150 Araç)
 `nmap_scan` · `nuclei_scan` · `sqlmap_scan` · `metasploit_run` · `hydra_attack` · `john_crack` · `hashcat_crack` · `ghidra_analysis` · `gdb_analyze` · `radare2_analyze` · `volatility_analyze` · `binwalk_analyze` · `dalfox_xss_scan` · `jwt_analyzer` · `graphql_scanner` · `api_fuzzer` · `gobuster_scan` · `ffuf_scan` · `wpscan_analyze` · `nikto_scan` · `masscan_high_speed` · `rustscan_fast_scan` · `subfinder_scan` · `amass_scan` · `prowler_scan` · `trivy_scan` · `kube_hunter_scan` · `kube_bench_cis` · `checkov_iac_scan` · `autorecon_comprehensive` · `intelligent_smart_scan` · `ai_generate_payload` · `ai_vulnerability_assessment` · `bugbounty_comprehensive_assessment` · `browser_agent_inspect` · `threat_hunting_assistant` · `vulnerability_intelligence_dashboard` · `responder_credential_harvest` · `pacu_exploitation` · `msfvenom_generate` · `cloudmapper_analysis` · `docker_bench_security_scan` · `steghide_analysis` · `exiftool_extract` · `foremost_carving` · `http_intruder` · `http_repeater` · `dnsenum_scan` · `netexec_scan` · `one_gadget_search` · `libc_database_lookup` · `pwntools_exploit` · `angr_symbolic_execution` · `advanced_payload_generation` · `comprehensive_api_audit` · `create_attack_chain_ai` · `monitor_cve_feeds`
 
-### CTF
-`ctf_auto` · `ctf_solver` · `ctf_web_analyzer` · `ctf_network_analyzer` · `ctf_stego` · `ctf_file_analyzer`
+### CTF Canavarı (24 araç)
+**Yönlendirme:** `ctf_auto` · `ctf_classify`
+**Kripto:** `ctf_solver` · `ctf_rsa` · `ctf_aes_helper` · `ctf_hash` · `ctf_jwt`
+**Stego & Medya:** `ctf_stego` · `ctf_audio_analyzer` · `ctf_ocr` · `image_analyze`
+**Dosya & Forensics:** `ctf_file_analyzer` · `ctf_forensics`
+**Binary & PWN:** `ctf_binary_analyzer` · `ctf_pwn` · `pwn_session` · `interactive_session`
+**Web & Network:** `ctf_web_analyzer` · `ctf_network_analyzer`
+**Mobile:** `ctf_mobile`
 
 ---
 
@@ -503,17 +595,62 @@ Fetih'i tarayıcıdan da yönetebilirsin. WebSocket tabanlı gerçek zamanlı ak
 
 ## Kullanım Senaryoları
 
-### CTF Çözümü
+### CTF Çözümü (Çoklu Kategori)
 
 ```bash
-fetih --provider groq          # Hızlı model seç
+fetih --provider claude        # Vision için Anthropic/OpenAI/Google önerilir
+/güvenlik pentest
 
-/güvenlik pentest             # Pentest profilini aç
-/ctf --dosya challenge.jpg    # Dosyayı analiz et — kategori otomatik tespit edilir
+# 1. Stego (PNG LSB):
+sen: "challenge.png'de gizli flag var, bul"
+# ctf_auto → file_image → ctf_stego LSB-R kanalı → flag{lsb_red}
 
-# FETİH şunları yapar:
-#  magic bytes analizi → steganografi tespiti → LSB çıkarma → flag arama
-#  Sonuç: FLAG{g1zl1_veri_bulundu}
+# 2. Audio (WAV LSB + DTMF):
+sen: "phone_call.wav'i analiz et"
+# ctf_audio_analyzer → DTMF Goertzel → "0258#" decode → flag
+
+# 3. RSA challenge:
+sen: "n=..., e=..., c=... — flag\'i çöz"
+# ctf_rsa action=auto → factordb → Fermat → Wiener zincir → flag
+
+# 4. JWT crack:
+sen: "şu token'ın secret'ını kır: eyJ..."
+# ctf_jwt action=brute → HS256 brute-force → "secret" eşleşti → forge admin
+
+# 5. Binary RE:
+sen: "./pwn1 binary'sini incele, vuln bul"
+# ctf_binary_analyzer → strings + readelf + objdump → gets() detected → format string
+
+# 6. Remote PWN:
+sen: "challenge.tld:1337'ye bağlan, buffer overflow exploit et"
+# pwn_session connect → ctf_pwn cyclic → offset → ctf_pwn shellcode → exploit
+
+# 7. Forensics (memory dump):
+sen: "memory.dmp içinde komut satırı geçmişini ara"
+# ctf_forensics action=volatility plugin=windows.cmdline.CmdLine → flag
+
+# 8. Captcha:
+sen: "captcha.png'deki kodu oku"
+# ctf_ocr action=ocr → tesseract (saniyede) → "X9K7AP"
+```
+
+---
+
+### Sınav Modu (6 Paralel Terminal)
+
+Sınav günü 6 farklı terminal aç, her birinde farklı klasör:
+
+```bash
+# Terminal 1: Crypto challenge'lar
+cd /sınav/crypto && fetih --auto -p "bu klasördeki tüm challenge\'ları çöz, flag\'leri ./flags.txt\'e yaz"
+
+# Terminal 2: Web challenges
+cd /sınav/web && fetih --auto -p "her klasördeki URL\'i ctf_web_analyzer ile tara, flag bul"
+
+# Terminal 3: Forensics
+cd /sınav/forensics && fetih --auto -p "her .pcap, .dmp, .raw dosyasını çöz"
+
+# ... her terminal bağımsız, paralel çalışır
 ```
 
 ---
@@ -620,7 +757,29 @@ src/
 │   └── coordinator.ts      # Multi-agent koordinatör
 ├── providers/              # Claude, Gemini, OpenAI, Ollama, Groq, DeepSeek,
 │                           # Mistral, xAI, LM Studio, LiteLLM, OpenRouter, Copilot
+│                           # — Anthropic/OpenAI/Google'da multimodal (image) desteği
 ├── tools/                  # 60+ yerleşik araç
+│   ├── image-analyze.ts    # Vision LLM çağrısı (VLM wrapper)
+│   └── ctf/                # CTF Canavarı (24 araç)
+│       ├── ctf-auto.ts             # Otomatik yönlendirici
+│       ├── ctf-classify.ts         # Challenge metni kategori tahmini
+│       ├── ctf-solver.ts           # Encoding/klasik kripto (recursive)
+│       ├── ctf-rsa.ts              # Wiener/Fermat/factordb/common modulus
+│       ├── ctf-aes-helper.ts       # ECB pattern, padding oracle template
+│       ├── ctf-hash.ts             # Format auto-detect + rockyou crack
+│       ├── ctf-jwt.ts              # Decode/alg:none/HMAC brute/forge
+│       ├── ctf-stego.ts            # PNG LSB, alpha, kanal ayrıştırma
+│       ├── ctf-audio-analyzer.ts   # WAV LSB, DTMF, Morse, spektogram+VLM
+│       ├── ctf-ocr.ts              # tesseract + zbarimg (VLM fallback)
+│       ├── ctf-file-analyzer.ts    # Magic, derin EXIF, file carving
+│       ├── ctf-forensics.ts        # Binary PCAP, volatility, strings sweep
+│       ├── ctf-binary-analyzer.ts  # ELF/PE: strings/objdump/readelf/nm
+│       ├── ctf-pwn.ts              # Cyclic, fmt string, shellcode, ROP
+│       ├── pwn-session.ts          # Remote socket (pwntools.remote)
+│       ├── interactive-session.ts  # gdb/msfconsole/nc child_process yöneticisi
+│       ├── ctf-mobile.ts           # APK/IPA ZIP analiz, apktool/jadx
+│       ├── ctf-web-analyzer.ts     # SQLi/XSS/LFI/IDOR
+│       └── ctf-network-analyzer.ts # PCAP text, Basic Auth, DNS TXT
 ├── fetih-engine/            # Fetih Engine (150 tool, 54 sınıf, MCP server)
 │   ├── fetih_engine_server.py
 │   ├── fetih_engine_mcp.py
@@ -630,6 +789,10 @@ src/
 ├── cron.ts                 # Periyodik görev sistemi
 ├── model-cost.ts           # Gerçek model fiyat tablosu
 └── storage/                # Oturum, geçmiş, bellek, araç metrikleri
+
+tests/
+├── ctf-integration.test.ts # 49 CTF entegrasyon testi (gerçek fixture'larla)
+└── ...                     # Toplam 149 test, hepsi yeşil
 ```
 
 ---
