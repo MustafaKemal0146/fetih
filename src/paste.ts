@@ -88,7 +88,7 @@ export async function hasImageInClipboard(): Promise<boolean> {
  */
 export async function getImageFromClipboard(): Promise<{ base64: string; mediaType: string } | null> {
   const platform = getPlatform();
-  const tmpPath = join(tmpdir(), `seth_paste_${Date.now()}.png`);
+  const tmpPath = join(tmpdir(), `fetih_paste_${Date.now()}.png`);
 
   try {
     if (platform === 'linux') {

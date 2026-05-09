@@ -10,7 +10,7 @@ import { writeFile, readFile, appendFile, mkdir } from 'node:fs/promises';
 // ─── Bash completion script ───────────────────────────────────────────────────
 
 const BASH_COMPLETION = `# Fetih bash completion
-_seth_complete() {
+_fetih_complete() {
   local cur="\${COMP_WORDS[COMP_CWORD]}"
   local prev="\${COMP_WORDS[COMP_CWORD-1]}"
   local opts="--help --version --provider --model --auto --debug --headless"
@@ -27,13 +27,13 @@ _seth_complete() {
 
   COMPREPLY=( \$(compgen -f -- "\${cur}") )
 }
-complete -F _seth_complete fetih
+complete -F _fetih_complete fetih
 `;
 
 // ─── Zsh completion script ────────────────────────────────────────────────────
 
 const ZSH_COMPLETION = `# Fetih zsh completion
-_seth() {
+_fetih() {
   local -a opts
   opts=(
     '--help:Yardımı göster'
@@ -46,7 +46,7 @@ _seth() {
   )
   _describe 'fetih seçenekleri' opts
 }
-compdef _seth fetih
+compdef _fetih fetih
 `;
 
 // ─── Fish completion script ───────────────────────────────────────────────────

@@ -1,13 +1,13 @@
 import React, { useMemo } from 'react';
 import { Box, Text, Static } from 'ink';
-import { useSethAgent, type UseSethAgentOptions } from './hooks/useSethAgent.js';
+import { useFetihAgent, type UseFetihAgentOptions } from './hooks/useFetihAgent.js';
 import { ChatMessage } from './ChatMessage.js';
 import { InputComposer } from './InputComposer.js';
 import { Spinner } from './components.js';
 import type { ChatMessage as MessageType } from '../types.js';
 
 export interface AppProps {
-  agentOptions: UseSethAgentOptions;
+  agentOptions: UseFetihAgentOptions;
 }
 
 interface StaticItem {
@@ -24,7 +24,7 @@ export function App({ agentOptions }: AppProps) {
     currentTool,
     sendMessage,
     abort,
-  } = useSethAgent(agentOptions);
+  } = useFetihAgent(agentOptions);
 
   // Sadece mesajları statik olarak render ediyoruz.
   // Logo ve giriş bilgileri zaten intro.ts tarafından (cli.ts içinde) basıldı.

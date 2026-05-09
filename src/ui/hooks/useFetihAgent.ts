@@ -4,7 +4,7 @@ import { runAgentLoop, type AgentLoopOptions } from '../../agent/loop.js';
 import { ToolRegistry } from '../../tools/registry.js';
 import { ToolExecutor } from '../../tools/executor.js';
 
-export interface UseSethAgentOptions {
+export interface UseFetihAgentOptions {
   provider: LLMProvider;
   model: string;
   systemPrompt: string;
@@ -17,7 +17,7 @@ export interface UseSethAgentOptions {
   effort?: string;
 }
 
-export function useSethAgent(options: UseSethAgentOptions) {
+export function useFetihAgent(options: UseFetihAgentOptions) {
   const [history, setHistory] = useState<ChatMessage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [streamingText, setStreamingText] = useState('');

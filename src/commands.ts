@@ -858,7 +858,7 @@ FETIH artık bir ordu gibi düşünen 'Leviathan' çekirdeğine sahip. Yaratıc�
   kaydet: async (args, ctx) => {
     const parts = args.trim().split(' ');
     const fmt = ['md', 'html', 'txt', 'cast'].includes(parts[0] ?? '') ? parts.shift()! : 'md';
-    const filename = parts.join(' ') || `seth_chat_${Date.now()}.${fmt}`;
+    const filename = parts.join(' ') || `fetih_chat_${Date.now()}.${fmt}`;
     const messages = ctx.getHistory();
 
     let content = '';
@@ -905,7 +905,7 @@ ${rows}
   export: async (args, ctx) => {
     const parts = args.trim().split(' ');
     const fmt = ['json', 'md', 'html', 'obsidian'].includes(parts[0] ?? '') ? parts.shift()! : 'json';
-    const filename = parts.join(' ') || `seth_export_${Date.now()}.${fmt === 'obsidian' ? 'md' : fmt}`;
+    const filename = parts.join(' ') || `fetih_export_${Date.now()}.${fmt === 'obsidian' ? 'md' : fmt}`;
     const messages = ctx.getHistory();
     const stats = ctx.getStats();
 

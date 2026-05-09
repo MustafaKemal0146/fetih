@@ -78,27 +78,27 @@ ${data.rawOutput.slice(0, 3000)}
 \\usepackage{mdframed}
 
 \\geometry{margin=2.5cm}
-\\definecolor{sethblue}{RGB}{0,82,155}
-\\definecolor{sethred}{RGB}{180,0,0}
+\\definecolor{fetihblue}{RGB}{0,82,155}
+\\definecolor{fetihred}{RGB}{180,0,0}
 \\definecolor{critred}{RGB}{200,0,0}
 
 \\pagestyle{fancy}
 \\fancyhf{}
-\\rhead{\\textcolor{sethblue}{\\textbf{FETIH Güvenlik Raporu}}}
+\\rhead{\\textcolor{fetihblue}{\\textbf{FETIH Güvenlik Raporu}}}
 \\lhead{${escapeLaTeX(data.target)}}
 \\rfoot{Sayfa \\thepage}
 \\lfoot{${escapeLaTeX(data.date)}}
 
-\\titleformat{\\section}{\\large\\bfseries\\color{sethblue}}{}{0em}{}[\\titlerule]
+\\titleformat{\\section}{\\large\\bfseries\\color{fetihblue}}{}{0em}{}[\\titlerule]
 
 \\begin{document}
 
 \\begin{titlepage}
 \\centering
 \\vspace*{1.5cm}
-{\\ttfamily\\Huge\\bfseries\\color{sethred} FETIH}\\\\[0.3cm]
+{\\ttfamily\\Huge\\bfseries\\color{fetihred} FETIH}\\\\[0.3cm]
 {\\small\\color{gray}\\url{https://github.com/MustafaKemal0146/fetih}}\\\\[1cm]
-{\\Huge\\bfseries\\color{sethblue} SİBER GÜVENLİK\\\\[0.5em]TARAMA RAPORU}\\\\[2cm]
+{\\Huge\\bfseries\\color{fetihblue} SİBER GÜVENLİK\\\\[0.5em]TARAMA RAPORU}\\\\[2cm]
 \\begin{tabular}{rl}
 \\textbf{Hedef:} & ${escapeLaTeX(data.target)} \\\\[0.3em]
 \\textbf{Tarih:} & ${escapeLaTeX(data.date)} \\\\[0.3em]

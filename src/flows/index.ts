@@ -123,10 +123,10 @@ export async function runHealthCheck(config?: FetihConfig): Promise<HealthCheckR
 
   // 4. Fetih dizin yapısı
   try {
-    const hc = await checkSethDirectory();
+    const hc = await checkFetihDirectory();
     checks.push(hc);
   } catch (err) {
-    checks.push({ name: 'seth_directory', status: 'fail', message: String(err), duration: 0 });
+    checks.push({ name: 'fetih_directory', status: 'fail', message: String(err), duration: 0 });
   }
 
   // 5. Git kullanılabilirliği
@@ -200,7 +200,7 @@ async function checkDiskSpace(): Promise<HealthCheck> {
   }
 }
 
-async function checkSethDirectory(): Promise<HealthCheck> {
+async function checkFetihDirectory(): Promise<HealthCheck> {
   const start = Date.now();
   const homeDir = join(homedir(), '.fetih');
   const dirs = ['plugins', 'tasks', 'sessions', 'audit', 'auto-reply', 'flows', 'sandbox'];

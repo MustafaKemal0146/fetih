@@ -17,7 +17,7 @@ let registered = false;
 /**
  * Fetih Engine MCP tool'larını keşfedip FETIH registry'sine kaydeder.
  */
-export async function registerSethEngineTools(registry: ToolRegistry): Promise<number> {
+export async function registerFetihEngineTools(registry: ToolRegistry): Promise<number> {
   if (registered) return 0;
 
   const entry = getMcpServer(SERVER_NAME);

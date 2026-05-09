@@ -1,7 +1,7 @@
 import React from 'react';
 import { render } from 'ink';
 import { App } from './App.js';
-import type { UseSethAgentOptions } from './hooks/useSethAgent.js';
+import type { UseFetihAgentOptions } from './hooks/useFetihAgent.js';
 import type { FetihConfig } from '../types.js';
 import { loadConfig, resolveModel } from '../config/settings.js';
 import { createProvider } from '../providers/base.js';
@@ -22,7 +22,7 @@ export async function startModernUi(configOverrides: Partial<FetihConfig>) {
   const executor = new ToolExecutor(registry, cfg.tools);
   executor.setSecurityProfile(cfg.tools.securityProfile ?? 'standard');
 
-  const agentOptions: UseSethAgentOptions = {
+  const agentOptions: UseFetihAgentOptions = {
     provider,
     model,
     systemPrompt: SYSTEM_PROMPT_TR,

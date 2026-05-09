@@ -200,8 +200,8 @@ export async function createDefaultRegistry(config?: FetihConfig): Promise<ToolR
   registry.register(taskStopTool);
 
   // Fetih Engine tool'larını keşfet ve kaydet (arka planda)
-  const { registerSethEngineTools } = await import('../fetih-engine/registry.js');
-  registerSethEngineTools(registry).then(eklenen => {
+  const { registerFetihEngineTools } = await import('../fetih-engine/registry.js');
+  registerFetihEngineTools(registry).then(eklenen => {
     if (eklenen > 0) {
       snapshotToolRegistry(registry);
     }

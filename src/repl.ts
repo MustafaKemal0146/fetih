@@ -472,7 +472,7 @@ export async function startRepl(configOverrides?: Partial<FetihConfig>, skipWelc
   // ─── Harici editör (Ctrl+X Ctrl+E) ──────────────────────────────────────────
   async function openExternalEditor(): Promise<void> {
     const currentInput = rl?.line ?? '';
-    const tmpFile = pathJoin(tmpdir(), `seth_edit_${Date.now()}.txt`);
+    const tmpFile = pathJoin(tmpdir(), `fetih_edit_${Date.now()}.txt`);
     const editor = process.env.EDITOR ?? process.env.VISUAL ?? 'nano';
 
     await fsWriteFile(tmpFile, currentInput, 'utf-8');
