@@ -19,7 +19,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(BASE_DIR)
 
 try:
-    from SETH_Locale import get_text
+    from FETIH_Locale import get_text
 except ImportError:
     def get_text(k, **kwargs): return f"[{k}]"
 

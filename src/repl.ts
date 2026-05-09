@@ -85,8 +85,8 @@ export async function startRepl(configOverrides?: Partial<FetihConfig>, skipWelc
   void startBackgroundCleanup(pathJoin(homedir(), '.fetih', 'sessions'));
 
   // Fetih Engine arka plan sunucusunu başlat
-  const { startSethEngine } = await import('./fetih-engine/bridge.js');
-  startSethEngine();
+  const { startFetihEngine } = await import('./fetih-engine/bridge.js');
+  startFetihEngine();
 
   let currentProvider: ProviderName = appConfig.defaultProvider;
   let currentModel = resolveModel(currentProvider, appConfig);

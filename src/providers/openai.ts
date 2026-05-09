@@ -3,19 +3,20 @@
  */
 
 import OpenAI from 'openai';
-import type { LLMProvider, ChatMessage, ChatOptions, ChatResponse, StreamEvent, ContentBlock, ToolUseBlock, TextBlock, ToolSchema } from '../types.js';
+import type { LLMProvider, ChatMessage, ChatOptions, ChatResponse, StreamEvent, ContentBlock, ToolUseBlock, TextBlock, ToolSchema, ProviderName } from '../types.js';
 import { ProviderError } from '../core/errors.js';
 import { normalizeContent } from '../core/message.js';
 
 export class OpenAIProvider implements LLMProvider {
-  readonly name = 'openai' as const;
+  readonly name: ProviderName;
   readonly supportsTools = true;
   readonly supportsStreaming = true;
   readonly supportsVision = true;
 
   private readonly client: OpenAI;
 
-  constructor(apiKey: string, baseUrl?: string) {
+  constructor(apiKey: string, baseUrl?: string, providerName: ProviderName = 'openai') {
+    this.name = providerName;
     this.client = new OpenAI({ apiKey, baseURL: baseUrl });
   }
 

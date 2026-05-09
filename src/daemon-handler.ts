@@ -37,8 +37,8 @@ export async function initializeDaemonHandler(): Promise<void> {
   void startBackgroundCleanup(join(homedir(), '.fetih', 'sessions'));
 
   // Fetih Engine arka plan sunucusunu başlat
-  const { startSethEngine } = await import('./fetih-engine/bridge.js');
-  startSethEngine();
+  const { startFetihEngine } = await import('./fetih-engine/bridge.js');
+  startFetihEngine();
 
   daemonConfig = loadConfig();
 

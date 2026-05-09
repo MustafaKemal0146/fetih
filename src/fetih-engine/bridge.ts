@@ -21,7 +21,7 @@ let serverProcess: ChildProcess | null = null;
  * Fetih Engine server'ını background'da başlat.
  * FETIH lifecycle'ında çağrılır.
  */
-export function startSethEngine(): void {
+export function startFetihEngine(): void {
   if (serverProcess) return;
 
   const serverScript = join(ENGINE_DIR, 'fetih_engine_server.py');
@@ -38,13 +38,22 @@ export function startSethEngine(): void {
       detached: false,
     });
 
-    serverProcess.stdout?.on('data', () => {});
-    serverProcess.stderr?.on('data', () => {});
-    serverProcess.on('error', () => { serverProcess = null; });
+    serverProcess.stdout?.on('data', (d: Buffer) => {
+      const msg = d.toString().trim();
+      if (msg) process.stderr.write(`[Fetih-Server] ${msg}\n`);
+    });
+    serverProcess.stderr?.on('data', (d: Buffer) => {
+      const msg = d.toString().trim();
+      if (msg) process.stderr.write(`[Fetih-Server ERR] ${msg}\n`);
+    });
+    serverProcess.on('error', (e) => {
+      process.stderr.write(`[Fetih-Server] Başlatma hatası: ${e.message}\n`);
+      serverProcess = null;
+    });
     serverProcess.on('exit', () => { serverProcess = null; });
 
     registerEngineMcp();
-    registerCleanup(async () => { stopSethEngine(); });
+    registerCleanup(async () => { stopFetihEngine(); });
   } catch {
     serverProcess = null;
   }
@@ -53,7 +62,7 @@ export function startSethEngine(): void {
 /**
  * Fetih Engine server'ını durdur.
  */
-export function stopSethEngine(): void {
+export function stopFetihEngine(): void {
   if (serverProcess) {
     try { serverProcess.kill('SIGTERM'); } catch { /* ignore */ }
     setTimeout(() => {

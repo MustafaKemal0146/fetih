@@ -1,34 +1,54 @@
 import { z } from 'zod';
 import { spawn, ChildProcess } from 'child_process';
+import { existsSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 import type { ToolDefinition, ToolResult } from '../types.js';
+
+const __fetihDirname = dirname(fileURLToPath(import.meta.url));
+const ENGINE_PATH = join(__fetihDirname, '../../FETIH-Apps/Core/FETIH_Engine.py');
 
 let pythonWorker: ChildProcess | null = null;
 
-function getWorker() {
+function getWorker(): ChildProcess {
   if (pythonWorker) return pythonWorker;
-  
-  pythonWorker = spawn('python3', ['FETIH-Apps/Core/FETIH_Engine.py'], {
-    stdio: ['pipe', 'pipe', 'inherit']
+
+  if (!existsSync(ENGINE_PATH)) {
+    throw new Error(`FETIH Engine bulunamadı: ${ENGINE_PATH}`);
+  }
+
+  pythonWorker = spawn('python3', [ENGINE_PATH], {
+    stdio: ['pipe', 'pipe', 'pipe'],
   });
-  
+
   if (pythonWorker.stdout) {
-    pythonWorker.stdout.on('data', (data) => {
+    pythonWorker.stdout.on('data', (data: Buffer) => {
       const lines = data.toString().split('\n');
       for (const line of lines) {
-        if (line.trim()) {
-          try {
-            const parsed = JSON.parse(line);
-            if (parsed.type === 'log') {
-              const color = parsed.level === 'SUCCESS' ? '\x1b[32m' : parsed.level === 'ERROR' ? '\x1b[31m' : '\x1b[36m';
-              console.log(`${color}[FETIH-WORKER] [${parsed.timestamp}] [${parsed.level}] ${parsed.message}\x1b[0m`);
-            }
-          } catch (e) {
-            // JSON değilse yoksay
+        if (!line.trim()) continue;
+        try {
+          const parsed = JSON.parse(line);
+          if (parsed.type === 'log') {
+            const color = parsed.level === 'SUCCESS' ? '\x1b[32m' : parsed.level === 'ERROR' ? '\x1b[31m' : '\x1b[36m';
+            console.log(`${color}[FETIH-WORKER] [${parsed.timestamp}] [${parsed.level}] ${parsed.message}\x1b[0m`);
           }
+        } catch {
+          // JSON değilse yoksay
         }
       }
     });
   }
+
+  pythonWorker.stderr?.on('data', (d: Buffer) => {
+    process.stderr.write(`[FETIH-Engine] ${d}`);
+  });
+
+  pythonWorker.on('error', (e) => {
+    process.stderr.write(`[FETIH-Engine] Başlatma hatası: ${e.message}\n`);
+    pythonWorker = null;
+  });
+
+  pythonWorker.on('exit', () => { pythonWorker = null; });
 
   return pythonWorker;
 }
@@ -41,9 +61,20 @@ export const fetihEngineSchema = z.object({
 export async function fetihEngine(input: Record<string, unknown>): Promise<ToolResult> {
   const args = fetihEngineSchema.parse(input);
   const { target, action } = args;
-  const worker = getWorker();
-  
+
+  let worker: ChildProcess;
+  try {
+    worker = getWorker();
+  } catch (e) {
+    return { output: `FETIH Engine başlatılamadı: ${e instanceof Error ? e.message : String(e)}`, isError: true };
+  }
+
   return new Promise((resolve) => {
+    const timeout = setTimeout(() => {
+      worker.stdout?.removeListener('data', onData);
+      resolve({ output: 'Zaman aşımı: FETIH Engine 60s içinde yanıt vermedi', isError: true });
+    }, 60_000);
+
     const onData = (data: Buffer) => {
       const lines = data.toString().split('\n');
       for (const line of lines) {
@@ -51,20 +82,21 @@ export async function fetihEngine(input: Record<string, unknown>): Promise<ToolR
         try {
           const parsed = JSON.parse(line);
           if (parsed.type === 'result') {
-            if (worker.stdout) worker.stdout.removeListener('data', onData);
+            clearTimeout(timeout);
+            worker.stdout?.removeListener('data', onData);
             resolve({
               output: JSON.stringify(parsed, null, 2),
-              isError: parsed.status === 'error'
+              isError: parsed.status === 'error',
             });
             return;
           }
-        } catch (e) {
+        } catch {
           // Yanıt JSON değilse devam et
         }
       }
     };
 
-    if (worker.stdout) worker.stdout.on('data', onData);
+    worker.stdout?.on('data', onData);
     if (worker.stdin) worker.stdin.write(JSON.stringify({ action, target }) + '\n');
   });
 }

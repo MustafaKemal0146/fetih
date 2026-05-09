@@ -32,10 +32,9 @@ function cachedGet(url: string): string | undefined {
 }
 
 function setCached(url: string, text: string): void {
-  // Evict old entries if cache grows too large
-  if (cache.size > 100) {
-    const oldest = [...cache.entries()].sort((a, b) => a[1].ts - b[1].ts)[0];
-    if (oldest) cache.delete(oldest[0]);
+  if (cache.size >= 100) {
+    const firstKey = cache.keys().next().value;
+    if (firstKey !== undefined) cache.delete(firstKey);
   }
   cache.set(url, { ts: Date.now(), text });
 }
@@ -155,16 +154,9 @@ export const webFetchTool: ToolDefinition = {
         };
       }
 
-      const raw = await res.text();
-      rawText = raw;
-
-      // Resim desteği: image/* content-type ise base64 olarak döndür
+      // Resim desteği: image/* content-type ise base64 olarak döndür (tek fetch)
       if (contentType.startsWith('image/')) {
-        const imgRes = await fetch(url, {
-          signal: controller.signal,
-          headers: { 'User-Agent': `FETIH/${VERSION} (Terminal AI Agent)` },
-        });
-        const buf = await imgRes.arrayBuffer();
+        const buf = await res.arrayBuffer();
         const b64 = Buffer.from(buf).toString('base64');
         const ext = contentType.split('/')[1]?.split(';')[0] ?? 'png';
         return {
@@ -173,6 +165,9 @@ export const webFetchTool: ToolDefinition = {
           data: { mediaType: contentType, base64: b64 } as any,
         };
       }
+
+      const raw = await res.text();
+      rawText = raw;
     } catch (err: unknown) {
       clearTimeout(timer);
       if (err instanceof Error && err.name === 'AbortError') {

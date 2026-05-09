@@ -1,11 +1,19 @@
 import type { ToolDefinition, ToolResult } from '../types.js';
+import { registerCleanup } from '../lifecycle.js';
 
 let puppeteer: any = null;
 let browserInstance: any = null;
 let currentPage: any = null;
+let cleanupRegistered = false;
 
 async function getPuppeteer() {
-  if (!puppeteer) puppeteer = await import('puppeteer');
+  if (!puppeteer) {
+    try {
+      puppeteer = await import('puppeteer');
+    } catch {
+      throw new Error('Puppeteer kurulu değil. Kurmak için: npm install puppeteer');
+    }
+  }
   return puppeteer;
 }
 
@@ -14,8 +22,12 @@ async function getBrowser() {
     const pptr = await getPuppeteer();
     browserInstance = await pptr.default.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
     });
+    if (!cleanupRegistered) {
+      cleanupRegistered = true;
+      registerCleanup(async () => { await closeBrowser(); });
+    }
   }
   return browserInstance;
 }
@@ -58,6 +70,7 @@ export const browserAutomationTool: ToolDefinition = {
     const action = input.action as string;
     try {
       if (action === 'close') { await closeBrowser(); return { output: '✓ Tarayıcı kapatıldı', isError: false }; }
+      try { await getPuppeteer(); } catch (e) { return { output: String(e), isError: true }; }
       const page = await getPage();
       switch (action) {
         case 'navigate': {

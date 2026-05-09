@@ -56,19 +56,19 @@ export async function createProvider(
       const apiKey = resolveProviderApiKey(resolved, config);
       if (!apiKey) throw new ProviderError('OPENROUTER_API_KEY is not set.', resolved);
       const { OpenAIProvider } = await import('./openai.js');
-      return new OpenAIProvider(apiKey, 'https://openrouter.ai/api/v1');
+      return new OpenAIProvider(apiKey, 'https://openrouter.ai/api/v1', 'openrouter');
     }
     case 'groq': {
       const apiKey = resolveProviderApiKey(resolved, config);
       if (!apiKey) throw new ProviderError('GROQ_API_KEY is not set.', resolved);
       const { OpenAIProvider } = await import('./openai.js');
-      return new OpenAIProvider(apiKey, 'https://api.groq.com/openai/v1');
+      return new OpenAIProvider(apiKey, 'https://api.groq.com/openai/v1', 'groq');
     }
     case 'mistral': {
       const apiKey = resolveProviderApiKey(resolved, config);
       if (!apiKey) throw new ProviderError('MISTRAL_API_KEY is not set.', resolved);
       const { OpenAIProvider } = await import('./openai.js');
-      return new OpenAIProvider(apiKey, 'https://api.mistral.ai/v1');
+      return new OpenAIProvider(apiKey, 'https://api.mistral.ai/v1', 'mistral');
     }
     case 'deepseek': {
       const apiKey = resolveProviderApiKey(resolved, config);
@@ -80,54 +80,54 @@ export async function createProvider(
       const apiKey = resolveProviderApiKey(resolved, config);
       if (!apiKey) throw new ProviderError('XAI_API_KEY is not set.', resolved);
       const { OpenAIProvider } = await import('./openai.js');
-      return new OpenAIProvider(apiKey, 'https://api.x.ai/v1');
+      return new OpenAIProvider(apiKey, 'https://api.x.ai/v1', 'xai');
     }
     case 'lmstudio': {
       const baseUrl = config.providers.lmstudio?.baseUrl ?? 'http://localhost:1234';
       const { OpenAIProvider } = await import('./openai.js');
-      return new OpenAIProvider('lm-studio', `${baseUrl}/v1`);
+      return new OpenAIProvider('lm-studio', `${baseUrl}/v1`, 'lmstudio');
     }
     case 'litellm': {
       const baseUrl = config.providers.litellm?.baseUrl ?? 'http://localhost:4000';
       const apiKey = resolveProviderApiKey(resolved, config) ?? 'litellm';
       const { OpenAIProvider } = await import('./openai.js');
-      return new OpenAIProvider(apiKey, `${baseUrl}/v1`);
+      return new OpenAIProvider(apiKey, `${baseUrl}/v1`, 'litellm');
     }
     case 'github-copilot': {
       const baseUrl = config.providers['github-copilot']?.baseUrl ?? 'http://localhost:3000';
       const { OpenAIProvider } = await import('./openai.js');
-      return new OpenAIProvider('n/a', `${baseUrl}/v1`);
+      return new OpenAIProvider('n/a', `${baseUrl}/v1`, 'github-copilot');
     }
     // === OpenAI uyumlu yeni provider'lar ===
     case 'fireworks': {
       const apiKey = resolveProviderApiKey(resolved, config);
       if (!apiKey) throw new ProviderError('FIREWORKS_API_KEY is not set.', resolved);
       const { OpenAIProvider } = await import('./openai.js');
-      return new OpenAIProvider(apiKey, 'https://api.fireworks.ai/inference/v1');
+      return new OpenAIProvider(apiKey, 'https://api.fireworks.ai/inference/v1', 'fireworks');
     }
     case 'together': {
       const apiKey = resolveProviderApiKey(resolved, config);
       if (!apiKey) throw new ProviderError('TOGETHER_API_KEY is not set.', resolved);
       const { OpenAIProvider } = await import('./openai.js');
-      return new OpenAIProvider(apiKey, 'https://api.together.xyz/v1');
+      return new OpenAIProvider(apiKey, 'https://api.together.xyz/v1', 'together');
     }
     case 'perplexity': {
       const apiKey = resolveProviderApiKey(resolved, config);
       if (!apiKey) throw new ProviderError('PERPLEXITY_API_KEY is not set.', resolved);
       const { OpenAIProvider } = await import('./openai.js');
-      return new OpenAIProvider(apiKey, 'https://api.perplexity.ai');
+      return new OpenAIProvider(apiKey, 'https://api.perplexity.ai', 'perplexity');
     }
     case 'huggingface': {
       const apiKey = resolveProviderApiKey(resolved, config);
       if (!apiKey) throw new ProviderError('HF_API_KEY is not set.', resolved);
       const { OpenAIProvider } = await import('./openai.js');
-      return new OpenAIProvider(apiKey, 'https://api-inference.huggingface.co/v1');
+      return new OpenAIProvider(apiKey, 'https://api-inference.huggingface.co/v1', 'huggingface');
     }
     case 'nvidia': {
       const apiKey = resolveProviderApiKey(resolved, config);
       if (!apiKey) throw new ProviderError('NVIDIA_API_KEY is not set.', resolved);
       const { OpenAIProvider } = await import('./openai.js');
-      return new OpenAIProvider(apiKey, 'https://integrate.api.nvidia.com/v1');
+      return new OpenAIProvider(apiKey, 'https://integrate.api.nvidia.com/v1', 'nvidia');
     }
     default: {
       throw new ProviderError(`Unknown provider: ${name as string}`, name as string);

@@ -94,7 +94,7 @@ export class DeepSeekProvider implements LLMProvider {
 
   async chat(messages: ChatMessage[], options: ChatOptions): Promise<ChatResponse> {
     const openaiMessages = this.toOpenAIMessages(messages, options.systemPrompt);
-    const thinkingEnabled = options.thinkingEnabled ?? true;
+    const thinkingEnabled = options.thinkingEnabled ?? false;
     const reasoningEffort = options.reasoningEffort ?? 'high';
 
     // Thinking açıkken temperature desteklenmiyor
@@ -126,7 +126,7 @@ export class DeepSeekProvider implements LLMProvider {
 
   async *stream(messages: ChatMessage[], options: ChatOptions): AsyncIterable<StreamEvent> {
     const openaiMessages = this.toOpenAIMessages(messages, options.systemPrompt);
-    const thinkingEnabled = options.thinkingEnabled ?? true;
+    const thinkingEnabled = options.thinkingEnabled ?? false;
     const reasoningEffort = options.reasoningEffort ?? 'high';
 
     const extraBody: Record<string, unknown> = thinkingEnabled
