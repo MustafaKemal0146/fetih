@@ -115,8 +115,8 @@ FETİH'in içine gömülü gelişmiş siber güvenlik motoru. 54 sınıf, 150 ar
 
 Fetih Engine iki katmanlıdır:
 
-1. **`seth_engine_server.py`** — Flask tabanlı arka plan sunucusu (8888 portu)
-2. **`seth_engine_mcp.py`** — MCP protokolü ile 150 tool'u AI'ya sunan arayüz
+1. **`fetih_engine_server.py`** — Flask tabanlı arka plan sunucusu (8888 portu)
+2. **`fetih_engine_mcp.py`** — MCP protokolü ile 150 tool'u AI'ya sunan arayüz
 
 FETİH açıldığında engine otomatik başlar, tool'lar keşfedilir ve AI'nın kullanımına sunulur. Tek yapman gereken FETİH'e ne yapmasını istediğini söylemek.
 
@@ -622,8 +622,8 @@ src/
 │                           # Mistral, xAI, LM Studio, LiteLLM, OpenRouter, Copilot
 ├── tools/                  # 60+ yerleşik araç
 ├── fetih-engine/            # Fetih Engine (150 tool, 54 sınıf, MCP server)
-│   ├── seth_engine_server.py
-│   ├── seth_engine_mcp.py
+│   ├── fetih_engine_server.py
+│   ├── fetih_engine_mcp.py
 │   ├── bridge.ts           # FETİH lifecycle entegrasyonu
 │   └── registry.ts         # Tool keşfi ve kaydı
 ├── web/                    # WebSocket tabanlı tarayıcı arayüzü
