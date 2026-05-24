@@ -1,0 +1,4 @@
+[console_scripts]
+fetih = fetih_cli.main:main
+fetih-acp = acp_adapter.entry:main
+fetih-agent = run_agent:main

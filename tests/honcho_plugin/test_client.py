@@ -1,0 +1,893 @@
+"""Tests for plugins/memory/honcho/client.py — Honcho client configuration."""
+
+import importlib.util
+import json
+import os
+from pathlib import Path
+from unittest.mock import patch, MagicMock
+
+from fetih_cli.profiles import _get_default_fetih_home
+
+import pytest
+
+from plugins.memory.honcho.client import (
+    HonchoClientConfig,
+    get_honcho_client,
+    reset_honcho_client,
+    resolve_active_host,
+    resolve_config_path,
+    resolve_global_config_path,
+    HOST,
+)
+
+
+class TestHonchoClientConfigDefaults:
+    def test_default_values(self):
+        config = HonchoClientConfig()
+        assert config.host == "fetih"
+        assert config.workspace_id == "fetih"
+        assert config.api_key is None
+        assert config.environment == "production"
+        assert config.timeout is None
+        assert config.enabled is False
+        assert config.save_messages is True
+        assert config.session_strategy == "per-directory"
+        assert config.recall_mode == "hybrid"
+        assert config.session_peer_prefix is False
+        assert config.sessions == {}
+
+
+class TestFromEnv:
+    def test_reads_api_key_from_env(self):
+        with patch.dict(os.environ, {"HONCHO_API_KEY": "test-key-123"}):
+            config = HonchoClientConfig.from_env()
+        assert config.api_key == "test-key-123"
+        assert config.enabled is True
+
+    def test_reads_environment_from_env(self):
+        with patch.dict(os.environ, {
+            "HONCHO_API_KEY": "key",
+            "HONCHO_ENVIRONMENT": "staging",
+        }):
+            config = HonchoClientConfig.from_env()
+        assert config.environment == "staging"
+
+    def test_defaults_without_env(self):
+        with patch.dict(os.environ, {}, clear=True):
+            # Remove HONCHO_API_KEY if it exists
+            os.environ.pop("HONCHO_API_KEY", None)
+            os.environ.pop("HONCHO_ENVIRONMENT", None)
+            config = HonchoClientConfig.from_env()
+        assert config.api_key is None
+        assert config.environment == "production"
+
+    def test_custom_workspace(self):
+        config = HonchoClientConfig.from_env(workspace_id="custom")
+        assert config.workspace_id == "custom"
+
+    def test_reads_base_url_from_env(self):
+        with patch.dict(os.environ, {"HONCHO_BASE_URL": "http://localhost:8000"}, clear=False):
+            config = HonchoClientConfig.from_env()
+        assert config.base_url == "http://localhost:8000"
+        assert config.enabled is True
+
+    def test_enabled_without_api_key_when_base_url_set(self):
+        """base_url alone (no API key) is sufficient to enable a local instance."""
+        with patch.dict(os.environ, {"HONCHO_BASE_URL": "http://localhost:8000"}, clear=False):
+            os.environ.pop("HONCHO_API_KEY", None)
+            config = HonchoClientConfig.from_env()
+        assert config.api_key is None
+        assert config.base_url == "http://localhost:8000"
+        assert config.enabled is True
+
+    def test_reads_timeout_from_env(self):
+        with patch.dict(os.environ, {"HONCHO_TIMEOUT": "90"}, clear=True):
+            config = HonchoClientConfig.from_env()
+        assert config.timeout == 90.0
+
+
+class TestFromGlobalConfig:
+    def test_missing_config_falls_back_to_env(self, tmp_path):
+        with patch.dict(os.environ, {}, clear=True):
+            config = HonchoClientConfig.from_global_config(
+                config_path=tmp_path / "nonexistent.json"
+            )
+        # Should fall back to from_env
+        assert config.enabled is False
+        assert config.api_key is None
+
+    def test_reads_full_config(self, tmp_path, monkeypatch):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "apiKey": "***",
+            "workspace": "my-workspace",
+            "environment": "staging",
+            "peerName": "alice",
+            "aiPeer": "fetih-custom",
+            "enabled": True,
+            "saveMessages": False,
+            "contextTokens": 2000,
+            "sessionStrategy": "per-project",
+            "sessionPeerPrefix": True,
+            "sessions": {"/home/user/proj": "my-session"},
+            "hosts": {
+                "fetih": {
+                    "workspace": "override-ws",
+                    "aiPeer": "override-ai",
+                }
+            }
+        }))
+        # Isolate from real ~/.fetih/honcho.json
+        monkeypatch.setenv("FETIH_HOME", str(tmp_path / "isolated"))
+
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.api_key == "***"
+        # Host block workspace overrides root workspace
+        assert config.workspace_id == "override-ws"
+        assert config.ai_peer == "override-ai"
+        assert config.environment == "staging"
+        assert config.peer_name == "alice"
+        assert config.enabled is True
+        assert config.save_messages is False
+        assert config.session_strategy == "per-project"
+        assert config.session_peer_prefix is True
+
+    def test_host_block_overrides_root(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "apiKey": "key",
+            "workspace": "root-ws",
+            "aiPeer": "root-ai",
+            "hosts": {
+                "fetih": {
+                    "workspace": "host-ws",
+                    "aiPeer": "host-ai",
+                }
+            }
+        }))
+
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.workspace_id == "host-ws"
+        assert config.ai_peer == "host-ai"
+
+    def test_root_fields_used_when_no_host_block(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "apiKey": "key",
+            "workspace": "root-ws",
+            "aiPeer": "root-ai",
+        }))
+
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.workspace_id == "root-ws"
+        assert config.ai_peer == "root-ai"
+
+    def test_session_strategy_default_from_global_config(self, tmp_path):
+        """from_global_config with no sessionStrategy should match dataclass default."""
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"apiKey": "***"}))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.session_strategy == "per-directory"
+
+    def test_context_tokens_default_is_none(self, tmp_path):
+        """Default context_tokens should be None (uncapped) unless explicitly set."""
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"apiKey": "***"}))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.context_tokens is None
+
+    def test_context_tokens_explicit_sets_cap(self, tmp_path):
+        """Explicit contextTokens in config sets the cap."""
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"apiKey": "***", "contextTokens": 1200}))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.context_tokens == 1200
+
+    def test_context_tokens_explicit_overrides_default(self, tmp_path):
+        """Explicit contextTokens in config should override the default."""
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"apiKey": "***", "contextTokens": 2000}))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.context_tokens == 2000
+
+    def test_context_tokens_host_block_wins(self, tmp_path):
+        """Host block contextTokens should override root."""
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "apiKey": "key",
+            "contextTokens": 1000,
+            "hosts": {"fetih": {"contextTokens": 2000}},
+        }))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.context_tokens == 2000
+
+    def test_recall_mode_from_config(self, tmp_path):
+        """recallMode is read from config, host block wins."""
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "apiKey": "key",
+            "recallMode": "tools",
+            "hosts": {"fetih": {"recallMode": "context"}},
+        }))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.recall_mode == "context"
+
+    def test_recall_mode_default(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"apiKey": "key"}))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.recall_mode == "hybrid"
+
+    def test_corrupt_config_falls_back_to_env(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text("not valid json{{{")
+
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        # Should fall back to from_env without crashing
+        assert isinstance(config, HonchoClientConfig)
+
+    def test_api_key_env_fallback(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"enabled": True}))
+
+        with patch.dict(os.environ, {"HONCHO_API_KEY": "env-key"}):
+            config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.api_key == "env-key"
+
+    def test_base_url_env_fallback(self, tmp_path):
+        """HONCHO_BASE_URL env var is used when no baseUrl in config JSON."""
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"workspace": "local"}))
+
+        with patch.dict(os.environ, {"HONCHO_BASE_URL": "http://localhost:8000"}, clear=False):
+            config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.base_url == "http://localhost:8000"
+        assert config.enabled is True
+
+    def test_base_url_from_config_root(self, tmp_path):
+        """baseUrl in config root is read and takes precedence over env var."""
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"baseUrl": "http://config-host:9000"}))
+
+        with patch.dict(os.environ, {"HONCHO_BASE_URL": "http://localhost:8000"}, clear=False):
+            config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.base_url == "http://config-host:9000"
+
+    def test_base_url_not_read_from_host_block(self, tmp_path):
+        """baseUrl is a root-level connection setting, not overridable per-host (consistent with apiKey)."""
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "baseUrl": "http://root:9000",
+            "hosts": {"fetih": {"baseUrl": "http://host-block:9001"}},
+        }))
+
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.base_url == "http://root:9000"
+
+    def test_timeout_from_config_root(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"timeout": 75}))
+
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.timeout == 75.0
+
+    def test_request_timeout_alias_from_config_root(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"requestTimeout": "82.5"}))
+
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.timeout == 82.5
+
+
+class TestResolveSessionName:
+    def test_manual_override(self):
+        config = HonchoClientConfig(sessions={"/home/user/proj": "custom-session"})
+        assert config.resolve_session_name("/home/user/proj") == "custom-session"
+
+    def test_derive_from_dirname(self):
+        config = HonchoClientConfig()
+        result = config.resolve_session_name("/home/user/my-project")
+        assert result == "my-project"
+
+    def test_peer_prefix(self):
+        config = HonchoClientConfig(peer_name="alice", session_peer_prefix=True)
+        result = config.resolve_session_name("/home/user/proj")
+        assert result == "alice-proj"
+
+    def test_no_peer_prefix_when_no_peer_name(self):
+        config = HonchoClientConfig(session_peer_prefix=True)
+        result = config.resolve_session_name("/home/user/proj")
+        assert result == "proj"
+
+    def test_default_cwd(self):
+        config = HonchoClientConfig()
+        result = config.resolve_session_name()
+        # Should use os.getcwd() basename
+        assert result == Path.cwd().name
+
+    def test_per_repo_uses_git_root(self):
+        config = HonchoClientConfig(session_strategy="per-repo")
+        with patch.object(
+            HonchoClientConfig, "_git_repo_name", return_value="fetih-agent"
+        ):
+            result = config.resolve_session_name("/home/user/fetih-agent/subdir")
+        assert result == "fetih-agent"
+
+    def test_per_repo_with_peer_prefix(self):
+        config = HonchoClientConfig(
+            session_strategy="per-repo", peer_name="eri", session_peer_prefix=True
+        )
+        with patch.object(
+            HonchoClientConfig, "_git_repo_name", return_value="groudon"
+        ):
+            result = config.resolve_session_name("/home/user/groudon/src")
+        assert result == "eri-groudon"
+
+    def test_per_repo_falls_back_to_dirname_outside_git(self):
+        config = HonchoClientConfig(session_strategy="per-repo")
+        with patch.object(
+            HonchoClientConfig, "_git_repo_name", return_value=None
+        ):
+            result = config.resolve_session_name("/home/user/not-a-repo")
+        assert result == "not-a-repo"
+
+    def test_per_repo_manual_override_still_wins(self):
+        config = HonchoClientConfig(
+            session_strategy="per-repo",
+            sessions={"/home/user/proj": "custom-session"},
+        )
+        result = config.resolve_session_name("/home/user/proj")
+        assert result == "custom-session"
+
+
+class TestResolveConfigPath:
+    def test_prefers_fetih_home_when_exists(self, tmp_path):
+        fetih_home = tmp_path / "fetih"
+        fetih_home.mkdir()
+        local_cfg = fetih_home / "honcho.json"
+        local_cfg.write_text('{"apiKey": "local"}')
+
+        with patch.dict(os.environ, {"FETIH_HOME": str(fetih_home)}):
+            result = resolve_config_path()
+        assert result == local_cfg
+
+    def test_falls_back_to_default_profile_when_no_local(self, tmp_path, monkeypatch):
+        # Profile mode: FETIH_HOME points at ~/.fetih/profiles/<name>, so
+        # _get_default_fetih_home() must resolve back to ~/.fetih — that's
+        # the bug the HOME-anchored helper fixes (vs. blindly using Path.home()).
+        fake_home = tmp_path / "fakehome"
+        fake_home.mkdir()
+        default_home = fake_home / ".fetih"
+        profile_home = default_home / "profiles" / "work"
+        profile_home.mkdir(parents=True)
+        default_cfg = default_home / "honcho.json"
+        default_cfg.write_text('{"apiKey": "default-key"}')
+
+        monkeypatch.setattr(Path, "home", lambda: fake_home)
+        monkeypatch.setenv("FETIH_HOME", str(profile_home))
+
+        result = resolve_config_path()
+
+        assert _get_default_fetih_home() == default_home
+        assert result == default_cfg
+
+    def test_falls_back_to_global_without_fetih_home_env(self, tmp_path):
+        fake_home = tmp_path / "fakehome"
+        fake_home.mkdir()
+
+        with patch.dict(os.environ, {}, clear=False), \
+             patch.object(Path, "home", return_value=fake_home):
+            os.environ.pop("FETIH_HOME", None)
+            result = resolve_config_path()
+        assert result == fake_home / ".honcho" / "config.json"
+
+    def test_global_fallback_uses_home_at_call_time(self, tmp_path):
+        fake_home = tmp_path / "fakehome"
+        fake_home.mkdir()
+        fetih_home = tmp_path / "fetih"
+        fetih_home.mkdir()
+
+        with patch.dict(os.environ, {"FETIH_HOME": str(fetih_home)}), \
+             patch.object(Path, "home", return_value=fake_home):
+            assert resolve_global_config_path() == fake_home / ".honcho" / "config.json"
+            assert resolve_config_path() == fake_home / ".honcho" / "config.json"
+
+    def test_from_global_config_uses_default_profile_fallback(self, tmp_path, monkeypatch):
+        # Profile mode: from_global_config() reads the default-profile honcho.json
+        # via the HOME-anchored helper, not Path.home() / ".fetih".
+        fake_home = tmp_path / "fakehome"
+        fake_home.mkdir()
+        default_home = fake_home / ".fetih"
+        profile_home = default_home / "profiles" / "work"
+        profile_home.mkdir(parents=True)
+        default_cfg = default_home / "honcho.json"
+        default_cfg.write_text(json.dumps({
+            "apiKey": "default-key",
+            "workspace": "default-ws",
+        }))
+
+        monkeypatch.setattr(Path, "home", lambda: fake_home)
+        monkeypatch.setenv("FETIH_HOME", str(profile_home))
+
+        config = HonchoClientConfig.from_global_config()
+
+        assert config.api_key == "default-key"
+        assert config.workspace_id == "default-ws"
+
+    def test_from_global_config_uses_local_path(self, tmp_path):
+        fetih_home = tmp_path / "fetih"
+        fetih_home.mkdir()
+        local_cfg = fetih_home / "honcho.json"
+        local_cfg.write_text(json.dumps({
+            "apiKey": "***",
+            "workspace": "local-ws",
+        }))
+
+        with patch.dict(os.environ, {"FETIH_HOME": str(fetih_home)}), \
+             patch.object(Path, "home", return_value=tmp_path):
+            config = HonchoClientConfig.from_global_config()
+        assert config.api_key == "***"
+        assert config.workspace_id == "local-ws"
+
+
+class TestResolveActiveHost:
+    def test_default_returns_fetih(self):
+        with patch.dict(os.environ, {}, clear=True):
+            os.environ.pop("FETIH_HONCHO_HOST", None)
+            os.environ.pop("FETIH_HOME", None)
+            assert resolve_active_host() == "fetih"
+
+    def test_explicit_env_var_wins(self):
+        with patch.dict(os.environ, {"FETIH_HONCHO_HOST": "fetih.coder"}):
+            assert resolve_active_host() == "fetih.coder"
+
+    def test_profile_name_derives_host(self):
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("FETIH_HONCHO_HOST", None)
+            with patch("fetih_cli.profiles.get_active_profile_name", return_value="coder"):
+                assert resolve_active_host() == "fetih.coder"
+
+    def test_default_profile_returns_fetih(self):
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("FETIH_HONCHO_HOST", None)
+            with patch("fetih_cli.profiles.get_active_profile_name", return_value="default"):
+                assert resolve_active_host() == "fetih"
+
+    def test_custom_profile_returns_fetih(self):
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("FETIH_HONCHO_HOST", None)
+            with patch("fetih_cli.profiles.get_active_profile_name", return_value="custom"):
+                assert resolve_active_host() == "fetih"
+
+    def test_profiles_import_failure_falls_back(self):
+        import sys
+        with patch.dict(os.environ, {}, clear=False):
+            os.environ.pop("FETIH_HONCHO_HOST", None)
+            # Temporarily remove fetih_cli.profiles to simulate import failure
+            saved = sys.modules.get("fetih_cli.profiles")
+            sys.modules["fetih_cli.profiles"] = None  # type: ignore
+            try:
+                assert resolve_active_host() == "fetih"
+            finally:
+                if saved is not None:
+                    sys.modules["fetih_cli.profiles"] = saved
+                else:
+                    sys.modules.pop("fetih_cli.profiles", None)
+
+
+class TestProfileScopedConfig:
+    def test_from_env_uses_profile_host(self):
+        with patch.dict(os.environ, {"HONCHO_API_KEY": "key"}):
+            config = HonchoClientConfig.from_env(host="fetih.coder")
+        assert config.host == "fetih.coder"
+        assert config.workspace_id == "fetih"  # shared workspace
+        assert config.ai_peer == "fetih.coder"
+
+    def test_from_env_default_workspace_preserved_for_default_host(self):
+        with patch.dict(os.environ, {"HONCHO_API_KEY": "key"}):
+            config = HonchoClientConfig.from_env(host="fetih")
+        assert config.host == "fetih"
+        assert config.workspace_id == "fetih"
+
+    def test_from_global_config_reads_profile_host_block(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "apiKey": "shared-key",
+            "hosts": {
+                "fetih": {"aiPeer": "fetih", "peerName": "alice"},
+                "fetih.coder": {
+                    "aiPeer": "fetih.coder",
+                    "peerName": "alice-coder",
+                    "workspace": "coder-ws",
+                },
+            },
+        }))
+        config = HonchoClientConfig.from_global_config(
+            host="fetih.coder", config_path=config_file,
+        )
+        assert config.host == "fetih.coder"
+        assert config.workspace_id == "coder-ws"
+        assert config.ai_peer == "fetih.coder"
+        assert config.peer_name == "alice-coder"
+
+    def test_from_global_config_auto_resolves_host(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "apiKey": "key",
+            "hosts": {
+                "fetih.dreamer": {"peerName": "dreamer-user"},
+            },
+        }))
+        with patch("plugins.memory.honcho.client.resolve_active_host", return_value="fetih.dreamer"):
+            config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.host == "fetih.dreamer"
+        assert config.peer_name == "dreamer-user"
+
+
+class TestObservationModeMigration:
+    """Existing configs without explicit observationMode keep 'unified' default."""
+
+    def test_existing_config_defaults_to_unified(self, tmp_path):
+        """Config with host block but no observationMode → 'unified' (old default)."""
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps({
+            "apiKey": "k",
+            "hosts": {"fetih": {"enabled": True, "aiPeer": "fetih"}},
+        }))
+        cfg = HonchoClientConfig.from_global_config(config_path=cfg_file)
+        assert cfg.observation_mode == "unified"
+
+    def test_new_config_defaults_to_directional(self, tmp_path):
+        """Config with no host block and no credentials → 'directional' (new default)."""
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps({}))
+        cfg = HonchoClientConfig.from_global_config(config_path=cfg_file)
+        assert cfg.observation_mode == "directional"
+
+    def test_explicit_directional_respected(self, tmp_path):
+        """Existing config with explicit observationMode → uses what's set."""
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps({
+            "apiKey": "k",
+            "hosts": {"fetih": {"enabled": True, "observationMode": "directional"}},
+        }))
+        cfg = HonchoClientConfig.from_global_config(config_path=cfg_file)
+        assert cfg.observation_mode == "directional"
+
+    def test_explicit_unified_respected(self, tmp_path):
+        """Existing config with explicit observationMode unified → stays unified."""
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps({
+            "apiKey": "k",
+            "observationMode": "unified",
+            "hosts": {"fetih": {"enabled": True}},
+        }))
+        cfg = HonchoClientConfig.from_global_config(config_path=cfg_file)
+        assert cfg.observation_mode == "unified"
+
+    def test_granular_observation_overrides_preset(self, tmp_path):
+        """Explicit observation object overrides both preset and migration default."""
+        cfg_file = tmp_path / "config.json"
+        cfg_file.write_text(json.dumps({
+            "apiKey": "k",
+            "hosts": {"fetih": {
+                "enabled": True,
+                "observation": {
+                    "user": {"observeMe": True, "observeOthers": False},
+                    "ai": {"observeMe": False, "observeOthers": True},
+                },
+            }},
+        }))
+        cfg = HonchoClientConfig.from_global_config(config_path=cfg_file)
+        # observation_mode falls back to "unified" (migration), but
+        # granular booleans from the observation object win
+        assert cfg.user_observe_me is True
+        assert cfg.user_observe_others is False
+        assert cfg.ai_observe_me is False
+        assert cfg.ai_observe_others is True
+
+
+class TestGetHonchoClient:
+    def teardown_method(self):
+        reset_honcho_client()
+
+    @pytest.mark.skipif(
+        not importlib.util.find_spec("honcho"),
+        reason="honcho SDK not installed"
+    )
+    def test_passes_timeout_from_config(self):
+        fake_honcho = MagicMock(name="Honcho")
+        cfg = HonchoClientConfig(
+            api_key="test-key",
+            timeout=91.0,
+            workspace_id="fetih",
+            environment="production",
+        )
+
+        with patch("honcho.Honcho", return_value=fake_honcho) as mock_honcho:
+            client = get_honcho_client(cfg)
+
+        assert client is fake_honcho
+        mock_honcho.assert_called_once()
+        assert mock_honcho.call_args.kwargs["timeout"] == 91.0
+
+    @pytest.mark.skipif(
+        not importlib.util.find_spec("honcho"),
+        reason="honcho SDK not installed"
+    )
+    def test_fetih_config_timeout_override_used_when_config_timeout_missing(self):
+        fake_honcho = MagicMock(name="Honcho")
+        cfg = HonchoClientConfig(
+            api_key="test-key",
+            workspace_id="fetih",
+            environment="production",
+        )
+
+        with patch("honcho.Honcho", return_value=fake_honcho) as mock_honcho, \
+             patch("fetih_cli.config.load_config", return_value={"honcho": {"timeout": 88}}):
+            client = get_honcho_client(cfg)
+
+        assert client is fake_honcho
+        mock_honcho.assert_called_once()
+        assert mock_honcho.call_args.kwargs["timeout"] == 88.0
+
+    @pytest.mark.skipif(
+        not importlib.util.find_spec("honcho"),
+        reason="honcho SDK not installed"
+    )
+    def test_defaults_to_30s_when_no_timeout_configured(self):
+        from plugins.memory.honcho.client import _DEFAULT_HTTP_TIMEOUT
+
+        fake_honcho = MagicMock(name="Honcho")
+        cfg = HonchoClientConfig(
+            api_key="test-key",
+            workspace_id="fetih",
+            environment="production",
+        )
+
+        with patch("honcho.Honcho", return_value=fake_honcho) as mock_honcho, \
+             patch("fetih_cli.config.load_config", return_value={}):
+            client = get_honcho_client(cfg)
+
+        assert client is fake_honcho
+        mock_honcho.assert_called_once()
+        assert mock_honcho.call_args.kwargs["timeout"] == _DEFAULT_HTTP_TIMEOUT
+
+    @pytest.mark.skipif(
+        not importlib.util.find_spec("honcho"),
+        reason="honcho SDK not installed"
+    )
+    def test_fetih_request_timeout_alias_used(self):
+        fake_honcho = MagicMock(name="Honcho")
+        cfg = HonchoClientConfig(
+            api_key="test-key",
+            workspace_id="fetih",
+            environment="production",
+        )
+
+        with patch("honcho.Honcho", return_value=fake_honcho) as mock_honcho, \
+             patch("fetih_cli.config.load_config", return_value={"honcho": {"request_timeout": "77.5"}}):
+            client = get_honcho_client(cfg)
+
+        assert client is fake_honcho
+        mock_honcho.assert_called_once()
+        assert mock_honcho.call_args.kwargs["timeout"] == 77.5
+
+
+class TestResolveSessionNameGatewayKey:
+    """Regression tests for gateway_session_key priority in resolve_session_name.
+
+    Ensures gateway platforms get stable per-chat Honcho sessions even when
+    sessionStrategy=per-session would otherwise create ephemeral sessions.
+    Regression: plugin refactor 924bc67e dropped gateway key plumbing.
+    """
+
+    def test_gateway_key_overrides_per_session_strategy(self):
+        """gateway_session_key must win over per-session session_id."""
+        config = HonchoClientConfig(session_strategy="per-session")
+        result = config.resolve_session_name(
+            session_id="20260412_171002_69bb38",
+            gateway_session_key="agent:main:telegram:dm:8439114563",
+        )
+        assert result == "agent-main-telegram-dm-8439114563"
+
+    def test_session_title_still_wins_over_gateway_key(self):
+        """Explicit /title remap takes priority over gateway_session_key."""
+        config = HonchoClientConfig(session_strategy="per-session")
+        result = config.resolve_session_name(
+            session_title="my-custom-title",
+            session_id="20260412_171002_69bb38",
+            gateway_session_key="agent:main:telegram:dm:8439114563",
+        )
+        assert result == "my-custom-title"
+
+    def test_per_session_fallback_without_gateway_key(self):
+        """Without gateway_session_key, per-session returns session_id (CLI path)."""
+        config = HonchoClientConfig(session_strategy="per-session")
+        result = config.resolve_session_name(
+            session_id="20260412_171002_69bb38",
+            gateway_session_key=None,
+        )
+        assert result == "20260412_171002_69bb38"
+
+    def test_gateway_key_sanitizes_special_chars(self):
+        """Colons and other non-alphanumeric chars are replaced with hyphens."""
+        config = HonchoClientConfig()
+        result = config.resolve_session_name(
+            gateway_session_key="agent:main:telegram:dm:8439114563",
+        )
+        assert result == "agent-main-telegram-dm-8439114563"
+        assert ":" not in result
+
+
+class TestResolveSessionNameLengthLimit:
+    """Regression tests for Honcho's 100-char session ID limit (issue #13868).
+
+    Long gateway session keys (Matrix room+event IDs, Telegram supergroup
+    reply chains, Slack thread IDs with long workspace prefixes) can overflow
+    Honcho's 100-char session_id limit after sanitization. Before this fix,
+    every Honcho API call for those sessions 400'd with "session_id too long".
+    """
+
+    HONCHO_MAX = 100
+
+    def test_short_gateway_key_unchanged(self):
+        """Short keys must not get a hash suffix appended."""
+        config = HonchoClientConfig()
+        result = config.resolve_session_name(
+            gateway_session_key="agent:main:telegram:dm:8439114563",
+        )
+        # Unchanged fast-path: sanitize only, no truncation, no hash suffix.
+        assert result == "agent-main-telegram-dm-8439114563"
+        assert len(result) <= self.HONCHO_MAX
+
+    def test_key_at_exact_limit_unchanged(self):
+        """A sanitized key that is exactly 100 chars must be returned as-is."""
+        key = "a" * self.HONCHO_MAX
+        config = HonchoClientConfig()
+        result = config.resolve_session_name(gateway_session_key=key)
+        assert result == key
+        assert len(result) == self.HONCHO_MAX
+
+    def test_long_gateway_key_truncated_to_limit(self):
+        """An over-limit sanitized key must truncate to exactly 100 chars."""
+        key = "!roomid:matrix.example.org|" + "$event_" + ("a" * 300)
+        config = HonchoClientConfig()
+        result = config.resolve_session_name(gateway_session_key=key)
+        assert result is not None
+        assert len(result) == self.HONCHO_MAX
+
+    def test_truncation_is_deterministic(self):
+        """Same long key must always produce the same truncated session ID."""
+        key = "matrix-" + ("a" * 300)
+        config = HonchoClientConfig()
+        first = config.resolve_session_name(gateway_session_key=key)
+        second = config.resolve_session_name(gateway_session_key=key)
+        assert first == second
+
+    def test_truncated_result_respects_char_allowlist(self):
+        """Truncated result must still match Honcho's [a-zA-Z0-9_-] allowlist."""
+        import re
+        key = "slack:T12345:thread-reply:" + ("x" * 300) + ":with:colons:and:slashes/here"
+        config = HonchoClientConfig()
+        result = config.resolve_session_name(gateway_session_key=key)
+        assert result is not None
+        assert re.fullmatch(r"[a-zA-Z0-9_-]+", result)
+
+    def test_distinct_long_keys_do_not_collide(self):
+        """Two long keys sharing a prefix must produce different truncated IDs."""
+        prefix = "matrix:!room:example.org|" + "a" * 200
+        key_a = prefix + "-suffix-alpha"
+        key_b = prefix + "-suffix-beta"
+        config = HonchoClientConfig()
+        result_a = config.resolve_session_name(gateway_session_key=key_a)
+        result_b = config.resolve_session_name(gateway_session_key=key_b)
+        assert result_a != result_b
+        assert len(result_a) == self.HONCHO_MAX
+        assert len(result_b) == self.HONCHO_MAX
+
+    def test_truncated_result_has_hash_suffix(self):
+        """Truncated IDs must end with '-<8 hex chars>' for collision resistance."""
+        import re
+        key = "matrix-" + ("a" * 300)
+        config = HonchoClientConfig()
+        result = config.resolve_session_name(gateway_session_key=key)
+        # Last 9 chars: '-' + 8 hex chars.
+        assert re.search(r"-[0-9a-f]{8}$", result)
+
+
+class TestResetHonchoClient:
+    def test_reset_clears_singleton(self):
+        import plugins.memory.honcho.client as mod
+        mod._honcho_client = MagicMock()
+        assert mod._honcho_client is not None
+        reset_honcho_client()
+        assert mod._honcho_client is None
+
+
+class TestDialecticDepthParsing:
+    """Tests for _parse_dialectic_depth and _parse_dialectic_depth_levels."""
+
+    def test_default_depth_is_1(self, tmp_path):
+        """Default dialecticDepth should be 1."""
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"apiKey": "***"}))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.dialectic_depth == 1
+
+    def test_depth_from_root(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"apiKey": "***", "dialecticDepth": 2}))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.dialectic_depth == 2
+
+    def test_depth_host_block_wins(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "apiKey": "***",
+            "dialecticDepth": 1,
+            "hosts": {"fetih": {"dialecticDepth": 3}},
+        }))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.dialectic_depth == 3
+
+    def test_depth_clamped_high(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"apiKey": "***", "dialecticDepth": 10}))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.dialectic_depth == 3
+
+    def test_depth_clamped_low(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"apiKey": "***", "dialecticDepth": -1}))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.dialectic_depth == 1
+
+    def test_depth_levels_default_none(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({"apiKey": "***"}))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.dialectic_depth_levels is None
+
+    def test_depth_levels_from_config(self, tmp_path):
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "apiKey": "***",
+            "dialecticDepth": 2,
+            "dialecticDepthLevels": ["minimal", "high"],
+        }))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.dialectic_depth_levels == ["minimal", "high"]
+
+    def test_depth_levels_padded_if_short(self, tmp_path):
+        """Array shorter than depth gets padded with 'low'."""
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "apiKey": "***",
+            "dialecticDepth": 3,
+            "dialecticDepthLevels": ["high"],
+        }))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.dialectic_depth_levels == ["high", "low", "low"]
+
+    def test_depth_levels_truncated_if_long(self, tmp_path):
+        """Array longer than depth gets truncated."""
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "apiKey": "***",
+            "dialecticDepth": 1,
+            "dialecticDepthLevels": ["high", "max", "medium"],
+        }))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.dialectic_depth_levels == ["high"]
+
+    def test_depth_levels_invalid_values_default_to_low(self, tmp_path):
+        """Invalid reasoning levels in the array fall back to 'low'."""
+        config_file = tmp_path / "config.json"
+        config_file.write_text(json.dumps({
+            "apiKey": "***",
+            "dialecticDepth": 2,
+            "dialecticDepthLevels": ["invalid", "high"],
+        }))
+        config = HonchoClientConfig.from_global_config(config_path=config_file)
+        assert config.dialectic_depth_levels == ["low", "high"]

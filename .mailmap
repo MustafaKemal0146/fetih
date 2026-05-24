@@ -1,0 +1,6 @@
+# .mailmap — canonical author mapping for git shortlog / git log / GitHub
+# Format: Canonical Name <canonical@email> <commit@email>
+# See: https://git-scm.com/docs/gitmailmap
+
+# Add contributor mappings here as needed.
+Mustafa Kemal Çıngıl <workmustafakemalcingil@gmail.com>

@@ -1,0 +1,81 @@
+/**
+ * @fileoverview Salt okunur git diff (tam veya --stat, staged opsiyonel).
+ */
+import { relative, resolve } from 'path';
+import chalk from 'chalk';
+import { resolveGitRepoRoot, runGit } from './git-internal.js';
+export const gitDiffTool = {
+    name: 'git_diff',
+    description: 'İşleme alınmış veya alınmamış değişikliklerin diff çıktısı veya --stat özeti. Salt okunur.',
+    inputSchema: {
+        type: 'object',
+        properties: {
+            staged: {
+                type: 'boolean',
+                description: 'true ise index (stage) ile HEAD arası (--cached). Varsayılan: false (çalışma ağacı).',
+            },
+            stat_only: {
+                type: 'boolean',
+                description: 'true ise yalnızca dosya başına satır istatistiği (--stat). Varsayılan: false (tam diff).',
+            },
+            paths: {
+                type: 'array',
+                items: { type: 'string' },
+                description: 'İsteğe bağlı dosya/klasör yolları (cwd’ye göre).',
+            },
+        },
+        required: [],
+    },
+    isDestructive: false,
+    requiresConfirmation: false,
+    async execute(input, cwd) {
+        const { root, error } = resolveGitRepoRoot(cwd);
+        if (!root)
+            return { output: error ?? 'Git hatası', isError: true };
+        const staged = Boolean(input.staged);
+        const statOnly = Boolean(input.stat_only);
+        const pathsIn = input.paths?.filter((x) => x?.trim()) ?? [];
+        const args = ['diff'];
+        if (staged)
+            args.push('--cached');
+        if (statOnly)
+            args.push('--stat');
+        if (pathsIn.length > 0) {
+            const relPaths = [];
+            for (const p of pathsIn) {
+                const abs = resolve(cwd, p);
+                const rel = relative(root, abs).replace(/\\/g, '/');
+                if (rel.startsWith('..')) {
+                    return { output: `paths içinde depo dışı yol: ${p}`, isError: true };
+                }
+                relPaths.push(rel || '.');
+            }
+            args.push('--', ...relPaths);
+        }
+        const r = runGit(root, args);
+        if (!r.ok) {
+            return {
+                output: r.stderr.trim() || r.stdout.trim() || `git diff çıkış kodu: ${r.exitCode}`,
+                isError: true,
+            };
+        }
+        const out = r.stdout.trim();
+        if (!out)
+            return { output: statOnly ? '(değişiklik yok)' : '' };
+        if (statOnly)
+            return { output: out };
+        // Basit renklendirme
+        const lines = out.split('\n').map(line => {
+            if (line.startsWith('+') && !line.startsWith('+++'))
+                return chalk.green(line);
+            if (line.startsWith('-') && !line.startsWith('---'))
+                return chalk.red(line);
+            if (line.startsWith('@@'))
+                return chalk.cyan(line);
+            if (line.startsWith('diff') || line.startsWith('index'))
+                return chalk.bold(line);
+            return line;
+        });
+        return { output: lines.join('\n') };
+    },
+};

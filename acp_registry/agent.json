@@ -1,0 +1,16 @@
+{
+  "id": "fetih-agent",
+  "name": "FETIH Agent",
+  "version": "1.0.0",
+  "description": "Open-source offensive security & CTF AI agent with persistent memory, skill system, and rich tool support.",
+  "repository": "https://github.com/MustafaKemal0146/fetih",
+  "website": "https://github.com/MustafaKemal0146/fetih",
+  "authors": ["MustafaKemal0146"],
+  "license": "MIT",
+  "distribution": {
+    "uvx": {
+      "package": "fetih-agent[acp]==1.0.0",
+      "args": ["fetih-acp"]
+    }
+  }
+}

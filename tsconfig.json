@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "./dist",
+    "rootDir": ".",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  },
+  "include": [
+    "bridge/**/*.ts",
+    "tools/ctf/**/*.ts",
+    "tools/osint/**/*.ts",
+    "tools/git/**/*.ts",
+    "tools/image-analyze.ts",
+    "types.ts",
+    "lifecycle.ts"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules"
+  ]
+}
