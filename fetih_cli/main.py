@@ -5815,6 +5815,36 @@ def cmd_version(args):
         pass
 
 
+def cmd_download_tools(args):
+    """CTF/pentest araçlarını indir ve kur."""
+    import platform as _platform
+    if _platform.system() != "Linux":
+        print("Hata: download-tools yalnızca Linux'ta çalışır.", file=sys.stderr)
+        sys.exit(1)
+
+    from fetih_cli.tool_installer import (
+        interactive_menu,
+        install_tools,
+        print_status,
+        tools_for_category,
+    )
+
+    category = getattr(args, "category", None)
+    yes      = getattr(args, "yes", False)
+
+    if category == "status":
+        print_status()
+        return
+
+    tool_list = tools_for_category(category)
+
+    if tool_list is None:
+        # category=None → interaktif menü
+        interactive_menu()
+    else:
+        install_tools(tool_list, yes=yes)
+
+
 def cmd_uninstall(args):
     """Uninstall FETIH Agent."""
     _require_tty("uninstall")
@@ -11665,6 +11695,32 @@ Examples:
         help="Assume yes for interactive prompts (config migration, stash restore). API-key entry is skipped; run 'fetih config migrate' separately for those.",
     )
     update_parser.set_defaults(func=cmd_update)
+
+    # =========================================================================
+    # download-tools command
+    # =========================================================================
+    dl_tools_parser = subparsers.add_parser(
+        "download-tools",
+        help="CTF/pentest araçlarını indir ve kur",
+        description=(
+            "nmap, sqlmap, pwntools, gdb, binwalk ve daha fazlasını otomatik kur.\n"
+            "Kategoriler: all, basic, network, web, pentest, binary, ctf, status"
+        ),
+        aliases=["tools-install"],
+    )
+    dl_tools_parser.add_argument(
+        "category",
+        nargs="?",
+        default=None,
+        help="Kategori: all / basic / network / web / pentest / binary / ctf / status",
+    )
+    dl_tools_parser.add_argument(
+        "--yes", "-y",
+        action="store_true",
+        default=False,
+        help="Onay sormadan kur",
+    )
+    dl_tools_parser.set_defaults(func=cmd_download_tools)
 
     # =========================================================================
     # uninstall command

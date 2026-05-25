@@ -456,3 +456,30 @@ python3 -c "data=open('./file','rb').read(); print(bytes(b^0x42 for b in data))"
 - **Cheatsheet'ler hızlı erişim için** — kategori belli olmadan önce cheatsheet'ten karar al
 - **Skill'ler derin teknik için** — kategori belli olunca skill'i oku, exploit kodunu uyarla
 - **Cross-skill zincir mantığı** — özellikle real-world tarzı CTF'lerde 2-3 skill kombinasyonu gerekir
+
+---
+
+## Araç Kurulumu
+
+CTF/pentest araçlarını otomatik kurmak için:
+
+```bash
+fetih download-tools            # interaktif menü (kategori seç)
+fetih download-tools all        # hepsini kur (nmap, sqlmap, nuclei, pwntools, ghidra...)
+fetih download-tools basic      # temel araçlar (nmap, sqlmap, pwntools, gdb, binwalk)
+fetih download-tools status     # hangi araçlar kurulu göster
+fetih download-tools network    # sadece ağ araçları
+fetih download-tools web        # sadece web araçları
+fetih download-tools binary     # sadece binary/exploit araçları
+fetih download-tools ctf        # sadece CTF forensics/stego araçları
+```
+
+**Kategoriler ve araçlar:**
+
+| Kategori | Araçlar |
+|----------|---------|
+| network  | nmap, masscan, rustscan, fierce, dnsenum, subfinder, amass |
+| web      | sqlmap, nikto, nuclei, ffuf, gobuster, dalfox, arjun, wpscan |
+| pentest  | hydra, john, hashcat, netexec, metasploit |
+| binary   | gdb, pwntools, radare2, ropper, one_gadget, checksec, angr |
+| ctf      | binwalk, foremost, sleuthkit, exiftool, steghide, zsteg, volatility3 |

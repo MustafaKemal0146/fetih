@@ -187,6 +187,12 @@ COMMAND_REGISTRY: list[CommandDef] = [
                subcommands=("connect", "disconnect", "status")),
     CommandDef("plugins", "List installed plugins and their status",
                "Tools & Skills", cli_only=True),
+    CommandDef("download-tools",
+               "CTF/pentest araçlarını indir ve kur (nmap, sqlmap, pwntools, ghidra...)",
+               "Tools & Skills", cli_only=True,
+               aliases=("tools-install",),
+               args_hint="[all|basic|network|web|pentest|binary|ctf|status]",
+               subcommands=("all", "basic", "network", "web", "pentest", "binary", "ctf", "status")),
 
     # Info
     CommandDef("commands", "Browse all commands and skills (paginated)", "Info",

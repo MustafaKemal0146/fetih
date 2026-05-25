@@ -1823,6 +1823,49 @@ maybe_start_gateway() {
     fi
 }
 
+prompt_ctf_tools() {
+    # Yalnızca Linux + interaktif terminalde çalışır
+    if [ "$IS_INTERACTIVE" != true ] || [ "$DISTRO" = "termux" ]; then
+        return
+    fi
+    if [[ "$OSTYPE" != "linux-gnu"* ]]; then
+        return
+    fi
+
+    FETIH_CMD="$(command -v fetih 2>/dev/null || echo "")"
+    if [ -z "$FETIH_CMD" ]; then
+        return
+    fi
+
+    echo ""
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${BOLD}  CTF / Pentest Araçları${NC}"
+    echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo "  nmap, sqlmap, pwntools, gdb, binwalk, hydra ve 40+ araç"
+    echo "  CTF ve penetrasyon testi için gerekli tüm araçlar."
+    echo ""
+    echo -e "  ${BOLD}[1]${NC} Hepsini yükle   (nmap, sqlmap, nuclei, pwntools, ghidra...)"
+    echo -e "  ${BOLD}[2]${NC} Temel araçlar   (nmap, sqlmap, pwntools, gdb, binwalk)"
+    echo -e "  ${BOLD}[3]${NC} Sonra yükle     (fetih download-tools)"
+    echo ""
+    read -r -p "  Seçim [1/2/3]: " ctf_choice
+    echo ""
+    case "$ctf_choice" in
+        1)
+            log_info "Tüm araçlar yükleniyor (uzun sürebilir)..."
+            "$FETIH_CMD" download-tools all --yes || log_warn "Bazı araçlar yüklenemedi."
+            ;;
+        2)
+            log_info "Temel araçlar yükleniyor..."
+            "$FETIH_CMD" download-tools basic --yes || log_warn "Bazı araçlar yüklenemedi."
+            ;;
+        *)
+            echo -e "  Daha sonra kurmak için: ${CYAN}fetih download-tools${NC}"
+            ;;
+    esac
+}
+
 print_success() {
     echo ""
     echo -e "${GREEN}${BOLD}"
@@ -2056,6 +2099,7 @@ main() {
     copy_config_templates
     run_setup_wizard
     maybe_start_gateway
+    prompt_ctf_tools
 
     print_success
 
