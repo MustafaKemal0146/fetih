@@ -339,6 +339,41 @@ fetih --model ollama/qwen2.5-coder:32b
 
 ---
 
+## CTF / Pentest Araç Deposu
+
+FETIH, **84 araç** ve **9 kategori** ile kurulu gelir. İlk kurulumda otomatik sorar; sonradan tek komutla indirilir:
+
+```bash
+fetih download-tools            # interaktif menü
+fetih download-tools all        # hepsini kur
+fetih download-tools basic      # temel set (nmap, sqlmap, pwntools, gdb, binwalk...)
+fetih download-tools status     # hangisi kurulu göster
+fetih download-tools network    # sadece ağ araçları
+fetih download-tools web        # sadece web araçları
+fetih download-tools binary     # binary/exploit
+fetih download-tools forensics  # disk forensics
+fetih download-tools stego      # steganografi
+fetih download-tools crypto     # kriptografi kütüphaneleri
+fetih download-tools mobile     # Android/mobil
+fetih download-tools osint      # OSINT
+```
+
+### Araç Kataloğu (84 araç)
+
+| Kategori | Araçlar | Yöntem |
+|----------|---------|--------|
+| **Ağ Keşif** (15) | nmap, masscan, arp-scan, dnsenum, fierce, rustscan, tshark, wireshark, scapy, pyshark, subfinder, amass, waybackurls, gau, assetfinder | apt/pip/go/cargo |
+| **Web Saldırı** (16) | sqlmap, nikto, nuclei, dalfox, ffuf, gobuster, feroxbuster, arjun, wafw00f, wpscan, katana, hakrawler, smuggler, httpx, aiohttp, racepwn | apt/pip/go/gem |
+| **Sızma Testi** (6) | hydra, john, hashcat, netexec, haiti-hash, metasploit | apt/pip/script |
+| **Binary/Exploit** (11) | gdb, pwntools, radare2, ropper, checksec, one_gadget, angr, z3-solver, seccomp-tools, pwndbg, ghidra | apt/pip/gem/git/deb |
+| **Kriptografi** (6) | pycryptodome, gmpy2, sympy, fpylll, sagemath, padding-oracle | pip/apt |
+| **Disk Forensics** (15) | binwalk, foremost, testdisk, sleuthkit, autopsy, exiftool, ewf-tools, ntfs-3g, volatility3, pypykatz, analyzeMFT, pytsk3, bless, wxhexeditor, wrk | apt/pip |
+| **Steganografi** (9) | steghide, zsteg, stegoveritas, stegseek, stegolsb, ffmpeg, sox, audacity, sonic-visualiser | apt/pip/gem/deb |
+| **Mobil** (4) | androguard, frida-tools, objection, ntfs-tools | pip |
+| **OSINT** (2) | maigret, sherlock | pip |
+
+---
+
 ## Kurulum
 
 ### Linux / macOS / WSL2

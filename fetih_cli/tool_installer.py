@@ -45,7 +45,7 @@ class Tool(NamedTuple):
 
 
 # ---------------------------------------------------------------------------
-# Araç listesi — 6 kategori
+# Araç listesi — 9 kategori
 # ---------------------------------------------------------------------------
 TOOLS: dict[str, list[Tool]] = {
     "network": [
@@ -55,6 +55,10 @@ TOOLS: dict[str, list[Tool]] = {
         Tool("dnsenum",    "dnsenum",    "apt",   "dnsenum",                      True,  "DNS enumeration"),
         Tool("fierce",     "fierce",     "pip",   "fierce",                       False, "DNS zone tarama"),
         Tool("rustscan",   "rustscan",   "cargo", "rustscan",                     False, "Ultrafast port tarayıcı"),
+        Tool("tshark",     "tshark",     "apt",   "tshark",                       True,  "Komut satırı paket analizi"),
+        Tool("wireshark",  "wireshark",  "apt",   "wireshark",                    True,  "GUI paket analizi"),
+        Tool("scapy",      "scapy",      "pip",   "scapy",                        False, "Paket manipülasyon kütüphanesi"),
+        Tool("pyshark",    "pyshark",    "pip",   "pyshark",                      False, "Python PCAP analiz"),
         Tool("subfinder",  "subfinder",  "go",    "github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest",
                                                                                   False, "Subdomain keşfi"),
         Tool("amass",      "amass",      "apt",   "amass",                        False, "OSINT + subdomain"),
@@ -83,12 +87,17 @@ TOOLS: dict[str, list[Tool]] = {
                                                                                   False, "Web crawler"),
         Tool("hakrawler",  "hakrawler",  "go",    "github.com/hakluke/hakrawler@latest",
                                                                                   False, "Hızlı web crawler"),
+        Tool("smuggler",   "smuggler",   "pip",   "smuggler",                     False, "HTTP request smuggling"),
+        Tool("httpx",      "httpx",      "pip",   "httpx[http2]",                 False, "HTTP/2 race condition testi"),
+        Tool("aiohttp",    "aiohttp",    "pip",   "aiohttp",                      False, "Async HTTP (race condition)"),
+        Tool("racepwn",    "racepwn",    "pip",   "racepwn",                      False, "Race condition saldırı aracı"),
     ],
     "pentest": [
         Tool("hydra",      "hydra",      "apt",   "hydra",                        True,  "Brute-force aracı"),
         Tool("john",       "john",       "apt",   "john",                         False, "Şifre kırıcı"),
         Tool("hashcat",    "hashcat",    "apt",   "hashcat",                      False, "GPU şifre kırıcı"),
         Tool("netexec",    "netexec",    "pip",   "netexec",                      False, "SMB/SSH/WinRM sızma"),
+        Tool("haiti-hash", "haiti",      "pip",   "haiti-hash",                   False, "Hash formatı tanıma"),
         Tool("metasploit", "msfconsole", "script","https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb",
                                                                                   True,  "Exploit framework (büyük)"),
     ],
@@ -100,24 +109,59 @@ TOOLS: dict[str, list[Tool]] = {
         Tool("checksec",   "checksec",   "pip",   "checksec",                     False, "Binary güvenlik kontrol"),
         Tool("one_gadget", "one_gadget", "gem",   "one_gadget",                   False, "One-gadget libc bulucu"),
         Tool("angr",       "angr",       "pip",   "angr",                         False, "Symbolic execution"),
+        Tool("z3-solver",  "z3",         "pip",   "z3-solver",                    False, "Z3 constraint solver"),
+        Tool("seccomp-tools","seccomp-tools","gem","seccomp-tools",               False, "SECCOMP filter analizi"),
         Tool("pwndbg",     "pwndbg",     "git",   "https://github.com/pwndbg/pwndbg|/opt/pwndbg|./setup.sh",
                                                                                   False, "GDB için pwn eklenti"),
         Tool("ghidra",     "ghidra",     "deb",   "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_11.1.2_build/ghidra_11.1.2_PUBLIC_20240709.zip",
                                                                                   False, "Reverse engineering (~500MB)"),
     ],
-    "ctf": [
+    "crypto": [
+        Tool("pycryptodome","python3",   "pip",   "pycryptodome",                 False, "Kripto kütüphanesi"),
+        Tool("gmpy2",      "python3",    "pip",   "gmpy2",                        False, "GMP Python binding (RSA)"),
+        Tool("sympy",      "python3",    "pip",   "sympy",                        False, "Sembolik matematik"),
+        Tool("fpylll",     "python3",    "pip",   "fpylll",                       False, "LLL lattice reduction"),
+        Tool("sagemath",   "sage",       "apt",   "sagemath",                     False, "Matematiksel hesaplama (~1GB)"),
+        Tool("padding-oracle","python3", "pip",   "padding-oracle",               False, "Padding oracle saldırı"),
+    ],
+    "forensics": [
         Tool("binwalk",       "binwalk",    "pip",   "binwalk",                   False, "Firmware analiz + carving"),
         Tool("foremost",      "foremost",   "apt",   "foremost",                  False, "File carving"),
         Tool("testdisk",      "testdisk",   "apt",   "testdisk",                  False, "Disk kurtarma + PhotoRec"),
         Tool("sleuthkit",     "fls",        "apt",   "sleuthkit",                 False, "Disk forensics (TSK)"),
+        Tool("autopsy",       "autopsy",    "apt",   "autopsy",                   False, "GUI disk forensics"),
         Tool("exiftool",      "exiftool",   "apt",   "libimage-exiftool-perl",    False, "EXIF / metadata"),
-        Tool("steghide",      "steghide",   "apt",   "steghide",                  False, "Stegano hide/extract"),
-        Tool("zsteg",         "zsteg",      "gem",   "zsteg",                     False, "PNG/BMP stegano"),
-        Tool("stegoveritas",  "stegoveritas","pip",  "stegoveritas",              False, "Multi-format stegano"),
+        Tool("ewf-tools",     "ewfmount",   "apt",   "ewf-tools",                 True,  "EnCase .E01 imaj desteği"),
+        Tool("ntfs-3g",       "ntfscat",    "apt",   "ntfs-3g",                   True,  "NTFS analiz araçları"),
         Tool("volatility3",   "vol",        "pip",   "volatility3",               False, "Bellek forensics"),
-        Tool("stegseek",      "stegseek",   "deb",   "https://github.com/RickdeJager/stegseek/releases/download/v0.6/stegseek_0.6-1.deb",
+        Tool("pypykatz",      "pypykatz",   "pip",   "pypykatz",                  False, "LSASS / NTLM dump"),
+        Tool("analyzeMFT",    "analyzeMFT", "pip",   "analyzeMFT",                False, "NTFS MFT analizi"),
+        Tool("pytsk3",        "python3",    "pip",   "pytsk3",                    False, "Python TSK binding"),
+        Tool("bless",         "bless",      "apt",   "bless",                     False, "Hex editor (GUI)"),
+        Tool("wxhexeditor",   "wxHexEditor","apt",   "wxhexeditor",               False, "Hex editor (GUI, büyük)"),
+        Tool("wrk",           "wrk",        "apt",   "wrk",                       False, "HTTP load tester"),
+    ],
+    "stego": [
+        Tool("steghide",      "steghide",    "apt",  "steghide",                  False, "Stegano hide/extract"),
+        Tool("zsteg",         "zsteg",       "gem",  "zsteg",                     False, "PNG/BMP stegano"),
+        Tool("stegoveritas",  "stegoveritas","pip",  "stegoveritas",              False, "Multi-format stegano"),
+        Tool("stegseek",      "stegseek",    "deb",  "https://github.com/RickdeJager/stegseek/releases/download/v0.6/stegseek_0.6-1.deb",
                                                                                   False, "Steghide brute-force"),
-        Tool("dirsearch",     "dirsearch",  "pip",   "dirsearch",                 False, "Web dizin tarama"),
+        Tool("stegolsb",      "stegolsb",    "pip",  "stegolsb",                  False, "LSB stegano"),
+        Tool("ffmpeg",        "ffmpeg",      "apt",  "ffmpeg",                    False, "Audio/video dönüşüm"),
+        Tool("sox",           "sox",         "apt",  "sox",                       False, "Ses işleme"),
+        Tool("audacity",      "audacity",    "apt",  "audacity",                  False, "Ses editörü (GUI)"),
+        Tool("sonic-visualiser","sonic-visualiser","apt","sonic-visualiser",      False, "Spektogram analizi (GUI)"),
+    ],
+    "mobile": [
+        Tool("androguard",    "androguard",  "pip",  "androguard",                False, "Android APK analizi"),
+        Tool("frida-tools",   "frida",       "pip",  "frida-tools",               False, "Dynamic instrumentation"),
+        Tool("objection",     "objection",   "pip",  "objection",                 False, "Frida wrapper (SSL/root bypass)"),
+        Tool("ntfs-tools",    "python3",     "pip",  "ntfs-tools",                False, "NTFS Python araçları"),
+    ],
+    "osint": [
+        Tool("maigret",       "maigret",     "pip",  "maigret",                   False, "Kullanıcı adı OSINT"),
+        Tool("sherlock",      "sherlock",    "pip",  "sherlock-project",           False, "Sosyal medya hesap arama"),
     ],
 }
 
