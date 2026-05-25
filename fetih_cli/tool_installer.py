@@ -31,6 +31,10 @@ def _c(color: str, text: str) -> str:
         return f"{color}{text}{_NC}"
     return text
 
+def _clear_line(text: str) -> str:
+    """Satırı sıfırla + 70 karaktere kadar boşlukla temizle (kuruluyor... kalıntısı için)."""
+    return f"\r{text:<70}"
+
 
 # ---------------------------------------------------------------------------
 # Araç tanımı
@@ -53,15 +57,17 @@ TOOLS: dict[str, list[Tool]] = {
         Tool("masscan",    "masscan",    "apt",   "masscan",                      True,  "Hızlı port tarayıcı"),
         Tool("arp-scan",   "arp-scan",   "apt",   "arp-scan",                     True,  "LAN host keşfi"),
         Tool("dnsenum",    "dnsenum",    "apt",   "dnsenum",                      True,  "DNS enumeration"),
-        Tool("fierce",     "fierce",     "pip",   "fierce",                       False, "DNS zone tarama"),
-        Tool("rustscan",   "rustscan",   "cargo", "rustscan",                     False, "Ultrafast port tarayıcı"),
+        Tool("fierce",     "fierce",     "pip",   "dnspython fierce",             False, "DNS zone tarama"),
+        Tool("rustscan",   "rustscan",   "deb",   "https://github.com/RustScan/RustScan/releases/download/2.3.0/rustscan_2.3.0_amd64.deb",
+                                                                                  False, "Ultrafast port tarayıcı"),
         Tool("tshark",     "tshark",     "apt",   "tshark",                       True,  "Komut satırı paket analizi"),
         Tool("wireshark",  "wireshark",  "apt",   "wireshark",                    True,  "GUI paket analizi"),
-        Tool("scapy",      "scapy",      "pip",   "scapy",                        False, "Paket manipülasyon kütüphanesi"),
-        Tool("pyshark",    "pyshark",    "pip",   "pyshark",                      False, "Python PCAP analiz"),
+        Tool("scapy",      "module:scapy","pip",   "scapy",                       False, "Paket manipülasyon kütüphanesi"),
+        Tool("pyshark",    "module:pyshark","pip", "pyshark",                     False, "Python PCAP analiz"),
         Tool("subfinder",  "subfinder",  "go",    "github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest",
                                                                                   False, "Subdomain keşfi"),
-        Tool("amass",      "amass",      "apt",   "amass",                        False, "OSINT + subdomain"),
+        Tool("amass",      "amass",      "go",    "github.com/owasp-amass/amass/v4/cmd/amass@latest",
+                                                                                  False, "OSINT + subdomain"),
         Tool("waybackurls","waybackurls","go",    "github.com/tomnomnom/waybackurls@latest",
                                                                                   False, "Wayback Machine URL"),
         Tool("gau",        "gau",        "go",    "github.com/lc/gau/v2/cmd/gau@latest",
@@ -79,7 +85,7 @@ TOOLS: dict[str, list[Tool]] = {
         Tool("ffuf",       "ffuf",       "go",    "github.com/ffuf/ffuf/v2@latest",
                                                                                   False, "Web fuzzer"),
         Tool("gobuster",   "gobuster",   "apt",   "gobuster",                     False, "Dizin/dosya bruteforce"),
-        Tool("feroxbuster","feroxbuster","apt",   "feroxbuster",                  False, "Recursive fuzzer"),
+        Tool("feroxbuster","feroxbuster","cargo", "feroxbuster",                  False, "Recursive fuzzer"),
         Tool("arjun",      "arjun",      "pip",   "arjun",                        False, "HTTP parametre keşfi"),
         Tool("wafw00f",    "wafw00f",    "pip",   "wafw00f",                      False, "WAF tespit"),
         Tool("wpscan",     "wpscan",     "gem",   "wpscan",                       False, "WordPress tarayıcı"),
@@ -87,19 +93,20 @@ TOOLS: dict[str, list[Tool]] = {
                                                                                   False, "Web crawler"),
         Tool("hakrawler",  "hakrawler",  "go",    "github.com/hakluke/hakrawler@latest",
                                                                                   False, "Hızlı web crawler"),
-        Tool("smuggler",   "smuggler",   "pip",   "smuggler",                     False, "HTTP request smuggling"),
+        Tool("smuggler",   "smuggler.py","git",   "https://github.com/defparam/smuggler|/opt/smuggler|true",
+                                                                                  False, "HTTP request smuggling"),
         Tool("httpx",      "httpx",      "pip",   "httpx[http2]",                 False, "HTTP/2 race condition testi"),
-        Tool("aiohttp",    "aiohttp",    "pip",   "aiohttp",                      False, "Async HTTP (race condition)"),
-        Tool("racepwn",    "racepwn",    "pip",   "racepwn",                      False, "Race condition saldırı aracı"),
+        Tool("aiohttp",    "module:aiohttp","pip", "aiohttp",                     False, "Async HTTP (race condition - kütüphane)"),
+        Tool("racepwn",    "/opt/racepwn","git",  "https://github.com/insidersec/racepwn|/opt/racepwn|true",
+                                                                                  False, "Race condition saldırı aracı"),
     ],
     "pentest": [
         Tool("hydra",      "hydra",      "apt",   "hydra",                        True,  "Brute-force aracı"),
         Tool("john",       "john",       "apt",   "john",                         False, "Şifre kırıcı"),
         Tool("hashcat",    "hashcat",    "apt",   "hashcat",                      False, "GPU şifre kırıcı"),
-        Tool("netexec",    "netexec",    "pip",   "netexec",                      False, "SMB/SSH/WinRM sızma"),
-        Tool("haiti-hash", "haiti",      "pip",   "haiti-hash",                   False, "Hash formatı tanıma"),
-        Tool("metasploit", "msfconsole", "script","https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb",
-                                                                                  True,  "Exploit framework (büyük)"),
+        Tool("netexec",    "netexec",    "pipx",  "netexec",                      False, "SMB/SSH/WinRM sızma"),
+        Tool("haiti-hash", "haiti",      "cargo", "haiti-hash",                   False, "Hash formatı tanıma (Rust)"),
+        Tool("metasploit", "msfconsole", "script","metasploit",                   True,  "Exploit framework (büyük)"),
     ],
     "binary": [
         Tool("gdb",        "gdb",        "apt",   "gdb",                          False, "GNU debugger"),
@@ -111,18 +118,18 @@ TOOLS: dict[str, list[Tool]] = {
         Tool("angr",       "angr",       "pip",   "angr",                         False, "Symbolic execution"),
         Tool("z3-solver",  "z3",         "pip",   "z3-solver",                    False, "Z3 constraint solver"),
         Tool("seccomp-tools","seccomp-tools","gem","seccomp-tools",               False, "SECCOMP filter analizi"),
-        Tool("pwndbg",     "pwndbg",     "git",   "https://github.com/pwndbg/pwndbg|/opt/pwndbg|./setup.sh",
-                                                                                  False, "GDB için pwn eklenti"),
+        Tool("pwndbg",     "/opt/pwndbg/gdbinit.py", "git",
+             "https://github.com/pwndbg/pwndbg|/opt/pwndbg|true",
+                                                                                  False, "GDB için pwn eklenti (GDB'ye 'source /opt/pwndbg/gdbinit.py' ekle)"),
         Tool("ghidra",     "ghidra",     "deb",   "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_11.1.2_build/ghidra_11.1.2_PUBLIC_20240709.zip",
                                                                                   False, "Reverse engineering (~500MB)"),
     ],
     "crypto": [
-        Tool("pycryptodome","python3",   "pip",   "pycryptodome",                 False, "Kripto kütüphanesi"),
-        Tool("gmpy2",      "python3",    "pip",   "gmpy2",                        False, "GMP Python binding (RSA)"),
-        Tool("sympy",      "python3",    "pip",   "sympy",                        False, "Sembolik matematik"),
-        Tool("fpylll",     "python3",    "pip",   "fpylll",                       False, "LLL lattice reduction"),
-        Tool("sagemath",   "sage",       "apt",   "sagemath",                     False, "Matematiksel hesaplama (~1GB)"),
-        Tool("padding-oracle","python3", "pip",   "padding-oracle",               False, "Padding oracle saldırı"),
+        Tool("pycryptodome","module:Crypto","pip","pycryptodome",                 False, "Kripto kütüphanesi"),
+        Tool("gmpy2",      "module:gmpy2","pip",  "gmpy2",                        False, "GMP Python binding (RSA)"),
+        Tool("sympy",      "module:sympy","pip",  "sympy",                        False, "Sembolik matematik"),
+        Tool("fpylll",     "module:fpylll","pip", "fpylll",                       False, "LLL lattice reduction"),
+        Tool("padding-oracle","module:padding_oracle","pip","padding-oracle",     False, "Padding oracle saldırı"),
     ],
     "forensics": [
         Tool("binwalk",       "binwalk",    "pip",   "binwalk",                   False, "Firmware analiz + carving"),
@@ -136,7 +143,7 @@ TOOLS: dict[str, list[Tool]] = {
         Tool("volatility3",   "vol",        "pip",   "volatility3",               False, "Bellek forensics"),
         Tool("pypykatz",      "pypykatz",   "pip",   "pypykatz",                  False, "LSASS / NTLM dump"),
         Tool("analyzeMFT",    "analyzeMFT", "pip",   "analyzeMFT",                False, "NTFS MFT analizi"),
-        Tool("pytsk3",        "python3",    "pip",   "pytsk3",                    False, "Python TSK binding"),
+        Tool("pytsk3",        "module:pytsk3","pip", "pytsk3",                    False, "Python TSK binding"),
         Tool("bless",         "bless",      "apt",   "bless",                     False, "Hex editor (GUI)"),
         Tool("wxhexeditor",   "wxHexEditor","apt",   "wxhexeditor",               False, "Hex editor (GUI, büyük)"),
         Tool("wrk",           "wrk",        "apt",   "wrk",                       False, "HTTP load tester"),
@@ -147,7 +154,7 @@ TOOLS: dict[str, list[Tool]] = {
         Tool("stegoveritas",  "stegoveritas","pip",  "stegoveritas",              False, "Multi-format stegano"),
         Tool("stegseek",      "stegseek",    "deb",  "https://github.com/RickdeJager/stegseek/releases/download/v0.6/stegseek_0.6-1.deb",
                                                                                   False, "Steghide brute-force"),
-        Tool("stegolsb",      "stegolsb",    "pip",  "stegolsb",                  False, "LSB stegano"),
+        Tool("stegolsb",      "stegolsb",    "pip",  "stego-lsb",                 False, "LSB stegano"),
         Tool("ffmpeg",        "ffmpeg",      "apt",  "ffmpeg",                    False, "Audio/video dönüşüm"),
         Tool("sox",           "sox",         "apt",  "sox",                       False, "Ses işleme"),
         Tool("audacity",      "audacity",    "apt",  "audacity",                  False, "Ses editörü (GUI)"),
@@ -157,7 +164,7 @@ TOOLS: dict[str, list[Tool]] = {
         Tool("androguard",    "androguard",  "pip",  "androguard",                False, "Android APK analizi"),
         Tool("frida-tools",   "frida",       "pip",  "frida-tools",               False, "Dynamic instrumentation"),
         Tool("objection",     "objection",   "pip",  "objection",                 False, "Frida wrapper (SSL/root bypass)"),
-        Tool("ntfs-tools",    "python3",     "pip",  "ntfs-tools",                False, "NTFS Python araçları"),
+        Tool("ntfs-tools",    "module:ntfs", "pip",  "ntfs-tools",                False, "NTFS Python araçları"),
     ],
     "osint": [
         Tool("maigret",       "maigret",     "pip",  "maigret",                   False, "Kullanıcı adı OSINT"),
@@ -171,11 +178,16 @@ BASIC_TOOLS = {"nmap", "sqlmap", "pwntools", "gdb", "binwalk",
 
 
 # ---------------------------------------------------------------------------
-# Yardımcı: kurulum yöntemleri
+# Yardımcı fonksiyonlar
 # ---------------------------------------------------------------------------
-def _run(cmd: list[str], check: bool = True) -> bool:
+def _run(cmd: list[str], check: bool = True, env: dict | None = None) -> bool:
     try:
-        subprocess.run(cmd, check=check, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        run_env = os.environ.copy()
+        if env:
+            run_env.update(env)
+        subprocess.run(cmd, check=check,
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                       env=run_env)
         return True
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
@@ -186,15 +198,205 @@ def _has_sudo() -> bool:
 
 
 def _check_tool(tool: Tool) -> bool:
-    return shutil.which(tool.check) is not None
+    """Check semantiği:
+    - 'module:<name>'      → Python modülü olarak içe aktar dene
+    - '/path'              → dosya yolu kontrol
+    - '<binary>'           → PATH + bilinen bin dizinleri
+    """
+    # Python modülü
+    if tool.check.startswith("module:"):
+        mod = tool.check.split(":", 1)[1]
+        try:
+            _run([sys.executable, "-c", f"import {mod}"], check=True)
+            return True
+        except Exception:
+            pass
+        # uv venv için ayrı kontrol
+        if shutil.which("uv"):
+            r = subprocess.run(
+                ["uv", "run", "python", "-c", f"import {mod}"],
+                capture_output=True
+            )
+            if r.returncode == 0:
+                return True
+        return False
+
+    # Dosya yolu
+    if tool.check.startswith("/"):
+        return os.path.exists(tool.check)
+
+    # Binary kontrolü
+    if shutil.which(tool.check):
+        return True
+    import glob
+    venv_bin = os.path.dirname(sys.executable)
+    candidates = [
+        venv_bin,
+        os.path.expanduser("~/.local/bin"),
+        os.path.expanduser("~/.cargo/bin"),
+        os.path.expanduser("~/go/bin"),
+    ]
+    for d in candidates:
+        if os.path.exists(os.path.join(d, tool.check)):
+            return True
+    for p in glob.glob(os.path.expanduser("~/.gem/ruby/*/bin")):
+        if os.path.exists(os.path.join(p, tool.check)):
+            return True
+    return False
 
 
+# ---------------------------------------------------------------------------
+# Bağımlılık yöneticisi önkurulum
+# ---------------------------------------------------------------------------
+_APT_UPDATED = False
+
+def _ensure_apt_update() -> None:
+    global _APT_UPDATED
+    if not _APT_UPDATED:
+        _run(["sudo", "apt-get", "update", "-qq"])
+        _APT_UPDATED = True
+
+
+def _ensure_ruby() -> bool:
+    """Ruby/gem + native extension için build araçları."""
+    if not shutil.which("gem"):
+        _ensure_apt_update()
+        if not _run(["sudo", "apt-get", "install", "-y", "-q", "ruby-full"]):
+            return False
+    # Native gem extension build için (wpscan, seccomp-tools)
+    global _RUBY_BUILD_DEPS
+    if not _RUBY_BUILD_DEPS:
+        _ensure_apt_update()
+        _run(["sudo", "apt-get", "install", "-y", "-q",
+              "ruby-dev", "build-essential",
+              "libcurl4-openssl-dev", "libxml2-dev", "libxslt1-dev",
+              "zlib1g-dev", "libsqlite3-dev"], check=False)
+        _RUBY_BUILD_DEPS = True
+    return shutil.which("gem") is not None
+
+_RUBY_BUILD_DEPS = False
+
+
+def _ensure_rust() -> bool:
+    """cargo yoksa rustup ile kur."""
+    if shutil.which("cargo"):
+        return True
+    with tempfile.NamedTemporaryFile(suffix=".sh", delete=False) as f:
+        tmp = f.name
+    try:
+        urllib.request.urlretrieve("https://sh.rustup.rs", tmp)
+        if _run(["sh", tmp, "-y", "--no-modify-path"]):
+            cargo_bin = os.path.expanduser("~/.cargo/bin")
+            os.environ["PATH"] = cargo_bin + ":" + os.environ.get("PATH", "")
+            return shutil.which("cargo") is not None
+    except Exception:
+        pass
+    finally:
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+    return False
+
+
+def _ensure_pipx() -> bool:
+    """pipx yoksa 3 yolla kurmayı dene."""
+    if shutil.which("pipx"):
+        return True
+    # 1. apt
+    _ensure_apt_update()
+    if _run(["sudo", "apt-get", "install", "-y", "-q", "pipx"]):
+        if shutil.which("pipx"):
+            return True
+    # 2. pip3 --user
+    if shutil.which("pip3"):
+        if _run(["pip3", "install", "--user", "--quiet",
+                 "--break-system-packages", "pipx"]):
+            os.environ["PATH"] = os.path.expanduser("~/.local/bin") + ":" + os.environ.get("PATH", "")
+            return shutil.which("pipx") is not None
+    # 3. uv tool
+    if shutil.which("uv"):
+        if _run(["uv", "tool", "install", "pipx"]):
+            return shutil.which("pipx") is not None
+    return False
+
+
+def _ensure_universe_repo() -> bool:
+    """Ubuntu universe repo yoksa ekle (sagemath için)."""
+    result = subprocess.run(
+        ["apt-cache", "show", "sagemath"],
+        capture_output=True, text=True
+    )
+    if result.returncode == 0:
+        return True
+    return _run(["sudo", "add-apt-repository", "-y", "universe"]) and \
+           _run(["sudo", "apt-get", "update", "-qq"])
+
+
+# ---------------------------------------------------------------------------
+# Kurulum yöntemleri
+# ---------------------------------------------------------------------------
 def _install_apt(tool: Tool) -> bool:
-    return _run(["sudo", "apt-get", "install", "-y", "-q", tool.pkg])
+    _ensure_apt_update()
+    # 1. apt-get install
+    if _run(["sudo", "apt-get", "install", "-y", "-q",
+             "-o", "Dpkg::Options::=--force-confdef",
+             "-o", "Dpkg::Options::=--force-confold",
+             tool.pkg]):
+        return True
+    # 2. snap fallback (sadece bazı paketler için anlamlı)
+    if shutil.which("snap") and tool.name in {"sagemath", "amass", "ffuf"}:
+        if _run(["sudo", "snap", "install", tool.name]):
+            return True
+    return False
 
 
 def _install_pip(tool: Tool) -> bool:
-    return _run([sys.executable, "-m", "pip", "install", "--quiet", tool.pkg])
+    """5 katmanlı pip fallback zinciri."""
+    pkgs = tool.pkg.split()  # "dnspython fierce" → ["dnspython", "fierce"]
+
+    # 1. uv pip — FETIH'in uv venv'i için ana yol
+    if shutil.which("uv"):
+        if _run(["uv", "pip", "install"] + pkgs):
+            return True
+
+    # 2. ensurepip + venv pip — pip yoksa kur, sonra dene
+    _run([sys.executable, "-m", "ensurepip", "--upgrade"], check=False)
+    if _run([sys.executable, "-m", "pip", "install", "--quiet"] + pkgs):
+        return True
+
+    # 3. --break-system-packages (Ubuntu 22.04+)
+    if _run([sys.executable, "-m", "pip", "install", "--quiet",
+             "--break-system-packages"] + pkgs):
+        return True
+
+    # 4. Sistem pip3 --user
+    if shutil.which("pip3"):
+        if _run(["pip3", "install", "--quiet", "--user",
+                 "--break-system-packages"] + pkgs):
+            return True
+        if _run(["pip3", "install", "--quiet", "--user"] + pkgs):
+            return True
+
+    # 5. pipx fallback — CLI araçlar için son şans
+    if _ensure_pipx() and _run(["pipx", "install", "--quiet", pkgs[-1]]):
+        return True
+
+    return False
+
+
+def _install_pipx(tool: Tool) -> bool:
+    """4 katmanlı pipx fallback."""
+    # 1. pipx install
+    if _ensure_pipx():
+        if _run(["pipx", "install", "--quiet", tool.pkg]):
+            return True
+    # 2. uv tool install (pipx alternatifi)
+    if shutil.which("uv"):
+        if _run(["uv", "tool", "install", tool.pkg]):
+            return True
+    # 3. pip install fallback
+    return _install_pip(tool)
 
 
 def _install_go(tool: Tool) -> bool:
@@ -205,25 +407,75 @@ def _install_go(tool: Tool) -> bool:
 
 def _install_cargo(tool: Tool) -> bool:
     if not shutil.which("cargo"):
-        return False
-    return _run(["cargo", "install", tool.pkg])
+        if not _ensure_rust():
+            return False
+    cargo_bin = os.path.expanduser("~/.cargo/bin")
+    env = {"PATH": cargo_bin + ":" + os.environ.get("PATH", "")}
+    cargo = shutil.which("cargo") or os.path.join(cargo_bin, "cargo")
+    return _run([cargo, "install", tool.pkg], env=env)
 
 
 def _install_gem(tool: Tool) -> bool:
-    if not shutil.which("gem"):
+    """3 katmanlı gem fallback."""
+    if not _ensure_ruby():
         return False
-    return _run(["gem", "install", tool.pkg])
+    # 1. --user-install (sudo'suz, ~/.gem'e kurar)
+    if _run(["gem", "install", "--user-install", "--no-document", tool.pkg]):
+        # PATH'e ekle
+        import glob
+        for gem_bin in glob.glob(os.path.expanduser("~/.gem/ruby/*/bin")):
+            os.environ["PATH"] = gem_bin + ":" + os.environ.get("PATH", "")
+        return True
+    # 2. sudo gem install (sistem geneli)
+    if _has_sudo() and _run(["sudo", "gem", "install", "--no-document", tool.pkg]):
+        return True
+    # 3. Düz gem install
+    return _run(["gem", "install", "--no-document", tool.pkg])
 
 
 def _install_git(tool: Tool) -> bool:
-    """pkg formatı: <url>|<dest>|<build_cmd>"""
+    """pkg formatı: <url>|<dest>|<build_cmd>
+    build_cmd 'true' → sadece clone + symlink
+    """
     parts = tool.pkg.split("|")
     if len(parts) != 3:
         return False
     url, dest, build = parts
+
+    needs_sudo = dest.startswith(("/opt", "/usr"))
+    git_cmd = (["sudo"] if needs_sudo else []) + ["git"]
+
+    # Mevcut durumu temizle
+    if os.path.isdir(dest):
+        if os.path.isdir(os.path.join(dest, ".git")):
+            # Geçerli git repo — güncelle
+            _run(git_cmd + ["-C", dest, "fetch", "--all"], check=False)
+            _run(git_cmd + ["-C", dest, "reset", "--hard", "origin/HEAD"], check=False)
+        else:
+            # Bozuk durum — temizle
+            _run((["sudo"] if needs_sudo else []) + ["rm", "-rf", dest], check=False)
+
     if not os.path.isdir(dest):
-        if not _run(["git", "clone", "--depth=1", url, dest]):
+        if not _run(git_cmd + ["clone", "--depth=1", url, dest]):
             return False
+
+    if build == "true":
+        # Sadece clone + ana script symlink
+        basename = os.path.basename(dest)
+        candidates = [
+            f"{basename}.py", "main.py", "run.py", basename,
+            f"{basename}/{basename}.py",
+        ]
+        for cand in candidates:
+            script = os.path.join(dest, cand)
+            if os.path.isfile(script):
+                _run((["sudo"] if needs_sudo else []) + ["chmod", "+x", script], check=False)
+                link = f"/usr/local/bin/{os.path.basename(cand)}"
+                _run(["sudo", "ln", "-sf", script, link], check=False)
+                return True
+        return True  # Clone başarılı, script bulunmasa da
+
+    # Build script çalıştır
     orig = os.getcwd()
     try:
         os.chdir(dest)
@@ -235,7 +487,7 @@ def _install_git(tool: Tool) -> bool:
 
 
 def _install_deb(tool: Tool) -> bool:
-    """pkg: .deb URL veya zip URL (ghidra için)"""
+    """pkg: .deb URL veya .zip URL (ghidra için)."""
     url = tool.pkg
     if url.endswith(".deb"):
         with tempfile.NamedTemporaryFile(suffix=".deb", delete=False) as f:
@@ -244,7 +496,12 @@ def _install_deb(tool: Tool) -> bool:
             print(f"    İndiriliyor {url.split('/')[-1]}...", end="", flush=True)
             urllib.request.urlretrieve(url, tmp)
             print(" indirildi")
-            return _run(["sudo", "dpkg", "-i", tmp])
+            # dpkg -i yerine apt install — bağımlılıkları otomatik çözer
+            if _run(["sudo", "apt", "install", "-y", "-q", tmp]):
+                return True
+            # Fallback: dpkg + bağımlılık düzeltme
+            _run(["sudo", "dpkg", "-i", tmp], check=False)
+            return _run(["sudo", "apt-get", "install", "-f", "-y", "-q"])
         except Exception:
             return False
         finally:
@@ -253,9 +510,15 @@ def _install_deb(tool: Tool) -> bool:
             except OSError:
                 pass
     elif url.endswith(".zip"):
-        # Ghidra gibi zip araçlar için — /opt'a aç, symlink oluştur
         dest_dir = "/opt/ghidra"
         if os.path.isdir(dest_dir):
+            # Zaten kurulu, sadece symlink kontrol
+            extracted = next(
+                (e for e in os.listdir("/opt") if e.startswith("ghidra_")), None
+            )
+            if extracted and not shutil.which("ghidra"):
+                _run(["sudo", "ln", "-sf", f"/opt/{extracted}/ghidraRun",
+                      "/usr/local/bin/ghidra"])
             return True
         with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as f:
             tmp = f.name
@@ -263,11 +526,10 @@ def _install_deb(tool: Tool) -> bool:
             print(f"    İndiriliyor {url.split('/')[-1]} (~500MB)...", end="", flush=True)
             urllib.request.urlretrieve(url, tmp)
             print(" indirildi")
-            _run(["sudo", "unzip", "-q", tmp, "-d", "/opt"])
-            # İndirilen klasörü /opt/ghidra olarak symlink et
+            if not _run(["sudo", "unzip", "-q", tmp, "-d", "/opt"]):
+                return False
             extracted = next(
-                (e for e in os.listdir("/opt") if e.startswith("ghidra_")),
-                None,
+                (e for e in os.listdir("/opt") if e.startswith("ghidra_")), None
             )
             if extracted:
                 _run(["sudo", "ln", "-sf", f"/opt/{extracted}/ghidraRun",
@@ -284,7 +546,7 @@ def _install_deb(tool: Tool) -> bool:
 
 
 def _install_script(tool: Tool) -> bool:
-    """Metasploit gibi curl | bash installer'lar için."""
+    """Metasploit gibi özel installer'lar."""
     if tool.name == "metasploit":
         print("    Metasploit kurulumu başlatılıyor (uzun sürebilir)...")
         with tempfile.NamedTemporaryFile(suffix=".sh", delete=False, mode="w") as f:
@@ -309,6 +571,7 @@ def _install_script(tool: Tool) -> bool:
 _INSTALL_DISPATCH = {
     "apt":    _install_apt,
     "pip":    _install_pip,
+    "pipx":   _install_pipx,
     "go":     _install_go,
     "cargo":  _install_cargo,
     "gem":    _install_gem,
@@ -360,23 +623,33 @@ def install_tools(tools: list[Tool], yes: bool = False) -> None:
 
     ok = 0
     fail = 0
-    for t in to_install:
-        needs_root = t.root and not has_sudo
-        if needs_root:
-            print(f"  {_c(_YELLOW, '⚠')} {t.name:<16} sudo erişimi yok, atlanıyor")
-            fail += 1
-            continue
+    try:
+        for t in to_install:
+            needs_root = t.root and not has_sudo
+            if needs_root:
+                print(f"  {_c(_YELLOW, '⚠')} {t.name:<16} sudo erişimi yok, atlanıyor")
+                fail += 1
+                continue
 
-        print(f"  {_c(_BLUE, '↓')} {t.name:<16} kuruluyor ({t.method})...", end="", flush=True)
-        if install_tool(t):
-            print(f"\r  {_c(_GREEN, '✓')} {t.name:<16} kuruldu")
-            ok += 1
-        else:
-            print(f"\r  {_c(_RED, '✗')} {t.name:<16} başarısız ({t.method}: {t.pkg})")
-            fail += 1
+            prefix = f"  {_c(_BLUE, '↓')} {t.name:<16} kuruluyor ({t.method})..."
+            print(prefix, end="", flush=True)
+            if install_tool(t):
+                success = f"  {_c(_GREEN, '✓')} {t.name:<16} kuruldu"
+                print(_clear_line(success))
+                ok += 1
+            else:
+                pkg_short = t.pkg.split("|")[0][:40]
+                fail_msg = f"  {_c(_RED, '✗')} {t.name:<16} başarısız ({t.method}: {pkg_short})"
+                print(_clear_line(fail_msg))
+                fail += 1
+    except KeyboardInterrupt:
+        print(f"\n\n  {_c(_YELLOW, '⚠')} Kullanıcı iptal etti.")
 
     print()
-    print(_c(_GREEN, f"  ✓ {ok} kuruldu") + (f"  {_c(_YELLOW, f'⚠ {fail} başarısız')}" if fail else ""))
+    summary = _c(_GREEN, f"  ✓ {ok} kuruldu")
+    if fail:
+        summary += f"  {_c(_YELLOW, f'⚠ {fail} başarısız')}"
+    print(summary)
 
 
 # ---------------------------------------------------------------------------
@@ -386,15 +659,15 @@ def print_status() -> None:
     """Hangi araçların kurulu olduğunu kategori bazında göster."""
     total = installed = 0
     for cat, tools in TOOLS.items():
-        cat_ok = [t for t in tools if _check_tool(t)]
+        cat_ok  = [t for t in tools if _check_tool(t)]
         cat_miss = [t for t in tools if not _check_tool(t)]
-        total += len(tools)
+        total    += len(tools)
         installed += len(cat_ok)
         print(f"\n  {_c(_BOLD, cat.upper())} ({len(cat_ok)}/{len(tools)})")
         for t in cat_ok:
-            print(f"    {_c(_GREEN, '✓')} {t.name:<16} {t.desc}")
+            print(f"    {_c(_GREEN, '✓')} {t.name:<18} {t.desc}")
         for t in cat_miss:
-            print(f"    {_c(_RED, '✗')} {t.name:<16} {t.desc}")
+            print(f"    {_c(_RED, '✗')} {t.name:<18} {t.desc}")
 
     print(f"\n  Toplam: {_c(_GREEN, str(installed))} / {total} araç kurulu\n")
     if installed < total:
@@ -406,12 +679,11 @@ def print_status() -> None:
 # ---------------------------------------------------------------------------
 def interactive_menu() -> None:
     """Kategori seçim menüsü."""
-    all_tools = [t for tlist in TOOLS.values() for t in tlist]
+    all_tools  = [t for tlist in TOOLS.values() for t in tlist]
     basic_list = [t for tlist in TOOLS.values() for t in tlist if t.name in BASIC_TOOLS]
-
     categories = list(TOOLS.keys())
-    total = len(all_tools)
-    installed = sum(1 for t in all_tools if _check_tool(t))
+    total      = len(all_tools)
+    installed  = sum(1 for t in all_tools if _check_tool(t))
 
     print()
     print(_c(_BOLD, "  ╔══════════════════════════════════════════╗"))
@@ -424,7 +696,7 @@ def interactive_menu() -> None:
     for i, cat in enumerate(categories, 4):
         tools_in_cat = TOOLS[cat]
         ok = sum(1 for t in tools_in_cat if _check_tool(t))
-        print(f"       {i}) {cat:<12} ({ok}/{len(tools_in_cat)} kurulu)")
+        print(f"       {i}) {cat:<14} ({ok}/{len(tools_in_cat)} kurulu)")
     print(f"  {_c(_BOLD, 'q)')} Çıkış\n")
 
     choice = input("  Seçim: ").strip().lower()
@@ -463,11 +735,11 @@ def tools_for_category(category: str | None) -> list[Tool] | None:
     <kategori> → o kategorinin araçları
     """
     if category is None:
-        return None  # interaktif menü açılacak
+        return None
     if category == "all":
         return [t for tlist in TOOLS.values() for t in tlist]
     if category == "basic":
         return [t for tlist in TOOLS.values() for t in tlist if t.name in BASIC_TOOLS]
     if category == "status":
-        return None  # özel durum
+        return None
     return TOOLS.get(category)

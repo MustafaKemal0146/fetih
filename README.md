@@ -341,7 +341,7 @@ fetih --model ollama/qwen2.5-coder:32b
 
 ## CTF / Pentest Araç Deposu
 
-FETIH, **84 araç** ve **9 kategori** ile kurulu gelir. İlk kurulumda otomatik sorar; sonradan tek komutla indirilir:
+FETIH, **83 araç** ve **9 kategori** ile kurulu gelir. İlk kurulumda otomatik sorar; sonradan tek komutla indirilir:
 
 ```bash
 fetih download-tools            # interaktif menü
@@ -358,7 +358,7 @@ fetih download-tools mobile     # Android/mobil
 fetih download-tools osint      # OSINT
 ```
 
-### Araç Kataloğu (84 araç)
+### Araç Kataloğu (83 araç)
 
 | Kategori | Araçlar | Yöntem |
 |----------|---------|--------|
@@ -366,7 +366,7 @@ fetih download-tools osint      # OSINT
 | **Web Saldırı** (16) | sqlmap, nikto, nuclei, dalfox, ffuf, gobuster, feroxbuster, arjun, wafw00f, wpscan, katana, hakrawler, smuggler, httpx, aiohttp, racepwn | apt/pip/go/gem |
 | **Sızma Testi** (6) | hydra, john, hashcat, netexec, haiti-hash, metasploit | apt/pip/script |
 | **Binary/Exploit** (11) | gdb, pwntools, radare2, ropper, checksec, one_gadget, angr, z3-solver, seccomp-tools, pwndbg, ghidra | apt/pip/gem/git/deb |
-| **Kriptografi** (6) | pycryptodome, gmpy2, sympy, fpylll, sagemath, padding-oracle | pip/apt |
+| **Kriptografi** (5) | pycryptodome, gmpy2, sympy, fpylll, padding-oracle | pip |
 | **Disk Forensics** (15) | binwalk, foremost, testdisk, sleuthkit, autopsy, exiftool, ewf-tools, ntfs-3g, volatility3, pypykatz, analyzeMFT, pytsk3, bless, wxhexeditor, wrk | apt/pip |
 | **Steganografi** (9) | steghide, zsteg, stegoveritas, stegseek, stegolsb, ffmpeg, sox, audacity, sonic-visualiser | apt/pip/gem/deb |
 | **Mobil** (4) | androguard, frida-tools, objection, ntfs-tools | pip |
