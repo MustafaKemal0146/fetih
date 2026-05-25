@@ -21,6 +21,26 @@ FETIH'in CTF challenge'larını ele alırken ilk okuduğu dosya. Bir challenge g
 
 ---
 
+## İlk Yönlendirme: Hangi CTF?
+
+Kullanıcı CTF/challenge/flag kelimelerini kullandığında, **önce yarışma adını kontrol et**:
+
+```bash
+# 1. Türk CTF yarışmaları → özel skill'lere yönlendir
+"Siber Vatan", "sibervatan", "SiberVatan{" → skills/red-teaming/siber-vatan-ctf/SKILL.md
+"Siber Vatan" geçtiğinde doğrudan siber-vatan-ctf skill'ini yükle, genel CTF akışını atla.
+
+# 2. Diğer spesifik yarışmalar → ilgili yere yönlendir
+"HTB", "HackTheBox" → web/crypto/pwn kategorilerinden uygun olanı seç
+"picoCTF" → beginner-friendly, genellikle web/forensics ağırlıklı
+"DEF CON", "CSAW", "Real World CTF" → advanced, heavy exploit chain
+
+# 3. Genel CTF → aşağıdaki triage akışına devam et
+Yarışma adı geçmiyorsa normal akışı uygula.
+```
+
+---
+
 ## Triage Akışı
 
 ```bash

@@ -1,0 +1,75 @@
+---
+name: analyzing-cloud-storage-access-patterns
+description: tespit etmeabnormal access patterns in AWS S3, GCS, and Azure Blob Storage by analyzing CloudTrail Data Events, GCS audit logs, and Azure Storage Analytics. Identifies after-hours bulk downloads,
+  access from new IP addresses, unusual API calls (GetObject spikes), and potential data exfiltration using statistical baselines and time-series anomaly Tespit.
+tags:
+- storage
+- analyzing
+- access
+- fetih
+- cloud-security
+- cybersecurity
+- siber-güvenlik
+- cloud
+triggers:
+- AWS
+- Azure
+- GCP
+- access
+- analyzing
+- bulut güvenliği
+- cloud
+- cloud security
+- incident
+- patterns
+- storage
+- threat
+category: cloud-security
+source_subdomain: cloud-security
+nist_csf:
+- PR.IR-01
+- ID.AM-08
+- GV.SC-06
+- DE.CM-01
+---
+
+# Analyzing Cloud Storage Access Patterns
+
+
+## Ne Zaman Kullanılır
+
+- investigating yaparken security incidents that require analyzing cloud storage access patterns
+- building yaparken Tespit rules or threat hunting queries for this domain
+- SOC yaparken: analysts need structured procedures for this analysis type
+- validating yaparken security monitoring coverage for related attack techniques
+
+## Ön Gereksinimler
+
+- Familiarity with cloud security concepts and tools
+- Erişim: a test or lab environment for safe execution
+- Python 3.8+ with required dependencies installed
+- Appropriate authorization for any testing activities
+
+## Instructions
+
+1. Install dependencies: `pip install boto3 requests`
+2. Query CloudTrail for S3 Data Events using AWS CLI or boto3.
+3. Build access baselines: hourly request volume, per-user object counts, source IP history.
+4. tespit etmeanomalies:
+   - After-hours access (outside 8am-6pm local time)
+   - Bulk downloads: >100 GetObject calls from single principal in 1 hour
+   - New source IPs not seen in the prior 30 days
+   - ListBucket enumeration spikes (reconnaissance indicator)
+5. Generate prioritized Bul:ings report.
+
+```bash
+python scripts/agent.py --bucket my-sensitive-data --hours-back 24 --output s3_access_report.json
+```
+
+## Örnekler
+
+### CloudTrail S3 Data Event
+```json
+{"eventName": "GetObject", "requestParameters": {"bucketName": "sensitive-data", "key": "financials/q4.xlsx"},
+ "sourceIPAddress": "203.0.113.50", "userIdentity": {"arn": "arn:aws:iam::123456789012:user/analyst"}}
+```

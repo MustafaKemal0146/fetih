@@ -2,6 +2,20 @@
 name: siber-vatan-ctf
 description: Siber Vatan CTF playbook — flag formats, web/reverse/forensics/blockchain/OSINT/stego/crypto recipes, and pivot heuristics tailored to the Turkish CTF circuit.
 tags: [ctf, siber-vatan, capture-the-flag, web-exploitation, reverse-engineering, forensics, crypto, blockchain, osint, turkce]
+triggers:
+  - "Siber Vatan"
+  - "siber vatan"
+  - "sibervatan"
+  - "SiberVatan"
+  - "SIBERVATAN"
+  - "SiberVatan{"
+  - "SIBERVATAN{"
+  - "sibervatan{"
+  - "yavuzkraft"
+  - "Siber Vatan yarışması"
+  - "Siber Vatan CTF"
+  - "TR-circuit CTF"
+  - "Türk CTF yarışması"
 ---
 
 # Siber Vatan CTF Playbook
