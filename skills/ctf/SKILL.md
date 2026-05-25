@@ -459,7 +459,7 @@ python3 -c "data=open('./file','rb').read(); print(bytes(b^0x42 for b in data))"
 
 ---
 
-## Araç Kurulumu
+## Araç Kontrol ve Kurulumu
 
 CTF/pentest araçlarını otomatik kurmak için:
 
@@ -467,19 +467,34 @@ CTF/pentest araçlarını otomatik kurmak için:
 fetih download-tools            # interaktif menü (kategori seç)
 fetih download-tools all        # hepsini kur (nmap, sqlmap, nuclei, pwntools, ghidra...)
 fetih download-tools basic      # temel araçlar (nmap, sqlmap, pwntools, gdb, binwalk)
-fetih download-tools status     # hangi araçlar kurulu göster
-fetih download-tools network    # sadece ağ araçları
-fetih download-tools web        # sadece web araçları
-fetih download-tools binary     # sadece binary/exploit araçları
-fetih download-tools ctf        # sadece CTF forensics/stego araçları
+fetih download-tools status     # hangi araçlar kurulu göster — Eksik araçları görmek için ilk adım!
 ```
 
-**Kategoriler ve araçlar:**
+Kategoriye göre kurulum:
 
-| Kategori | Araçlar |
+```bash
+fetih download-tools crypto      # Crypto araçları (pycryptodome, gmpy2, sympy, fpylll, padding-oracle)
+fetih download-tools pwn         # Pwn/Binary araçları (gdb, pwntools, radare2, ghidra, angr, z3)
+fetih download-tools web         # Web araçları (sqlmap, nuclei, ffuf, nikto, wpscan, dalfox)
+fetih download-tools forensics   # Forensics araçları (binwalk, volatility3, sleuthkit, exiftool, steghide)
+fetih download-tools rev         # Reverse engineering (gdb, radare2, ghidra, angr, z3)
+fetih download-tools osint       # OSINT araçları (sherlock, maigret, subfinder, amass)
+fetih download-tools network     # Network tarama (nmap, masscan, dnsenum, subfinder, amass)
+```
+
+### Araç Kurulumu Akışı
+
+1. **Önce status kontrol et** → `fetih download-tools status`
+2. **Eksik araçları gör** → hangi kategorilerde neler eksik
+3. **Kategori seç** → `fetih download-tools <kategori>`
+4. **Onay ver** → kurulum başlayacak
+
+| Kategori | Önemli Araçlar |
 |----------|---------|
-| network  | nmap, masscan, rustscan, fierce, dnsenum, subfinder, amass |
-| web      | sqlmap, nikto, nuclei, ffuf, gobuster, dalfox, arjun, wpscan |
-| pentest  | hydra, john, hashcat, netexec, metasploit |
-| binary   | gdb, pwntools, radare2, ropper, one_gadget, checksec, angr |
-| ctf      | binwalk, foremost, sleuthkit, exiftool, steghide, zsteg, volatility3 |
+| **crypto** | pycryptodome, gmpy2, sympy, fpylll, padding-oracle |
+| **pwn** | gdb, pwntools, radare2, ropper, checksec, pwndbg, ghidra, angr, z3, seccomp-tools |
+| **web** | sqlmap, nikto, nuclei, ffuf, gobuster, feroxbuster, dalfox, wpscan, katana, smuggler |
+| **forensics** | binwalk, foremost, testdisk, sleuthkit, exiftool, volatility3, steghide, zsteg |
+| **rev** | gdb, radare2, ghidra, angr, z3, pwntools, ropper |
+| **osint** | sherlock, maigret, subfinder, amass, assetfinder, waybackurls, gau |
+| **network** | nmap, masscan, arp-scan, dnsenum, rustscan, fierce, subfinder, amass |
