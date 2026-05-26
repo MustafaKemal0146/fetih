@@ -13,6 +13,7 @@ triggers:
 category: ai-security
 mitre_attack: [T1496, T1584]
 nist_csf: [DE.CM-8, PR.IP-3]
+adapted_for: fetih
 source: Eyadkelleh/awesome-claude-skills-security
 ---
 

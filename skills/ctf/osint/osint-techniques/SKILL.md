@@ -13,6 +13,7 @@ triggers:
 category: ctf-osint
 mitre_attack: [T1592, T1593, T1594]
 nist_csf: [ID.AM-1, DE.CM-8]
+adapted_for: fetih
 source: ljagiello/ctf-skills
 ---
 

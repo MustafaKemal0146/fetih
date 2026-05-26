@@ -12,6 +12,7 @@ triggers:
 category: ctf
 mitre_attack: [T1592, T1059]
 nist_csf: [DE.CM-8, PR.IP-3]
+adapted_for: fetih
 source: Eyadkelleh/awesome-claude-skills-security
 ---
 

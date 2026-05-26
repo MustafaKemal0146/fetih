@@ -14,6 +14,7 @@ triggers:
 category: web-application-security
 mitre_attack: [T1592, T1190]
 nist_csf: [DE.CM-8, PR.IP-3]
+adapted_for: fetih
 source: Eyadkelleh/awesome-claude-skills-security
 ---
 

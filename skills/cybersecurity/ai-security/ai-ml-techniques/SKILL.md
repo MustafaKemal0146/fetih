@@ -15,6 +15,7 @@ triggers:
 category: ctf-ai-ml
 mitre_attack: [T1496, T1584]
 nist_csf: [DE.CM-8, PR.IP-3]
+adapted_for: fetih
 source: ljagiello/ctf-skills
 ---
 

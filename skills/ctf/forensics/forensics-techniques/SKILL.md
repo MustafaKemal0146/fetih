@@ -13,6 +13,7 @@ triggers:
 category: ctf-forensics
 mitre_attack: [T1070, T1562]
 nist_csf: [DE.CM-4, RS.AN-1]
+adapted_for: fetih
 source: ljagiello/ctf-skills
 ---
 

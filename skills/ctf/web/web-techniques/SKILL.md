@@ -15,6 +15,7 @@ triggers:
 category: ctf-web
 mitre_attack: [T1190, T1592, T1059]
 nist_csf: [DE.CM-8, PR.IP-3]
+adapted_for: fetih
 source: ljagiello/ctf-skills
 ---
 

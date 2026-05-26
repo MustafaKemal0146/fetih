@@ -12,6 +12,7 @@ triggers:
 category: identity-access-management
 mitre_attack: [T1552, T1087]
 nist_csf: [PR.DS-5, DE.CM-8]
+adapted_for: fetih
 source: Eyadkelleh/awesome-claude-skills-security
 ---
 

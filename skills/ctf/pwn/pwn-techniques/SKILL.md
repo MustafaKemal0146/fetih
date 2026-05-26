@@ -12,6 +12,7 @@ triggers:
 category: ctf-pwn
 mitre_attack: [T1059, T1068, T1203]
 nist_csf: [PR.IP-3, DE.CM-8]
+adapted_for: fetih
 source: ljagiello/ctf-skills
 ---
 

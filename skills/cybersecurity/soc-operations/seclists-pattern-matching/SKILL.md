@@ -14,6 +14,7 @@ triggers:
 category: soc-operations
 mitre_attack: [T1087, T1046]
 nist_csf: [DE.CM-8, RS.AN-1]
+adapted_for: fetih
 source: Eyadkelleh/awesome-claude-skills-security
 ---
 

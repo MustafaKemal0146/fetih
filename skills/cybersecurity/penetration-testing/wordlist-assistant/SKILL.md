@@ -13,6 +13,7 @@ triggers:
 category: penetration-testing
 mitre_attack: [T1110, T1592]
 nist_csf: [DE.CM-8, PR.AA-1]
+adapted_for: fetih
 source: Eyadkelleh/awesome-claude-skills-security
 ---
 

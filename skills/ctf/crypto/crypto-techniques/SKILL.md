@@ -16,6 +16,7 @@ triggers:
 category: ctf-crypto
 mitre_attack: [T1552, T1600]
 nist_csf: [PR.DS-1, PR.DS-2]
+adapted_for: fetih
 source: ljagiello/ctf-skills
 ---
 
