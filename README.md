@@ -9,7 +9,7 @@
 
 <p align="center">
   <strong>CTF · Pentest · OSINT · Red Team — terminalde çalışan otonom yapay zeka ajanı</strong><br/>
-  Python · 20+ AI sağlayıcı · 500+ skill · Gateway · MCP · Docker · Kalıcı bellek
+  Python · 20+ AI sağlayıcı · 912+ skill · Gateway · MCP · Docker · Kalıcı bellek
 </p>
 
 <p align="center">
@@ -76,7 +76,7 @@ flowchart TD
 | CTF araç seti | **✓ (MCP köprüsü)** | ✗ | ✗ | ✗ | ✗ |
 | Pentest araç entegrasyonu | ✓ | ✗ | ✗ | ✗ | ✗ |
 | Telegram / Discord gateway | ✓ | ✗ | ✗ | ✗ | ✗ |
-| 500+ skill kataloğu | ✓ | ✗ | ✗ | ✗ | ✗ |
+| 912+ skill kataloğu | ✓ | ✗ | ✗ | ✗ | ✗ |
 | Kalıcı bellek + öğrenme | ✓ | kısmi | kısmi | ✗ | bazıları |
 | Multi-agent (paralel) | ✓ | ✗ | kısmi | kısmi | bazıları |
 | Offline / yerel model | ✓ | ✗ | ✗ | ✗ | bazıları |
@@ -429,7 +429,9 @@ fetih
 
 ## Skill Sistemi
 
-FETIH'in en güçlü özelliklerinden biri **skill** sistemidir. Bir skill, tekrar eden görevleri tek komutla çalıştırmanı sağlayan yapılandırılmış bir iş akışıdır. FETIH kataloğunda 500'den fazla hazır skill bulunur; kendi skill'lerini de yazabilirsin.
+FETIH'in en güçlü özelliklerinden biri **skill** sistemidir. Bir skill, tekrar eden görevleri tek komutla çalıştırmanı sağlayan yapılandırılmış bir iş akışıdır. FETIH kataloğunda **912+** hazır skill bulunur; kendi skill'lerini de yazabilirsin.
+
+> **Yeni:** [ljagiello/ctf-skills](https://github.com/ljagiello/ctf-skills) (107 referans dosya) ve [Eyadkelleh/awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) (SecLists + LLM testing + agent/command seti) entegre edildi.
 
 ### Skill Kullanımı
 
@@ -716,7 +718,7 @@ fetih/
 │   ├── security/             # Pentest, bug bounty, code audit
 │   ├── ctf/                  # CTF kategorileri
 │   ├── osint/                # OSINT iş akışları
-│   └── ...                   # 500+ skill
+│   └── ...                   # 912+ skill
 └── plugins/                  # Eklenti sistemi
 ```
 

@@ -21,13 +21,28 @@ triggers:
   - "takıldım"
   - "hint"
   - "nudge"
+  - "ctf techniques"
+  - "advanced exploitation"
+  - "SSTI"
+  - "SSRF"
+  - "CSP bypass"
+  - "request smuggling"
+  - "deserialization"
+  - "side-channel"
+  - "padding oracle"
+  - "LLL lattice"
+  - "heap feng shui"
+  - "kernel exploit"
+  - "AI CTF"
+  - "adversarial ML"
+  - "llm attacks"
 ---
 
 # CTF Master Solver — Ana Orkestratör
 
 FETIH'in CTF challenge'larını ele alırken ilk okuduğu dosya. Bir challenge geldiğinde bu akışı takip et, kategoriyi belirle, ilgili skill'i yükle ve gerekirse zincirleme yap.
 
-**Toplam:** 41 SKILL.md + 5 cheatsheet + 2 yeni skill (auto-solver, hint-system) = 48 referans nokta.
+**Toplam:** 55 SKILL.md · 5 cheatsheet · 107 imported reference dosyası · ljagiello/ctf-skills & awesome-claude-security entegrasyonu.
 
 ---
 
@@ -153,11 +168,34 @@ file challenge.apk                  # → android-apk-analysis
 | Validator/constraint çözme | `skills/ctf/rev/z3-constraint-solving` |
 | .apk Android app | `skills/ctf/rev/android-apk-analysis` |
 
-### OSINT Skills (1)
+### OSINT Skills (2)
 
 | Challenge ipucu | Skill yolu |
 |---|---|
 | Kişi araştır, fictional persona | `skills/ctf/osint/persona-tracking` |
+| OSINT teknikleri, araç zinciri | `skills/ctf/osint/osint-techniques` |
+
+### Misc Skills (2)
+
+| Challenge ipucu | Skill yolu |
+|---|---|
+| CTFd navigasyon, platform keşfi | `skills/ctf/misc/misc-techniques` |
+| Yarışma stratejisi, CTF yardım | `skills/ctf/competition-assistant` |
+
+### Yeni Imported Skills (ljagiello/ctf-skills)
+
+Her kategoride derinlemesine referans dosyalarıyla birlikte:
+
+| Skill | Referans Dosya | Kapsam |
+|---|---|---|
+| `skills/ctf/web/web-techniques/` | **20 ref** | SQLi, SSRF, SSTI, XXE, JWT, CSP bypass, client-side, server-side deser, OAuth/SAML, node-prototype |
+| `skills/ctf/crypto/crypto-techniques/` | **16 ref** | RSA, ECC, AES, hash, LLL lattice, padding oracle, side-channel |
+| `skills/ctf/pwn/pwn-techniques/` | **18 ref** | Heap feng shui, kernel exploit, format string, ROP chains, sandbox escape |
+| `skills/ctf/rev/reverse-techniques/` | **18 ref** | Ghidra/IDA, unpacking, obfuscation, anti-debug, symbolic execution |
+| `skills/ctf/forensics/forensics-techniques/` | **14 ref** | Disk recovery, memory dump, stego advanced, signals/hardware |
+| `skills/ctf/misc/misc-techniques/` | **12 ref** | Encoding, pyjail, bash jail, DNS, RF/SDR, pythonjail |
+
+> Bu skill'ler yüksek kaliteli CTF tekniği içerir. Kategori belli olduktan sonra ilgili `*-techniques/SKILL.md` dosyasını oku, `references/` altındaki ilgili `.md` dosyasına yönlendir.
 
 ---
 

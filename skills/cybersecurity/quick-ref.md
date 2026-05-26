@@ -521,3 +521,13 @@ Tek satırda arama için optimize edildi. Kullanım: `grep T1055 quick-ref.md`
 | T1491 | `performing-purple-team-atomic-testing` |
 
 | T1491.002 | `performing-purple-team-atomic-testing` |
+
+| T1072 | `containing-active-breach` |
+| T1204 | `building-malware-incident-communication-template, building-phishing-reporting-button-workflow, conducting-malware-incident-response, conducting-phishing-incident-response, ctf-malware, implementing-soar-playbook-with-palo-alto-xsoar` |
+| T1496 | `ctf-ai-ml, llm-security-testing` |
+| T1525 | `conducting-cloud-incident-response, performing-cloud-incident-containment-procedures` |
+| T1564 | `performing-disk-forensics-investigation` |
+| T1584 | `ctf-ai-ml, llm-security-testing` |
+| T1600 | `ctf-crypto` |
+| T1620 | `analyzing-memory-dumps-with-volatility, conducting-memory-forensics-with-volatility` |
+

@@ -1,6 +1,6 @@
 ---
 name: cybersecurity-master-orchestrator
-description: FETIH Siber Güvenlik Ana Orkestratörü — 754 skill ile tüm siber güvenlik alanlarını kapsar. Tehdit avı, zararlı yazılım analizi, dijital adli bilişim, olay müdahalesi, bulut güvenliği, ağ güvenliği, web uygulama güvenliği, API güvenliği, sızma testi, red team, SOC operasyonları, OT/ICS güvenliği ve daha 25+ alt kategori.
+description: FETIH Siber Güvenlik Ana Orkestratörü — 912+ skill ile tüm siber güvenlik alanlarını kapsar. Tehdit avı, zararlı yazılım analizi, dijital adli bilişim, olay müdahalesi, bulut güvenliği, ağ güvenliği, web uygulama güvenliği, API güvenliği, sızma testi, red team, SOC operasyonları, OT/ICS güvenliği ve daha 25+ alt kategori. ljagiello/ctf-skills ve Eyadkelleh/awesome-claude-skills-security entegre edildi.
 tags: [cybersecurity, siber-güvenlik, orchestrator, master, threat-hunting, malware-analysis, forensics, incident-response, cloud-security, network-security, pentest, red-team, soc, mitre-attack, nist-csf]
 triggers:
   - "siber güvenlik"
@@ -29,13 +29,26 @@ triggers:
   - "MITRE ATT&CK"
   - "NIST CSF"
   - "ISO 27001"
+  - "seclists"
+  - "wordlist"
+  - "fuzzing payload"
+  - "LLM security"
+  - "prompt injection"
+  - "jailbreak"
+  - "bug bounty"
+  - "pentest advisor"
+  - "web shell detect"
+  - "API key leak"
+  - "XSS payload"
+  - "SQL injection payload"
+  - "password list"
 ---
 
 # FETIH Siber Güvenlik Ana Orkestratörü
 
-FETIH'in siber güvenlik operasyonlarını yürütürken başvurduğu ana katalog. **754 özel skill** ile tüm siber güvenlik yaşam döngüsünü kapsar: tespit → analiz → müdahale → iyileştirme → önleme.
+FETIH'in siber güvenlik operasyonlarını yürütürken başvurduğu ana katalog. **912+ özel skill** ile tüm siber güvenlik yaşam döngüsünü kapsar: tespit → analiz → müdahale → iyileştirme → önleme.
 
-**Kapsam:** 32 alt kategori · 725 skill · 291 MITRE ATT&CK tekniği · 14/14 ATT&CK taktiği · NIST CSF uyumlu
+**Kapsam:** 32 alt kategori · 743 cybersecurity skill · 291 MITRE ATT&CK tekniği · 14/14 ATT&CK taktiği · NIST CSF uyumlu · ljagiello/ctf-skills & Eyadkelleh/awesome-claude-security entegrasyonu
 > **Red Team skill'leri** (29 adet) → `skills/red-teaming/red-team-operations/` dizininde
 
 ---
@@ -48,19 +61,19 @@ Bir siber güvenlik görevi geldiğinde, aşağıdaki tablodan ilgili kategoriyi
 |---|----------|-------|----------|
 | 1 | **Tehdit Avı** | 63 | Proaktif tehdit arama, anomali tespiti, YARA/Sigma kuralları, SIEM/EDR sorguları |
 | 2 | **Bulut Güvenliği** | 63 | AWS, Azure, GCP güvenlik denetimi, IAM, S3, bulut log analizi |
-| 3 | **SOC Operasyonları** | 61 | SIEM yönetimi, alert triyajı, log yönetimi, vaka yönetimi, shift el kitabı |
+| 3 | **SOC Operasyonları** | 62 | SIEM yönetimi, alert triyajı, log yönetimi, vaka yönetimi, shift el kitabı, SecLists pattern-matching |
 | 4 | **Tehdit İstihbaratı** | 50 | IOC analizi, tehdit aktörü profilleme, MISP, STIX/TAXII, APT takibi |
-| 5 | **Web Uygulama Güvenliği** | 46 | OWASP Top 10, SQLi, XSS, CSRF, SSRF, WAF bypass, API güvenlik testi |
+| 5 | **Web Uygulama Güvenliği** | 50 | OWASP Top 10, SQLi, XSS, CSRF, SSRF, WAF bypass, API güvenlik testi, SecLists fuzzing, bug bounty |
 | 6 | **Ağ Güvenliği** | 43 | Nmap, Wireshark, IDS/IPS, firewall denetimi, ağ segmentasyonu, paket analizi |
-| 7 | **Zararlı Yazılım Analizi** | 39 | Statik/dinamik analiz, sandbox, Ghidra, IDA, bellek forensik, unpacking |
+| 7 | **Zararlı Yazılım Analizi** | 42 | Statik/dinamik analiz, sandbox, Ghidra, IDA, bellek forensik, unpacking, web shell tespiti |
 | 8 | **Dijital Adli Bilişim** | 37 | Disk imajı, dosya sistemi, timeline, silinmiş dosya kurtarma, steganografi |
-| 9 | **Kimlik ve Erişim Yönetimi** | 36 | IAM, MFA, SSO, PAM, Zero Trust, Azure AD/Entra ID, Active Directory |
+| 9 | **Kimlik ve Erişim Yönetimi** | 39 | IAM, MFA, SSO, PAM, Zero Trust, Azure AD/Entra ID, Active Directory, API key tarama, SecLists password/username |
 | 10 | **OT/ICS Güvenliği** | 29 | SCADA, PLC, DCS, Modbus, endüstriyel kontrol sistemleri güvenliği |
 | 11 | **Konteyner Güvenliği** | 29 | Docker, Kubernetes, container escape, image scanning, runtime security |
 | 12 | **API Güvenliği** | 28 | REST/GraphQL güvenliği, OWASP API Top 10, OAuth2, JWT, rate limiting |
 | 13 | **Olay Müdahalesi** | 26 | IR playbook, kontaminasyon, eradikasyon, kurtarma, post-mortem, iletişim |
 | 14 | **Zafiyet Yönetimi** | 25 | CVSS, SSVC, patch yönetimi, zafiyet tarama, risk önceliklendirme |
-| 15 | **Sızma Testi** | 20 | Metodoloji, raporlama, exploitation, post-exploitation, temizlik |
+| 15 | **Sızma Testi** | 23 | Metodoloji, raporlama, exploitation, post-exploitation, temizlik, pentest advisor, wordlist, rapor jeneratörü |
 | 16 | **Sıfır Güven Mimarisi** | 18 | Zero Trust ilkeleri, mikro-segmentasyon, sürekli doğrulama, ZTNA |
 | 17 | **Uç Nokta Güvenliği** | 17 | EDR/XDR, endpoint hardening, malware önleme, cihaz kontrolü |
 | 18 | **DevSecOps** | 17 | CI/CD güvenliği, SAST/DAST, supply chain, container scanning, IaC güvenliği |
@@ -73,7 +86,7 @@ Bir siber güvenlik görevi geldiğinde, aşağıdaki tablodan ilgili kategoriyi
 | 25 | **Aldatma Teknolojisi** | 3 | Honeypot, deception, tuzak sistemler |
 | 26 | **Kablosuz Ağ Güvenliği** | 2 | WiFi, Bluetooth, RF güvenliği |
 | 27 | **Firmware Güvenliği** | 2 | UEFI, BIOS, firmware analizi |
-| 28 | **Yapay Zeka Güvenliği** | 2 | AI/ML güvenliği, adversarial ML, model güvenliği |
+| 28 | **Yapay Zeka Güvenliği** | 4 | AI/ML güvenliği, adversarial ML, model güvenliği, LLM security testing, CTF AI/ML attacks |
 | 29 | **Gizlilik Uyumu** | 2 | GDPR, KVKK, veri gizliliği |
 | 30 | **Sosyal Mühendislik** | 1 | Pretexting, phishing, vishing, fiziksel güvenlik |
 | 31 | **Veri Koruma** | 1 | DLP, veri sınıflandırma, şifreleme |

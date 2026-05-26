@@ -588,3 +588,58 @@
 - `implementing-zero-trust-for-saas-applications`
 - `implementing-zero-trust-with-hashicorp-boundary`
 
+---
+
+## Imported Skills (2026-05-26)
+
+### seclists-fuzzing
+- `seclists-fuzzing`
+
+### seclists-passwords  
+- `seclists-passwords`
+
+### seclists-payloads
+- `seclists-payloads`
+
+### seclists-usernames
+- `seclists-usernames`
+
+### seclists-pattern-matching
+- `seclists-pattern-matching`
+
+### seclists-web-shells
+- `seclists-web-shells`
+
+### api-key-scanner
+- `api-key-scanner`
+
+### sqli-test-generator
+- `sqli-test-generator`
+
+### xss-test-generator
+- `xss-test-generator`
+
+### wordlist-assistant
+- `wordlist-assistant`
+
+### llm-security-testing
+- `llm-security-testing`
+
+### ai-ml-techniques
+- `ai-ml-techniques`
+
+### malware-techniques
+- `malware-techniques`
+
+### webshell-detection
+- `webshell-detection`
+
+### pentest-advisor-agent
+- `pentest-advisor-agent`
+
+### bug-bounty-hunter-agent
+- `bug-bounty-hunter-agent`
+
+### ctf-competition-assistant
+- `ctf-competition-assistant`
+
