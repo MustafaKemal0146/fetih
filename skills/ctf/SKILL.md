@@ -1,7 +1,7 @@
 ---
 name: ctf-master-solver
-description: CTF challenge ana orkestratörü — kategori tespiti, modern saldırı patern tanıma, ilgili skill arama, cross-skill zincir koordinasyonu, hızlı referans erişim
-tags: [ctf, orchestrator, master, solver, triage, category-detection, modern-attacks]
+description: CTF challenge ana orkestratörü — kategori tespiti, modern saldırı patern tanıma, ilgili skill arama, cross-skill zincir koordinasyonu, hızlı referans erişim. Auto-solver ve hint-system routing.
+tags: [ctf, orchestrator, master, solver, triage, category-detection, modern-attacks, auto-solve, hint]
 triggers:
   - "CTF challenge"
   - "flag bul"
@@ -11,13 +11,23 @@ triggers:
   - "yarışma görevi"
   - "writeup yaz"
   - "exploit yaz"
+  - "auto solve"
+  - "autosolve"
+  - "/auto-solve"
+  - "otomatik çöz"
+  - "solve this ctf"
+  - "ipucu ver"
+  - "/hint"
+  - "takıldım"
+  - "hint"
+  - "nudge"
 ---
 
 # CTF Master Solver — Ana Orkestratör
 
 FETIH'in CTF challenge'larını ele alırken ilk okuduğu dosya. Bir challenge geldiğinde bu akışı takip et, kategoriyi belirle, ilgili skill'i yükle ve gerekirse zincirleme yap.
 
-**Toplam:** 39 SKILL.md + 5 cheatsheet = 44 referans nokta.
+**Toplam:** 41 SKILL.md + 5 cheatsheet + 2 yeni skill (auto-solver, hint-system) = 48 referans nokta.
 
 ---
 
@@ -26,6 +36,10 @@ FETIH'in CTF challenge'larını ele alırken ilk okuduğu dosya. Bir challenge g
 Kullanıcı CTF/challenge/flag kelimelerini kullandığında, **önce yarışma adını kontrol et**:
 
 ```bash
+# 0. Özel komutlar → özel skill'lere yönlendir
+"/auto-solve", "auto solve", "autosolve" → skills/ctf/auto-solver/SKILL.md
+"/hint", "ipucu ver", "takıldım" → skills/ctf/hint-system/SKILL.md
+
 # 1. Türk CTF yarışmaları → özel skill'lere yönlendir
 "Siber Vatan", "sibervatan", "SiberVatan{" → skills/red-teaming/siber-vatan-ctf/SKILL.md
 "Siber Vatan" geçtiğinde doğrudan siber-vatan-ctf skill'ini yükle, genel CTF akışını atla.

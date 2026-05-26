@@ -509,3 +509,341 @@ def is_valid_namespace(candidate: Optional[str]) -> bool:
     if not candidate:
         return False
     return bool(_NAMESPACE_RE.match(candidate))
+
+
+# ---------------------------------------------------------------------------
+# Mapping / Index dosyalari — hizli skill arama
+# ---------------------------------------------------------------------------
+
+# Cache: mapping dosyasi path -> parse edilmis dict
+_MAPPING_CACHE: Dict[str, Any] = {}
+_MAPPING_CACHE_MAX = 6
+
+# Anahtar kelime -> kategori eşlemesi (Türkçe + İngilizce)
+_KEYWORD_CATEGORY_MAP = {
+    # Tehdit avı
+    'tehdit avı': 'threat-hunting', 'tehdit avi': 'threat-hunting',
+    'threat hunting': 'threat-hunting', 'threat hunt': 'threat-hunting',
+    'anomali': 'threat-hunting', 'anomaly': 'threat-hunting',
+    'yara': 'threat-hunting', 'sigma': 'threat-hunting',
+    'siem': 'soc-operations', 'edr': 'endpoint-security',
+    'xdr': 'endpoint-security',
+    # Bulut
+    'aws': 'cloud-security', 'azure': 'cloud-security',
+    'gcp': 'cloud-security', 'bulut': 'cloud-security',
+    'cloud': 'cloud-security', 's3': 'cloud-security',
+    'iam': 'identity-access-management',
+    # Zararlı yazılım
+    'zararlı yazılım': 'malware-analysis', 'zararli yazilim': 'malware-analysis',
+    'malware': 'malware-analysis', 'ransomware': 'ransomware-defense',
+    'fidye': 'ransomware-defense', 'virus': 'malware-analysis',
+    'trojan': 'malware-analysis', 'rootkit': 'malware-analysis',
+    # Adli bilişim
+    'adli bilişim': 'digital-forensics', 'adli bilisim': 'digital-forensics',
+    'forensics': 'digital-forensics', 'forensic': 'digital-forensics',
+    'disk imajı': 'digital-forensics', 'disk image': 'digital-forensics',
+    'volatility': 'malware-analysis', 'memory dump': 'malware-analysis',
+    'bellek': 'malware-analysis',
+    # Ağ
+    'ağ': 'network-security', 'ag': 'network-security',
+    'network': 'network-security', 'nmap': 'network-security',
+    'wireshark': 'network-security', 'paket': 'network-security',
+    'packet': 'network-security', 'firewall': 'network-security',
+    'ids': 'network-security', 'ips': 'network-security',
+    # Web
+    'web': 'web-application-security', 'sql injection': 'web-application-security',
+    'sqli': 'web-application-security', 'xss': 'web-application-security',
+    'csrf': 'web-application-security', 'ssrf': 'web-application-security',
+    'owasp': 'web-application-security', 'api': 'api-security',
+    'graphql': 'api-security', 'rest': 'api-security',
+    # Sızma testi
+    'sızma': 'penetration-testing', 'sizma': 'penetration-testing',
+    'pentest': 'penetration-testing', 'pentesting': 'penetration-testing',
+    'exploit': 'penetration-testing', 'exploitation': 'penetration-testing',
+    'red team': 'penetration-testing', 'redteam': 'penetration-testing',
+    # Olay müdahale
+    'olay müdahale': 'incident-response', 'olay mudahale': 'incident-response',
+    'incident response': 'incident-response', 'ir': 'incident-response',
+    'kontaminasyon': 'incident-response', 'eradikasyon': 'incident-response',
+    # SOC
+    'soc': 'soc-operations', 'alert': 'soc-operations',
+    'triage': 'soc-operations', 'vaka': 'incident-response',
+    # Konteyner
+    'docker': 'container-security', 'kubernetes': 'container-security',
+    'k8s': 'container-security', 'container': 'container-security',
+    'konteyner': 'container-security',
+    # Kimlik
+    'kimlik': 'identity-access-management', 'erişim': 'identity-access-management',
+    'erisim': 'identity-access-management', 'mfa': 'identity-access-management',
+    'sso': 'identity-access-management', 'active directory': 'identity-access-management',
+    'azure ad': 'identity-access-management', 'entra': 'identity-access-management',
+    'zero trust': 'zero-trust-architecture', 'sıfır güven': 'zero-trust-architecture',
+    'sifir guven': 'zero-trust-architecture',
+    # Zafiyet
+    'zafiyet': 'vulnerability-management', 'vulnerability': 'vulnerability-management',
+    'cvss': 'vulnerability-management', 'patch': 'vulnerability-management',
+    'cve': 'vulnerability-management',
+    # Kripto
+    'kripto': 'cryptography', 'şifreleme': 'cryptography',
+    'sifreleme': 'cryptography', 'crypto': 'cryptography',
+    'tls': 'cryptography', 'ssl': 'cryptography', 'pki': 'cryptography',
+    # Mobil
+    'mobil': 'mobile-security', 'mobile': 'mobile-security',
+    'android': 'mobile-security', 'ios': 'mobile-security', 'apk': 'mobile-security',
+    # OT/ICS
+    'scada': 'ot-ics-security', 'plc': 'ot-ics-security',
+    'ics': 'ot-ics-security', 'ot': 'ot-ics-security',
+    'endüstriyel': 'ot-ics-security', 'endustriyel': 'ot-ics-security',
+    # Oltalma
+    'oltalama': 'phishing-defense', 'phishing': 'phishing-defense',
+    'email': 'phishing-defense', 'spf': 'phishing-defense',
+    'dkim': 'phishing-defense', 'dmarc': 'phishing-defense',
+    # Uyum
+    'uyum': 'compliance-governance', 'compliance': 'compliance-governance',
+    'iso 27001': 'compliance-governance', 'nist': 'compliance-governance',
+    'gdpr': 'privacy-compliance', 'kvkk': 'privacy-compliance',
+    'pci dss': 'compliance-governance', 'soc 2': 'compliance-governance',
+    # DevSecOps
+    'devsecops': 'devsecops', 'ci/cd': 'devsecops',
+    'cicd': 'devsecops', 'sast': 'devsecops', 'dast': 'devsecops',
+    'supply chain': 'supply-chain-security', 'tedarik zinciri': 'supply-chain-security',
+    # Blockchain
+    'blockchain': 'blockchain-security', 'smart contract': 'blockchain-security',
+    'defi': 'blockchain-security',
+    # Kablosuz
+    'wifi': 'wireless-security', 'wireless': 'wireless-security',
+    'kablosuz': 'wireless-security', 'bluetooth': 'wireless-security',
+    # Yapay zeka
+    'ai security': 'ai-security', 'ml security': 'ai-security',
+    'yapay zeka': 'ai-security', 'adversarial': 'ai-security',
+    # Sosyal mühendislik
+    'sosyal mühendislik': 'social-engineering', 'sosyal muhendislik': 'social-engineering',
+    'social engineering': 'social-engineering',
+    # Tehdit istihbaratı
+    'tehdit istihbarat': 'threat-intelligence', 'tehdit istihbarati': 'threat-intelligence',
+    'threat intelligence': 'threat-intelligence', 'ioc': 'threat-intelligence',
+    'misp': 'threat-intelligence', 'stix': 'threat-intelligence',
+    'apt': 'threat-intelligence',
+    # Uç nokta
+    'uç nokta': 'endpoint-security', 'uc nokta': 'endpoint-security',
+    'endpoint': 'endpoint-security',
+    # Aldatma
+    'honeypot': 'deception-technology', 'deception': 'deception-technology',
+    'tuzak': 'deception-technology',
+    # Firmware
+    'firmware': 'firmware-security', 'bios': 'firmware-security',
+    'uefi': 'firmware-security',
+    # Veri koruma
+    'dlp': 'data-protection', 'veri koruma': 'data-protection',
+    'data protection': 'data-protection',
+    # CTF
+    'ctf': 'ctf', 'capture the flag': 'ctf',
+}
+
+
+def _load_mapping_file(mapping_name: str) -> Optional[Dict[str, Any]]:
+    """Mapping dosyasini yukle ve cache'le.
+
+    mapping_name: 'quick-ref', 'mitre-attack-index', 'nist-csf-index',
+                  'tool-index', 'category-full-index'
+    """
+    global _MAPPING_CACHE
+
+    if mapping_name in _MAPPING_CACHE:
+        return _MAPPING_CACHE[mapping_name]
+
+    # LRU temizligi
+    while len(_MAPPING_CACHE) >= _MAPPING_CACHE_MAX:
+        oldest = next(iter(_MAPPING_CACHE))
+        del _MAPPING_CACHE[oldest]
+
+    skills_dir = get_skills_dir()
+    # cybersecurity/ altinda olabilir, direkt skills/ altinda da olabilir
+    candidates = [
+        skills_dir / 'cybersecurity' / f'{mapping_name}.md',
+        skills_dir / f'{mapping_name}.md',
+    ]
+
+    for path in candidates:
+        if not path.exists():
+            continue
+        try:
+            content = path.read_text(encoding='utf-8')
+            _MAPPING_CACHE[mapping_name] = {
+                'path': str(path),
+                'content': content,
+                'lines': content.split('\n'),
+            }
+            return _MAPPING_CACHE[mapping_name]
+        except Exception:
+            continue
+
+    return None
+
+
+def query_skills_by_keyword(user_query: str, max_results: int = 25) -> List[str]:
+    """Kullanici mesajindaki anahtar kelimelere gore ilgili skill isimlerini bul.
+
+    Strateji:
+      1. _KEYWORD_CATEGORY_MAP'te eslesen kategorileri bul
+      2. quick-ref.md'de anahtar kelime iceren satirlari tara
+      3. tool-index.md'de arac isimlerini ara
+      4. Sonucu birlesik sekilde dondur (tekrarsiz, sirali)
+    """
+    query_lower = user_query.lower()
+    matched_categories: Set[str] = set()
+    extra_skills: Set[str] = set()
+
+    # Adim 1: Anahtar kelime -> kategori esleme (sadece kategori adlari)
+    for keyword, category in _KEYWORD_CATEGORY_MAP.items():
+        # Kisa keyword'ler (<= 2 karakter) icin word-boundary eslesme
+        if len(keyword) <= 2:
+            if re.search(r'\b' + re.escape(keyword) + r'\b', query_lower):
+                matched_categories.add(category)
+        elif keyword in query_lower:
+            matched_categories.add(category)
+
+    # Adim 2: quick-ref.md'de ara (MITRE ID varsa)
+    mitre_match = re.findall(r'T\d{4}(?:\.\d{3})?', user_query.upper())
+    if mitre_match:
+        quick_ref = _load_mapping_file('quick-ref')
+        if quick_ref:
+            for mid in mitre_match:
+                for line in quick_ref['lines']:
+                    if mid in line:
+                        skills = re.findall(r'`([a-z][a-z0-9-]+)`', line)
+                        extra_skills.update(skills)
+
+    # Adim 3: tool-index.md'de arac ismi ara (supplementary)
+    common_tools = [
+        'nmap', 'wireshark', 'metasploit', 'burp', 'ghidra', 'ida',
+        'volatility', 'splunk', 'nessus', 'hydra', 'john', 'hashcat',
+        'gobuster', 'ffuf', 'sqlmap', 'nikto', 'zap', 'aircrack',
+        'ettercap', 'tcpdump', 'tshark', 'autopsy', 'binwalk',
+        'foremost', 'steghide', 'exiftool', 'radare2', 'gdb',
+        'docker', 'kubernetes', 'terraform', 'ansible',
+    ]
+    for tool in common_tools:
+        if tool in query_lower:
+            tool_index = _load_mapping_file('tool-index')
+            if tool_index:
+                in_tool_section = False
+                for line in tool_index['lines']:
+                    if line.startswith(f'## {tool}') or line.startswith(f'## **{tool}**'):
+                        in_tool_section = True
+                        continue
+                    if in_tool_section:
+                        if line.startswith('## '):
+                            break
+                        skills = re.findall(r'`([a-z][a-z0-9-]+)`', line)
+                        extra_skills.update(skills)
+
+    # Adim 4: Kategorilerden skill isimlerini yukle (PRIMARY)
+    result_skills: List[str] = []
+    seen: Set[str] = set()
+
+    # Once eslesen kategorilerdeki skill'leri yukle
+    if matched_categories:
+        category_index = _load_mapping_file('category-full-index')
+        if category_index:
+            for cat in sorted(matched_categories)[:4]:
+                in_section = False
+                for line in category_index['lines']:
+                    if line.startswith(f'## {cat}') or line.startswith(f'## {cat.replace("-", " ")}'):
+                        in_section = True
+                        continue
+                    if in_section:
+                        if line.startswith('## '):
+                            break
+                        skills = re.findall(r'`([A-Za-z][A-Za-z0-9_ -]+)`', line)
+                        for s in skills:
+                            s_clean = s.strip().lower().replace(' ', '-').replace('_', '-')
+                            if s_clean not in seen and len(s_clean) > 3:
+                                seen.add(s_clean)
+                                result_skills.append(s_clean)
+                                if len(result_skills) >= max_results:
+                                    break
+                    if len(result_skills) >= max_results:
+                        break
+                if len(result_skills) >= max_results:
+                    break
+
+    # Sonra extra skill'leri ekle (tool-index'ten gelenler)
+    for s in sorted(extra_skills):
+        s_clean = s.lower().replace('_', '-')
+        if s_clean not in seen and len(s_clean) > 3:
+            seen.add(s_clean)
+            result_skills.append(s_clean)
+            if len(result_skills) >= max_results:
+                break
+
+    # Hic sonuc yoksa kategorileri direkt ekle (geriye donuk uyumluluk)
+    if not result_skills:
+        for cat in matched_categories:
+            if cat not in seen:
+                seen.add(cat)
+                result_skills.append(cat)
+
+    return result_skills[:max_results]
+
+
+def query_skills_by_mitre(technique_ids: List[str]) -> List[str]:
+    """MITRE ATT&CK teknik ID'lerine gore skill isimlerini bul."""
+    skills: Set[str] = set()
+
+    quick_ref = _load_mapping_file('quick-ref')
+    if not quick_ref:
+        return []
+
+    for tid in technique_ids:
+        for line in quick_ref['lines']:
+            if tid in line:
+                found = re.findall(r'`([a-z][a-z0-9-]+)`', line)
+                skills.update(found)
+
+    return sorted(skills)
+
+
+def query_skills_by_nist_csf(nist_ids: List[str]) -> List[str]:
+    """NIST CSF kategorilerine gore skill isimlerini bul."""
+    skills: Set[str] = set()
+
+    nist_index = _load_mapping_file('nist-csf-index')
+    if not nist_index:
+        return []
+
+    for nid in nist_ids:
+        for line in nist_index['lines']:
+            if nid in line:
+                found = re.findall(r'`([a-z][a-z0-9-]+)`', line)
+                skills.update(found)
+
+    return sorted(skills)
+
+
+def query_skills_by_tool(tool_name: str) -> List[str]:
+    """Arac ismine gore ilgili skill'leri bul."""
+    skills: Set[str] = set()
+
+    tool_index = _load_mapping_file('tool-index')
+    if not tool_index:
+        return []
+
+    in_tool_section = False
+    for line in tool_index['lines']:
+        if line.startswith(f'## {tool_name}') or line.startswith(f'## **{tool_name}**'):
+            in_tool_section = True
+            continue
+        if in_tool_section:
+            if line.startswith('## ') and not line.startswith(f'## {tool_name}'):
+                break
+            found = re.findall(r'`([a-z][a-z0-9-]+)`', line)
+            skills.update(found)
+
+    return sorted(skills)
+
+
+def clear_mapping_cache() -> None:
+    """Mapping cache'ini temizle (ornegin skill'ler yeniden yuklendiginde)."""
+    global _MAPPING_CACHE
+    _MAPPING_CACHE.clear()

@@ -8044,6 +8044,14 @@ class FETIHCLI:
             self._handle_voice_command(cmd_original)
         elif canonical == "busy":
             self._handle_busy_command(cmd_original)
+        elif canonical == "validate-skills":
+            self._handle_validate_skills_command(cmd_original)
+        elif canonical == "report":
+            self._handle_report_command(cmd_original)
+        elif canonical == "auto-solve":
+            self._handle_auto_solve_command(cmd_original)
+        elif canonical == "hint":
+            self._handle_hint_command(cmd_original)
         else:
             # Check for user-defined quick commands (bypass agent loop, no LLM call)
             base_cmd = cmd_lower.split()[0]
@@ -9071,6 +9079,66 @@ class FETIHCLI:
             _cprint(f"  {_DIM}{behavior}{_RST}")
         else:
             _cprint(f"  {_ACCENT}✓ Busy input mode set to '{arg}' (session only){_RST}")
+
+    def _handle_validate_skills_command(self, cmd: str):
+        """Handle /validate-skills — scan all SKILL.md files for frontmatter errors."""
+        try:
+            from fetih_cli.skill_validator import handle_validate_skills_slash
+            exit_code = handle_validate_skills_slash(cmd)
+            if exit_code == 0:
+                _cprint(f"  {_DIM}✓ Validation complete — all skills clean{_RST}")
+        except Exception as e:
+            _cprint(f"  {_DIM}✗ Validator error: {e}{_RST}")
+
+    def _handle_report_command(self, cmd: str):
+        """Handle /report — generate a pentest security assessment report."""
+        parts = cmd.strip().split()
+        subcommand = parts[1] if len(parts) > 1 else "summary"
+        if subcommand not in ("summary", "full", "findings"):
+            _cprint(f"  {_ACCENT}Usage: /report [summary|full|findings] [--format md|pdf]{_RST}")
+            _cprint(f"  {_DIM}  summary  — Executive summary (1 page){_RST}")
+            _cprint(f"  {_DIM}  full     — Full report with CVSS, MITRE, remediation{_RST}")
+            _cprint(f"  {_DIM}  findings — Technical findings only{_RST}")
+            return
+        # Delegate to the pentest-report-generator skill via pending input
+        msg = f"/report {subcommand} — pentest raporu olustur. skill_view('pentest-report-generator') ile basla."
+        if hasattr(self, '_pending_input'):
+            self._pending_input.put(msg)
+            _cprint(f"  {_DIM}⚡ Pentest raporu olusturuluyor ({subcommand})...{_RST}")
+        else:
+            _cprint(f"  {_DIM}Rapor talebi alindi. Agent'a: {msg[:80]}...{_RST}")
+
+    def _handle_auto_solve_command(self, cmd: str):
+        """Handle /auto-solve — auto-solve a CTF challenge."""
+        parts = cmd.strip().split(maxsplit=1)
+        if len(parts) < 2:
+            _cprint(f"  {_ACCENT}Usage: /auto-solve <challenge.zip|url> [--category web|crypto|pwn] [--resume]{_RST}")
+            return
+        target = parts[1].strip()
+        _cprint(f"  {_DIM}⚡ CTF Auto-Solver baslatiliyor...{_RST}")
+        _cprint(f"  {_DIM}  Hedef: {target[:80]}{_RST}")
+        # Delegate to the auto-solver skill via pending input
+        msg = f"/auto-solve {target} — bu CTF challenge'ini otomatik coz. skill_view('auto-solver') ile basla."
+        if hasattr(self, '_pending_input'):
+            self._pending_input.put(msg)
+        else:
+            _cprint(f"  {_DIM}Solver talebi alindi.{_RST}")
+
+    def _handle_hint_command(self, cmd: str):
+        """Handle /hint — CTF progressive hint system."""
+        parts = cmd.strip().split()
+        subcommand = parts[1] if len(parts) > 1 else "nudge"
+        if subcommand not in ("more", "solution", "status", "reset"):
+            if subcommand not in ("nudge",):
+                # Default to nudge
+                subcommand = "nudge"
+        # Delegate to the hint-system skill via pending input
+        msg = f"/hint {subcommand} — CTF ipucu istegi. skill_view('hint-system') ile basla."
+        if hasattr(self, '_pending_input'):
+            self._pending_input.put(msg)
+            _cprint(f"  {_DIM}💡 CTF ipucu ({subcommand}) hazirlaniyor...{_RST}")
+        else:
+            _cprint(f"  {_DIM}Ipucu talebi alindi.{_RST}")
 
     def _handle_fast_command(self, cmd: str):
         """Handle /fast — toggle fast mode (OpenAI Priority Processing / Anthropic Fast Mode)."""
