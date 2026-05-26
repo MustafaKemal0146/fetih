@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Graphql Security Assessment
@@ -318,3 +319,10 @@ A social network API allows querying `friends { friends { friends { ... } } }` u
 6. Remove GraphiQL/Playground from production
 7. Parameterize all database queries in resolvers
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3c89e3a04d607fe1
+-->
+

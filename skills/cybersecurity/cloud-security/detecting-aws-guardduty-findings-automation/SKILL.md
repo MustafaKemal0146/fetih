@@ -35,6 +35,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Aws Guardduty Bul:ings Automation
@@ -348,3 +349,10 @@ aws guardduty update-organization-configuration \
 - AWS GuardDuty Best Practices: https://aws.github.io/aws-security-services-best-practices/guides/guardduty/
 - EventBridge Integration: https://docs.aws.amazon.com/guardduty/latest/ug/guardduty_Bul:ings_eventbridge.html
 - GuardDuty Bul:ing Types Reference
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3a70ba36d3bd9dc6
+-->
+

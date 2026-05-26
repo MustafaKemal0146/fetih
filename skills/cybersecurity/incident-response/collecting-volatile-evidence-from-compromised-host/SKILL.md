@@ -36,6 +36,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Collecting Volatile Evidence from Compromised Host
@@ -230,3 +231,10 @@ EOF
 - System configuration snapshots
 - Evidence manifest with SHA256 checksums
 - Chain of custody documentation
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 75724154d1adeaba
+-->
+

@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Performing Wireless Security Assessment with Kismet
@@ -386,3 +387,10 @@ if __name__ == '__main__':
 - [CISA Kismet Resources](https://www.cisa.gov/resources-tools/services/kismet)
 - [NIST SP 800-153 - Wireless Network Security](https://csrc.nist.gov/publications/detail/sp/800-153/final)
 - [Wi-Fi Alliance WPA3 Specification](https://www.wi-fi.org/discover-wi-fi/security)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: efa73e83081e07d8
+-->
+

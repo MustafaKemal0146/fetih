@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Implementing Network Access Control
@@ -373,3 +374,10 @@ wpa_cli -i eth0 status
 - Posture pass rate: 95.8% (15 devices quarantined for missing patches)
 - RADIUS failover tested: Successful (critical VLAN activated in 3 seconds)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f430a0c267688aad
+-->
+

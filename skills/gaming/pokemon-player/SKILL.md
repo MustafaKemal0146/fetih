@@ -3,6 +3,7 @@ name: pokemon-player
 description: "Play Pokemon via headless emulator + RAM reads."
 tags: [gaming, pokemon, emulator, pyboy, gameplay, gameboy]
 platforms: [linux, macos, windows]
+adapted_for: fetih
 ---
 # Pokemon Player
 
@@ -214,3 +215,10 @@ Then hold B to speed through attack animations and text.
 - Dialog detection via RAM is unreliable — verify with screenshots
 - Save BEFORE risky encounters
 - The tunnel URL changes each time you restart it
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3c23a66be871a748
+-->
+

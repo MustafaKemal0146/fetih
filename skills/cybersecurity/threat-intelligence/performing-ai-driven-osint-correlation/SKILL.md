@@ -36,6 +36,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Performing Ai Driven Osint Correlation
@@ -391,3 +392,10 @@ The final output is a structured JSON correlation report and a Markdown intellig
 - Şunu doğrula: no false positives from common usernames (e.g., "admin", "test") inflated entity profiles.
 - Ensure breach data timestamps are current and from reputable aggregators.
 - Validate that the final report does not include stale or retracted OSINT data.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e72a82e004596f48
+-->
+

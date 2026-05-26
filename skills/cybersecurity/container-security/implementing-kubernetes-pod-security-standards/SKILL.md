@@ -30,6 +30,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Kubernetes Pod Security Standards
@@ -246,3 +247,10 @@ kubescape scan framework nsa --namespace production
 - [Pod Security Admission - Kubernetes](https://kubernetes.io/docs/concepts/security/pod-security-admission/)
 - [Migrate from PodSecurityPolicy](https://kubernetes.io/docs/tasks/configure-pod-container/migrate-from-psp/)
 - [Kubescape PSS Scanner](https://github.com/kubescape/kubescape)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ee7d4b70edf462f4
+-->
+

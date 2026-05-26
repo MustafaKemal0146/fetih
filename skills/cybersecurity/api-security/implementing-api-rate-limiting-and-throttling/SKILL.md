@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Api Rate Limiting and Throttling
@@ -482,3 +483,10 @@ class DistributedRateLimiter:
 - Retry-After header: Accurate within 1 second of actual reset time
 - Response overhead: < 2ms added latency per request for rate limit check
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ed5be0d80e1b401c
+-->
+

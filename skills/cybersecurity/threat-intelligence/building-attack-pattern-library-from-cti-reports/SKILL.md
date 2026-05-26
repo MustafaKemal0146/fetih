@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Building Attack Pattern Library from Cti Reports
@@ -328,3 +329,10 @@ templates = library.generate_Tespit_templates(mapped_behaviors)
 - [attackcti Python Library](https://github.com/OTRF/ATTACK-Python-Client)
 - [Sigma Rules Project](https://github.com/SigmaHQ/sigma)
 - [MITRE ATT&CK STIX Data](https://github.com/mitre/cti)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ffe30ebc2058b569
+-->
+

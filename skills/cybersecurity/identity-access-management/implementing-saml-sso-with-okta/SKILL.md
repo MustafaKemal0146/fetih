@@ -31,6 +31,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Implementing Saml Sso with Okta
@@ -149,3 +150,10 @@ Implement SAML 2.0 Single Sign-On (SSO) using Okta as the Identity Provider (IdP
 - [ ] Session timeout forces re-authentication
 - [ ] SLO properly terminates sessions on both IdP and SP
 - [ ] Certificate rotation tested without service interruption
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1968387ab6a66c05
+-->
+

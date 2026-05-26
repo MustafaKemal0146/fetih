@@ -29,6 +29,7 @@ related_skills:
   - buffer-overflow-rop
   - srop-attack
   - heap-exploit
+adapted_for: fetih
 ---
 
 # SECCOMP Sandbox Escape — Yasaklı Syscall'lar Etrafında Dans
@@ -408,3 +409,10 @@ apt install liburing-dev
 - LiveOverflow seccomp video serisi
 - "The Definitive Guide to Linux System Calls" — syscall numaraları için
 - KernelTLV BPF Filter Documentation
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d780c5e8fa960731
+-->
+

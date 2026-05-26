@@ -26,6 +26,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Performing Dns Tunneling Detection
@@ -84,3 +85,10 @@ for pkt in packets:
         if entropy > 4.0:
             print(f"Suspicious: {query} (entropy={entropy:.2f})")
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f88ed443b79178bf
+-->
+

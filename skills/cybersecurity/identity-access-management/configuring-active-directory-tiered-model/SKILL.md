@@ -29,6 +29,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Configuring Active Directory Tiered Model
@@ -74,3 +75,10 @@ Implement Microsoft's Enhanced Security Admin Environment (ESAE) tiered administ
 - [ ] Audit logging enabled and forwarding to SIEM
 - [ ] Documentation and runbooks complete
 - [ ] Compliance evidence generated
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2b88e36f6f68f139
+-->
+

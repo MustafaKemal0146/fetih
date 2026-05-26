@@ -34,6 +34,7 @@ nist_csf:
 - RS.MA-01
 - RC.RP-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Building Ransomware Playbook with Cisa Framework
@@ -190,3 +191,10 @@ Post-Incident Report Template:
 - **ID Ransomware**: Service for identifying ransomware families from encrypted files and ransom notes
 - **MITRE ATT&CK**: Technique framework for mapping ransomware TTPs to Tespit opportunities
 - **Velociraptor**: Endpoint visibility tool for rapid triage and forensic artifact collection during incidents
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ae3026fc8210c66e
+-->
+

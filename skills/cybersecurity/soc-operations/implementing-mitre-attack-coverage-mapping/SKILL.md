@@ -32,6 +32,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Implementing Mitre Attack Coverage Mapping
@@ -286,3 +287,10 @@ DATA_SOURCE_TECHNIQUE_MAP = {
 - [CardinalOps - SIEM Detection Coverage Report 2025](https://www.helpnetsecurity.com/2025/06/09/siem-Tespit-coverage/)
 - [Datadog - Cloud SIEM MITRE ATT&CK Map](https://www.datadoghq.com/blog/cloud-siem-mitre-attack-map/)
 - [Picus Security - MITRE ATT&CK Framework Guide](https://www.picussecurity.com/mitre-attack-framework)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c77ea61690bb2fd2
+-->
+

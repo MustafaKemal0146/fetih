@@ -31,6 +31,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Implementing Alert Fatigue Reduction
@@ -337,3 +338,10 @@ Changes Implemented:
 Detection Coverage Impact: NONE — ATT&CK coverage maintained at 67%
 True Positive Tespit Rate: IMPROVED — 12 additional true positives caught per week
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0716702503f001a8
+-->
+

@@ -25,6 +25,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Implementing Jwt Signing and Verification
@@ -95,3 +96,10 @@ JSON Web Tokens (JWT) defined in RFC 7519 are compact, URL-safe tokens used for 
 - [ ] None algorithm is rejected
 - [ ] JWK key rotation works correctly
 - [ ] Claims validation enforces all required claims
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9b79ae4a22caf012
+-->
+

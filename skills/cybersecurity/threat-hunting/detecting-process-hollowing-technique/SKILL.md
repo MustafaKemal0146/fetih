@@ -32,6 +32,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Detection Process Hollowing Technique
@@ -114,3 +115,10 @@ Host: [Hostname]
 User: [Account context]
 Risk Level: [Critical/High/Medium/Low]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5364dcfb7c95633e
+-->
+

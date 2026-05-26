@@ -37,6 +37,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Extracting Credentials from Memory Dump
@@ -318,3 +319,10 @@ Credential Extraction Summary:
     - High: Revoke all Kerberos tickets via krbtgt rotation
     - Medium: Audit DPAPI-protected data exposure
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7543b1c73393671c
+-->
+

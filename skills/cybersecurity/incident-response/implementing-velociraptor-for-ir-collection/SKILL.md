@@ -39,6 +39,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Implementing Velociraptor for Ir Collection
@@ -297,3 +298,10 @@ Monitoring:
 - [CISA Velociraptor Resource](https://www.cisa.gov/resources-tools/services/velociraptor)
 - [Velociraptor GitHub Repository](https://github.com/Velocidex/velociraptor)
 - [Pen Test Partners: Large-Scale Velociraptor](https://www.pentestpartners.com/security-blog/using-velociraptor-for-large-scale-endpoint-visibility-and-rapid-threat-hunting/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 02fc4bc15db23139
+-->
+

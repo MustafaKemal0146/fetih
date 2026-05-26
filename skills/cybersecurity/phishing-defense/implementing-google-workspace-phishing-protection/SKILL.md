@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-09
 - RS.CO-02
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Google Workspace Phishing Protection
@@ -112,3 +113,10 @@ Google Workspace provides advanced phishing and malware protection through the A
 - Enhanced Safe Browsing blocks known phishing URL clicked in email
 - APP-enrolled accounts reject non-FIDO2 authentication attempts
 - SPF, DKIM, DMARC all pass for outbound messages
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9bd70aa495a76004
+-->
+

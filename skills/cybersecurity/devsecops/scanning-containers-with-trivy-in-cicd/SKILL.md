@@ -31,6 +31,7 @@ nist_csf:
 - GV.SC-07
 - ID.IM-04
 - PR.PS-04
+adapted_for: fetih
 ---
 
 # Scanning Containers with Trivy in Cicd
@@ -312,3 +313,10 @@ MISCONFIGURATION:
 
 QUALITY GATE: FAILED (2 Critical, 5 High Bul:ings)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1f4b908a65e6043c
+-->
+

@@ -31,6 +31,7 @@ related_skills:
   - sqli-exploitation
   - ssrf-ssti-chain
   - deserialization
+adapted_for: fetih
 ---
 
 # JavaScript Prototype Pollution — `Object.prototype` Üzerinden Kontrol
@@ -351,3 +352,10 @@ git clone https://github.com/kosmosec/proto-find
 - PortSwigger PP labs: https://portswigger.net/web-security/prototype-pollution
 - HackTricks PP page: https://book.hacktricks.xyz/pentesting-web/deserialization/nodejs-proto-prototype-pollution
 - "Server-side prototype pollution" Gareth Heyes (PortSwigger 2022)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a3e80204cabce980
+-->
+

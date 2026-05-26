@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Security Headers Audit
@@ -259,3 +260,10 @@ No HSTS header is present. An attacker on the network can perform an SSL strippi
 6. **Low**: Remove Server and X-Powered-By version information
 7. **Low**: Add Permissions-Policy to restrict unused browser features
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c5dbaf2e6b869168
+-->
+

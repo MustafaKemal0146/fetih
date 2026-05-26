@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Remediating S3 Bucket Misconfiguration
@@ -306,3 +307,10 @@ SUMMARY:
   Access Logging Coverage: 100%
   Block Public Access: 156/156 buckets
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 643e50b2e07d624e
+-->
+

@@ -34,6 +34,7 @@ nist_csf:
 - DE.CM-09
 - RS.CO-02
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Email Sandboxing with Proofpoint
@@ -120,3 +121,10 @@ Recommended attachment policy:
 - URL Defense rewrites and blocks known phishing URLs
 - TAP Dashboard displays threat summary
 - SIEM receives and alerts on TAP events
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 13d442747c54f40c
+-->
+

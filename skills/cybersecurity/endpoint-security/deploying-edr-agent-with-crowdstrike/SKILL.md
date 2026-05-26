@@ -34,6 +34,7 @@ nist_csf:
 - PR.PS-02
 - DE.CM-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Dağıt:ing Edr Agent with Crowdstrike
@@ -234,3 +235,10 @@ reg query "HKLM\SYSTEM\CrowdStrike\{9b03c1d9-3138-44ed-9fae-d9f4c034b88d}\{16e04
 - **macOS System Extension blocked**: macOS requires explicit approval for kernel/system extensions. Use MDM to pre-approve CrowdStrike extensions before Dağıt:ment.
 - **Conflicting security products**: Running multiple EDR/AV products causes performance issues and false positives. Coordinate exclusions or remove legacy AV before Falcon Dağıt:ment.
 - **Sensor version pinning**: Falcon auto-updates sensors by default. Pin sensor versions in the console for change-controlled environments before testing new versions.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c3af26179d2b25c9
+-->
+

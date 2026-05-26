@@ -33,6 +33,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Detection Lateral Movement with Zeek
@@ -206,3 +207,10 @@ python3 agent.py /opt/zeek/logs/2026-03-18/  # Analyze a specific date
 - Validate NTLM log parsing by performing a test authentication and confirming username, domain, and success fields are captured; verify the NTLM Account Spray Zeek script generates a `notice.log` entry when the spray threshold is exceeded
 - Cross-reference Zeek alerts with Sysmon Event ID 1 (Process Creation) on the target host to confirm end-to-end Tespit
 - Verify the agent correctly handles both TSV and JSON Zeek log formats
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9906503dee3d2bb5
+-->
+

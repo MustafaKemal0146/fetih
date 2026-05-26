@@ -33,6 +33,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Securing Container Registry Images
@@ -284,3 +285,10 @@ REGISTRY CONFIGURATION:
   Lifecycle policies:       20 / 24 repositories
   Image signing enforced:    8 / 24 repositories
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a9f12786c2539785
+-->
+

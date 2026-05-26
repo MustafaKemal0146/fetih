@@ -30,6 +30,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Security Information Sharing with Stix2
@@ -389,3 +390,10 @@ validate_stix_bundle("emotet_campaign_bundle.json")
 - Re-retrieve published objects from the TAXII server and confirm they round-trip without data loss
 - Şunu kontrol et: consuming systems (SIEM, SOAR, TIP) can ingest the bundle and create corresponding Tespit rules or enrichment data
 - Run `stix2-validator` CLI tool against exported bundles: `stix2_validator emotet_campaign_bundle.json`
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f9b24316c84d6c82
+-->
+

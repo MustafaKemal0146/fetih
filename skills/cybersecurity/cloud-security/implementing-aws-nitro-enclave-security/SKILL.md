@@ -35,6 +35,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Aws Nitro Enclave Security
@@ -465,3 +466,10 @@ Run the enclave and implement operational monitoring:
 - [WARN] PCR0 used in policy; consider PCR8 for Dağıt:ment flexibility
 - [FAIL] Health check endpoint does not verify enclave attestation freshness
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 977da6ce09ea7ffb
+-->
+

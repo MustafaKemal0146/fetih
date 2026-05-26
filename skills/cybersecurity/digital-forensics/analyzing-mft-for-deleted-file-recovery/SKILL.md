@@ -37,6 +37,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Mft for Deleted File Recovery
@@ -247,3 +248,10 @@ Recovered files exported to: /analysis/mft_output/recovered/
 Full CSV report: /analysis/mft_output/mft_analysis.csv (395,264 rows)
 Timeline CSV: /analysis/mft_output/mft_timeline.csv
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 357b173463bfac6e
+-->
+

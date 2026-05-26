@@ -36,6 +36,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Performing Post Quantum Cryptography Migration
@@ -330,3 +331,10 @@ python scripts/agent.py --action scan_tls --target server.example.com:443
 - CISA PQC Migration Strategy: https://www.cisa.gov/sites/default/files/2024-09/Strategy-for-Migrating-to-Automated-PQC-Discovery-and-Inventory-Tools.pdf
 - IETF Hybrid Key Exchange Draft: https://datatracker.ietf.org/doc/draft-ietf-tls-hybrid-design/
 - CycloneDX Crypto BOM: https://cyclonedx.org/use-cases/cryptographic-key/
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e1099d4aa8d13272
+-->
+

@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing Active Directory Bloodhound Analysis
@@ -230,3 +231,10 @@ Code Execution as SYSTEM
 - SharpHound: https://github.com/BloodHoundAD/SharpHound
 - MITRE ATT&CK S0521: https://attack.mitre.org/software/S0521/
 - SpecterOps BloodHound Documentation: https://bloodhound.readthedocs.io/
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e4c6dfe621c219c2
+-->
+

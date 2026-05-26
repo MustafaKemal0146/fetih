@@ -32,6 +32,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Implementing Azure Ad Privileged Identity Management
@@ -250,3 +251,10 @@ Enable PIM security alerts:
 - [Plan a PIM Dağıt:ment](https://learn.microsoft.com/en-us/entra/id-governance/privileged-identity-management/pim-Dağıt:ment-plan)
 - [Start Using PIM](https://learn.microsoft.com/en-us/entra/id-governance/privileged-identity-management/pim-getting-started)
 - [Microsoft Graph PIM API](https://learn.microsoft.com/en-us/graph/api/resources/privilegedidentitymanagementv3-overview)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 60c9ab10f4a180cc
+-->
+

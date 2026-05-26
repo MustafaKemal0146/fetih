@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Analyzing Apt Group with Mitre Navigator
@@ -286,3 +287,10 @@ for tactic in tactic_order:
 - [Navigator Layer Format v4.5](https://github.com/mitre-attack/attack-navigator/blob/master/layers/LAYERFORMATv4_5.md)
 - [CISA Best Practices for MITRE ATT&CK Mapping](https://www.cisa.gov/sites/default/files/2023-01/Best%20Practices%20for%20MITRE%20ATTCK%20Mapping.pdf)
 - [Picus: Leverage MITRE ATT&CK for Threat Intelligence](https://www.picussecurity.com/how-to-leverage-the-mitre-attack-framework-for-threat-intelligence)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f74c146ea32d6a20
+-->
+

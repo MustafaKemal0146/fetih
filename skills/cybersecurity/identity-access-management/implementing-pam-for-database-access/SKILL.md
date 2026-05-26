@@ -28,6 +28,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Implementing Pam for Database Access
@@ -73,3 +74,10 @@ Dağıt: privileged access management for database systems including Oracle, SQL
 - [ ] Audit logging enabled and forwarding to SIEM
 - [ ] Documentation and runbooks complete
 - [ ] Compliance evidence generated
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 66dda47031d7b9b4
+-->
+

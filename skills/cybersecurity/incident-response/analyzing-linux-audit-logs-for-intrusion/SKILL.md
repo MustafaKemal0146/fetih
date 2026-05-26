@@ -35,6 +35,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Analyzing Linux Audit Logs for Intrusion
@@ -234,3 +235,10 @@ transport = tcp
 - [ ] Critical file watches trigger alerts on test modifications (`touch /etc/shadow` generates an event)
 - [ ] Logs are forwarding to central SIEM (verify with a test event and confirm receipt)
 - [ ] Audit rules persist across reboot (rules in `/etc/audit/rules.d/`, not only via `auditctl`)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0b2dc31c12a59e13
+-->
+

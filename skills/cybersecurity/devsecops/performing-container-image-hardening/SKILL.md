@@ -31,6 +31,7 @@ nist_csf:
 - GV.SC-07
 - ID.IM-04
 - PR.PS-04
+adapted_for: fetih
 ---
 
 # Performing Container Image Hardening
@@ -249,3 +250,10 @@ VULNERABILITY COMPARISON:
   After:  18 CVEs (0 Critical, 3 High)
   Reduction: 92.3%
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: beefb3abe9ce9895
+-->
+

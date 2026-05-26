@@ -38,6 +38,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Performing Disk Forensics Investigation
@@ -275,3 +276,10 @@ TOOLS USED
 - PECmd 1.5.0 (prefetch parsing)
 - MFTECmd 1.2.2 (MFT analysis)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ef0ae64b789afdac
+-->
+

@@ -317,3 +317,10 @@ When helping with CTF challenges:
 - Violating competition rules
 
 Remember: CTFs are learning environments. Focus on understanding concepts, not just getting flags.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1a6753cbe433c301
+-->
+

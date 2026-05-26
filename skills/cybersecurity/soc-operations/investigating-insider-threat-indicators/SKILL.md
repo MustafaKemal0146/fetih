@@ -34,6 +34,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Investigating Insider Threat Indicators
@@ -315,3 +316,10 @@ Evidence Collected:   4 items (SHA-256 verified, chain of custody documented)
 Recommendation:       Immediate access revocation recommended
                       Evidence package prepared for Legal review
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9f242d9e7b4b8877
+-->
+

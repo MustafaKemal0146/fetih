@@ -38,6 +38,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Analyzing Persistence Mechanisms in Linux
@@ -78,3 +79,10 @@ Adversaries establish persistence on Linux systems through crontab jobs, systemd
 - Timeline of persistence installation from auditd correlation
 - MITRE ATT&CK technique mapping (T1053, T1543, T1574, T1546)
 - Remediation commands for each Detected persistence mechanism
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 85ebfa335dd2335c
+-->
+

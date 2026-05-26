@@ -27,6 +27,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Implementing Envelope Encryption with Aws Kms
@@ -104,3 +105,10 @@ Envelope encryption is a strategy where data is encrypted with a data encryption
 - [ ] Plaintext DEK is wiped from memory after use
 - [ ] Encryption context is validated during decryption
 - [ ] Key rotation re-encrypts DEKs with new master key
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 13448402442903cb
+-->
+

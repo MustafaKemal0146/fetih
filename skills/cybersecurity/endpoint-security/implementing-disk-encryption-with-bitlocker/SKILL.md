@@ -31,6 +31,7 @@ nist_csf:
 - PR.PS-02
 - DE.CM-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Implementing Disk Encryption with Bitlocker
@@ -203,3 +204,10 @@ if ($vol.ProtectionStatus -eq "On" -and $vol.VolumeStatus -eq "FullyEncrypted") 
 - **Encrypting used space only on repurposed drives**: If a drive previously contained sensitive data, "used space only" encryption leaves deleted data unencrypted in free space. Use full disk encryption for repurposed drives.
 - **Forgetting removable drives**: USB drives and external disks are common data loss vectors. Enforce BitLocker To Go for removable media.
 - **No pre-provisioning for SCCM Dağıt:ments**: Pre-provision BitLocker during OSD task sequence to encrypt before OS Dağıt:ment, avoiding the lengthy post-Dağıt:ment encryption process.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c67ab92c948662b3
+-->
+

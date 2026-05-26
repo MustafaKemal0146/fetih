@@ -33,6 +33,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Performing Network Traffic Analysis with Tshark
@@ -71,3 +72,10 @@ bu skill automates packet capture analysis using tshark (Wireshark CLI) and pysh
 - Suspicious flow Tespits with severity ratings
 - Extracted IOCs (IPs, domains, URLs)
 - DNS anomaly analysis results
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c861b0b0bc42c22d
+-->
+

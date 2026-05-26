@@ -33,6 +33,7 @@ nist_csf:
 - GV.SC-07
 - ID.IM-04
 - PR.PS-04
+adapted_for: fetih
 ---
 
 # Implementing Policy as Code with Open Policy Agent
@@ -316,3 +317,10 @@ AUDIT VIOLATIONS (warn):
   [K8sRequiredLabels] namespace/staging
     - Missing labels: {cost-center}
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b183e80646a28fdf
+-->
+

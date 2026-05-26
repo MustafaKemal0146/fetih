@@ -39,6 +39,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Implementing Soar Automation with Phantom
@@ -426,3 +427,10 @@ Total Duration:    4m 22s (vs 35min avg manual triage)
 Time Saved:        ~31 minutes
 Disposition:       True Positive — Escalated to IR
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 614e29ac8d6a9686
+-->
+

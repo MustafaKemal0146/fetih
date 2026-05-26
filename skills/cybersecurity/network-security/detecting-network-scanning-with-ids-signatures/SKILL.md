@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Detection Network Scanning with Ids Signatures
@@ -293,3 +294,10 @@ if __name__ == '__main__':
 - [Nmap IDS Evasion Techniques](https://nmap.org/book/subvert-ids.html)
 - [OPNsense Suricata Nmap Detection Rules](https://github.com/aleksibovellan/opnsense-suricata-nmaps)
 - [Emerging Threats Ruleset](https://rules.emergingthreats.net/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 881943dc8524a3e4
+-->
+

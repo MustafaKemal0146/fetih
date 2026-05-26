@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Conducting Mobile App Penetration Test
@@ -219,3 +220,10 @@ and view financial data without biometric verification.
 3. Add runtime integrity checks to tespit etmeFrida and other instrumentation frameworks
 4. Implement step-up authentication for high-risk operations (transfers > threshold)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b4ecce211b208df4
+-->
+

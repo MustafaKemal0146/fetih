@@ -32,6 +32,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Recovering Deleted Files with Photorec
@@ -220,3 +221,10 @@ PhotoRec Recovery Summary:
   Output Directory: /cases/case-2024-001/recovered/all/
   Hash Manifest:    /cases/case-2024-001/recovered/recovered_hashes.txt
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 95e335069f057e2d
+-->
+

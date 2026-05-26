@@ -33,6 +33,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Building Soc Escalation Matrix
@@ -227,3 +228,10 @@ auto_escalation_rules:
 - [ClearFeed - Incident Escalation Matrix](https://clearfeed.ai/blogs/incident-escalation-matrix)
 - [Vectra - SOC Operations Guide](https://www.vectra.ai/topics/soc-operations)
 - [Runframe - Incident Priority Levels Explained](https://runframe.io/learn/incident-priority)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 301f745dc47193bc
+-->
+

@@ -32,6 +32,7 @@ nist_csf:
 - GV.SC-07
 - ID.IM-04
 - PR.PS-04
+adapted_for: fetih
 ---
 
 # Implementing Code Signing for Artifacts
@@ -227,3 +228,10 @@ TRANSPARENCY LOG:
   Log index range: 24658135-24658137
   Verification: https://search.sigstore.dev
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7c2afe27dc327caa
+-->
+

@@ -42,6 +42,7 @@ triggers:
   - "XSS payload"
   - "SQL injection payload"
   - "password list"
+adapted_for: fetih
 ---
 
 # FETIH Siber Güvenlik Ana Orkestratörü
@@ -242,3 +243,10 @@ nist_csf: [XX.XX-XX]
 
 **Toplam:** 725 SKILL.md · 32 kategori · Son güncelleme: 2026-05-25
 > **Red Team skill'leri** → `skills/red-teaming/red-team-operations/` (29 skill)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0ebaf06640ac922e
+-->
+

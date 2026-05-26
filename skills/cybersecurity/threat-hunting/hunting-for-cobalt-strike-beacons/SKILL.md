@@ -35,6 +35,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Cobalt Strike Beacons
@@ -78,3 +79,10 @@ Combine multiple indicators (TLS + timing + HTTP profile) into a composite beaco
 ## Expected Output
 
 JSON report containing Detected beacon candidates with confidence scores, TLS fingerprints, timing analysis, HTTP profile matches, and recommended response actions.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: aaf648369b938ec8
+-->
+

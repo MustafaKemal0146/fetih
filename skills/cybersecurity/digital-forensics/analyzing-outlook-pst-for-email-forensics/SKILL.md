@@ -37,6 +37,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Outlook Pst for Email Forensics
@@ -357,3 +358,10 @@ Summary:
   Encrypted attachments:       3 (67.2 MB total - possible exfiltration)
   Report: /analysis/email_report/pst_forensic_report.json
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 413c538ab336aed1
+-->
+

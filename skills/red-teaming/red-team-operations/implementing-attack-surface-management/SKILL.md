@@ -35,6 +35,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Implementing Attack Surface Management
@@ -207,3 +208,10 @@ python agent.py \
     --action full_scan \
     --output multi_domain_report.json
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c9deead8ab336212
+-->
+

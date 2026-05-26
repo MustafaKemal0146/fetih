@@ -31,6 +31,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Soar Playbook for Phishing
@@ -101,3 +102,10 @@ Splunk SOAR orchestrates and automates security operations through playbooks tha
   }
 }
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4a68ac09a927e219
+-->
+

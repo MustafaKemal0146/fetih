@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Azure Defender for Cloud
@@ -294,3 +295,10 @@ SECURITY ALERTS (Last 7 Days):
   Medium severity:  12
   Low severity:     28
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 37da2b7151ef2e36
+-->
+

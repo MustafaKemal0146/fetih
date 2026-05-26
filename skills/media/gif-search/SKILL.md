@@ -11,6 +11,7 @@ prerequisites:
 metadata:
   fetih:
     tags: [GIF, Media, Search, Tenor, API]
+adapted_for: fetih
 ---
 
 # GIF Search (Tenor API)
@@ -89,3 +90,10 @@ Each result has multiple formats under `.media_formats`:
 - URL-encode the query: spaces as `+`, special chars as `%XX`
 - For sending in chat, `tinygif` URLs are lighter weight
 - GIF URLs can be used directly in markdown: `![alt](url)`
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ab8384dc1cbc3656
+-->
+

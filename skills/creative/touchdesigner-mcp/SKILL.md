@@ -10,6 +10,7 @@ metadata:
     tags: [TouchDesigner, MCP, twozero, creative-coding, real-time-visuals, generative-art, audio-reactive, VJ, installation, GLSL]
     related_skills: [native-mcp, ascii-video, manim-video, fetih-video]
 
+adapted_for: fetih
 ---
 
 # TouchDesigner Integration (twozero MCP)
@@ -354,3 +355,10 @@ See `references/network-patterns.md` for complete build scripts + shader code.
 ---
 
 > You're not writing code. You're conducting light.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ea75721af04de215
+-->
+

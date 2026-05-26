@@ -37,6 +37,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Windows Shellbag Artifacts
@@ -216,3 +217,10 @@ Summary:
   Deleted folder evidence:        3 paths (anti-forensics indicator)
   CSV exported to:                /analysis/shellbag_output/
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1fd6c3b9f3c3ff9c
+-->
+

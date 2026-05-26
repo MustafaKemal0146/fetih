@@ -16,6 +16,7 @@ triggers:
   - landing page
   - dashboard design
   - website styled like
+adapted_for: fetih
 ---
 
 # Popular Web Designs
@@ -212,3 +213,10 @@ Match the design to the content:
 - **Premium / luxury:** Apple, BMW, Stripe, Superhuman, Revolut
 - **Data-dense / dashboards:** Sentry, Kraken, Cohere, ClickHouse
 - **Monospace / terminal aesthetic:** Ollama, OpenCode, x.ai, VoltAgent
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1a0ceeb1505c79a1
+-->
+

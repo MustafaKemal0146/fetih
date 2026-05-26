@@ -31,6 +31,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Analyzing Azure Activity Logs for Threats
@@ -86,3 +87,10 @@ AuditLogs
 | where TargetResources[0].modifiedProperties[0].newValue has "Global Administrator"
 '''
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 053eb7cbab143306
+-->
+

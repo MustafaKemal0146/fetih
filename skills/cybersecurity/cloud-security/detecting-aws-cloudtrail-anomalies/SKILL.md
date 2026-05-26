@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Aws Cloudtrail Anomalies
@@ -73,3 +74,10 @@ Produce a JSON report with anomaly scores, top suspicious users, and recommended
 ## Expected Output
 
 JSON report with event statistics, baseline deviations, anomalous users/IPs, sensitive API calls, and error rate analysis.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 58e8a2c5fe70a780
+-->
+

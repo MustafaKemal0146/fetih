@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Detection Lateral Movement in Network
@@ -332,3 +333,10 @@ sudo iptables -I FORWARD -s 10.10.5.23 -j DROP
 2. Credential dumping not Detected (no LSASS monitoring)
 3. 30-minute gap between first lateral movement and alert
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9564e6fb05509f97
+-->
+

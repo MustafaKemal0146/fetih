@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Performing Bandwidth Throttling Attack Simulation
@@ -297,3 +298,10 @@ iperf3 -c 10.10.20.10 -t 10 -f m -p 5201
 2. Configure QoS to prioritize DSCP EF (46) marked traffic
 3. Set monitoring threshold at 80% bandwidth utilization for early warning
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 83e68303f717880c
+-->
+

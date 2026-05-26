@@ -2,6 +2,7 @@
 name: pwn-category-tools
 description: Pwn/Binary kategorisi SKILL.md — BOF, ROP, kernel exploit araçları kurma rehberi
 tags: [ctf, pwn, binary, tools, setup, pwntools, gdb, radare2, ghidra]
+adapted_for: fetih
 ---
 
 # Pwn / Binary Kategorisi — Gerekli Araçlar
@@ -269,3 +270,10 @@ EOF
 - **Ruby gem'ler** (`seccomp-tools`, `one_gadget`) → build tools gerekli
 
 Skill okuduğunda başında hangi araçlar gerekli gösterilecek!
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a1282e43806e44e9
+-->
+

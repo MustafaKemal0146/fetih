@@ -36,6 +36,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Ebpf Security Monitoring
@@ -373,3 +374,10 @@ tetra getevents -o json | jq -c 'select(.process_kprobe != null)' | \
       -d "$line"
   done
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2f74f9dbc7a5d737
+-->
+

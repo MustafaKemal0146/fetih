@@ -10,6 +10,7 @@ metadata:
   fetih:
     tags: [Multimodal, Image Segmentation, Computer Vision, SAM, Zero-Shot]
 
+adapted_for: fetih
 ---
 
 # Segment Anything Model (SAM)
@@ -504,3 +505,10 @@ mask_generator = SamAutomaticMaskGenerator(
 - **Demo**: https://segment-anything.com
 - **SAM 2 (Video)**: https://github.com/facebookresearch/segment-anything-2
 - **HuggingFace**: https://huggingface.co/facebook/sam-vit-huge
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f88c660be31a9b42
+-->
+

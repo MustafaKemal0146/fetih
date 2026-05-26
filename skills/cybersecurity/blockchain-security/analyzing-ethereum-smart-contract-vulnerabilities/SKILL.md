@@ -31,6 +31,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - ID.RA-01
+adapted_for: fetih
 ---
 
 # Analyzing Ethereum Smart Contract Vulnerabilities
@@ -77,3 +78,10 @@ Produce a structured audit report with vulnerability descriptions, affected code
 ## Expected Output
 
 JSON report listing vulnerabilities with SWC (Smart Contract Weakness Classification) identifiers, severity ratings, affected functions, and suggested fixes.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a3227609f7b145f7
+-->
+

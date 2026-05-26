@@ -32,6 +32,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Performing Network Forensics with Wireshark
@@ -282,3 +283,10 @@ Network Forensics Summary:
     Domains: update-service.malware-c2.com, data.evil-dns.com
     Hashes:  3 file hashes flagged as malware
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c21e5bc39a346938
+-->
+

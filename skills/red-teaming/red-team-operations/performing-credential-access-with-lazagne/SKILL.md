@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing Credential Access with Lazagne
@@ -231,3 +232,10 @@ LaZagne is an open-source post-exploitation tool designed to retrieve credential
 - [ ] Domain credentials validated against AD
 - [ ] Lateral movement opportunities identified from recovered creds
 - [ ] Evidence documented with appropriate handling procedures
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4e96c68982b7106a
+-->
+

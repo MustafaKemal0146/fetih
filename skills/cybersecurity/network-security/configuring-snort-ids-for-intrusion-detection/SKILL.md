@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Configuring Snort Ids for Intrusion Detection
@@ -388,3 +389,10 @@ snort -c /usr/local/etc/snort/snort.lua --daq-dir /usr/local/lib/daq -T 2>&1 | g
 - Thresholded SID 1000004 to 5 alerts per source per hour
 - Added 3 custom rules for PHI exfiltration Tespit
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 514c0940b69c047e
+-->
+

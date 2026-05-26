@@ -34,6 +34,7 @@ nist_csf:
 - PR.AA-05
 - PR.IR-01
 - GV.PO-01
+adapted_for: fetih
 ---
 
 # Implementing Microsegmentation with Guardicore
@@ -324,3 +325,10 @@ PCI CDE ISOLATION:
   Authorized CDE entry points:  4
   Lateral movement paths blocked: 95%
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 15bcbd49c078fd5f
+-->
+

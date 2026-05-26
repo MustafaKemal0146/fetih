@@ -9,6 +9,7 @@ metadata:
   fetih:
     tags: [design, design-system, tokens, ui, accessibility, wcag, tailwind, dtcg, google]
     related_skills: [popular-web-designs, claude-design, excalidraw, architecture-diagram]
+adapted_for: fetih
 ---
 
 # DESIGN.md Skill
@@ -197,3 +198,10 @@ summary — WCAG findings are the most load-bearing reason to use the CLI.
 - CLI: `@google/design.md` on npm
 - License of generated DESIGN.md files: whatever the user's project uses;
   the spec itself is Apache-2.0.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3c33fbcc8fa1b08d
+-->
+

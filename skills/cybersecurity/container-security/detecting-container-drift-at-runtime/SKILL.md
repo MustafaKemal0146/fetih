@@ -33,6 +33,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Container Drift At Runtime
@@ -249,3 +250,10 @@ For Azure Kubernetes environments, Microsoft Defender provides built-in binary d
 - [Microsoft Defender for Containers Drift Tespit](https://techcommunity.microsoft.com/blog/microsoftdefendercloudblog/Detect-container-drift-with-microsoft-defender-for-containers/4232044)
 - [Ensure Immutability of Containers at Runtime](https://notes.kodekloud.com/docs/Certified-Kubernetes-Security-Specialist-CKS/Monitoring-Logging-and-Runtime-Security/Ensure-Immutability-of-Containers-at-Runtime/)
 - [Falco Runtime Security](https://falco.org/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 999989c93ffeb178
+-->
+

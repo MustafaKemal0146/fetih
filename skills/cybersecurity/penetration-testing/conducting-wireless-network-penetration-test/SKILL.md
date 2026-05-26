@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Conducting Wireless Network Penetration Test
@@ -190,3 +191,10 @@ the WPA2-Enterprise authentication required for employee access.
 4. Migrate IoT devices to 802.1X authentication with device certificates where supported
 5. Dağıt: WIDS to tespit etmedeauthentication attacks and rogue access points
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2f003500dfe4cbe7
+-->
+

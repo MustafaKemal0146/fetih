@@ -33,6 +33,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Aws Account Enumeration with Scout Suite
@@ -263,3 +264,10 @@ scout aws --profile production
 - AWS Security Audit Checklist
 - CIS AWS Foundations Benchmark
 - AWS Well-Architected Security Pillar
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 667759313aa74901
+-->
+

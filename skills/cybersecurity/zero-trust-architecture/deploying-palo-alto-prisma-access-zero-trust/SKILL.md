@@ -34,6 +34,7 @@ nist_csf:
 - PR.AA-05
 - PR.IR-01
 - GV.PO-01
+adapted_for: fetih
 ---
 
 # Dağıt:ing Palo Alto Prisma Access Zero Trust
@@ -292,3 +293,10 @@ SECURITY (last 30 days):
   URL Blocked: 45,678
   WildFire Submissions: 2,345
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: fc0ede655391fd6f
+-->
+

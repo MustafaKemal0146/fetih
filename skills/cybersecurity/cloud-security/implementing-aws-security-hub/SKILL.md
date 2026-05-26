@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Aws Security Hub
@@ -224,3 +225,10 @@ Bul:ING SUMMARY:
   Auto-Remediated This Month: 89
   Suppressed: 23
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: dad0f53d2184a484
+-->
+

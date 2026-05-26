@@ -15,6 +15,7 @@ difficulty: medium
 category: web
 solved_challenges:
   - "corCTF 2023 - force (Fastify+Mercurius, 10000 alias/request ile 10^5 PIN brute)"
+adapted_for: fetih
 ---
 
 # GraphQL Saldırıları
@@ -442,3 +443,10 @@ clairvoyance http://<IP>/graphql -o schema.json -w /usr/share/wordlists/rockyou.
 - **Mutation batching kapalı:** Query batching açık olabilir. Sadece okuma operasyonları ile farklı bir yol ara.
 - **POST yerine GET:** Bazı GraphQL endpoint'leri GET de destekler: `/graphql?query={user{name}}`
 - **CSRF + GraphQL:** Content-Type kontrolü yoksa CSRF ile mutation tetiklenebilir.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7ed940ecbf1de662
+-->
+

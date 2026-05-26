@@ -34,6 +34,7 @@ nist_csf:
 - PR.AA-05
 - PR.IR-01
 - GV.PO-01
+adapted_for: fetih
 ---
 
 # Implementing Zero Trust with Hashicorp Boundary
@@ -479,3 +480,10 @@ resource "boundary_host_set_plugin" "web_tier" {
 - [From Zero to Hero with Boundary](https://www.hashicorp.com/en/blog/from-zero-to-hero-hashicorp-boundary)
 - [Boundary Terraform Provider](https://registry.terraform.io/providers/hashicorp/boundary/latest/docs)
 - [Zero Trust with Vault, Consul, and Boundary](https://www.hashicorp.com/en/resources/zero-trust-security-with-hashicorp-vault-consul-and-boundary)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: da195cf72fe81095
+-->
+

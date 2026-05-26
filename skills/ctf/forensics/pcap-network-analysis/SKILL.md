@@ -22,6 +22,7 @@ category: forensics
 solved_challenges:
   - "HTB Cyber Apocalypse 2024 - Phreaky (SMTP, 15 ZIP parça birleştirme → PDF)"
   - "corCTF 2024 - the-conspiracy (custom Python protokol, per-message key decrypt)"
+adapted_for: fetih
 ---
 
 # PCAP / Network Forensics
@@ -427,3 +428,10 @@ for i, p in enumerate(payloads[:10]):
 - **Wireshark "Follow TCP Stream"**: GUI'de en hızlı yöntem. Sağ tık → Follow → TCP Stream → Show data as: C Arrays ya da Raw.
 - **pyshark yavaşlığı**: Büyük PCAP'larda pyshark çok yavaş olabilir. tshark CLI ya da scapy rdpcap() daha hızlı.
 - **Encoding katmanları**: CTF'lerde sıklıkla base64(zlib(base64(flag))) gibi iç içe encoding olur. Her decode adımında magic byte kontrol et.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 18ee827b2fa561f4
+-->
+

@@ -35,6 +35,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Triaging Security Alerts in Splunk
@@ -229,3 +230,10 @@ Disposition:  TRUE POSITIVE — Compromised credential
 Action:       Escalated to Tier 2, ticket IR-2024-0431 created
               Account jsmith disabled pending password reset
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c09fd940e97d742b
+-->
+

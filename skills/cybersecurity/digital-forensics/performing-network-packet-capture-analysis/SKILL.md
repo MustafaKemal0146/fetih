@@ -37,6 +37,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Performing Network Packet Capture Analysis
@@ -248,3 +249,10 @@ if __name__ == "__main__":
 - PCAP Analysis Mastery: https://insanecyber.com/mastering-pcap-review/
 - SANS Network Forensics: https://www.sans.org/cyber-security-courses/network-forensics/
 - Public PCAPs for Practice: https://www.netresec.com/?page=PcapFiles
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2d1d4625ea9bb7dd
+-->
+

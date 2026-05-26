@@ -30,6 +30,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Performing Threat Hunting with Yara Rules
@@ -415,3 +416,10 @@ print("YARA hunting pipeline active. Monitoring /mnt/quarantine/ ...")
 - Şunu kontrol et: community rule sets load without critical syntax errors after filtering
 - Confirm the continuous hunting pipeline generates alerts in JSONL format when test files are dropped
 - Cross-reference YARA matches against VirusTotal or sandbox results to validate Tespit accuracy
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1c544e5eb6748eec
+-->
+

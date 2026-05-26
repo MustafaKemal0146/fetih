@@ -35,6 +35,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Building Detection Rules with Sigma
@@ -325,3 +326,10 @@ Testing:
   False Positives:   2 in 7-day backtest (svchost edge case — filter added)
   Performance:       Avg execution 3.2s on 50M events/day
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2c95fe0c54ab2b7f
+-->
+

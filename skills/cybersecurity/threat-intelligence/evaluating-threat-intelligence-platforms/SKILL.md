@@ -37,6 +37,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Evaluating Threat Intelligence Platforms
@@ -172,3 +173,10 @@ Plan 90-day implementation:
 - **Underestimating administration burden**: MISP and OpenCTI require dedicated admin time (minimum 0.25 FTE); budget accordingly.
 - **Ignoring data migration costs**: Moving historical intelligence from one TIP to another is costly and often impractical for legacy systems.
 - **Not testing SIEM integration in PoC**: TIP value depends heavily on downstream integration quality; always test SIEM/SOAR connectivity during evaluation.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5fdaf09a4e3061a9
+-->
+

@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Performing Wifi Password Cracking with Aircrack
@@ -237,3 +238,10 @@ sha256sum handshake_capture-01.cap > evidence_hashes.txt
 4. Consider WPA3-SAE for PSK networks to prevent offline cracking
 5. Enable 802.11w Protected Management Frames to prevent deauth attacks
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 49fc8b04a6da619b
+-->
+

@@ -15,6 +15,7 @@ category: crypto
 solved_challenges:
   - "LACTF 2024 - very-hot (N=p*q*r, p,q,r ardışık aralıkta)"
   - "CryptoCTF 2023 - closeprimes"
+adapted_for: fetih
 ---
 
 # RSA Close Primes — Fermat Factorization
@@ -300,3 +301,10 @@ def hizli_tani(n):
 # Kullanim:
 # hizli_tani(N_degeri)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7b27bdc648b6eb28
+-->
+

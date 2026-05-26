@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Performing Vlan Hopping Attack
@@ -283,3 +284,10 @@ EOF
 5. Enable port security on access ports
 6. Set VTP to transparent mode on all switches
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3ea23b7b27c13596
+-->
+

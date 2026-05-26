@@ -33,6 +33,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Detection Malicious Scheduled Tasks with Sysmon
@@ -81,3 +82,10 @@ targeting remote systems.
   Source: \\192.168.1.50 (remote creation)
   MITRE: T1053.005 - Scheduled Task/Job
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 29600ac1a4d7060e
+-->
+

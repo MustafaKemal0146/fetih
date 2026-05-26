@@ -32,6 +32,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Detection Golden Ticket Attacks in Kerberos Logs
@@ -112,3 +113,10 @@ Anomaly: [No prior TGT/RC4 in AES environment/Extended lifetime]
 KRBTGT Last Reset: [Date]
 Risk Level: [Critical]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: aad8a6556981e5bf
+-->
+

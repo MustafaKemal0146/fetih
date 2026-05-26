@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Executing Red Team Exercise
@@ -197,3 +198,10 @@ Convert red team Bul:ings into defensive improvements:
 3. Enhance PowerShell logging (Script Block Logging, Module Logging)
 4. Dağıt: memory-scanning EDR capability to tespit etmeprocess injection
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3dd97990f394635c
+-->
+

@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Implementing Ot Network Traffic Analysis with Nozomi
@@ -274,3 +275,10 @@ NETWORK ANALYSIS:
   Communication Links: [count]
   Cross-Zone Flows: [count]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 72cdba24fe56cf69
+-->
+

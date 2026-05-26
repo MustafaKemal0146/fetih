@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Aws Credential Exposure with Trufflehog
@@ -262,3 +263,10 @@ SUMMARY:
   Unverified credential patterns: 15
   Repositories with pre-commit hooks: 8 / 42
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 04c6f028117f0fd1
+-->
+

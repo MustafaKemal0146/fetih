@@ -32,6 +32,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-06
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Detection Living Off the Land Attacks
@@ -512,3 +513,10 @@ foreach ($binary in $lolbins_to_restrict) {
 - Şunu kontrol et: AppLocker or WDAC policies do not break legitimate administrative workflows before Dağıt:ing to production
 - Validate false positive rates by running Tespit rules against 7 days of baseline telemetry from a clean environment
 - Cross-reference Tespits against the LOLBAS project database at https://lolbas-project.github.io/ for completeness
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: bc395accc8f7990e
+-->
+

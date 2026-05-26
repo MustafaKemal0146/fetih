@@ -33,6 +33,7 @@ nist_csf:
 - PR.AA-05
 - ID.RA-01
 - DE.CM-09
+adapted_for: fetih
 ---
 
 # Intercepting Mobile Traffic with Burpsuite
@@ -190,3 +191,10 @@ android sslpinning disable
 - **Certificate transparency**: Some apps use Certificate Transparency logs to tespit etmeMITM. Check for CT enforcement in the app.
 - **Non-HTTP protocols**: Burp Suite only handles HTTP/HTTPS. Use Wireshark for WebSocket, MQTT, gRPC, or custom binary protocols.
 - **VPN-based apps**: Apps using VPN tunnels bypass device proxy settings. May need iptables rules on a rooted device to redirect traffic.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 26cacbf3a414e77f
+-->
+

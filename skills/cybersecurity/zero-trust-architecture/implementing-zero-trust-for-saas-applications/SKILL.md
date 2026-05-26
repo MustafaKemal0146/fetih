@@ -34,6 +34,7 @@ nist_csf:
 - PR.AA-05
 - PR.IR-01
 - GV.PO-01
+adapted_for: fetih
 ---
 
 # Implementing Zero Trust for Saas Applications
@@ -308,3 +309,10 @@ SSPM Bul:INGS:
   Medium: 15
   Remediated this month: 18
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 197850c471b24b8b
+-->
+

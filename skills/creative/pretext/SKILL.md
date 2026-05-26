@@ -9,6 +9,7 @@ metadata:
   fetih:
     tags: [creative-coding, typography, pretext, ascii-art, canvas, generative, text-layout, kinetic-typography]
     related_skills: [p5js, claude-design, excalidraw, architecture-diagram]
+adapted_for: fetih
 ---
 
 # Pretext Creative Demos
@@ -218,3 +219,10 @@ Clone these for inspiration / patterns (all MIT-ish, linked from [pretext.cool](
 - **Alarmy editorial clock** — `github.com/SmisLee/alarmy-pretext-demo`
 
 Official playground: [chenglou.me/pretext](https://chenglou.me/pretext/) — accordion, bubbles, dynamic-layout, editorial-engine, justification-comparison, masonry, markdown-chat, rich-note.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a7a4555d216c4d6c
+-->
+

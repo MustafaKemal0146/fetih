@@ -38,6 +38,7 @@ related_skills:
   - lattice-attacks
   - rsa-common-modulus
   - diffie-hellman-attacks
+adapted_for: fetih
 ---
 
 # Elliptic Curve Saldırıları — ECDLP'yi Kırmanın 7 Yolu
@@ -357,3 +358,10 @@ ECC challenge → eğri parametreleri kontrol et
 - SageMath ECDLP belgeleri: https://doc.sagemath.org/html/en/reference/arithmetic_curves/sage/schemes/elliptic_curves/
 - CryptoHack ECC course: https://cryptohack.org/courses/elliptic/
 - "A Survey on Cryptographic Attacks Against Bitcoin" (paper)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0ed8c4b5fc2f4b32
+-->
+

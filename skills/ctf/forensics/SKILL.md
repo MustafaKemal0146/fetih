@@ -2,6 +2,7 @@
 name: forensics-category-tools
 description: Forensics kategorisi SKILL.md — Memory, disk, PCAP, steganography araçları kurma rehberi
 tags: [ctf, forensics, tools, setup, volatility3, binwalk, exiftool]
+adapted_for: fetih
 ---
 
 # Forensics Kategorisi — Gerekli Araçlar
@@ -358,3 +359,10 @@ EOF
 - **Audio tools** (`sox`, `ffmpeg`) → format dönüşüm
 
 Skill okudoğunda başında hangi araçlar gerekli gösterilecek!
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 741f2cc3b4b866f1
+-->
+

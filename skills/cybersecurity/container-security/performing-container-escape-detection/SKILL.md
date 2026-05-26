@@ -26,6 +26,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Container Escape Detection
@@ -77,3 +78,10 @@ for vol in pod.spec.volumes or []:
     if vol.host_path and "docker.sock" in (vol.host_path.path or ""):
         print(f"Docker socket exposed: {pod.metadata.name}")
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a9ad82752f5d6922
+-->
+

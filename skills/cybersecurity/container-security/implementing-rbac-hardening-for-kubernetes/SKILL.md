@@ -34,6 +34,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Rbac Hardening for Kubernetes
@@ -251,3 +252,10 @@ kubectl access-matrix --sa payments:payment-processor
 - [CIS Kubernetes Benchmark - RBAC Controls](https://www.cisecurity.org/benchmark/kubernetes)
 - [Kubernetes Security Hardening Guide 2025](https://sealos.io/blog/a-practical-guide-to-kubernetes-security-hardening-your-cluster-in-2025/)
 - [OWASP Kubernetes Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Kubernetes_Security_Cheat_Sheet.html)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 491f208e8548807f
+-->
+

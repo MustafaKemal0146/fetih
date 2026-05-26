@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Testing for Json Web Token Vulnerabilities
@@ -199,3 +200,10 @@ python3 jwt_tool.py <JWT_TOKEN> -S hs256 -p "discovered_secret" \
 - Ignore jku/x5u headers or validate against known endpoints
 - Set appropriate token expiration (exp) and implement token revocation
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 781ffa531b0eeba7
+-->
+

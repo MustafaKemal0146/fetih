@@ -33,6 +33,7 @@ nist_csf:
 - RS.MA-01
 - RC.RP-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Recovering from Ransomware Attack
@@ -273,3 +274,10 @@ Throughout: SOC monitoring on high alert
 - [ ] IOCs loaded in Tespit rules
 - [ ] Canary files Dağıtılmış
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 48df1eb8d4b5a9ea
+-->
+

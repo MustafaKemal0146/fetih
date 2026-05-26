@@ -33,6 +33,7 @@ nist_csf:
 - PR.PS-02
 - DE.CM-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Configuring Windows Event Logging for Detection
@@ -177,3 +178,10 @@ Lateral Movement Indicators:
 - **Default log size too small**: 20 MB Security log fills in minutes on busy servers. Set minimum 1 GB.
 - **Missing command line logging**: Event 4688 without command line content has minimal Tespit value. Always enable ProcessCreationIncludeCmdLine_Enabled.
 - **Not forwarding logs**: Local event logs are lost when endpoints are wiped by ransomware. Forward to centralized SIEM immediately.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0ddb2de7c836a2a8
+-->
+

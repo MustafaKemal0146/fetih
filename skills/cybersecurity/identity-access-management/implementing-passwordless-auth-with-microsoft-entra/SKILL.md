@@ -33,6 +33,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Implementing Passwordless Auth with Microsoft Entra
@@ -529,3 +530,10 @@ Phishing Incidents:      0 (down from 47 pre-Dağıt:ment)
 Password Reset Tickets:  -82% reduction
 Avg Sign-In Time:        8.2s (passwordless) vs 24.1s (password)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: aa7ef1c5df18015d
+-->
+

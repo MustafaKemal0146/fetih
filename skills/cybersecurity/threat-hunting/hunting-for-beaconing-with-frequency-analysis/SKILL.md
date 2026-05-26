@@ -34,6 +34,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Beaconing with Frequency Analysis
@@ -176,3 +177,10 @@ Risk Score: [0-100]
 Risk Level: [Critical/High/Medium/Low]
 Indicators: [List of triggered risk factors]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: fc1c1662b5afbbb2
+-->
+

@@ -84,3 +84,10 @@ Instead of using potentially harmful payloads:
 - Avoid accessing cookies or sensitive data unnecessarily
 
 Provide ethical, professional security testing guidance.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a2675b88e32c9310
+-->
+

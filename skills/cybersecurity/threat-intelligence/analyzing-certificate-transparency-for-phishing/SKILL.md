@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Analyzing Certificate Transparency for Phishing
@@ -346,3 +347,10 @@ generate_ct_report(suspicious, alerts if 'alerts' in dir() else [], "mycompany.c
 - [Let's Encrypt: Certificate Transparency Logs](https://letsencrypt.org/docs/ct-logs/)
 - [SSLMate Cert Spotter](https://sslmate.com/certspotter/)
 - [CyberSierra: CT Logs as Early Warning System](https://cybersierra.co/blog/ssl-certificate-transparency-logs/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9ba3e0e2bc07b36d
+-->
+

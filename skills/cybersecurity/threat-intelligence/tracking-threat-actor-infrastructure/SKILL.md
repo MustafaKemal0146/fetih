@@ -35,6 +35,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Tracking Threat Actor Infrastructure
@@ -312,3 +313,10 @@ def build_infrastructure_timeline(indicators):
 - [crt.sh Certificate Transparency](https://crt.sh/)
 - [PassiveTotal API](https://api.passivetotal.org/api/docs/)
 - [JARM Fingerprinting](https://github.com/salesforce/jarm)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 790e3fe4550c902f
+-->
+

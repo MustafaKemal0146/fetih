@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Graphql Introspection Attack
@@ -516,3 +517,10 @@ production database credentials, and execute admin-only mutations.
 5. Disable field suggestions in error messages to prevent schema reconstruction
 6. Rate limit GraphQL requests per query, not just per HTTP request
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5bfb9ef6b3c0c310
+-->
+

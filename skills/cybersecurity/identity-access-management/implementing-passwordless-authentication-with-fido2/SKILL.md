@@ -30,6 +30,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Implementing Passwordless Authentication with Fido2
@@ -75,3 +76,10 @@ Dağıt: FIDO2/WebAuthn passwordless authentication using security keys and plat
 - [ ] Audit logging enabled and forwarding to SIEM
 - [ ] Documentation and runbooks complete
 - [ ] Compliance evidence generated
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 355c03e6dac84dbf
+-->
+

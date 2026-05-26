@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Api Security Testing with Postman
@@ -399,3 +400,10 @@ jobs:
 4. Remove password_hash and mfa_secret from user serialization
 5. Standardize login error messages to prevent account enumeration
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e0be4a9abd25a2a3
+-->
+

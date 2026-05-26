@@ -34,6 +34,7 @@ nist_csf:
 - PR.AA-05
 - PR.IR-01
 - GV.PO-01
+adapted_for: fetih
 ---
 
 # Implementing Beyondcorp Zero Trust Access Model
@@ -316,3 +317,10 @@ VPN DECOMMISSION STATUS:
   Users still on VPN:              148 (5%)
   Planned decommission:            2026-03-15
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c01e5786347ea599
+-->
+

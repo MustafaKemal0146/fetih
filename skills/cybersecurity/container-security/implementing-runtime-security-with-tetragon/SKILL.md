@@ -34,6 +34,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Runtime Security with Tetragon
@@ -294,3 +295,10 @@ spec:
 - [CNCF Tetragon Project Page](https://www.cncf.io/projects/tetragon/)
 - [eBPF Security Observability with Tetragon - CoreWeave](https://docs.coreweave.com/security/tutorials/ebpf-observability)
 - [Kubernetes Security: eBPF & Tetragon for Runtime Monitoring](https://medium.com/@noah_h/kubernetes-security-ebpf-tetragon-for-runtime-monitoring-policy-enforcement-819b6ed97953)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d717ccd9d0a329d6
+-->
+

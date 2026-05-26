@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Analyzing Ransomware Leak Site Intelligence
@@ -350,3 +351,10 @@ generate_ransomware_intel_report(trends, risk, new_groups)
 - [Sophos: Threat Intelligence Report 2025](https://www.sophos.com/en-us/blog/threat-intelligence-executive-report-volume-2025-number-6)
 - [H-ISAC: Ransomware Data Leak Sites Report](https://www.aha.org/h-isac-green-reports/2025-08-26-h-isac-tlp-ransomware-data-leak-sites-report-august-26-2025)
 - [CYFIRMA: Weekly Intelligence Reports](https://www.cyfirma.com/news/weekly-intelligence-report-16-january-2026/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 138c7c724a33e9d2
+-->
+

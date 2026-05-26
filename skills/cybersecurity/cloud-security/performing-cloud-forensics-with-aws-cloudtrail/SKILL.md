@@ -33,6 +33,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Cloud Forensics with Aws Cloudtrail
@@ -98,3 +99,10 @@ Actions Taken: [API calls by attacker]
 Data Accessed: [S3 objects, secrets, etc.]
 Persistence Mechanisms: [New users, keys, roles]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4788911acc74fea0
+-->
+

@@ -7,6 +7,7 @@ metadata:
   fetih:
     tags: [music, audio, generation, ai, heartmula, heartcodec, lyrics, songs]
     related_skills: [audiocraft]
+adapted_for: fetih
 ---
 
 # HeartMuLa - Open-Source Music Generation
@@ -169,3 +170,10 @@ Bridge lyrics...
 - Models: https://huggingface.co/HeartMuLa
 - Paper: https://arxiv.org/abs/2601.10547
 - License: Apache-2.0
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: eabec861d77e5d20
+-->
+

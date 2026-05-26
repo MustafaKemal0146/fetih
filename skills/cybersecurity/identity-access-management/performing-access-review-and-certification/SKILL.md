@@ -28,6 +28,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Performing Access Review and Certification
@@ -148,3 +149,10 @@ Conduct systematic access reviews and certifications to ensure users have approp
 - [ ] Audit evidence package complete and archived
 - [ ] SOD violations identified and documented
 - [ ] Exceptions documented with business justification and expiry
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f601eb8e1e2fbda6
+-->
+

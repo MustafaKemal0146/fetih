@@ -161,3 +161,10 @@ Use [field-notes.md](field-notes.md) once you have confirmed the challenge is tr
 - Database: tables named `flag`, `flags`, `secret`, or seeded challenge content
 - HTTP: custom headers, archived responses, hidden routes, admin exports
 - Browser: hidden DOM nodes, `data-*` attributes, inline state objects, source maps
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ee96db198e0c94aa
+-->
+

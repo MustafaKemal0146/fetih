@@ -30,6 +30,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Hardening Docker Daemon Configuration
@@ -300,3 +301,10 @@ docker run --rm --net host --pid host \
 8. **Audit Docker socket** - Monitor Erişim: /var/run/docker.sock
 9. **Run Docker Bench regularly** - Automate CIS benchmark checks
 10. **Keep Docker updated** - Apply security patches promptly
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5e5dc656da9b6a47
+-->
+

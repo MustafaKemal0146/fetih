@@ -36,6 +36,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Performing Oil Gas Cybersecurity Assessment
@@ -377,3 +378,10 @@ COMPLIANCE STATUS:
   API 1164: [N]% compliant
   IEC 62443: [N]% compliant
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 838b8d6edf908606
+-->
+

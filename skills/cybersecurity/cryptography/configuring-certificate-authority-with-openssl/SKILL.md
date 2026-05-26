@@ -24,6 +24,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Configuring Certificate Authority with Openssl
@@ -101,3 +102,10 @@ Root CA (offline, air-gapped)
 - [ ] CRL is generated and accessible
 - [ ] Revoked certificates appear in CRL
 - [ ] Certificate policies are correctly embedded
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 05a96c306227b3a7
+-->
+

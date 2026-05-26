@@ -15,6 +15,7 @@ category: crypto
 solved_challenges:
   - "picoCTF 2024 - rsa_oracle (multiplicative homomorphism)"
   - "CryptoHack - Bleichenbacher's attack"
+adapted_for: fetih
 ---
 
 # RSA Padding Oracle Saldırısı
@@ -411,3 +412,10 @@ from Crypto.Util.number import long_to_bytes
 # Multiplicative homomorphism — tek satirda:
 flag = long_to_bytes((decrypt_oracle((c_flag * pow(2, e, n)) % n) * pow(2, -1, n)) % n)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 633aa2224b180b5f
+-->
+

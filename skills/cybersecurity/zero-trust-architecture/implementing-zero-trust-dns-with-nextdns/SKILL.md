@@ -35,6 +35,7 @@ nist_csf:
 - PR.AA-05
 - PR.IR-01
 - GV.PO-01
+adapted_for: fetih
 ---
 
 # Implementing Zero Trust Dns with Nextdns
@@ -338,3 +339,10 @@ Tier 3 - Compliance (Organization-specific):
 - [NIST SP 800-81-2: Secure DNS Dağıt:ment Guide](https://csrc.nist.gov/publications/detail/sp/800-81/2/final)
 - [RFC 8484: DNS Queries over HTTPS (DoH)](https://tools.ietf.org/html/rfc8484)
 - [RFC 7858: DNS over TLS (DoT)](https://tools.ietf.org/html/rfc7858)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a975b4e7fa8cfbf7
+-->
+

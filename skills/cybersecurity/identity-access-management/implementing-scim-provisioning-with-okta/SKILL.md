@@ -33,6 +33,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Implementing Scim Provisioning with Okta
@@ -233,3 +234,10 @@ Okta provides an automated SCIM test suite (via Runscope/BlazeMeter) that valida
 - [Okta SCIM Developer Guide](https://developer.okta.com/docs/guides/scim-provisioning-integration-overview/main/)
 - [Build a SCIM API Service - Okta](https://developer.okta.com/docs/guides/scim-provisioning-integration-prepare/main/)
 - [SCIM Core Schema RFC 7643](https://tools.ietf.org/html/rfc7643)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: cd835f958963f7da
+-->
+

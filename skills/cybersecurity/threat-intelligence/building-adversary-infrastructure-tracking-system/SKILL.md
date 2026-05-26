@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Building Adversary Infrastructure Tracking System
@@ -352,3 +353,10 @@ monitor = InfrastructureMonitor(tracker, known_indicators=set())
 - [Validin: Passive DNS Threat Hunting](https://www.validin.com/blog/announcing_validin_threat_hunting_platform/)
 - [SecurityTrails API](https://securitytrails.com/corp/api)
 - [Hunt.io: Uncovering Malicious Infrastructure](https://hunt.io/blog/practical-guide-unconvering-malicious-infrastructure)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ead8f3a415ec0e67
+-->
+

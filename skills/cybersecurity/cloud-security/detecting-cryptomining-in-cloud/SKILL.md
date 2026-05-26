@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Cryptomining in Cloud
@@ -327,3 +328,10 @@ REMEDIATION:
   - AWS Config rule Dağıtılmış: cloudtrail-enabled (auto-remediate)
   - SCP Dağıtılmış: deny ec2:RunInstances for GPU instance types without approval
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 24803293c1883713
+-->
+

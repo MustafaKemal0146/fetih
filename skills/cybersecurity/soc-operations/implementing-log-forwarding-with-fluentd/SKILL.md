@@ -28,6 +28,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Log Forwarding with Fluentd
@@ -68,3 +69,10 @@ bu skill covers configuring Fluentd and Fluent Bit for centralized log collectio
 - Configuration validation report
 - Log routing topology diagram (text-based)
 - Test event delivery confirmation
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: bb766fdccd2b2cc5
+-->
+

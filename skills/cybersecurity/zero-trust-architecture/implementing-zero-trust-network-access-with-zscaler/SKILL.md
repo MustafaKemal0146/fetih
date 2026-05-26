@@ -32,6 +32,7 @@ nist_csf:
 - PR.AA-05
 - PR.IR-01
 - GV.PO-01
+adapted_for: fetih
 ---
 
 # Implementing Zero Trust Network Access with Zscaler
@@ -187,3 +188,10 @@ ZPA supports clientless browser-based access for web applications, enabling ZTNA
 - CISA Zero Trust Maturity Model v2.0 - Network Pillar
 - Zscaler Private Access Architecture Guide
 - CSA Software-Defined Perimeter and Zero Trust Specification v2.0
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f510eec357223458
+-->
+

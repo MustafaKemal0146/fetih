@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Cloud Trail Log Analysis
@@ -343,3 +344,10 @@ ALERTING STATUS:
   CloudWatch alarms active: 14 / 14
   Alerts fired (last 7 days): 8
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ce129196f1678525
+-->
+

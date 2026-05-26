@@ -32,6 +32,7 @@ nist_csf:
 - PR.AA-05
 - PR.IR-01
 - GV.PO-01
+adapted_for: fetih
 ---
 
 # Implementing Identity Verification for Zero Trust
@@ -215,3 +216,10 @@ AI-driven analytics tespit etmecompromised identities through impossible travel
 - CISA Zero Trust Maturity Model v2.0 - Identity Pillar
 - FIDO Alliance WebAuthn Specification
 - Microsoft Entra Conditional Access Documentation
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9436ea9d3c8f6148
+-->
+

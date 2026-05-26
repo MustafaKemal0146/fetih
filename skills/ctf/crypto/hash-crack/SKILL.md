@@ -18,6 +18,7 @@ category: crypto
 solved_challenges:
   - "IRIS CTF 2024 - OSINT bcrypt (wordlist from social media posts)"
   - "WolvCTF 2024 - Username (hashcat mode 16500 JWT)"
+adapted_for: fetih
 ---
 
 # Hash Kırma
@@ -501,3 +502,10 @@ cewl https://target-ctf-site.com -d 2 -m 6 -w site_wordlist.txt
 | sha512crypt ($6$) | `hashcat -m 1800 hash.txt rockyou.txt -r best64.rule` |
 | Kısa şifre (<= 6 char) | `hashcat -m 0 hash.txt -a 3 ?a?a?a?a?a?a --increment` |
 | Sosyal mühendislik | CeWL + Mentalist + manuel varyasyonlar |
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: aaa503f7942ffd7e
+-->
+

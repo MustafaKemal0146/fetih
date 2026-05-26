@@ -9,6 +9,7 @@ metadata:
   fetih:
     tags: [planning, design, implementation, workflow, documentation]
     related_skills: [subagent-driven-development, test-driven-development, requesting-code-review]
+adapted_for: fetih
 ---
 
 # Writing Implementation Plans
@@ -295,3 +296,10 @@ Frequent commits
 ```
 
 **A good plan makes implementation obvious.**
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0f00dcc685be6825
+-->
+

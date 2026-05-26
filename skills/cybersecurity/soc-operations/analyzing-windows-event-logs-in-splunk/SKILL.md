@@ -34,6 +34,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Analyzing Windows Event Logs in Splunk
@@ -302,3 +303,10 @@ ATT&CK Mapping:
   T1053.005 — Scheduled Task (persistence)
   T1059.001 — PowerShell (encoded execution)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6e75925abc3a7aea
+-->
+

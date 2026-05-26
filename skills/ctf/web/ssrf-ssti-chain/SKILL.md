@@ -18,6 +18,7 @@ category: web
 solved_challenges:
   - "corCTF 2024 - msfrogofwar3 (Flask + Jinja2 SSTI, arbitrary file write)"
   - "Real World CTF 2024 - Chatterbox (Thymeleaf SSTI + PostgreSQL SQLi + LFI)"
+adapted_for: fetih
 ---
 
 # SSRF → SSTI Zinciri ile RCE
@@ -366,3 +367,10 @@ if __name__ == "__main__":
 - **SSRF redirect bloğu:** `http://127.0.0.1` yerine `http://0177.0.0.1`, `http://2130706433` (decimal IP), `http://[::1]` dene.
 - **Template cache:** Jinja2 template'leri cache'ler. Farklı dosya adı veya cache bust parametresi dene.
 - **FreeMarker:** `${7*7}` çalışıyorsa RCE için `<#assign ex="freemarker.template.utility.Execute"?new()>${ex("id")}` dene.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e924290f3d6e4390
+-->
+

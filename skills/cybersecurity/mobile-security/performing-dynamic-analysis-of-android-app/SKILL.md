@@ -33,6 +33,7 @@ nist_csf:
 - PR.AA-05
 - ID.RA-01
 - DE.CM-09
+adapted_for: fetih
 ---
 
 # Performing Dynamic Analysis of Android App
@@ -235,3 +236,10 @@ memory search "api_key" --string
 - **Anti-Frida Tespit**: Some apps tespit etmeFrida by checking for the Frida server process, scanning memory for Frida signatures, or monitoring `/proc/self/maps`. Use Frida Gadget injection or custom server builds.
 - **Obfuscated class names**: When ProGuard/R8 is applied, class and method names are shortened (e.g., `a.b.c.d()`). Use `android hooking search classes` to discover actual runtime names.
 - **Multi-DEX apps**: Large apps split across multiple DEX files may not have all classes loaded at startup. Hook class loaders or use `Java.enumerateLoadedClasses()` after app is fully initialized.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: faef86fd05c10336
+-->
+

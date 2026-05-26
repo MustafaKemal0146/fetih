@@ -33,6 +33,7 @@ nist_csf:
 - GV.SC-07
 - ID.IM-04
 - PR.PS-04
+adapted_for: fetih
 ---
 
 # Implementing Github Advanced Security for Code Scanning
@@ -221,3 +222,10 @@ The organization-level security overview provides:
 - [CodeQL Query Repository](https://github.com/github/codeql)
 - [SARIF Specification](https://sarifweb.azurewebsites.net/)
 - [GitHub Security Overview](https://docs.github.com/en/code-security/security-overview/about-security-overview)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ebae87a58045f8e7
+-->
+

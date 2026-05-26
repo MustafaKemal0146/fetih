@@ -33,6 +33,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Detection Anomalies in Industrial Control Systems
@@ -332,3 +333,10 @@ ANOMALIES tespit etme (ED): [N]
   Baseline: [Expected behavior]
   Observed: [Actual behavior]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: faf715dca13d87ee
+-->
+

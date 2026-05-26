@@ -31,6 +31,7 @@ related_skills:
   - rsa-padding-oracle
   - aes-gcm-nonce-reuse
   - jwt-attacks
+adapted_for: fetih
 ---
 
 # AES CBC/ECB Bütünlük Saldırıları — Padding Oracle Olmadan
@@ -326,3 +327,10 @@ AES challenge → mode tespit (ECB / CBC / GCM / CTR)
              ├── GCM + nonce reuse → aes-gcm-nonce-reuse skill
              └── CTR + nonce reuse → crib dragging (bu skill)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b6ae2dbd8410f043
+-->
+

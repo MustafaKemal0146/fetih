@@ -32,6 +32,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Performing Log Analysis for Forensic Investigation
@@ -289,3 +290,10 @@ Log Analysis Summary:
 
   Report: /cases/case-2024-001/analysis/log_analysis_report.txt
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3d85523da9a5100f
+-->
+

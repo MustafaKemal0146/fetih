@@ -28,6 +28,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Pod Security Admission Controller
@@ -300,3 +301,10 @@ kubectl get namespaces -L pod-security.kubernetes.io/enforce
 6. **Combine with Gatekeeper** Ek custom policies beyond PSA
 7. **Use restricted profile** for all production workloads
 8. **Document exemptions** with clear justification
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 829a78d73f8aff75
+-->
+

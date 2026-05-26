@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Api Schema Validation Security
@@ -433,3 +434,10 @@ jobs:
 - Redocly API Security by Design: https://redocly.com/learn/security
 - Impart Security API Validation: https://www.impart.ai/blog/Detect-and-fix-api-vulnerabilities-using-validation-secure-principles-and-real-time-response
 - OWASP API Security Top 10 2023: https://owasp.org/API-Security/editions/2023/en/0x00-header/
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 617786f657c7913c
+-->
+

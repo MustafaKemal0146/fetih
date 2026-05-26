@@ -16,6 +16,7 @@ category: pwn
 solved_challenges:
   - "DiceCTF 2024 - baby-talk (off-by-one + libc leak)"
   - "Google CTF 2023 - write-flag-where"
+adapted_for: fetih
 ---
 
 # Ret2Libc — NX + ASLR Bypass
@@ -238,3 +239,10 @@ addr = u64(leak)
 one_gadget libc.so.6 -l 2   # daha fazla gadget listele
 ```
 Ya da klasik `system("/bin/sh")` zincirini kullan.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 20d8b28c92c5c721
+-->
+

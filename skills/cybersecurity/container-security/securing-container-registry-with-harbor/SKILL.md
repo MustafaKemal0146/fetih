@@ -33,6 +33,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Securing Container Registry with Harbor
@@ -235,3 +236,10 @@ curl -k "https://harbor.example.com/api/v2.0/audit-logs?page=1&page_size=10" \
 - [Harbor Documentation](https://goharbor.io/docs/)
 - [Harbor Security Best Practices](https://goharbor.io/docs/2.10.0/administration/vulnerability-scanning/)
 - [Harbor GitHub Repository](https://github.com/goharbor/harbor)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d52fd9402a088573
+-->
+

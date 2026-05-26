@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Gcp Penetration Testing with Gcpbucketbrute
@@ -72,3 +73,10 @@ bu skill covers Google Cloud Platform security testing using GCPBucketBrute for 
 - IAM privilege escalation path analysis
 - Service account security assessment
 - Risk-scored Bul:ings with remediation recommendations
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6883abf19a02029c
+-->
+

@@ -34,6 +34,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Detection T1003 Credential Dumping with Edr
@@ -162,3 +163,10 @@ ATT&CK Technique: [T1003.00x]
 Risk Level: [Critical/High/Medium]
 Credentials at Risk: [Scope assessment]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6dbed932870a18aa
+-->
+

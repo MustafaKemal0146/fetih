@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Cloud Security Posture Management
@@ -286,3 +287,10 @@ AUTO-REMEDIATION (Last 7 Days):
   Manual remediation pending: 51
   Exceptions approved:        8
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3768c306a14bfa8f
+-->
+

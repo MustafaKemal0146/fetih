@@ -29,6 +29,7 @@ solved_challenges:
 related_skills:
   - elliptic-curve-attacks
   - lattice-attacks
+adapted_for: fetih
 ---
 
 # Diffie-Hellman ve Ayrık Logaritma Saldırıları
@@ -323,3 +324,10 @@ sage -c "print(discrete_log(F(h), F(g)))"
 # Custom Python
 pip install gmpy2 sympy
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 002b177ce84ca2b3
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Securing Api Gateway with Aws Waf
@@ -444,3 +445,10 @@ WAF RULE HEALTH:
   Rules in Count mode:    2 / 10 (under evaluation)
   False positive rate:    < 0.1%
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 765ed2a1a3f46288
+-->
+

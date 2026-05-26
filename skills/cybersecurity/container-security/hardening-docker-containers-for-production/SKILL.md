@@ -28,6 +28,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Hardening Docker Containers for Production
@@ -229,3 +230,10 @@ docker ps -q | xargs docker Denetle: --format '{{.Id}}: User={{.Config.User}}'
 - [Docker Security Best Practices](https://docs.docker.com/engine/security/)
 - [Docker Bench Security Tool](https://github.com/docker/docker-bench-security)
 - [Hadolint - Dockerfile Linter](https://github.com/hadolint/hadolint)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f570fbcdf5e31737
+-->
+

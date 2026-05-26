@@ -32,6 +32,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Unusual Service Installations
@@ -70,3 +71,10 @@ Attackers frequently install malicious Windows services for persistence and priv
 
 - JSON report listing all new service installations with risk scores, suspicious indicators, and remediation recommendations
 - Timeline of service installation events with binary path analysis
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2010bc9e7779fb2e
+-->
+

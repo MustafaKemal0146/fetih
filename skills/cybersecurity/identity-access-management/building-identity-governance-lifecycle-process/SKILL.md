@@ -32,6 +32,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Building Identity Governance Lifecycle Process
@@ -695,3 +696,10 @@ Denied:                    24 (7.0%)
 Average Approval Time:     6.2 hours
 SOD Violations Flagged:    12
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 43171de00b4aae46
+-->
+

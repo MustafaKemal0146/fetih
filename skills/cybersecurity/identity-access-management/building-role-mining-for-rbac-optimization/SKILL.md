@@ -26,6 +26,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Building Role Mining for Rbac Optimization
@@ -258,3 +259,10 @@ After mining candidate roles:
 - [RBAC Standard - ANSI/INCITS 359-2012](https://www.incits.org/)
 - [Formal Concept Analysis for Role Engineering](https://link.springer.com/chapter/10.1007/978-3-540-73070-6_7)
 - [scikit-learn Clustering Documentation](https://scikit-learn.org/stable/modules/clustering.html)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1ae218c45d265c51
+-->
+

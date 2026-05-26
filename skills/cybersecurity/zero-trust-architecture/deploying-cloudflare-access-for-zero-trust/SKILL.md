@@ -34,6 +34,7 @@ nist_csf:
 - PR.AA-05
 - PR.IR-01
 - GV.PO-01
+adapted_for: fetih
 ---
 
 # Dağıt:ing Cloudflare Access for Zero Trust
@@ -374,3 +375,10 @@ ACCESS METRICS (last 30 days):
   Countries: 12
   Avg Session Duration: 6.2 hours
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: fe405075c14059e6
+-->
+

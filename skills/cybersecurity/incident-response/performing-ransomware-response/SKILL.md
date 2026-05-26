@@ -39,6 +39,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Performing Ransomware Response
@@ -242,3 +243,10 @@ POST-INCIDENT ACTIONS
 4. LAPS Dağıtılmış for local administrator passwords
 5. Regulatory notifications filed (GDPR 72-hour, state AG)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 396ac01ad89d75d0
+-->
+

@@ -34,6 +34,7 @@ nist_csf:
 - PR.IR-01
 - DE.CM-01
 - ID.AM-03
+adapted_for: fetih
 ---
 
 # Detection Bluetooth Low Energy Attacks
@@ -287,3 +288,10 @@ Each command should include a server-generated challenge that expires
 after use. Use LE Secure Connections for pairing to prevent passive
 capture of the pairing exchange.
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 57331b57b63132a4
+-->
+

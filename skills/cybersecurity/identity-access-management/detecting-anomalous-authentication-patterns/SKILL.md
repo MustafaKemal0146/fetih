@@ -32,6 +32,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Detection Anomalous Authentication Patterns
@@ -708,3 +709,10 @@ Password Spray Campaign #1:
   Duration:          45 minutes
   Pattern:           2 attempts per user, 3-second interval
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7c3966e781894afa
+-->
+

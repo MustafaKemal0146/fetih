@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Performing Dark Web Monitoring for Threats
@@ -277,3 +278,10 @@ def generate_dark_web_report(Bul:ings, organization):
 - [DarkOwl](https://www.darkowl.com/)
 - [Intel 471](https://intel471.com/)
 - [Flare Systems](https://flare.io/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0f55e308ca1b406a
+-->
+

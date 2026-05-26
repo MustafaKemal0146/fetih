@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Implementing Patch Management for Ot Systems
@@ -349,3 +350,10 @@ COMPLIANCE:
   Dağıtılmış or mitigated: [N]/[N]
   Deferred with compensating controls: [N]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2ace63433a681e78
+-->
+

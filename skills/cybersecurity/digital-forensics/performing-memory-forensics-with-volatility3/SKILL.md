@@ -32,6 +32,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Performing Memory Forensics with Volatility3
@@ -250,3 +251,10 @@ Memory Forensics Analysis:
 
   Extracted Artifacts:   15 files dumped to /analysis/extracted/
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 91c2a52796bb36c5
+-->
+

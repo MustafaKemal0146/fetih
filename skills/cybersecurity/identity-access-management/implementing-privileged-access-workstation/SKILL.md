@@ -27,6 +27,7 @@ nist_csf:
 - PR.AA-01
 - PR.AA-02
 - PR.AA-05
+adapted_for: fetih
 ---
 
 # Implementing Privileged Access Workstation
@@ -66,3 +67,10 @@ A Privileged Access Workstation (PAW) is a hardened device dedicated to performi
 
 - JSON report listing device compliance status, hardening checks, JIT access windows, and PAM integration verification
 - Risk scoring per workstation with remediation recommendations
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 64ff52c237a6377a
+-->
+

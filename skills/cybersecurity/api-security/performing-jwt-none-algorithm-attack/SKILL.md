@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Jwt None Algorithm Attack
@@ -346,3 +347,10 @@ def verify_token_secure(token: str, secret_key: str) -> dict:
 - PortSwigger JWT None Algorithm: https://portswigger.net/kb/issues/00200901_jwt-none-algorithm-supported
 - HackTricks JWT Vulnerabilities: https://book.hacktricks.xyz/pentesting-web/hacking-jwt-json-web-tokens
 - Invicti JWT Signature Bypass: https://www.invicti.com/web-vulnerability-scanner/vulnerabilities/jwt-signature-bypass-via-none-algorithm
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2933722e01038795
+-->
+

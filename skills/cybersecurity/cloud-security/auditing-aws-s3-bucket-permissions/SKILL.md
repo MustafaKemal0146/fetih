@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Auditing Aws S3 Bucket Permissions
@@ -263,3 +264,10 @@ SUMMARY:
   Buckets without access logging:      18 / 47
   Buckets with overly broad policies:   7 / 47
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e448fd1a75681c5d
+-->
+

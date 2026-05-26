@@ -33,6 +33,7 @@ nist_csf:
 - DE.CM-01
 - DE.AE-06
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Implementing Network Deception with Honeypots
@@ -98,3 +99,10 @@ Credentials Used: [Username:Password if applicable]
 Commands Executed: [For SSH honeypots]
 Risk Level: [Critical/High/Medium/Low]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 88bac31ff3ccb06f
+-->
+

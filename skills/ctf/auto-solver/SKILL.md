@@ -14,6 +14,7 @@ triggers:
   - "capture the flag çözüm"
   - "solve challenge"
 category: ctf
+adapted_for: fetih
 ---
 
 # CTF Auto-Solver — Otomatik Çözüm Pipeline
@@ -253,3 +254,10 @@ echo "[$(date)] PIVOT: [sebep] — yeni yaklaşım: [yaklaşım]" >> pivot_log.t
 - `references/flag-formats.md` — 40+ CTF flag formatı kataloğu
 - Siber Vatan CTF Playbook — `skills/red-teaming/siber-vatan-ctf/SKILL.md`
 - CTF Master Solver — `skills/ctf/SKILL.md`
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a6d0d476f57c300f
+-->
+

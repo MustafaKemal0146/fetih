@@ -36,6 +36,7 @@ nist_csf:
 - GV.RM-01
 - GV.PO-01
 - GV.OV-01
+adapted_for: fetih
 ---
 
 # Performing Soc2 Type2 Audit Preparation
@@ -302,3 +303,10 @@ ir_evidence = {
     ],
 }
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 479e62332d543621
+-->
+

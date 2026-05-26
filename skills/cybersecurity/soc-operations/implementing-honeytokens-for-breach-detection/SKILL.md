@@ -30,6 +30,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Honeytokens for Breach Detection
@@ -80,3 +81,10 @@ aws_creds = f"[default]\naws_access_key_id = {canary_key_id}\naws_secret_access_
 with open("/opt/backup/.aws/credentials", "w") as f:
     f.write(aws_creds)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0cf01afd3884a22d
+-->
+

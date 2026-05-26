@@ -34,6 +34,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Performing Deception Technology Dağıt:ment
@@ -300,3 +301,10 @@ Automated Response:
   [DONE] Incident INC0012567 created (P1 — Critical)
   [PENDING] Tier 2 investigation — Belirle: if workstation compromised or insider threat
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 270166645048eedd
+-->
+

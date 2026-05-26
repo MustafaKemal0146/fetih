@@ -34,6 +34,7 @@ nist_csf:
 - DE.CM-09
 - RS.CO-02
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Dmarc Dkim Spf Email Security
@@ -128,3 +129,10 @@ Use the `scripts/process.py` to parse DMARC aggregate XML reports and identify a
 - DKIM signature verified on test emails
 - DMARC record properly formatted and reporting enabled
 - Test emails pass all three checks in recipient's Authentication-Results header
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 60eb1cfef3d5ce43
+-->
+

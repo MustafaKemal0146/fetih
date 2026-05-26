@@ -34,6 +34,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Kubernetes Etcd Security Assessment
@@ -203,3 +204,10 @@ kubectl get secrets --all-namespaces -o json | \
 - [CIS Kubernetes Benchmark - etcd Controls](https://www.cisecurity.org/benchmark/kubernetes)
 - [Securing etcd - K8s Security Guide](https://k8s-security.geek-kb.com/docs/best_practices/cluster_setup_and_hardening/control_plane_security/etcd_security_mitigation/)
 - [Infosec: Encryption and etcd](https://www.infosecinstitute.com/resources/cryptography/encryption-and-etcd-the-key-to-securing-kubernetes/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 29445bd6d28714f8
+-->
+

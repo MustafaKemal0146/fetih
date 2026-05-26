@@ -33,6 +33,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-06
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Detection Living Off the Land with Lolbas
@@ -73,3 +74,10 @@ Living Off the Land Binaries, Scripts, and Libraries (LOLBAS) are legitimate sys
 - MITRE ATT&CK technique mapping for each Tespit (T1218, T1105, T1140, T1127)
 - Parent-child process anomaly analysis
 - Sigma rule match details with raw event data
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6aff223f0ccaba66
+-->
+

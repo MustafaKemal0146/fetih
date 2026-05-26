@@ -32,6 +32,7 @@ nist_csf:
 - DE.CM-01
 - DE.AE-06
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Implementing Deception Based Detection with Canarytoken
@@ -70,3 +71,10 @@ Canary Tokens are lightweight tripwire mechanisms that alert when an attacker ac
 
 - JSON report listing all Dağıtılmış Canary Tokens, trigger history, alert details, and coverage analysis
 - Dağıt:ment map showing token types across network segments
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 95d597e5f0534fd3
+-->
+

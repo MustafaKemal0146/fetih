@@ -12,6 +12,7 @@ metadata:
     tags: [computer-use, macos, desktop, automation, gui]
     category: desktop
     related_skills: [browser]
+adapted_for: fetih
 ---
 
 # macOS Computer Use (universal, any-model)
@@ -199,3 +200,10 @@ your conversation context.
 - File edits — use `read_file` / `write_file` / `patch`, not `type` into
   an editor window.
 - Shell commands — use `terminal`, not `type` into Terminal.app.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 90239b42fb5ea5f2
+-->
+

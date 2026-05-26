@@ -33,6 +33,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Cloud Waf Rules
@@ -307,3 +308,10 @@ FALSE POSITIVE ANALYSIS:
   Confirmed False Positives: 1 (SizeRestrictions_BODY for /api/upload)
   Action Taken: Rule exclusion applied
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 38fb7c0f4a118960
+-->
+

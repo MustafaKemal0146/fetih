@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Compromised Cloud Credentials
@@ -329,3 +330,10 @@ CONTAINMENT ACTIONS TAKEN:
   Passwords force-reset:          4
   MFA re-enrolled:                4
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: db63fd26b76c9f7f
+-->
+

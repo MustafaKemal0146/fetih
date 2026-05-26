@@ -38,6 +38,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Triaging Security Incident
@@ -233,3 +234,10 @@ ESCALATION
 Routed To:       [Team/Individual]
 SLA Target:      [Containment deadline]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9055b721c65fb9cc
+-->
+

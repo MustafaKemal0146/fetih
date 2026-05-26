@@ -37,6 +37,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Lnk File and Jump List Artifacts
@@ -293,3 +294,10 @@ Summary:
   Suspicious artifacts:          3 (hidden window execution, USB drive access, network shares)
   CSV exported to:               /analysis/lnk_output/ and /analysis/jumplist_output/
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b57ae48e001930df
+-->
+

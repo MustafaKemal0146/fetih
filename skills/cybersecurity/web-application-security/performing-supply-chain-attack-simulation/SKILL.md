@@ -35,6 +35,7 @@ nist_csf:
 - PR.PS-04
 - ID.RA-01
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Performing Supply Chain Attack Simulation
@@ -72,3 +73,10 @@ Software supply chain attacks exploit trust in package registries through typosq
 ## Output
 
 JSON report with risk scores per package, Detected attack vectors, hash verification results, and CVE Bul:ings.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4cc038d73da8d418
+-->
+

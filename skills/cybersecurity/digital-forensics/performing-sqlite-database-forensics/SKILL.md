@@ -37,6 +37,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Performing Sqlite Database Forensics
@@ -377,3 +378,10 @@ Summary:
   Report: /analysis/sqlite_report/sqlite_forensics.json
   Recovered DB: /analysis/sqlite_report/History_recovered.db
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f85bb71fd7a56059
+-->
+

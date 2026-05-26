@@ -39,6 +39,7 @@ nist_csf:
 - PR.PS-04
 - ID.RA-01
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Implementing Devsecops Security Scanning
@@ -395,3 +396,10 @@ pre-commit run --all-files  # Test against existing codebase
 - [ ] Branch protection rules enforce required status checks before merge
 - [ ] Pre-commit hooks catch secrets and SAST Bul:ings locally before push
 - [ ] Developer documentation explains how to interpret scan results and fix common Bul:ings
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ac5560a97405bdc5
+-->
+

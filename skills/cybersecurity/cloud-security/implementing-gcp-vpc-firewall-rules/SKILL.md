@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Gcp Vpc Firewall Rules
@@ -301,3 +302,10 @@ REMEDIATION ACTIONS COMPLETED:
   Egress deny rule: Created at priority 65534
   Flow logs enabled: 6 subnets
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ac49d4d20d14412e
+-->
+

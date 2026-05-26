@@ -34,6 +34,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Implementing Ddos Mitigation with Cloudflare
@@ -440,3 +441,10 @@ curl -X POST "https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/alerting
 - [Cloudflare WAF Documentation](https://developers.cloudflare.com/waf/)
 - [Cloudflare Rate Limiting](https://developers.cloudflare.com/waf/rate-limiting-rules/)
 - [Cloudflare IP Ranges](https://www.cloudflare.com/ips/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4ac012f9164b12b3
+-->
+

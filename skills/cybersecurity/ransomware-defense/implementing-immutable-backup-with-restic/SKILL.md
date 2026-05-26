@@ -35,6 +35,7 @@ nist_csf:
 - RS.MA-01
 - RC.RP-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Implementing Immutable Backup with Restic
@@ -105,3 +106,10 @@ Integrity Check: PASSED (all packs verified)
 Object Lock: Compliance mode, 90-day retention
 Restore Test: PASSED (15 files verified)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d053f1d5bf3b1e02
+-->
+

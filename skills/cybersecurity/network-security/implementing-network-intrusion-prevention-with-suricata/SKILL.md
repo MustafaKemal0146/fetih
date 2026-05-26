@@ -34,6 +34,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Implementing Network Intrusion Prevention with Suricata
@@ -340,3 +341,10 @@ echo "rate_filter gen_id 1, sig_id 2100366, track by_src, count 10, seconds 60, 
 - [Emerging Threats Rulesets](https://rules.emergingthreats.net/)
 - [OISF Suricata GitHub](https://github.com/OISF/suricata)
 - [Suricata-Update Documentation](https://suricata-update.readthedocs.io/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1a4a7dc97e0dbd38
+-->
+

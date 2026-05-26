@@ -34,6 +34,7 @@ nist_csf:
 - DE.CM-01
 - DE.AE-06
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Dağıt:ing Active Directory Honeytokens
@@ -252,3 +253,10 @@ SecurityEvent
 - SpecterOps - Kerberoasting and AES-256: https://specterops.io/blog/2025/10/21/is-kerberoasting-still-a-risk-when-aes-256-kerberos-encryption-is-enabled/
 - APT29a Blog - Dağıt:ing Honeytokens in AD: https://apt29a.blogspot.com/2019/11/Dağıt:ing-honeytokens-in-active.html
 - ADSecurity.org - Tespit etme Kerberoasting Activity: https://adsecurity.org/?p=3458
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7424d019a5d28525
+-->
+

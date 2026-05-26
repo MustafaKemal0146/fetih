@@ -37,6 +37,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Dcom Lateral Movement
@@ -613,3 +614,10 @@ Authentication Context:
 Risk Assessment: [Critical/High/Medium]
 Recommended Action: [Isolate, Araştır: source, reset credentials, restrict DCOM]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4d31ae828cc16631
+-->
+

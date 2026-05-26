@@ -35,6 +35,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Canary Tokens for Network Intrusion
@@ -318,3 +319,10 @@ python scripts/agent.py --action inventory \
 - Zeltser Honeytoken Setup Guide: https://zeltser.com/honeytokens-canarytokens-setup/
 - Grafana Canary Token Case Study: https://grafana.com/blog/2025/08/25/canary-tokens-learn-all-about-the-unsung-heroes-of-security-at-grafana-labs/
 - AWS Infrastructure Canarytoken: https://blog.thinkst.com/2025/09/introducing-the-aws-infrastructure-canarytoken.html
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 62f1827792aa7586
+-->
+

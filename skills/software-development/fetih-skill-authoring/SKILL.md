@@ -9,6 +9,7 @@ metadata:
   fetih:
     tags: [skills, authoring, fetih, conventions, skill-md]
     related_skills: [writing-plans, requesting-code-review]
+adapted_for: fetih
 ---
 
 # Authoring FETIH-Agent Skills (in-repo)
@@ -163,3 +164,10 @@ Pick the closest existing category. Don't invent new top-level categories casual
 - [ ] Structure: `# Title` → `## Overview` → `## When to Use` → body → `## Common Pitfalls` → `## Verification Checklist`
 - [ ] `related_skills` references resolve in-repo (or are explicitly OK to be user-local)
 - [ ] `git add skills/<category>/<name>/ && git commit` completed on the intended branch
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f472d4bf542611fd
+-->
+

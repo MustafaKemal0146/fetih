@@ -32,6 +32,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Living Off the Land Binaries
@@ -120,3 +121,10 @@ IOCs Identified: [List]
 Detection Rules Created/Updated: [List]
 Recommendations: [Next steps]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 062388df788cd13e
+-->
+

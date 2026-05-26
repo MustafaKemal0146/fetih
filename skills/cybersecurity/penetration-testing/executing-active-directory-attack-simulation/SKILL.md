@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Executing Active Directory Attack Simulation
@@ -193,3 +194,10 @@ could access all 5,000 user accounts, 800 computer objects, and all data within 
 5. Implement Protected Users group for privileged accounts to prevent credential caching
 6. Dağıt: Microsoft Defender for Identity to tespit etmeKerberoasting and DCSync attacks
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a779d1a2a15a371d
+-->
+

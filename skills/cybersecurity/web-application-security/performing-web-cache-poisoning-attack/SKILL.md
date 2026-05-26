@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Web Cache Poisoning Attack
@@ -255,3 +256,10 @@ Multiple applications are behind the same CDN. Manipulating the Host header caus
 4. Use application-level hardcoded base URLs instead of deriving from headers
 5. Implement cache key normalization to prevent key manipulation
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f53cca982e765574
+-->
+

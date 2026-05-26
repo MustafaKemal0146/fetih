@@ -32,6 +32,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Kubernetes Penetration Testing
@@ -247,3 +248,10 @@ kubectl delete pod test-netpol test-egress test-metadata
 - [kube-bench - CIS Benchmark](https://github.com/aquasecurity/kube-bench)
 - [MITRE ATT&CK Containers Matrix](https://attack.mitre.org/matrices/enterprise/containers/)
 - [Kubernetes Threat Matrix - Microsoft](https://microsoft.github.io/Threat-Matrix-for-Kubernetes/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0b352477fd01227a
+-->
+

@@ -35,6 +35,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Configuring Oauth2 Authorization Flow
@@ -154,3 +155,10 @@ PKCE (RFC 7636) prevents authorization code interception attacks:
 - [ ] Token revocation invalidates both access and refresh tokens
 - [ ] Client Credentials flow works for service-to-service calls
 - [ ] Scopes correctly enforced at resource server
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 17b88deeca341a17
+-->
+

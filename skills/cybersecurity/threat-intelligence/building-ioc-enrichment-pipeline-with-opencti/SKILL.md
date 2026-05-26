@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Building Ioc Enrichment Pipeline with Opencti
@@ -278,3 +279,10 @@ class CustomEnrichmentConnector:
 
 if __name__ == "__main__":
     connector = CustomEnrichmentConnector()
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: bf8a01361d0c0543
+-->
+

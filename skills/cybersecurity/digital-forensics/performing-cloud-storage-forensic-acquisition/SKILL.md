@@ -37,6 +37,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Performing Cloud Storage Forensic Acquisition
@@ -345,3 +346,10 @@ Acquisition Summary:
   Acquisition log:      /acquisition/gdrive/acquisition_log.csv
   Completion Time:      2024-01-19 08:18:47 UTC
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 73dde3ad93f52403
+-->
+

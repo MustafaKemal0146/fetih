@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Performing Dns Enumeration and Zone Transfer
@@ -235,3 +236,10 @@ cat all_subdomains.txt | httpx -screenshot -o screenshots/
 4. **Missing DMARC Policy** (Medium): No DMARC record found, enabling email spoofing
 5. **Weak SPF Record** (Low): SPF uses ~all (soft fail) instead of -all (hard fail)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b0ef1ac22bc07266
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - GV.PO-01
 - PR.DS-01
 - GV.OC-05
+adapted_for: fetih
 ---
 
 # Implementing Gdpr Data Subject Access Request
@@ -288,3 +289,10 @@ for m in matches:
 - EDPB Guidelines 01/2022 on Right of Access: https://www.edpb.europa.eu/system/files/2023-04/edpb_guidelines_202201_data_subject_rights_access_v2_en.pdf
 - GDPR Article 12 (DSAR Modalities): https://gdpr-info.eu/art-12-gdpr/
 - Regulation (EU) 2025/2518 (Procedural Rules): Cross-border GDPR enforcement procedural rules
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 29dd83a8263d356a
+-->
+

@@ -29,6 +29,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Security Chaos Engineering
@@ -82,3 +83,10 @@ def run_experiment(setup_fn, verify_fn, rollback_fn, timeout=300):
         rollback_fn()
     return result
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d97a3a1e00e90077
+-->
+

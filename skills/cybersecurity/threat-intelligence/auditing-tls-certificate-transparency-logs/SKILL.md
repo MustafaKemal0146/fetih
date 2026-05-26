@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Auditing Tls Certificate Transparency Logs
@@ -205,3 +206,10 @@ Verify log integrity and produce compliance evidence:
 | exarnple.com | 2 | Let's Encrypt | Araştır: phishing |
 | examp1e.com | 1 | ZeroSSL | Araştır: phishing |
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: edb859a5fac937db
+-->
+

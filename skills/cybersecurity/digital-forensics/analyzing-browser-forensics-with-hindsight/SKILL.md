@@ -37,6 +37,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Browser Forensics with Hindsight
@@ -300,3 +301,10 @@ Domain                   | Name              | Expires            | Secure | Htt
 
 Report saved to: /analysis/hindsight_output/Hindsight_Report.xlsx
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2f3022853ce91bcb
+-->
+

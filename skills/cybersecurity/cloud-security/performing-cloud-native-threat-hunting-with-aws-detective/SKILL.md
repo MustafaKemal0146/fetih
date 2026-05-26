@@ -35,6 +35,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Cloud Native Threat Hunting with Aws Detective
@@ -175,3 +176,10 @@ Indicators are retrieved separately via `list-indicators` and include types such
 3. Cross-reference Detective Bul:ings with raw CloudTrail logs for accuracy
 4. Verify Bul:ing group correlations match manual investigation conclusions
 5. Confirm automated alerts trigger for HIGH/CRITICAL severity investigations
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d203213ce4cca1d7
+-->
+

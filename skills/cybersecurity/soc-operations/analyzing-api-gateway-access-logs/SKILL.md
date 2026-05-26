@@ -31,6 +31,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Analyzing Api Gateway Access Logs
@@ -78,3 +79,10 @@ auth_failures = df[df["status_code"] == 401]
 scanner_ips = auth_failures.groupby("source_ip").size()
 scanners = scanner_ips[scanner_ips > 100]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c1084cd8a179f6c2
+-->
+

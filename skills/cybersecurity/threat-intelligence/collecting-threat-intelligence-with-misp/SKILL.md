@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Collecting Threat Intelligence with Misp
@@ -191,3 +192,10 @@ csv_output = misp.search(
 - [MISP GitHub Repository](https://github.com/MISP/MISP)
 - [MISP OpenAPI Specification](https://www.misp-project.org/openapi/)
 - [CIRCL OSINT Feed](https://www.circl.lu/doc/misp/feed-osint/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1dd4e94645081a71
+-->
+

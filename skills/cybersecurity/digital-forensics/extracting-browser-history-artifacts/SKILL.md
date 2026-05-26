@@ -33,6 +33,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Extracting Browser History Artifacts
@@ -325,3 +326,10 @@ Browser Forensics Summary:
     Firefox History:  /analysis/firefox_history.csv
     Full Report:      /analysis/hindsight_report.xlsx
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d0fd02f6b5bd47bc
+-->
+

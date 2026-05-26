@@ -35,6 +35,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Linux Kernel Rootkits
@@ -147,3 +148,10 @@ Summary:
   Modified Binaries:    3 (/usr/bin/ps, netstat, ls)
   Risk Level:           CRITICAL
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4a94dbb2b9084a05
+-->
+

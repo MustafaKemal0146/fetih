@@ -33,6 +33,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Performing Ssl Tls Denetle:ion Configuration
@@ -264,3 +265,10 @@ show counter global filter category ssl
 - [Cisco SSL/TLS Proxy](https://www.cisco.com/c/en/us/td/docs/routers/sdwan/configuration/security/ios-xe-17/security-book-xe/m-ssl-proxy.html)
 - [NIST SP 800-52 Rev 2 - TLS Configuration](https://csrc.nist.gov/publications/detail/sp/800-52/rev-2/final)
 - [US-CERT Alert on HTTPS Denetle:ion](https://www.cisa.gov/news-events/alerts/2017/03/13/https-interception-weakens-tls-security)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e1009ef3bbc982c6
+-->
+

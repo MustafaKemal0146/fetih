@@ -9,6 +9,7 @@ metadata:
   fetih:
     tags: [debugging, fetih, tui, slash-commands, typescript, python]
     related_skills: [python-debugpy, node-inspect-debugger, systematic-debugging]
+adapted_for: fetih
 ---
 
 # Debugging FETIH TUI Slash Commands
@@ -150,3 +151,10 @@ After fixing:
    - Live UI state reflects the change immediately (not just after restart)
 
 5. If the command is also gateway-available, test it from at least one messaging platform (or run the gateway tests: `scripts/run_tests.sh tests/gateway/`).
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 8221d3079d530d46
+-->
+

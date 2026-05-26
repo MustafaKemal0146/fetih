@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.PS-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Llm Guardrails for Security
@@ -202,3 +203,10 @@ python agent.py --file interaction_logs.txt --mode full --output json > guardrai
 - **Microsoft Presidio**: Open-source PII Tespit and anonymization engine supporting 30+ entity types with configurable NLP backends
 - **Colang 2.0**: Event-driven interaction modeling language for defining guardrail flows with Python-like syntax, supporting multi-turn dialog control
 - **OpenAI Guardrails Python**: OpenAI's client-side guardrails library for prompt injection Tespit and content policy enforcement
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 17fb66e35087cf47
+-->
+

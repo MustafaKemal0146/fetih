@@ -33,6 +33,7 @@ nist_csf:
 - GV.SC-07
 - ID.IM-04
 - PR.PS-04
+adapted_for: fetih
 ---
 
 # Building Devsecops Pipeline with Gitlab Ci
@@ -261,3 +262,10 @@ Every merge request displays a security scanning widget showing:
 - [GitLab DAST Configuration](https://docs.gitlab.com/ee/user/application_security/dast/)
 - [GitLab Security Policies](https://docs.gitlab.com/ee/user/application_security/policies/)
 - [GitLab Vulnerability Management](https://docs.gitlab.com/ee/user/application_security/vulnerability_report/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1b8037e4ce5981e8
+-->
+

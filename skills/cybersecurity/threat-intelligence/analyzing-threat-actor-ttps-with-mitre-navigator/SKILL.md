@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Analyzing Threat Actor Ttps with Mitre Navigator
@@ -80,3 +81,10 @@ multiple groups, and assess Tespit coverage gaps against known adversaries.
   ]
 }
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a8ffe9e80f05abfe
+-->
+

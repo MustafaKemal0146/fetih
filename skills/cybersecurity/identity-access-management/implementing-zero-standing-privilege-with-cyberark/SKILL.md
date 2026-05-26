@@ -30,6 +30,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Implementing Zero Standing Privilege with Cyberark
@@ -252,3 +253,10 @@ Aşama 4: GOVERNANCE (Ongoing)
 - [CyberArk ZSP Implementation with AWS](https://aws.amazon.com/blogs/apn/how-to-implement-zero-standing-privileges-with-cyberark-for-securing-access-to-the-aws-console/)
 - [CyberArk Blueprint - Zero Standing Privilege](https://docs.cyberark.com/cyberark-blueprint/latest/en/content/zero-standing-privilege.htm)
 - [CyberArk Secure Cloud Access Documentation](https://docs.cyberark.com/ispss-access/latest/en/content/getstarted/acc-frst-page.htm)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 203720df7c1b9226
+-->
+

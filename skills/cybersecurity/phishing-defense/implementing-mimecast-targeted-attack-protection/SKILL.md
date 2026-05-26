@@ -34,6 +34,7 @@ nist_csf:
 - DE.CM-09
 - RS.CO-02
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Mimecast Targeted Attack Protection
@@ -138,3 +139,10 @@ Mimecast Targeted Threat Protection (TTP) is a suite of advanced email security 
 - Internal Email Protect tespit etme (s) test lateral phishing scenario
 - Pre-delivery hold catches weaponized URL before reaching inbox
 - False positive rate below organizational threshold after tuning
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f36e9b98647c64ff
+-->
+

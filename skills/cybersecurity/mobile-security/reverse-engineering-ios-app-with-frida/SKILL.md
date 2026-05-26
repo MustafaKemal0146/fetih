@@ -31,6 +31,7 @@ nist_csf:
 - PR.AA-05
 - ID.RA-01
 - DE.CM-09
+adapted_for: fetih
 ---
 
 # Reverse Engineering Ios App with Frida
@@ -251,3 +252,10 @@ if (ObjC.available) {
 - **Swift-only classes**: Pure Swift classes without `@objc` annotation are not visible through `ObjC.classes`. Use `Module.enumerateExports()` instead.
 - **Stripped binaries**: Release builds strip debug symbols. Combine frida-trace with class-dump output for effective analysis.
 - **Anti-Frida measures**: Sophisticated apps check for Frida artifacts (frida-server process, Frida agent strings in memory, injected libraries in dyld). Use stealthy Frida builds or Frida Gadget injection.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9bcf5f1647c9649e
+-->
+

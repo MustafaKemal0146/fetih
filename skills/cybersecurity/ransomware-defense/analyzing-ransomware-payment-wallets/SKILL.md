@@ -32,6 +32,7 @@ nist_csf:
 - RS.MA-01
 - RC.RP-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Analyzing Ransomware Payment Wallets
@@ -180,3 +181,10 @@ CLUSTER ANALYSIS:
 - **Blockstream.info**: Open-source Bitcoin block explorer with full API access
 - **blockchain.com API**: Free API for querying Bitcoin address balances and transaction histories
 - **OFAC SDN List**: U.S. Treasury sanctioned address list for compliance checking
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0cbbcffdf288ca43
+-->
+

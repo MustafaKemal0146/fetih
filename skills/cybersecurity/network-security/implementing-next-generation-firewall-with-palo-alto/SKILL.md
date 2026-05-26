@@ -34,6 +34,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Implementing Next Generation Firewall with Palo Alto
@@ -266,3 +267,10 @@ show system resources
 - [Best Practices for NGFW Dağıt:ment](https://docs.paloaltonetworks.com/best-practices)
 - [Palo Alto Firewall Best Practices Checklist](https://www.paloaltonetworks.com/cyberpedia/firewall-best-practices)
 - [NIST SP 800-41 Rev 1 - Firewall and Policy Guidelines](https://csrc.nist.gov/publications/detail/sp/800-41/rev-1/final)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 8f79d21d9c1fc3a5
+-->
+

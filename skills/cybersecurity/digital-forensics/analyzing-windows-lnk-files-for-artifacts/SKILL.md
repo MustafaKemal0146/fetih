@@ -32,6 +32,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Windows Lnk Files for Artifacts
@@ -307,3 +308,10 @@ LNK File Analysis Summary:
 
   Timeline: /cases/case-2024-001/analysis/lnk_analysis.csv
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 332a0097c7330987
+-->
+

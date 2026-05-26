@@ -37,6 +37,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Analyzing Threat Intelligence Feeds
@@ -129,3 +130,10 @@ Export enriched indicators via TAXII 2.1 push to SIEM (Splunk, Microsoft Sentine
 - **Feed overlap without deduplication**: Ingesting the same IOC from five feeds without deduplication inflates indicator counts and SIEM rule complexity.
 - **TLP violation**: Redistributing RED-classified intelligence outside authorized boundaries violates sharing agreements and trust relationships.
 - **Over-blocking on low-confidence indicators**: Indicators with confidence below 50 should trigger Tespit-only rules, not blocking, to avoid operational disruption.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4f698ce119cb5a2b
+-->
+

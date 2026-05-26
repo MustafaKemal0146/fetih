@@ -27,6 +27,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Performing Hash Cracking with Hashcat
@@ -100,3 +101,10 @@ Hash cracking is an essential skill for penetration testers and security auditor
 - [ ] Mask attack cracks short passwords
 - [ ] Results report shows password strength distribution
 - [ ] All operations performed within authorized scope
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7267b4c3646daacb
+-->
+

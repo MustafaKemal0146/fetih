@@ -33,6 +33,7 @@ nist_csf:
 - PR.AA-05
 - ID.RA-01
 - DE.CM-09
+adapted_for: fetih
 ---
 
 # Performing Android App Static Analysis with Mobsf
@@ -174,3 +175,10 @@ Add MobSF scanning as a build gate:
 - **Missing obfuscated code**: Static analysis accuracy drops significantly against obfuscated apps. Supplement with dynamic analysis for apps using DexGuard or custom packers.
 - **Outdated MobSF rules**: Security rules evolve with Android API levels. Ensure MobSF is updated to match the target app's `targetSdkVersion`.
 - **Skipping native code analysis**: MobSF analyzes Java/Kotlin but has limited coverage of native C/C++ libraries. Use `checksec` and manual review for `.so` files.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6e2dfbe52306456d
+-->
+

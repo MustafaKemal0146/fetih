@@ -28,6 +28,7 @@ nist_csf:
 - PR.PS-02
 - DE.CM-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Implementing File Integrity Monitoring with Aide
@@ -66,3 +67,10 @@ AIDE (Advanced Intrusion Tespit Environment) is a host-based intrusion Tespit sy
 - Baseline database creation status
 - JSON report of file changes (added/removed/changed) with severity
 - Cron job configuration for automated monitoring
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 64aed7561225bb7a
+-->
+

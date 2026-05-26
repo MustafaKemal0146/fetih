@@ -33,6 +33,7 @@ nist_csf:
 - PR.AA-01
 - PR.AA-05
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Implementing Zero Trust with Beyondcorp
@@ -76,3 +77,10 @@ Query IAP audit logs, verify policy enforcement, and identify gaps in zero trust
 ## Expected Output
 
 JSON report containing IAP-protected resources, access level definitions, policy binding audit results, and zero trust coverage metrics.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 948a5e8321bb751a
+-->
+

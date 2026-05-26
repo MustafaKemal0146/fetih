@@ -32,6 +32,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Performing Access Recertification with Saviynt
@@ -266,3 +267,10 @@ After campaign closes:
 - [Saviynt Simplifying Certifications with Intelligence](https://saviynt.com/blog/simplifying-certifications-with-intelligence)
 - [Saviynt Advanced Access Reviews](https://oxfordcomputergroup.com/resources/saviynt-advanced-access-reviews/)
 - [ISACA Access Recertification Best Practices](https://www.isaca.org/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1bdcc8a35f0fd792
+-->
+

@@ -31,6 +31,7 @@ nist_csf:
 - PR.DS-01
 - PR.AA-01
 - ID.AM-02
+adapted_for: fetih
 ---
 
 # Implementing Gdpr Data Protection Controls
@@ -192,3 +193,10 @@ The regulation requires organizations to implement measures appropriate to the r
 - ICO (UK) GDPR Guidance: https://ico.org.uk/for-organisations/guide-to-data-protection/guide-to-the-general-data-protection-regulation-gdpr/
 - CNIL (France) GDPR Compliance Toolkit
 - Article 29 Working Party Guidelines on DPIAs
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0662a04ef35ffa1c
+-->
+

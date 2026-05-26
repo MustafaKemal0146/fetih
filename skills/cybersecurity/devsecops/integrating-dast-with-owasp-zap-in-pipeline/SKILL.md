@@ -32,6 +32,7 @@ nist_csf:
 - GV.SC-07
 - ID.IM-04
 - PR.PS-04
+adapted_for: fetih
 ---
 
 # Integrating Dast with Owasp Zap in Pipeline
@@ -260,3 +261,10 @@ FAILING ALERTS:
 
 QUALITY GATE: FAILED (1 HIGH, 2 MEDIUM Bul:ings)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3772a864fd26c947
+-->
+

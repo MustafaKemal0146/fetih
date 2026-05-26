@@ -33,6 +33,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Email Headers for Phishing Investigation
@@ -307,3 +308,10 @@ Email Header Analysis Report:
 
   Risk Level: HIGH
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 8738cf5488ee3b5e
+-->
+

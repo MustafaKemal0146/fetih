@@ -33,6 +33,7 @@ nist_csf:
 - GV.PO-01
 - PR.DS-01
 - GV.OC-05
+adapted_for: fetih
 ---
 
 # Performing Privacy Impact Assessment
@@ -277,3 +278,10 @@ for function_id, outcomes in profile["functions"].items():
         status = "PASS" if outcome["implemented"] else "GAP"
         print(f"  [{status}] {outcome['subcategory']}: {outcome['description']}")
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ea76ef09ae7c8ef1
+-->
+

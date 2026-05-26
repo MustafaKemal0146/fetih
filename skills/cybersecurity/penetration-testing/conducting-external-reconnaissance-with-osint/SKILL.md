@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Conducting External Reconnaissance with Osint
@@ -194,3 +195,10 @@ the tespit et: technologies, frameworks, and services used by the target:
 3. Disable directory listings on docs.techcorp.io and audit all web servers
 4. Implement GitHub secret scanning across all organization repositories
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 860a390e84d7cb49
+-->
+

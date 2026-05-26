@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Conducting Social Engineering Pretext Call
@@ -175,3 +176,10 @@ Key intelligence to gather:
 - Social Engineering Penetration Testing by Gavin Watson (Syngress)
 - The Art of Deception by Kevin Mitnick (Wiley)
 - NIST SP 800-50: Building an Information Technology Security Awareness and Training Program
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 56e63509b9b073ef
+-->
+

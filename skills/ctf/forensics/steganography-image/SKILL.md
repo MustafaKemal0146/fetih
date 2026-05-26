@@ -23,6 +23,7 @@ solved_challenges:
   - "picoCTF 2023 - MSB (bit 7, R/G/B kanalları — LSB değil MSB!)"
   - "HTB Cyber Apocalypse 2024 - CyberSpaceCTF Memory (AES encrypted PNG)"
   - "çeşitli CTF LSB/alpha kanal stego"
+adapted_for: fetih
 ---
 
 # Görüntü Steganografi Analizi
@@ -359,3 +360,10 @@ while pos < len(data):
 - **PNG yeniden kaydetme**: Pillow ile okuyup tekrar kaydedersen LSB bilgisi değişebilir. Her zaman orijinal dosya üzerinde çalış.
 - **Renk paletli PNG**: Mod `P` (palette) PNG'lerde piksel değerleri renk indeksi, renk değeri değil. `img.convert("RGB")` ile dönüştür.
 - **Big-endian bit sırası**: MSB önce mi yoksa LSB önce mi? Bazı CTF'lerde byte içindeki bit sırası tersine çevrilmiştir.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 63dc95305ea07220
+-->
+

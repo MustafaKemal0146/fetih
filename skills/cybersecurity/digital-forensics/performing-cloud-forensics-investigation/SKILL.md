@@ -33,6 +33,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Performing Cloud Forensics Investigation
@@ -327,3 +328,10 @@ Cloud Forensics Summary:
     Resources Created: 3 EC2 instances (crypto mining)
     Estimated Cost: $4,500 in unauthorized compute
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: bcad2705504a97d0
+-->
+

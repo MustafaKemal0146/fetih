@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Securing Remote Erişim: Ot Environment
@@ -388,3 +389,10 @@ VENDOR ACCESS:
   Co-attended: [N]
   Recorded: [N]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6f1a9d0118135d3a
+-->
+

@@ -32,6 +32,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Endpoint Detection with Wazuh
@@ -73,3 +74,10 @@ Use the /logtest endpoint to validate decoder and rule logic against sample log 
 ## Expected Output
 
 JSON report with agent inventory, alert statistics, rule coverage, and logtest validation results.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 06268c03d7b93ade
+-->
+

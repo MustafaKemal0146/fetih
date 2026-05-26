@@ -34,6 +34,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Supply Chain Security with in Toto
@@ -295,3 +296,10 @@ in-toto attestations map directly to SLSA (Supply chain Levels for Software Arti
 - [CNCF in-toto Graduation Announcement](https://www.cncf.io/announcements/2025/04/23/cncf-announces-graduation-of-in-toto-security-framework-enhancing-software-supply-chain-integrity-across-industries/)
 - [SLSA Framework](https://slsa.dev/)
 - [Sigstore Integration](https://www.sigstore.dev/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: deebb4e2b07753bf
+-->
+

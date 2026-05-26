@@ -24,6 +24,7 @@ nist_csf:
 - PR.IR-01
 - DE.CM-01
 - ID.AM-03
+adapted_for: fetih
 ---
 
 # Performing Bluetooth Security Assessment
@@ -92,3 +93,10 @@ The agent uses bleak's asyncio API to discover nearby BLE devices, connect to ta
   "risk_score": 7.5
 }
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b8f8e621faa32568
+-->
+

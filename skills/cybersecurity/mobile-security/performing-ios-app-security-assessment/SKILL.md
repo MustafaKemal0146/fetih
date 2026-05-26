@@ -35,6 +35,7 @@ nist_csf:
 - PR.AA-05
 - ID.RA-01
 - DE.CM-09
+adapted_for: fetih
 ---
 
 # Performing Ios App Security Assessment
@@ -248,3 +249,10 @@ to the user's account without knowing device passcode.
 Store sensitive credentials with kSecAttrAccessibleWhenUnlockedThisDeviceOnly
 and enable biometric protection via kSecAccessControlBiometryCurrentSet.
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 25c22157305809fe
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Implementing Privileged Access Management with Cyberark
@@ -158,3 +159,10 @@ Dağıt: CyberArk Privileged Access Management to discover, vault, rotate, and m
 - [ ] SIEM receives CyberArk audit events
 - [ ] Break-glass procedure tested and documented
 - [ ] DR vault failover tested successfully
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 69665b8672848eb2
+-->
+

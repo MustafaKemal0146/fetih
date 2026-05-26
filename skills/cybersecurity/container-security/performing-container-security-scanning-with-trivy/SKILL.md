@@ -29,6 +29,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Container Security Scanning with Trivy
@@ -75,3 +76,10 @@ Add Trivy scanning as a pipeline gate that blocks builds with critical/high vuln
 ## Expected Output
 
 JSON/table report listing CVEs with severity, CVSS scores, fixed versions, affected packages, misconfiguration Bul:ings, and exposed secrets with file locations.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c60fff2d89e855a9
+-->
+

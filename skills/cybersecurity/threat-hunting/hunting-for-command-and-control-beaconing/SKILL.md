@@ -31,6 +31,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Command and Control Beaconing
@@ -118,3 +119,10 @@ Domain Age: [Days]
 TI Match: [Yes/No - source]
 Risk Level: [Critical/High/Medium/Low]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f9bfcbd961fcd93b
+-->
+

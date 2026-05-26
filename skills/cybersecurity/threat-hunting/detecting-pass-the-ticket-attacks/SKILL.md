@@ -34,6 +34,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-06
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Detection Pass the Ticket Attacks
@@ -71,3 +72,10 @@ Pass-the-Ticket (PtT) is a credential theft technique (MITRE ATT&CK T1550.003) w
 ## Expected Output
 
 JSON report containing Detected PtT indicators including anomalous ticket requests, RC4 downgrades, cross-host ticket reuse events, and risk-scored users with MITRE ATT&CK technique mapping.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: da7ac13391e9bc29
+-->
+

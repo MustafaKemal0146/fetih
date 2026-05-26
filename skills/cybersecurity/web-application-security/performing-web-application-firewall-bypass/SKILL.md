@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Web Application Firewall Bypass
@@ -227,3 +228,10 @@ curl "http://target.com/page?q=%253Cscript%253Ealert(1)%253C%252Fscript%253E"
 - Enable deep content Denetle:ion for all HTTP methods
 - Implement request normalization before rule evaluation
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: de3b6550225ea1a6
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Testing for Xml Injection Vulnerabilities
@@ -222,3 +223,10 @@ curl "http://target.com/search?query=' or substring(//user[1]/password,1,1)='a' 
 - Implement XML schema validation with strict DTD restrictions
 - Block outbound connections from XML processing services
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e8c95e38416f4a8a
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Testing Ransomware Recovery Procedures
@@ -176,3 +177,10 @@ Recovery Test Report:
 - CISA Ransomware Guide: https://www.cisa.gov/stopransomware
 - Veeam RTO/RPO Best Practices: https://www.veeam.com/blog/recovery-time-recovery-point-objectives.html
 - NIST CSF 2.0 RC.RP (Recovery Planning)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 250973cd191e454a
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Testing for Sensitive Data Exposure
@@ -293,3 +294,10 @@ The `.git` directory is accessible on the production server. Using git-dumper, t
 7. Enable TLS 1.2+ on all endpoints; redirect HTTP to HTTPS
 8. Implement secret scanning in CI/CD pipeline (trufflehog/gitleaks)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d3f6ef38f18ae621
+-->
+

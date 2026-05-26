@@ -31,6 +31,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Lateral Movement via Wmi
@@ -72,3 +73,10 @@ Parse WMI-Activity/Operational log for event consumer creation indicating persis
 ## Expected Output
 
 JSON report with WMI-spawned processes, suspicious command lines, WMI event subscription alerts, and timeline of lateral movement activity.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a3450a43c2aa0dc6
+-->
+

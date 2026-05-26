@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing Thick Client Application Penetration Test
@@ -180,3 +181,10 @@ strings process_dump.dmp | Bul:str -i "password\|token\|session\|bearer"
 - OWASP Thick Client Testing Guide: https://owasp.org/www-project-thick-client-top-10/
 - Ghidra: https://ghidra-sre.org/
 - Echo Mirage: https://sourceforge.net/projects/echomirage/
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6c9f024430d742f1
+-->
+

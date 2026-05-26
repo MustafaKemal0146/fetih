@@ -33,6 +33,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Analyzing Ransomware Network Indicators
@@ -73,3 +74,10 @@ Before and during ransomware execution, adversaries establish C2 channels, exfil
 - TOR exit node connection alerts
 - Data exfiltration flow analysis
 - Composite ransomware risk score with MITRE mapping (T1071, T1573, T1041)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 81e01949b355c914
+-->
+

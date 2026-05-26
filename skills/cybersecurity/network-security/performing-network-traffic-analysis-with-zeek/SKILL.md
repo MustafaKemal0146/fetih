@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Performing Network Traffic Analysis with Zeek
@@ -404,3 +405,10 @@ cat ssl.log | zeek-cut server_name not_valid_after | awk -F'\t' '$2 < systime()'
 - [Zeek Intel Framework](https://docs.zeek.org/en/master/frameworks/intel.html)
 - [CISA Zeek Resources](https://www.cisa.gov/resources-tools/services/kismet)
 - [Zeek GitHub Repository](https://github.com/zeek/zeek)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 39858c3d3a865938
+-->
+

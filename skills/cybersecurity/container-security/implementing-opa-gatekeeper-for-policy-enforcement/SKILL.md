@@ -29,6 +29,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Opa Gatekeeper for Policy Enforcement
@@ -379,3 +380,10 @@ kubectl get --raw /metrics | grep gatekeeper
 5. **Monitor audit results** - Check constraint `.status.violations` regularly
 6. **Test Rego policies** - Use `opa test` or Rego Playground before Dağıt:ing
 7. **Combine with admission webhooks** - Layer Gatekeeper with Pod Security Admission for defense in depth
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e8f5ca6f7f741142
+-->
+

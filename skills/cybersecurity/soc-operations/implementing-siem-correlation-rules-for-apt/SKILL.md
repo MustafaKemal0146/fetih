@@ -29,6 +29,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Siem Correlation Rules for Apt
@@ -91,3 +92,10 @@ Tespit:
   condition: pipe_created | near service_installed
 level: high
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f3f2a5fe3a3b47ea
+-->
+

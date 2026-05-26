@@ -33,6 +33,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Detection Arp Poisoning in Network Traffic
@@ -409,3 +410,10 @@ if __name__ == '__main__':
 - [Cisco DAI Configuration Guide](https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/16-12/configuration_guide/sec/b_1612_sec_9300_cg/configuring_dynamic_arp_Denetle:ion.html)
 - [Comparitech ARP Poisoning Guide](https://www.comparitech.com/blog/information-security/arp-poisoning-spoofing-Detect-prevent/)
 - [Okta ARP Poisoning Techniques](https://www.okta.com/identity-101/arp-poisoning/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a1ba6753b7feae13
+-->
+

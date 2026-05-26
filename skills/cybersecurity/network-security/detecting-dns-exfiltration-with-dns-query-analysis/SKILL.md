@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Detection Dns Exfiltration with Dns Query Analysis
@@ -445,3 +446,10 @@ index=dns sourcetype=zeek:dns
 - [Akamai DNS Data Exfiltration](https://www.akamai.com/glossary/what-is-dns-data-exfiltration)
 - [SANS Tespit etme DNS Tunneling](https://www.giac.org/paper/gcia/1116/Tespit etme-dns-tunneling/108367)
 - [Fidelis DNS Tunneling Tespit](https://fidelissecurity.com/threatgeek/learn/dns-tunneling-Tespit/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 04104aaf863756f6
+-->
+

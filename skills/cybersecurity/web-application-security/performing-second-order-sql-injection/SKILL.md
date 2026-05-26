@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Second Order Sql Injection
@@ -199,3 +200,10 @@ curl http://target.com/profile
 - Apply least-privilege database permissions
 - Enable SQL query logging for Tespit etme injection attempts
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0ab3cd0035c79e6e
+-->
+

@@ -35,6 +35,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Analyzing Dns Logs for Exfiltration
@@ -309,3 +310,10 @@ Containment:
   [DONE] Domain evil-tunnel[.]com added to DNS sinkhole
   [DONE] Incident IR-2024-0448 created
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9283ae59a92a83c7
+-->
+

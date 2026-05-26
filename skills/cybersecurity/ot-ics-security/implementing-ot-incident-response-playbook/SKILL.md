@@ -34,6 +34,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Implementing Ot Incident Response Playbook
@@ -393,3 +394,10 @@ CONTAINMENT ACTIONS TAKEN:
 RECOVERY STATUS:
   [system] - [restored/pending] - [ETA]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 47bc0978c688064b
+-->
+

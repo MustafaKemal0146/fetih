@@ -32,6 +32,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Persistence Mechanisms in Windows
@@ -115,3 +116,10 @@ Creation Time: [Timestamp]
 Risk Level: [Critical/High/Medium/Low]
 Verdict: [Malicious/Suspicious/Benign]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: eae9804b09fe9f25
+-->
+

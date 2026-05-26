@@ -33,6 +33,7 @@ nist_csf:
 - DE.CM-09
 - RS.CO-02
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Detection Business Email Compromise
@@ -110,3 +111,10 @@ Business Email Compromise (BEC) is a sophisticated fraud scheme where attackers 
 - Financial controls prevent unauthorized transfers in drills
 - Account compromise Tespit catches simulated attacks
 - Reduced BEC susceptibility in awareness assessments
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0eaf149b55ca51ff
+-->
+

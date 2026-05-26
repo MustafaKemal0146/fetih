@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Securing Serverless Functions
@@ -315,3 +316,10 @@ SUMMARY:
   Functions with Secrets Manager: 19/47 (40%)
   Functions with Input Validation: 22/47 (47%)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 426870fbeae53529
+-->
+

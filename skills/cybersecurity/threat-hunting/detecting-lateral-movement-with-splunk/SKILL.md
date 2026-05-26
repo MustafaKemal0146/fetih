@@ -32,6 +32,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Detection Lateral Movement with Splunk
@@ -114,3 +115,10 @@ Event Count: [Number of events]
 Risk Level: [Critical/High/Medium/Low]
 Lateral Movement Path: [A -> B -> C -> D]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b99ffa07ec7bdfe4
+-->
+

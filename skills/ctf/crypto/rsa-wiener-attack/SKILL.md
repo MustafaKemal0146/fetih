@@ -17,6 +17,7 @@ solved_challenges:
   - "CryptoCTF 2021 - DoRSA"
   - "CryptoHack - Everything is Big (Wiener's attack)"
   - "LACTF 2024 - very-hot (çarpan bulma varyantı)"
+adapted_for: fetih
 ---
 
 # RSA Wiener Attack
@@ -237,3 +238,10 @@ else:
 - **SageMath olmadan:** `owiener` pip paketi veya el yazımı yakınsama döngüsü kullan — her ikisi de SageMath gerektirmez.
 - **Yanlış FLAG format kontrolü:** `long_to_bytes(m)` bazen baştaki boş baytlar içerir; `.lstrip(b'\x00')` ile temizle.
 - **DoRSA varyantı:** İki modül verildiğinde sadece tek modüle Wiener uygulamak yetmez — oran yaklaşımı (`n2/n1`) gereklidir.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 71529182a485e248
+-->
+

@@ -38,6 +38,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Performing Soc Tabletop Exercise
@@ -416,3 +417,10 @@ KEY Bul:INGS:
 ACTION ITEMS: 5 (Critical: 2, High: 2, Medium: 1)
 NEXT EXERCISE: TTX-2024-Q2 (June 2024) — Insider Threat Scenario
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 923ebb4bd034880f
+-->
+

@@ -22,6 +22,7 @@ solved_challenges:
   - "PlaidCTF 2024 — DHCPP"
   - "CryptoHack 2023 — Forbidden Fruit"
   - "HTB University CTF 2024 — Signaling Victorious"
+adapted_for: fetih
 ---
 
 # AES-GCM / ChaCha20-Poly1305 Nonce Reuse Saldırısı
@@ -235,3 +236,10 @@ Signal uygulamasının Electron-safeStorage v10 AES-GCM anahtarı DPAPI ile şif
 - **Çoklu kök**: Birden fazla kök çıkabilir. Her H adayı için masking key'i doğrula (bilinen plaintext ile test et).
 - **CTR blok sayacı**: GCM'de nonce+0 masking key için, nonce+1'den itibaren plaintext için kullanılır. Karıştırma!
 - **Tag kesme**: Bazı implementasyonlar 12 veya 8 byte tag kullanır. `t.ljust(16, b'\x00')` ile normalize et.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6a26666db256a3c8
+-->
+

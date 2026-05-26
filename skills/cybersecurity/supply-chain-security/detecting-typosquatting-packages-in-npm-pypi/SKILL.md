@@ -36,6 +36,7 @@ nist_csf:
 - GV.SC-03
 - GV.SC-06
 - GV.SC-07
+adapted_for: fetih
 ---
 
 # Detection Typosquatting Packages in Npm Pypi
@@ -177,3 +178,10 @@ Combine signals into a composite risk score and Şunu üret:n actionable report:
 - REPORT: Submit malware reports to security@pypi.org with package names and evidence
 - MONITOR: Continue weekly scans for the full dependency watchlist
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ee65ef9753a27395
+-->
+

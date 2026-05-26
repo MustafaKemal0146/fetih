@@ -34,6 +34,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Triaging Security Incident with Ir Playbook
@@ -208,3 +209,10 @@ curl -X PATCH "https://thehive.local/api/v1/case/$CASE_ID" \
 - IOC enrichment summary attached to case
 - Escalation notification to appropriate stakeholders
 - Initial timeline of events from alert data
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 8ded04e6f5e5e868
+-->
+

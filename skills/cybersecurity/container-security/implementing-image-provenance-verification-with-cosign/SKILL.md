@@ -33,6 +33,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Image Provenance Verification with Cosign
@@ -309,3 +310,10 @@ cosign verify ghcr.io/myorg/myapp:v1.0.0 \
 6. **Store keys in KMS** (AWS KMS, GCP KMS, HashiCorp Vault) for key-based signing
 7. **Verify the full chain**: signature + certificate + Rekor inclusion
 8. **Include build metadata** as annotations on signatures
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d833fa09d32c7665
+-->
+

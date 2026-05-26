@@ -30,6 +30,7 @@ nist_csf:
 - PR.PS-02
 - DE.CM-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Implementing Usb Device Control Policy
@@ -146,3 +147,10 @@ Computer Configuration → Administrative Templates → System → Device Instal
 - **Not communicating policy to users**: USB blocks without user notification generate helpdesk tickets. Display a notification explaining the policy.
 - **Ignoring USB-C and Thunderbolt**: Modern devices use USB-C for docking, charging, and storage. Policies must distinguish between USB storage and USB peripherals.
 - **No approved device process**: Users with legitimate USB needs (presentations, field data collection) require an exception process with approved, encrypted devices.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 393dc94a5b7c0128
+-->
+

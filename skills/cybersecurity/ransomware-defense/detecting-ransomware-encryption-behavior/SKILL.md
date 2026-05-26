@@ -33,6 +33,7 @@ nist_csf:
 - RS.MA-01
 - RC.RP-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Detection Ransomware Encryption Behavior
@@ -216,3 +217,10 @@ Automated Response Actions:
 - **psutil (Python)**: Process and system monitoring library for tracking per-process I/O statistics
 - **Elastic Endpoint**: Commercial endpoint protection with built-in ransomware behavioral Tespit using canary files
 - **Wazuh**: Open-source security platform with file integrity monitoring and active response capabilities
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 687912d46f4ee0ad
+-->
+

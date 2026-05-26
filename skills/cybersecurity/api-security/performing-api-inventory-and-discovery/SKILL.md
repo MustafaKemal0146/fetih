@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Api Inventory and Discovery
@@ -439,3 +440,10 @@ def tespit etme (_shadow_and_zombie_apis)(discovered_endpoints, documented_endpo
 3. **Exposed Documentation**: 12 Swagger UI instances accessible publicly,
    revealing full API schema and endpoint details
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 97773061c5ed5068
+-->
+

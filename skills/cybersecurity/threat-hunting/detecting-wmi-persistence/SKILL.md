@@ -32,6 +32,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Detection Wmi Persistence
@@ -98,3 +99,10 @@ Command: [Executed command or script]
 Risk Level: [Critical/High/Medium/Low]
 Recommended Action: [Remove subscription, Araştır: lateral movement]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1cf15458ebb865fe
+-->
+

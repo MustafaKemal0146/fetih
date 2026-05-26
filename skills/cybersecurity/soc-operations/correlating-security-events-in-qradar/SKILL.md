@@ -34,6 +34,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Correlating Security Events in Qradar
@@ -296,3 +297,10 @@ Sources Correlated:
 Disposition:    TRUE POSITIVE — Escalated to Incident Response
 Ticket:         IR-2024-0432
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 784208c2c72d7237
+-->
+

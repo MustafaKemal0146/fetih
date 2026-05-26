@@ -32,6 +32,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Performing Mobile Device Forensics with Cellebrite
@@ -290,3 +291,10 @@ Mobile Forensics Summary:
     Messages Export: /analysis/whatsapp_messages.csv
     Locations:       /analysis/photo_locations.json
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 36603ee62a951e53
+-->
+

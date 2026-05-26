@@ -16,6 +16,7 @@ triggers:
   - "Siber Vatan CTF"
   - "TR-circuit CTF"
   - "Türk CTF yarışması"
+adapted_for: fetih
 ---
 
 # Siber Vatan CTF Playbook
@@ -144,3 +145,10 @@ When stuck on a challenge, switch dimensions in this order:
 - `references/web-bypass-patterns.md` — Full catalog of web exploitation patterns observed in Siber-Vatan-style competitions
 - `references/webhook-ssrf-testing.md` — SSRF testing via webhook/URL-tester functionality
 - `scripts/sstv_decoder.py` — Custom Scottie 1 SSTV decoder for headless environments
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a70edd19542b8262
+-->
+

@@ -35,6 +35,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Analyzing Powershell Empire Artifacts
@@ -69,3 +70,10 @@ PowerShell Empire is a post-exploitation framework consisting of listeners, stag
 ## Output
 
 JSON report with matched IOCs, decoded Base64 payloads, timeline of suspicious events, MITRE ATT&CK technique mappings, and severity scores.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b6c3ee2456871cfa
+-->
+

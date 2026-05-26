@@ -38,6 +38,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Containing Active Breach
@@ -238,3 +239,10 @@ BUSINESS IMPACT
 - 3 user workstations isolated (users reassigned to loaners)
 - Estimated restoration: pending eradication completion
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5aaa20d4268cf625
+-->
+

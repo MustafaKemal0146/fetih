@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Testing Api Security with Owasp Top 10
@@ -317,3 +318,10 @@ Authenticated users can access any order by iterating order IDs.
 Tested range: 1-1000, 847 valid orders accessible.
 PII exposure: names, addresses, payment details.
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a70445e48aa038e0
+-->
+

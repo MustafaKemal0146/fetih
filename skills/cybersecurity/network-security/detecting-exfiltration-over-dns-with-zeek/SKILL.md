@@ -30,6 +30,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Detection Exfiltration Over Dns with Zeek
@@ -97,3 +98,10 @@ bu skill analyzes Zeek dns.log files (TSV format) to tespit etmeexfiltration in
   ]
 }
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 16b119dde8cdafaa
+-->
+

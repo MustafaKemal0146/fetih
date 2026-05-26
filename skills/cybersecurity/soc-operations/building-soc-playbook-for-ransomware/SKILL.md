@@ -39,6 +39,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Building Soc Playbook for Ransomware
@@ -278,3 +279,10 @@ Total Affected: 1 server, 3 workstations
 Data Loss:      4 hours of file modifications (backup RPO)
 Exfiltration:   No evidence of data exfiltration confirmed
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c12d238bd7fc443b
+-->
+

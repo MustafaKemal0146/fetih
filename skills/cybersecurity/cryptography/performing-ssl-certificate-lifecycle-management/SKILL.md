@@ -28,6 +28,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Performing Ssl Certificate Lifecycle Management
@@ -99,3 +100,10 @@ SSL/TLS certificate lifecycle management encompasses the full process of request
 - [ ] Certificate chain validation verifies trust path
 - [ ] OCSP checking tespit etme (s) revoked certificates
 - [ ] Certificate inventory tracks all Dağıtılmış certificates
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a3839933517691d2
+-->
+

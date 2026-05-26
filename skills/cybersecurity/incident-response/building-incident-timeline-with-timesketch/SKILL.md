@@ -37,6 +37,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Building Incident Timeline with Timesketch
@@ -251,3 +252,10 @@ target-query -f timesketch://timesketch.local/case-001 \
 - [CISA Timesketch Resource](https://www.cisa.gov/resources-tools/services/timesketch)
 - [Hunt and Hackett: Scalable Forensics with Dissect and Timesketch](https://www.huntandhackett.com/blog/scalable-forensics-timeline-analysis-using-dissect-and-timesketch)
 - [Plaso (log2timeline) Documentation](https://plaso.readthedocs.io/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 58188cd11c3f8ab9
+-->
+

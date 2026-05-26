@@ -34,6 +34,7 @@ nist_csf:
 - RS.MA-01
 - RC.RP-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Implementing Ransomware Kill Switch Detection
@@ -221,3 +222,10 @@ During an active incident, scan endpoints for ransomware-associated mutexes:
 - **malware-mutex (GitHub)**: Community-maintained database of mutexes used by known malware families
 - **ANY.RUN**: Interactive malware sandbox that reports mutex creation during dynamic analysis
 - **PassiveDNS**: DNS monitoring infrastructure for Tespit etme kill switch domain resolution attempts
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c090fd2cbdec3e22
+-->
+

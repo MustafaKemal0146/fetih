@@ -29,6 +29,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Mtls for Zero Trust Services
@@ -81,3 +82,10 @@ context.load_cert_chain("client.pem", "client-key.pem")
 context.load_verify_locations("ca.pem")
 context.verify_mode = ssl.CERT_REQUIRED
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a332efaaa2d5f50a
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Conducting Api Security Testing
@@ -197,3 +198,10 @@ owns the requested account before returning data:
   const account = await Account.Bul:ById(accountId);
   if (account.userId !== req.user.id) return res.status(403).json({error: "Forbidden"});
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b804d1cff5e5265d
+-->
+

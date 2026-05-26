@@ -31,6 +31,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Performing Hardware Security Module Integration
@@ -70,3 +71,10 @@ Hardware Security Modules (HSMs) provide tamper-resistant cryptographic key stor
 
 - JSON report listing HSM slots, tokens, stored keys, supported mechanisms, and compliance status
 - Signing test results with key metadata and algorithm details
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7ccb4dec15de7e05
+-->
+

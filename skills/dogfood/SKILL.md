@@ -7,6 +7,7 @@ metadata:
   fetih:
     tags: [qa, testing, browser, web, dogfood]
     related_skills: []
+adapted_for: fetih
 ---
 
 # Dogfood: Systematic Web Application QA Testing
@@ -160,3 +161,10 @@ Save the report to `{output_dir}/report.md`.
 - **Check responsive behavior** by noting any layout issues visible in screenshots.
 - **Don't forget edge cases**: empty states, very long text, special characters, rapid clicking.
 - When reporting screenshots to the user, include `MEDIA:<screenshot_path>` so they can see the evidence inline.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1328424baceca71c
+-->
+

@@ -30,6 +30,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Kubernetes Network Policy with Calico
@@ -314,3 +315,10 @@ kubectl exec -n production frontend-pod -- wget -qO- --timeout=2 http://backend-
 6. **Test policies in staging** - Validate network connectivity after applying policies
 7. **Monitor denied traffic** - Enable Calico flow logs for visibility into blocked connections
 8. **Use tiers** - Organize policies into security, platform, and application tiers
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6f728d84fa7ff1e4
+-->
+

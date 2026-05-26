@@ -32,6 +32,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Container Image Minimal Base with Distroless
@@ -201,3 +202,10 @@ trivy image myapp:distroless
 - [Distroless Images - Docker Documentation](https://docs.docker.com/dhi/core-concepts/distroless/)
 - [Alpine, Distroless, or Scratch? - Google Cloud](https://medium.com/google-cloud/alpine-distroless-or-scratch-caac35250e0b)
 - [Docker Hardened Images](https://www.infoq.com/news/2025/12/docker-hardened-images/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d577dec6b94ce53b
+-->
+

@@ -32,6 +32,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Investigating Ransomware Attack Artifacts
@@ -365,3 +366,10 @@ Ransomware Investigation Summary:
     Bitcoin: bc1q...
     Tor: http://lockbit...onion
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6964075090960e0a
+-->
+

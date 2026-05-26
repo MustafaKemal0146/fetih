@@ -34,6 +34,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Conducting Post Incident Lessons Learned
@@ -183,3 +184,10 @@ tags:
 - Action items list with owners and deadlines
 - Updated IR playbooks and Tespit rules
 - Executive summary for leadership
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a1018cfa282e86b4
+-->
+

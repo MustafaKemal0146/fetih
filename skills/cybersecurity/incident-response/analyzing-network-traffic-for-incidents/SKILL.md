@@ -38,6 +38,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Analyzing Network Traffic for Incidents
@@ -258,3 +259,10 @@ EVIDENCE REFERENCES
 PCAP File:        INC-2025-1547_capture.pcap (SHA-256: ...)
 Zeek Logs:        /logs/zeek/2025-11-15/ (conn.log, ssl.log, dns.log)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4afc0188d5e74945
+-->
+

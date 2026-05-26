@@ -28,6 +28,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Performing Cryptographic Audit of Application
@@ -94,3 +95,10 @@ A cryptographic audit systematically reviews an application's use of cryptograph
 - [ ] Weak KDF parameters are identified
 - [ ] Report includes severity, location, and remediation
 - [ ] False positive rate is below 10%
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d51047df09a4cad0
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Performing Brand Monitoring for Impersonation
@@ -264,3 +265,10 @@ Regards,
 - [NetDiligence: Domain Security and Phishing](https://netdiligence.com/blog/2025/12/understanding-domain-security-brand-impersonation/)
 - [Flare: Digital Brand Protection](https://flare.io/glossary/digital-brand-protection/)
 - [dnstwist GitHub](https://github.com/elceef/dnstwist)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b3b3e627f6d509db
+-->
+

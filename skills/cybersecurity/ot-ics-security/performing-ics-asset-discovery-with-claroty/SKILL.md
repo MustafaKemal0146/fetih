@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Performing Ics Asset Discovery with Claroty
@@ -516,3 +517,10 @@ CRITICAL Bul:INGS:
   - [End-of-life firmware Bul:ing]
   - [Unencrypted protocol concern]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 62f947981430c2ac
+-->
+

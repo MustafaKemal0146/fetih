@@ -29,6 +29,7 @@ nist_csf:
 - DE.CM-09
 - RS.CO-02
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Anti Phishing Training Program
@@ -108,3 +109,10 @@ Use `scripts/process.py` to analyze training completion, simulation results, and
 - Measurable reduction in phishing click rate over 6 months
 - Increase in user phishing report rate
 - Department-level improvement tracking
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 670722192bd77443
+-->
+

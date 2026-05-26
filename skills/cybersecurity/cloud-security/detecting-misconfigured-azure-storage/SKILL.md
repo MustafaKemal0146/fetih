@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Misconfigured Azure Storage
@@ -260,3 +261,10 @@ SUMMARY:
   Shared key access enabled:           18 / 24
   Keys not rotated in 90+ days:        14 / 24
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: eecb10936b575de2
+-->
+

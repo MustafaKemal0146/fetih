@@ -29,6 +29,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Performing Red Team Phishing with Gophish
@@ -75,3 +76,10 @@ campaign = Campaign(name="Q1 Test", groups=[Group(name="Sales Team")],
     page=Page(name="Credential Page"))
 api.campaigns.post(campaign)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: eebb52c79488c071
+-->
+

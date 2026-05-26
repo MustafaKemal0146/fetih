@@ -33,6 +33,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Implementing Hashicorp Vault Dynamic Secrets
@@ -549,3 +550,10 @@ Root Credential Rotated:        YES (all databases)
 Audit Logging:                  ENABLED (file + syslog)
 Policy Violations (24h):        7 (permission denied)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d29a9a1cc26e6795
+-->
+

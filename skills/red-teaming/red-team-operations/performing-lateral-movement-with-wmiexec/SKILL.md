@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing Lateral Movement with Wmiexec
@@ -213,3 +214,10 @@ WMI (Windows Management Instrumentation) is a legitimate Windows administration 
 - [ ] Credential harvesting performed via WMI execution chain
 - [ ] No service creation artifacts on target systems
 - [ ] Evidence documented with command outputs and screenshots
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ac48c049a8af76e6
+-->
+

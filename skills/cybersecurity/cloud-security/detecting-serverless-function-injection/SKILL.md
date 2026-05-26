@@ -34,6 +34,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Serverless Function Injection
@@ -505,3 +506,10 @@ Dağıt: runtime protection controls to prevent injection at execution time:
 - Config rule: Lambda functions must not have layers from external accounts
 - Config rule: Lambda execution roles must not have wildcard resource permissions
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7eb65a8a7d035921
+-->
+

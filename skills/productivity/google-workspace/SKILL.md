@@ -15,6 +15,7 @@ metadata:
     tags: [Google, Gmail, Calendar, Drive, Sheets, Docs, Contacts, Email, OAuth]
     homepage: https://github.com/MustafaKemal0146/fetih
     related_skills: [himalaya]
+adapted_for: fetih
 ---
 
 # Google Workspace
@@ -333,3 +334,10 @@ All commands return JSON. Parse with `jq` or read directly. Key fields:
 ```bash
 $GSETUP --revoke
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1716386e7d07d803
+-->
+

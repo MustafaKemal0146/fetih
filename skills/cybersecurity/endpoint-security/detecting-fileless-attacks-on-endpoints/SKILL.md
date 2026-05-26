@@ -33,6 +33,7 @@ nist_csf:
 - PR.PS-02
 - DE.CM-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Detection Fileless Attacks on Endpoints
@@ -156,3 +157,10 @@ index=sysmon EventCode=13
 - **Disabled PowerShell logging**: Without Script Block Logging, deobfuscated PowerShell commands are invisible to defenders.
 - **AMSI bypass not Detected**: Sophisticated attackers bypass AMSI before executing payloads. tespit etmeAMSI bypass attempts as a high-priority alert.
 - **Not monitoring WMI events**: WMI persistence is a favored technique of APT groups. Sysmon events 19-21 must be enabled.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f7c04ca18e399324
+-->
+

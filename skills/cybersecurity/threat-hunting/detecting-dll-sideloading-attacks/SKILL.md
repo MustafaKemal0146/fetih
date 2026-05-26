@@ -32,6 +32,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Detection Dll Sideloading Attacks
@@ -108,3 +109,10 @@ App Location: [Expected/Anomalous]
 Host: [Hostname]
 Risk Level: [Critical/High/Medium/Low]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 759ec9124bfeb1d1
+-->
+

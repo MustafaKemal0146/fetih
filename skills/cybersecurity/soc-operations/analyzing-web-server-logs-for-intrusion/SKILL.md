@@ -32,6 +32,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Analyzing Web Server Logs for Intrusion
@@ -79,3 +80,10 @@ python scripts/agent.py --log-file /var/log/nginx/access.log --geoip-db GeoLite2
 ```
 Nikto/2.1.6, sqlmap/1.7, DirBuster-1.0-RC1, gobuster/3.1.0
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1bde935a9c1183b1
+-->
+

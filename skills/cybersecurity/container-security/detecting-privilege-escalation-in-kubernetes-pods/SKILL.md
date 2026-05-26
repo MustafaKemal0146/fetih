@@ -32,6 +32,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Privilege Escalation in Kubernetes Pods
@@ -252,3 +253,10 @@ kubectl get pods --all-namespaces -o json | \
 6. **Monitor with Falco** for runtime privilege escalation attempts
 7. **Audit RBAC changes** with Kubernetes audit logging
 8. **Use seccomp profiles** to restrict syscalls
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 84845cfb781e1bd4
+-->
+

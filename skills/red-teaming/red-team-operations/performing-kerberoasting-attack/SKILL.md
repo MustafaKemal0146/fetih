@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing Kerberoasting Attack
@@ -116,3 +117,10 @@ Kerberoasting is a post-exploitation technique that targets service accounts in 
 - [ ] Offline cracking attempted with appropriate wordlists
 - [ ] Cracked credentials validated
 - [ ] Access level of compromised accounts assessed
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7942834e32cc6b8c
+-->
+

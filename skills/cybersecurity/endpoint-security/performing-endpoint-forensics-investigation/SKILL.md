@@ -33,6 +33,7 @@ nist_csf:
 - PR.PS-02
 - DE.CM-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Performing Endpoint Forensics Investigation
@@ -224,3 +225,10 @@ Structure forensic report:
 - **Analyzing only disk, ignoring memory**: In-memory-only malware (fileless attacks) leaves no disk artifacts. Always capture memory first.
 - **Not hashing evidence**: All evidence must be cryptographically hashed at collection time to prove integrity.
 - **Tunnel vision**: Focusing on one artifact when the timeline tells a broader story. Always build a comprehensive timeline.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3da7d1db308794b3
+-->
+

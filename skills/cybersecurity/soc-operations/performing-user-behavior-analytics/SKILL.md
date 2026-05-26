@@ -31,6 +31,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Performing User Behavior Analytics
@@ -259,3 +260,10 @@ INVESTIGATION STATUS:
   admin_svc01: Under review — may be new automation Dağıt:ment (checking with IT Ops)
   mwilson:     Pending HR context — employee on notice period, monitoring increased
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e3fda33bf4acab57
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Conducting Spearphishing Simulation Campaign
@@ -143,3 +144,10 @@ Spearphishing simulation is a targeted social engineering attack vector used by 
 - [ ] Campaign tracked with delivery and interaction metrics
 - [ ] Evidence collected for engagement report
 - [ ] Cleanup performed on infrastructure post-campaign
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 739a6e86d98c4fa7
+-->
+

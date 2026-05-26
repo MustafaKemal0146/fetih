@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Suspicious Oauth Application Consent
@@ -70,3 +71,10 @@ Illicit consent grant attacks trick users into granting excessive permissions to
 
 - JSON report listing all OAuth apps with granted permissions, risk scores, unverified publishers, and suspicious consent patterns
 - Audit trail of consent grant events with user and IP details
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: dbf42b0e9cda6fa7
+-->
+

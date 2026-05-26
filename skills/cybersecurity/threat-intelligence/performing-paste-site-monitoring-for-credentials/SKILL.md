@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Performing Paste Site Monitoring for Credentials
@@ -353,3 +354,10 @@ def generate_credential_leak_alert(alert_data):
 - [Bitdefender: Credentials on Pastebin](https://www.bitdefender.com/en-us/blog/hotforsecurity/more-than-300000-user-credentials-posted-on-pastebin-over-the-last-year)
 - [zSecurity: Pastebin Monitoring](https://zsecurity.org/glossary/pastebin-monitoring/)
 - [SecurityBoulevard: Need to Monitor Paste Sites](https://securityboulevard.com/2019/11/orvis-data-leak-and-the-need-to-monitor-paste-sites/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ea0d97711a296e80
+-->
+

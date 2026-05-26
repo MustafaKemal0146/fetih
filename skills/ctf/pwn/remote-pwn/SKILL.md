@@ -15,6 +15,7 @@ category: pwn
 solved_challenges:
   - "corCTF 2023 - smm-diary (QEMU remote)"
   - "Çoğu CTF pwn challenge"
+adapted_for: fetih
 ---
 
 # Remote Pwn — pwntools Remote Şablonu
@@ -361,3 +362,10 @@ pattern = cyclic(200)
 offset = cyclic_find(0x6161616b)   # little-endian 4 byte
 log.info(f"Offset: {offset}")
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 02e38647deb3e4fd
+-->
+

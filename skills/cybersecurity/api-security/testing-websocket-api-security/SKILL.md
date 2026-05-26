@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Testing Websocket Api Security
@@ -449,3 +450,10 @@ and typing indicators for any user who visits the attacker's page.
 4. Implement per-message authorization checks, not just connection-level authentication
 5. Add rate limiting on WebSocket message volume per connection
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a39ad18e33c7a922
+-->
+

@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Managing Intelligence Lifecycle
@@ -135,3 +136,10 @@ Track metrics quarterly: PIR coverage rate, IOC true positive rate, time-to-diss
 - **Tactical-only focus**: Overemphasis on IOC sharing neglects strategic intelligence that informs security investment and risk decisions.
 - **No metrics program**: Cannot demonstrate CTI program value without tracking Tespit contributions, true positive rates, and stakeholder satisfaction.
 - **Underfunded collection**: PIRs cannot be answered without appropriate collection sources; document and escalate gaps rather than producing low-confidence estimates.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 36985d7fbe84b763
+-->
+

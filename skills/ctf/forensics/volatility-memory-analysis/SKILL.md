@@ -24,6 +24,7 @@ solved_challenges:
   - "HTB Cyber Apocalypse 2024 - Oblique Final (hiberfil.sys → volatility3 hibernation plugins)"
   - "HTB University CTF 2024 - Signaling Victorious (DPAPI + Signal config decrypt)"
   - "CyberSpaceCTF 2024 - Memory (WINWORD + AES encrypted PNG, envars)"
+adapted_for: fetih
 ---
 
 # Volatility3 ile Memory Forensics
@@ -328,3 +329,10 @@ vol -f hiberfil.sys windows.cmdline.CmdLine 2>/dev/null | head -100
 - **volatility3 vs volatility2 farkı**: volatility3'te `windows.pslist`, volatility2'de `pslist` (prefix yok). Plugin adları farklı — hangisini kullandığını kontrol et.
 - **lsadump şifreli çıkabilir**: LSA secrets bazı Windows sürümlerinde DPAPI ile ekstra şifreli. Ham hex değerini DPAPI pipeline'a besle.
 - **PID 4 = System**: lsass.exe genellikle PID 600-700 aralığında. `windows.pslist | grep lsass` ile bul.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9c0be64d80494884
+-->
+

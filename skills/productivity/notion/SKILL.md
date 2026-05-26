@@ -11,6 +11,7 @@ metadata:
   fetih:
     tags: [Notion, Productivity, Notes, Database, API, CLI, Workers]
     homepage: https://developers.notion.com
+adapted_for: fetih
 ---
 
 # Notion
@@ -446,3 +447,10 @@ Headings 5/6 collapse to H4. Multiple `>` lines render as separate quote blocks 
 - Always pass `-s` to curl to suppress progress bars (cleaner agent output).
 - Pipe JSON through `jq` when reading: `... | jq '.results[0].properties'`.
 - Notion also ships an MCP server now (`Notion MCP`, ~91% more token-efficient on DB ops than the previous version) — wire it via FETIH' MCP support if you want streaming Notion access from inside a session, but the paths above are enough for most one-shot tasks.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 702f649fcbc59045
+-->
+

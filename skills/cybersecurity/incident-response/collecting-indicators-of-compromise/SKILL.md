@@ -38,6 +38,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Collecting Indicators of Compromise
@@ -274,3 +275,10 @@ Hash     | c3d4e5f6a7b8...         | 100        | Malicious .docm attachment
 
 TOTAL: 14 indicators | HIGH confidence avg: 91
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5fa94d7412896055
+-->
+

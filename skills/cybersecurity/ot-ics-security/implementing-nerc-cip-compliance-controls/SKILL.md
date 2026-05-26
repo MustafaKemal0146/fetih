@@ -36,6 +36,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Implementing Nerc Cip Compliance Controls
@@ -419,3 +420,10 @@ COMPLIANCE STATUS BY STANDARD:
   CIP-010: [Status] - [N] gaps identified
   CIP-013: [Status] - [N] gaps identified
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b9a402fbef95f99a
+-->
+

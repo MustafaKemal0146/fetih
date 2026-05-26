@@ -27,6 +27,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Detection Beaconing Patterns with Zeek
@@ -82,3 +83,10 @@ log_to_df = LogToDataFrame()
 df = log_to_df.create_dataframe('conn.log')
 print(df[['id.orig_h', 'id.resp_h', 'ts', 'duration']].head())
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 97d09b2c074b4633
+-->
+

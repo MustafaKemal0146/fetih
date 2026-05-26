@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing Web Application Penetration Test
@@ -211,3 +212,10 @@ Add authorization middleware that verifies the authenticated user's ID matches
 the order's userId field before returning order data. Implement UUIDs instead
 of sequential integers for order identifiers to prevent enumeration.
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 248aafc0a50079cc
+-->
+

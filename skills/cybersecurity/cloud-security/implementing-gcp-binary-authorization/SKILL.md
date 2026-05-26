@@ -34,6 +34,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Gcp Binary Authorization
@@ -283,3 +284,10 @@ spec:
 - SLSA Framework: https://slsa.dev
 - Sigstore/Cosign for container signing
 - Google Software Supply Chain Security Best Practices
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b3ca60b3eebe6325
+-->
+

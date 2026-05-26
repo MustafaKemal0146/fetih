@@ -27,6 +27,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Detection Supply Chain Attacks in Ci Cd
@@ -80,3 +81,10 @@ for step in job.get("steps", []):
     if "${{" in run_cmd and "github.event" in run_cmd:
         print(f"Script injection risk: {run_cmd[:80]}")
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6dfd23eb5c5d8c7e
+-->
+

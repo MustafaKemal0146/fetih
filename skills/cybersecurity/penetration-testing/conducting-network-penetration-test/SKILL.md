@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Conducting Network Penetration Test
@@ -208,3 +209,10 @@ ultimately accessing the customer database containing 50,000+ records.
 3. Restrict Erişim: the Tomcat Manager interface to authorized management IPs only
 4. Implement network segmentation between web servers and database tier
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 97c9b57ca98cc8fb
+-->
+

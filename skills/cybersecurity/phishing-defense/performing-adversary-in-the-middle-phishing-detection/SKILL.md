@@ -34,6 +34,7 @@ nist_csf:
 - DE.CM-09
 - RS.CO-02
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Performing Adversary in the Middle Phishing Detection
@@ -134,3 +135,10 @@ Adversary-in-the-Middle (AiTM) phishing attacks use reverse-proxy infrastructure
 - SIEM alerts fire on simulated AiTM sign-in patterns
 - Web proxy blocks connections to known PhaaS infrastructure
 - Post-compromise rules tespit etmeinbox rule creation after suspicious auth
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: cbf966a96faa659c
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Extracting Windows Event Logs Artifacts
@@ -318,3 +319,10 @@ Windows Event Log Analysis Summary:
     Hayabusa: /analysis/hayabusa_timeline.csv
     Critical Events: /analysis/critical_events.json
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ccb34a80667cb24c
+-->
+

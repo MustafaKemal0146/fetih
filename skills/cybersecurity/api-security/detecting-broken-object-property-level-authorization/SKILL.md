@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Broken Object Property Level Authorization
@@ -414,3 +415,10 @@ def update_user(user_id, request_data, requesting_user):
 - Wallarm BOPLA Guide: https://lab.wallarm.com/api32023-broken-object-property-level-authorization/
 - API Security News BOPLA: https://apisecurity.io/owasp-api-security-top-10/api3-2023-broken-object-property-level-authorization/
 - CloudDefense BOPLA: https://www.clouddefense.ai/owasp/2023/3
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0f6f47ba4c756842
+-->
+

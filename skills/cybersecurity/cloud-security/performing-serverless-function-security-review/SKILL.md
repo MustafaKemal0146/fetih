@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Serverless Function Security Review
@@ -286,3 +287,10 @@ SUMMARY:
   Functions without VPC:               28 / 34
   Functions with wildcard permissions: 12 / 34
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 757e32f8be67873b
+-->
+

@@ -36,6 +36,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Correlating Threat Campaigns
@@ -170,3 +171,10 @@ Structure the campaign report:
 - **Common malware conflation**: Multiple threat actors use Cobalt Strike. Shared capability does not indicate same actor without additional corroboration.
 - **Premature attribution**: Forcing campaign-to-actor attribution before evidence threshold is reached produces incorrect intelligence that persists in reports.
 - **Missing temporal analysis**: Events from different years may share infrastructure that was recycled by a different actor, not the same campaign.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 35a35a0520fc149b
+-->
+

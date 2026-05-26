@@ -35,6 +35,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-06
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Detection Insider Threat with Ueba
@@ -77,3 +78,10 @@ Combine multiple anomalous indicators (unusual hours + large downloads + new sys
 ## Expected Output
 
 JSON report containing per-user risk scores, anomalous activity details, peer group deviations, and recommended investigation actions.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d2ff68e924ee4eb3
+-->
+

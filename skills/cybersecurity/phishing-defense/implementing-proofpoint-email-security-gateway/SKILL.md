@@ -34,6 +34,7 @@ nist_csf:
 - DE.CM-09
 - RS.CO-02
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Proofpoint Email Security Gateway
@@ -139,3 +140,10 @@ Proofpoint Email Protection is a cloud-native secure email gateway (SEG) that ac
 - TRAP successfully retracts test phishing message from inboxes post-delivery
 - False positive rate below 0.1% after initial tuning period
 - DMARC/SPF/DKIM authentication passes for all legitimate outbound mail
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5e66940274241cbd
+-->
+

@@ -37,6 +37,7 @@ nist_csf:
 - GV.SC-03
 - GV.SC-06
 - GV.SC-07
+adapted_for: fetih
 ---
 
 # Analyzing Sbom for Supply Chain Vulnerabilities
@@ -297,3 +298,10 @@ LICENSE COMPLIANCE
 - NVD API rate limits can slow analysis scanning yaparken hundreds of components without an API key
 - CPE names in SBOMs may not exactly match NVD entries, requiring fuzzy matching
 - Transitive dependencies may include log4j even when it is not a direct dependency
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f4c94ffc8803b794
+-->
+

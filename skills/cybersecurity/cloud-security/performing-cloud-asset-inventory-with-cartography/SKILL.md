@@ -34,6 +34,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Cloud Asset Inventory with Cartography
@@ -256,3 +257,10 @@ volumes:
 - Cartography Documentation: https://cartography.dev
 - CNCF Sandbox Project
 - Neo4j Cypher Query Language Reference
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e534853abdd58236
+-->
+

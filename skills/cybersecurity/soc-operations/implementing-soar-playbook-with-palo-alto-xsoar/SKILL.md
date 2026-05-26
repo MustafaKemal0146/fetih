@@ -38,6 +38,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Implementing Soar Playbook with Palo Alto Xsoar
@@ -351,3 +352,10 @@ calculate_risk_score()
 - [From Zero to Process to XSOAR Playbook](https://live.paloaltonetworks.com/t5/community-blogs/from-zero-to-process-to-xsoar-playbook/ba-p/564568)
 - [XSOAR Common Playbooks Pack](https://www.paloaltonetworks.com/blog/security-operations/playbook-of-the-week-xsoar-common-playbook/)
 - [Cortex XSOAR Product Page](https://www.paloaltonetworks.com/cortex/cortex-xsoar)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4dd74df16f0f38bc
+-->
+

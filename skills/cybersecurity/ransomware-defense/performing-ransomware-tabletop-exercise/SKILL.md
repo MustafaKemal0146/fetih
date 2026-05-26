@@ -33,6 +33,7 @@ nist_csf:
 - RS.MA-01
 - RC.RP-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Performing Ransomware Tabletop Exercise
@@ -246,3 +247,10 @@ Produce an after-action report (AAR) within 5 business days:
 | Area | Previous Score | Current Score | Trend |
 |------|---------------|--------------|-------|
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9466f80a6018f98a
+-->
+

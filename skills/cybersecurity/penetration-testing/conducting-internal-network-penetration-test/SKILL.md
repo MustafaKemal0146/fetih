@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Conducting Internal Network Penetration Test
@@ -266,3 +267,10 @@ Attack Path 1: Domain Compromise via LLMNR Poisoning
 - PTES: http://www.pentest-standard.org/
 - Impacket: https://github.com/fortra/impacket
 - BloodHound: https://github.com/BloodHoundAD/BloodHound
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0efb2d65b4b800af
+-->
+

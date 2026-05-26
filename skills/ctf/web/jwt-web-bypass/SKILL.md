@@ -16,6 +16,7 @@ category: web
 solved_challenges:
   - "HTB Cyber Apocalypse 2024 - LockTalk (HAProxy + CVE-2022-39227)"
   - "LINE CTF 2024 - jalyboy baby (alg:none Spring)"
+adapted_for: fetih
 ---
 
 # JWT Web Bypass
@@ -330,3 +331,10 @@ if __name__ == "__main__":
 - **Signature zorunlu:** RS256 kullanılıyorsa public key'i private key olarak verme saldırısını (alg confusion: RS256→HS256) dene.
 - **Token expire oluyor:** `"exp"` claim'ini `9999999999` gibi uzak bir tarihe ayarla.
 - **Burp ile debug:** `SESSION.proxies = {"http": "http://127.0.0.1:8080"}` satırını aktif bırak, her isteği Burp'te gör.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3b45f2127fdc9705
+-->
+

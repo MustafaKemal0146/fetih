@@ -31,6 +31,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Cloud Native Forensics with Falco
@@ -83,3 +84,10 @@ Key Tespit rules:
 falco -r /etc/falco/custom_rules.yaml -o json_output=true
 cat /var/log/falco/alerts.json | python3 -c "import json,sys; [print(json.loads(l)['output']) for l in sys.stdin]"
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6b5db7dfb7a4bc27
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Subdomain Enumeration with SubBul:er
@@ -184,3 +185,10 @@ subBul:er -d example.com -silent | httpx -silent | gowitness file -f - -P screen
 - Araştır: subdomains with CNAME pointing to unclaimed services
 - Restrict Erişim: development and staging environments
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 89bdf8f6ece876c9
+-->
+

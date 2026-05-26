@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Threat Intelligence Lifecycle Management
@@ -397,3 +398,10 @@ disseminator = IntelligenceDisseminator()
 - [MISP Project](https://www.misp-project.org/)
 - [STIX/TAXII Documentation](https://oasis-open.github.io/cti-documentation/)
 - [CISA Known Exploited Vulnerabilities](https://www.cisa.gov/known-exploited-vulnerabilities-catalog)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6bbae21c4d12e86c
+-->
+

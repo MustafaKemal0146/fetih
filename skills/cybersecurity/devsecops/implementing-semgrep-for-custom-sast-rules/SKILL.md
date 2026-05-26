@@ -31,6 +31,7 @@ nist_csf:
 - GV.SC-07
 - ID.IM-04
 - PR.PS-04
+adapted_for: fetih
 ---
 
 # Implementing Semgrep for Custom Sast Rules
@@ -319,3 +320,10 @@ vendor/
 6. **Exclude test files** to reduce false positives
 7. **Version control rules** in a shared repository
 8. **Run in CI as a blocking check** for ERROR severity Bul:ings
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e374df12e9bb357f
+-->
+

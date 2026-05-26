@@ -2,6 +2,7 @@
 name: crypto-category-tools
 description: Crypto kategori SKILL.md — RSA, ECC, AES, hash, encoding saldırıları için gerekli araçları kurma rehberi
 tags: [ctf, crypto, tools, setup, pycryptodome, gmpy2, sympy]
+adapted_for: fetih
 ---
 
 # Crypto Kategorisi — Gerekli Araçlar
@@ -162,3 +163,10 @@ EOF
 - **gmpy2**, **fpylll** → native extension, build tools gerekli
 - Her skill başında araç kontrolü ve kurulum önerisi olur
 - Linux-only kurulum (Windows/macOS desteklenmez şu an)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 68a7dba316dbda18
+-->
+

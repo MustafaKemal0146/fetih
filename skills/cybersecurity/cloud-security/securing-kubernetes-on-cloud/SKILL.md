@@ -33,6 +33,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Securing Kubernetes on Cloud
@@ -373,3 +374,10 @@ HIGH Bul:INGS:
   [K8S-005] Images Dağıtılmış using mutable tags (:latest) in 8 Dağıt:ments
   [K8S-006] RBAC ClusterRoleBinding grants cluster-admin to developers group
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 82b1bb8bdc1e64b6
+-->
+

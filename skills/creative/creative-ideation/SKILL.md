@@ -11,6 +11,7 @@ metadata:
     tags: [Creative, Ideation, Projects, Brainstorming, Inspiration]
     category: creative
     requires_toolsets: []
+adapted_for: fetih
 ---
 
 # Creative Ideation
@@ -150,3 +151,10 @@ After the user picks one, start building — create the project, write the code,
 ## Attribution
 
 Constraint approach inspired by [wttdotm.com/prompts.html](https://wttdotm.com/prompts.html). Adapted and expanded for software development and general-purpose ideation.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 73770b59d13c169b
+-->
+

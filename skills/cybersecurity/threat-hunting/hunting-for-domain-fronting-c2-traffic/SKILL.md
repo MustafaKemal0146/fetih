@@ -32,6 +32,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Domain Fronting C2 Traffic
@@ -69,3 +70,10 @@ Domain fronting (MITRE ATT&CK T1090.004) is a technique where attackers use diff
 ## Expected Output
 
 JSON report containing Detected domain fronting indicators with SNI-Host pairs, certificate details, CDN provider identification, confidence scores, and MITRE ATT&CK technique mapping.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: bd862f61f9f099b6
+-->
+

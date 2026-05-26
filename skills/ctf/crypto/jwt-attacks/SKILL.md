@@ -18,6 +18,7 @@ solved_challenges:
   - "WolvCTF 2024 - Username (hashcat brute)"
   - "HTB Cyber Apocalypse 2024 - LockTalk (CVE-2022-39227)"
   - "LINE CTF 2024 - jalyboy baby (alg:none)"
+adapted_for: fetih
 ---
 
 # JWT Saldırıları
@@ -511,3 +512,10 @@ Bazı kütüphaneler JSON serialize ederken key sırasına duyarlıdır. İmza d
 | python-jwt < 3.3.4 | CVE-2022-39227 |
 | RS256, public key biliniyor | HS256'ya geç, public key ile imzala |
 | `kid` parametresi var | SQL injection / path traversal |
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 71edbdf1130f6f32
+-->
+

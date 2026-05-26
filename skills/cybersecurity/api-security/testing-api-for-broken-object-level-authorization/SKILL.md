@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Testing Api for Broken Object Level Authorization
@@ -374,3 +375,10 @@ enumeration trivial.
 4. Add authorization tests to the CI/CD pipeline for every endpoint that accepts object IDs
 5. Implement rate limiting per user to slow enumeration attempts
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a626c6cc762fd82c
+-->
+

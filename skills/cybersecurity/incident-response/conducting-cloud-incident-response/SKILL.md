@@ -37,6 +37,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Conducting Cloud Incident Response
@@ -294,3 +295,10 @@ POST-INCIDENT HARDENING
 3. SCP preventing CloudTrail disablement Dağıtılmış
 4. GuardDuty auto-remediation Lambda configured
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2c10c1a236a313e5
+-->
+

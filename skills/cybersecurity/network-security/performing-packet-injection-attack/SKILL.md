@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Performing Packet Injection Attack
@@ -303,3 +304,10 @@ EOF
 1. Land attack (src==dst) not Detected -- add rule SID 2100333
 2. TCP RST injection not Detected -- create custom rule for out-of-window RST
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2d0ed33c3b293e6f
+-->
+

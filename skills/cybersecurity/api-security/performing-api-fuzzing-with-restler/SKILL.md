@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Api Fuzzing with Restler
@@ -352,3 +353,10 @@ EOF
 - Uncovered: POST /admin/migrate, DELETE /admin/cache,
   PUT /config/advanced, POST /webhooks/test
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 829029979704e53f
+-->
+

@@ -31,6 +31,7 @@ related_skills:
   - jwt-web-bypass
   - sqli-exploitation
   - ssrf-ssti-chain
+adapted_for: fetih
 ---
 
 # HTTP Request Smuggling — Frontend ve Backend'in Aynı Mesajı Farklı Okuması
@@ -400,3 +401,10 @@ git clone https://github.com/anshumanpattnaik/http-request-smuggling
 - "HTTP Desync Attacks" James Kettle (Black Hat 2019)
 - "HTTP/2: The Sequel is Always Worse" (Defcon 30)
 - albinowax/active-scan++ — Burp extension
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ad5f5a97c76b3df3
+-->
+

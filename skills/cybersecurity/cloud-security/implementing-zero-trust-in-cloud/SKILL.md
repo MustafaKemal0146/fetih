@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Zero Trust in Cloud
@@ -316,3 +317,10 @@ RECOMMENDATIONS:
   3. [MEDIUM] Expand micro-segmentation to remaining 35% of workloads
   4. [MEDIUM] Dağıt: service mesh for east-west mTLS encryption
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 88954c63a2ef8b6e
+-->
+

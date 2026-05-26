@@ -32,6 +32,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Analyzing Network Packets with Scapy
@@ -69,3 +70,10 @@ Scapy is a Python packet manipulation library that enables crafting, sending, sn
 ## Expected Output
 
 JSON report containing packet statistics, protocol distribution, top source/destination IPs, Detected anomalies (SYN floods, DNS tunneling indicators, fragmentation attacks), and per-flow summaries.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 525089d7cffd768e
+-->
+

@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-01
 - PR.PS-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Performing Firmware Extraction with Binwalk
@@ -247,3 +248,10 @@ SECURITY Bul:INGS
 [MEDIUM]   Dropbear SSH 2014.63 (CVE-2016-3116)
 [LOW]      UPnP service enabled by default
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6b4870822b791b27
+-->
+

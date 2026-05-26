@@ -35,6 +35,7 @@ nist_csf:
 - RS.MA-01
 - RC.RP-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Dağıt:ing Ransomware Canary Files
@@ -107,3 +108,10 @@ SHA-256 After: 7e91...2d3f
 Alert Channels: [email, slack, syslog]
 Action: Araştır: immediately - potential ransomware activity
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: bd9852babe4e4e05
+-->
+

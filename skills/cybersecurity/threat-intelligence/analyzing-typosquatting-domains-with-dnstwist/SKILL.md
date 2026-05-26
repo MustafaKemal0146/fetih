@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Analyzing Typosquatting Domains with Dnstwist
@@ -332,3 +333,10 @@ generate_takedown_report(analysis["high"])
 - [Darktrace: Monitoring Typosquatting Domains](https://www.darktrace.com/blog/vigilance-in-action-monitoring-typosquatting-domains)
 - [Security Risk Advisors: Domain Monitoring](https://sra.io/blog/domain-monitoring-fast-and-cheap/)
 - [Conscia: How to tespit etmeTyposquatting](https://conscia.com/blog/diving-deep-how-to-Detect-typosquatting/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b8d2a2c75bc7a965
+-->
+

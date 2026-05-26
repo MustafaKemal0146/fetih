@@ -35,6 +35,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Performing Ioc Enrichment Automation
@@ -435,3 +436,10 @@ IP: 45.33.32[.]156
   GreyNoise:    benign — Shodan scanner
   Action:       No action required (known scanner)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2a65d9fee98ff7b7
+-->
+

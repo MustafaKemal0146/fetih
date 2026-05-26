@@ -468,3 +468,10 @@ Exploitation:
 6. Contribute to security community
 
 Always prioritize responsible disclosure, ethics, and professionalism in bug bounty hunting.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 865ede330d733609
+-->
+

@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Shadow It Cloud Usage
@@ -70,3 +71,10 @@ Shadow IT refers to unauthorized SaaS applications and cloud services used witho
 
 - JSON report listing discovered cloud services with traffic volumes, user counts, risk scores, and approval status
 - Top unauthorized services ranked by data exfiltration risk
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: fa8a705bf593fdf5
+-->
+

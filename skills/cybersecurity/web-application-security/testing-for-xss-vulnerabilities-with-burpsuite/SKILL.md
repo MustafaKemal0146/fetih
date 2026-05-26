@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Testing for Xss Vulnerabilities with Burpsuite
@@ -256,3 +257,10 @@ A WAF blocks common XSS patterns and CSP restricts inline scripts. Discover a JS
 4. Set HttpOnly and Secure flags on session cookies
 5. Add X-Content-Type-Options: nosniff header
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7eb5467aceb880b7
+-->
+

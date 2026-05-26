@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Conducting Domain Persistence with Dcsync
@@ -212,3 +213,10 @@ DCSync is an attack technique that abuses the Microsoft Directory Replication Se
 - [ ] Erişim: Domain Controller validated with Golden Ticket
 - [ ] Evidence documented with hash values and timestamps
 - [ ] Remediation recommendations provided (double KRBTGT reset, ACL audit)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 32f282346bd701bf
+-->
+

@@ -31,6 +31,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Building Red Team C2 Infrastructure with Havoc
@@ -287,3 +288,10 @@ demon> rportfwd start 8080 TARGET_INTERNAL 80
 - Havoc Wiki: https://github.com/HavocFramework/Havoc/blob/main/WIKI.MD
 - RedTeamOps Havoc 101: https://github.com/WesleyWong420/RedTeamOps-Havoc-101
 - Dağıt:ing Havoc C2 via Terraform: https://www.100daysofredteam.com/p/red-team-infrastructure-Dağıt:ing-havoc-c2-via-terraform
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ea3f53ff78acd078
+-->
+

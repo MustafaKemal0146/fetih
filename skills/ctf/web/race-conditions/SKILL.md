@@ -29,6 +29,7 @@ related_skills:
   - sqli-exploitation
   - jwt-web-bypass
   - prototype-pollution
+adapted_for: fetih
 ---
 
 # Race Condition Exploitation — TOCTOU, Single-Packet ve Limit Overrun
@@ -354,3 +355,10 @@ async def main():
 
 asyncio.run(main())
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5a56ed06dcca427a
+-->
+

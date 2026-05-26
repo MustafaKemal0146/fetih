@@ -36,6 +36,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Securing Historian Server in Ot Environment
@@ -372,3 +373,10 @@ DMZ REPLICATION:
   Method: [PI-to-PI / Data Diode / VPN]
   Direction: [Unidirectional / Bidirectional]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 938d806938f4525b
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Performing Service Account Audit
@@ -139,3 +140,10 @@ Audit service accounts across enterprise infrastructure to identify orphaned, ov
 - [ ] Orphaned accounts flagged for remediation
 - [ ] gMSA migration candidates identified
 - [ ] Compliance report generated
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4ee7610936a76e91
+-->
+

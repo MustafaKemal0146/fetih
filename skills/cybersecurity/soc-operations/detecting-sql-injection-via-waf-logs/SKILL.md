@@ -30,6 +30,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Detection Sql Injection via Waf Logs
@@ -73,3 +74,10 @@ URI: /api/users?id=1' UNION SELECT username,password FROM users--
 Source IP: 203.0.113.42 (47 requests in 5 minutes)
 Classification: UNION-based SQLi campaign
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6a880a16ebf7a257
+-->
+

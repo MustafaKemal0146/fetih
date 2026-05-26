@@ -32,6 +32,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Kubernetes Cis Benchmark with Kube Bench
@@ -222,3 +223,10 @@ kubectl get clusterroles -o json | jq '.items[] | select(.rules[].resources[] ==
 5. **Use benchmark profiles** matching your Kubernetes distribution
 6. **Track score over time** to measure security posture improvement
 7. **Combine with admission controllers** to prevent drift
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 99c9190ed31ccd91
+-->
+

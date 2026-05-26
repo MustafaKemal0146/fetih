@@ -31,6 +31,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Performing False Positive Reduction in Siem
@@ -220,3 +221,10 @@ earliest=-24h
 - [ConnectWise - 9 Ways to Eliminate SIEM False Positives](https://www.connectwise.com/blog/9-ways-to-eliminate-siem-false-positives)
 - [Prophet Security - Alert Tuning Best Practices](https://www.prophetsecurity.ai/blog/security-operations-center-soc-best-practices-alert-tuning)
 - [ManageEngine - Reducing SIEM Alert False Positives](https://www.manageengine.com/log-management/siem/reducing-siem-alert-false-positives.html)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a8ced7bc03331ef0
+-->
+

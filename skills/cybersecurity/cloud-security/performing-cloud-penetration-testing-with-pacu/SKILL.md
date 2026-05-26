@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Cloud Penetration Testing with Pacu
@@ -253,3 +254,10 @@ RECOMMENDATIONS:
   3. Reduce SOC response time to < 15 minutes for IAM escalation alerts
   4. Implement SCP blocking iam:CreatePolicyVersion in non-admin OUs
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6ef6e1c6c5679a47
+-->
+

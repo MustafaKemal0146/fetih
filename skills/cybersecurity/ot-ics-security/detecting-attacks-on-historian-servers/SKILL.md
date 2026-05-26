@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Detection Attacks on Historian Servers
@@ -298,3 +299,10 @@ LATERAL MOVEMENT INDICATORS:
   Unauthorized Processes: [found/not found]
   Anomalous Authentication: [found/not found]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1ccc59d8df4e0259
+-->
+

@@ -34,6 +34,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Performing Purple Team Exercise
@@ -306,3 +307,10 @@ DETAILED RESULTS:
 POST-EXERCISE COVERAGE: 93% (14/15) — up from 73% at start
 REMAINING GAP: T1486 requires EDR file monitoring enhancement
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1db95df7cc1e5d22
+-->
+

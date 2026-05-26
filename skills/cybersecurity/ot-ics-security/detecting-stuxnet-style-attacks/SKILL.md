@@ -36,6 +36,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Detection Stuxnet Style Attacks
@@ -495,3 +496,10 @@ ENGINEERING WORKSTATION:
   Unauthorized modifications: [N]
   USB connections: [N]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a53a328b6178d678
+-->
+

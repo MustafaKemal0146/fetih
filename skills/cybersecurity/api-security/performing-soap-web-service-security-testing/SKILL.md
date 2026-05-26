@@ -35,6 +35,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Soap Web Service Security Testing
@@ -465,3 +466,10 @@ if __name__ == "__main__":
 - Levo.ai SOAP API Security Testing Guide: https://www.levo.ai/resources/blogs/soap-api-security-testing
 - SoapUI Web Service Hacking: https://www.soapui.org/docs/soap-and-wsdl/tips-and-tricks/web-service-hacking/
 - PortSwigger XXE Tutorial: https://portswigger.net/web-security/xxe
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6c1d3d79e38ce2f8
+-->
+

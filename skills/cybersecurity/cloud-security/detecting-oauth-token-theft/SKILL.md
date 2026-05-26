@@ -36,6 +36,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Oauth Token Theft
@@ -279,3 +280,10 @@ Policy: "Alert on mass file download (exfiltration via stolen token)"
 - [ ] Device code flow is restricted via conditional access (block or require compliant device)
 - [ ] Incident response runbook includes token revocation, password reset, and OAuth consent review steps
 - [ ] Mail forwarding rules and OAuth app grants are audited for compromised accounts
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 37346d63db4073ee
+-->
+

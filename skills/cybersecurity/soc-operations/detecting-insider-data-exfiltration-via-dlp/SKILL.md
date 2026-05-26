@@ -31,6 +31,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Detection Insider Data Exfiltration via Dlp
@@ -80,3 +81,10 @@ df["hour"] = df["timestamp"].dt.hour
 off_hours = df[(df["hour"] < 6) | (df["hour"] > 22)]
 suspicious = off_hours.groupby("user").size().sort_values(ascending=False)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 099567cd4248336e
+-->
+

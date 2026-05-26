@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.PS-01
 - PR.PS-02
+adapted_for: fetih
 ---
 
 # Analyzing Uefi Bootkit Persistence
@@ -321,3 +322,10 @@ REMEDIATION
 7. Reimport only trusted certificates into Secure Boot db
 8. Monitor MeasuredBoot logs for anomalous boot component loading
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 716a2e3e787087ad
+-->
+

@@ -30,6 +30,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Performing Entitlement Review with Sailpoint Iiq
@@ -465,3 +466,10 @@ SIGN-OFF
 Campaign Signed:        2026-02-14 by compliance-admin
 Audit Evidence:         Exported to /reports/Q1-2026-cert-evidence.pdf
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 8bdb08e69eb7999e
+-->
+

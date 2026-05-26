@@ -36,6 +36,7 @@ triggers:
   - "AI CTF"
   - "adversarial ML"
   - "llm attacks"
+adapted_for: fetih
 ---
 
 # CTF Master Solver — Ana Orkestratör
@@ -570,3 +571,10 @@ fetih download-tools network     # Network tarama (nmap, masscan, dnsenum, subfi
 | **rev** | gdb, radare2, ghidra, angr, z3, pwntools, ropper |
 | **osint** | sherlock, maigret, subfinder, amass, assetfinder, waybackurls, gau |
 | **network** | nmap, masscan, arp-scan, dnsenum, rustscan, fierce, subfinder, amass |
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 49e359470100edd6
+-->
+

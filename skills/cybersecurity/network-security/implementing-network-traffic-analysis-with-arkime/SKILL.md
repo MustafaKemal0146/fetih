@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Implementing Network Traffic Analysis with Arkime
@@ -74,3 +75,10 @@ Sessions: 288 over 24 hours
 Avg interval: 300s, Jitter: 4.2%
 Verdict: HIGH confidence C2 beaconing (jitter < 5%)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 72c1a8170c3685e2
+-->
+

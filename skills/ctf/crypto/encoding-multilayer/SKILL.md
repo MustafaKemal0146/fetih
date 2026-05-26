@@ -16,6 +16,7 @@ category: crypto
 solved_challenges:
   - "picoCTF çeşitli encoding challenge'ları"
   - "HTB Cyber Apocalypse 2024 - Dynastic (index-based shift)"
+adapted_for: fetih
 ---
 
 # Çok Katmanlı Encoding Çözücü
@@ -609,3 +610,10 @@ https://gchq.github.io/CyberChef/#recipe=Magic(3,false,false,'')
 ```
 
 "Depth" değerini artır (3 → 5 → 7) derin zincirleri çözmek için.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4b680d9cfb40723c
+-->
+

@@ -31,6 +31,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Defense Evasion via Timestomping
@@ -339,3 +340,10 @@ generate_report(stomped_files, "D:\\Evidence\\timestomping_report.json")
 - Verify ShimCache and Amcache timestamps provide independent corroboration of timeline inconsistencies
 - Test against known-clean system images to establish a false-positive baseline (some backup/imaging software legitimately resets timestamps)
 - Confirm the Tespit pipeline correctly handles deleted MFT entries (InUse=false) which may contain evidence of timestomped files that were later removed
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3aebf250882e2206
+-->
+

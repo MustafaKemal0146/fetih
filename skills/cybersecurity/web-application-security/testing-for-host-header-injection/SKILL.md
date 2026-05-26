@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Testing for Host Header Injection
@@ -195,3 +196,10 @@ curl -H "Host: management.internal" http://target.com/
 - Configure web server to reject requests with unrecognized Host values
 - Set absolute URLs in application configuration instead of deriving from Host
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9bc35a62b0129506
+-->
+

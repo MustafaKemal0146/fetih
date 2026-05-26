@@ -33,6 +33,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Auditing Kubernetes Cluster Rbac
@@ -311,3 +312,10 @@ SUMMARY:
   Pods with auto-mounted tokens: 45 / 67
   Privileged containers: 8
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: cef8609d398f9051
+-->
+

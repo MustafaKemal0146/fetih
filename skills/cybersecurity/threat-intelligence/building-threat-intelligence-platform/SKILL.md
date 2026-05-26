@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Building Threat Intelligence Platform
@@ -330,3 +331,10 @@ class TIPMetrics:
 - [TheHive Project](https://thehive-project.org/)
 - [Cortex Documentation](https://github.com/TheHive-Project/Cortex)
 - [MISP-OpenCTI Integration](https://docs.opencti.io/latest/Dağıt:ment/connectors/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9357b01f8de9fda5
+-->
+

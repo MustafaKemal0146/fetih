@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Implementing Network Traffic Baselining
@@ -67,3 +68,10 @@ Network traffic baselining establishes normal communication patterns by analyzin
 ## Expected Output
 
 JSON report containing traffic baselines (hourly/daily profiles), per-host statistics, Detected anomalies with z-scores, and top talker rankings with deviation indicators.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 63d2fb4364ba8e8f
+-->
+

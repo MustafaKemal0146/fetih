@@ -33,6 +33,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Lolbins Execution in Endpoint Logs
@@ -181,3 +182,10 @@ Tespit Category: [download_cradle/proxy_exec/uac_bypass/applocker_bypass]
 Network Activity: [Yes/No -- destination if applicable]
 Risk Level: [Critical/High/Medium/Low]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 945ca3a50e19a70a
+-->
+

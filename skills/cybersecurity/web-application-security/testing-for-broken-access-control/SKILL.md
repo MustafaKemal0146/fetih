@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Testing for Broken Access Control
@@ -322,3 +323,10 @@ The user profile update endpoint at `PUT /api/users/{id}` accepts a `role` field
 5. Use allowlists for mass assignment (only permit expected fields)
 6. Implement audit logging for all access control decisions
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 41994452727f5d2f
+-->
+

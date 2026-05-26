@@ -34,6 +34,7 @@ nist_csf:
 - RS.MA-01
 - RC.RP-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Implementing Ransomware Backup Strategy
@@ -262,3 +263,10 @@ Document restore test results and maintain a recovery runbook with step-by-step 
 | 2 | 200 | 4hr | 12hr | 4hr inc/Daily full | Monthly |
 | 3 | 250 | 24hr | 48hr | Daily inc/Weekly full | Quarterly |
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4e51f53eabd4f0cf
+-->
+

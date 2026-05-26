@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Stix Taxii Feed Integration
@@ -305,3 +306,10 @@ def push_to_taxii(server_url, collection_id, stix_bundle, user, password):
 - [stix2 Python Library](https://stix2.readthedocs.io/)
 - [MITRE ATT&CK TAXII Server](https://cti-taxii.mitre.org/taxii2/)
 - [Medallion TAXII Server](https://github.com/oasis-open/cti-taxii-server)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 51a56ab73ee071b1
+-->
+

@@ -28,6 +28,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Analyzing Tls Certificate Transparency Logs
@@ -79,3 +80,10 @@ certs = c.search("%.example.com")
 for cert in certs:
     print(f"Issuer: {cert.get('issuer_name')}, Domain: {cert.get('name_value')}")
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 21cbf7ea56fd7ec0
+-->
+

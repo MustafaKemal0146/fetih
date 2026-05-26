@@ -10,6 +10,7 @@ metadata:
     tags: [fetih, setup, configuration, multi-agent, spawning, cli, gateway, development]
     homepage: https://github.com/MustafaKemal0146/fetih
     related_skills: [claude-code, codex, opencode]
+adapted_for: fetih
 ---
 
 # FETIH
@@ -1011,3 +1012,10 @@ Types: `fix:`, `feat:`, `refactor:`, `docs:`, `chore:`
 - Use `get_fetih_home()` from `fetih_constants` for all paths (profile-safe)
 - Config values go in `config.yaml`, secrets go in `.env`
 - New tools need a `check_fn` so they only appear when requirements are met
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1d28bdf50ecfe287
+-->
+

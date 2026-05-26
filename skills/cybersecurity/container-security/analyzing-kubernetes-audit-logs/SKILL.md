@@ -27,6 +27,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Analyzing Kubernetes Audit Logs
@@ -77,3 +78,10 @@ Key events to Detect:
 if verb in ("get", "list") and resource == "secrets":
     print(f"Secret access: {user} -> {event['objectRef'].get('name')}")
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: aeccc63d93accc9e
+-->
+

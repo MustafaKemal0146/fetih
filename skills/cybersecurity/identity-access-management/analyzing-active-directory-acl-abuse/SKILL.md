@@ -27,6 +27,7 @@ nist_csf:
 - PR.AA-01
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Analyzing Active Directory Acl Abuse
@@ -93,3 +94,10 @@ bu skill uses the ldap3 Python library to connect to a Domain Controller, query 
   ]
 }
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 08534be30540fc6c
+-->
+

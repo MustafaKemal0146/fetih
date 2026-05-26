@@ -34,6 +34,7 @@ nist_csf:
 - DE.CM-09
 - RS.CO-02
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Analyzing Malicious Url with Urlscan
@@ -119,3 +120,10 @@ Use the `scripts/process.py` to automate URL scanning, extract IOCs, and cross-r
 - Document complete redirect chain
 - Generate IOC list from scan results
 - Cross-reference Bul:ings with at least 2 threat intelligence sources
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 984115b0d331411b
+-->
+

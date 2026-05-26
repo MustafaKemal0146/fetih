@@ -38,6 +38,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Conducting Phishing Incident Response
@@ -260,3 +261,10 @@ RECOMMENDATIONS
 3. Send targeted awareness notification to all 47 recipients
 4. Request domain takedown via registrar abuse contact
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 8f988d383cd1fbc2
+-->
+

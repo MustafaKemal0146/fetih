@@ -34,6 +34,7 @@ nist_csf:
 - RS.MA-01
 - RC.RP-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Implementing Honeypot for Ransomware Detection
@@ -343,3 +344,10 @@ def send_ransomware_alert(source_ip: str, canary_path: str, action: str):
 | Test Date | Test Type | Canary Triggered | Alert Received | Containment Executed | Time to Alert |
 |-----------|----------|-----------------|----------------|---------------------|---------------|
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7300e71f8c23f010
+-->
+

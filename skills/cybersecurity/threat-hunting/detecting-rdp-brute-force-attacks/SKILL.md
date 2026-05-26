@@ -33,6 +33,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-06
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Detection Rdp Brute Force Attacks
@@ -85,3 +86,10 @@ JSON report containing:
 - Targeted usernames and failure sub-status codes
 - Successful logons following brute force attempts (potential compromises)
 - Time-series analysis of attack intensity
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a1876820c3791729
+-->
+

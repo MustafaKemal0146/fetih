@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Auditing Gcp Iam Permissions
@@ -307,3 +308,10 @@ RECOMMENDER SUGGESTIONS:
   Priority HIGH:                     12
   Estimated permissions reduced:     2,847 individual permissions
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9afe202875d57905
+-->
+

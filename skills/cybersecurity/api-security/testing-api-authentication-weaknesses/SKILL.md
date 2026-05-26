@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Testing Api Authentication Weaknesses
@@ -432,3 +433,10 @@ and the 7-day expiration means stolen tokens remain valid for extended periods.
 4. Reduce token TTL to 15 minutes with refresh token rotation
 5. Add `iss` and `aud` claims validation to prevent token misuse across services
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: df9aee40cc91626e
+-->
+

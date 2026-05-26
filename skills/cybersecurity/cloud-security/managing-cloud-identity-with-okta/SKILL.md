@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Managing Cloud Identity with Okta
@@ -275,3 +276,10 @@ RECOMMENDATIONS:
   [HIGH] Remediate 3 orphan cloud accounts not managed by Okta
   [MEDIUM] Reduce session duration for admin roles from 8h to 4h
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 8171737c05825d2f
+-->
+

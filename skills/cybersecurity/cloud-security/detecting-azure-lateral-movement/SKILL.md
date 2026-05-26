@@ -34,6 +34,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Azure Lateral Movement
@@ -90,3 +91,10 @@ Create Sentinel playbooks (Logic Apps) to automatically revoke suspicious OAuth 
 ## Expected Output
 
 JSON report containing Detected lateral movement indicators, correlated event chains, affected identities, and recommended containment actions with MITRE ATT&CK technique mappings.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4b1fc89448cc68ba
+-->
+

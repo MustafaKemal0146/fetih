@@ -32,6 +32,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for T1098 Account Manipulation
@@ -73,3 +74,10 @@ Cross-reference account changes with authentication events to identify initial c
 ## Expected Output
 
 JSON report with Detected account manipulation events, privileged group changes, shadow admin indicators, and timeline correlation.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b3035cca26f19d76
+-->
+

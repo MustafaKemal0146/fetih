@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Api Security Posture Management
@@ -419,3 +420,10 @@ policies:
 - StackHawk Best ASPM Tools: https://www.stackhawk.com/blog/best-aspm-tools/
 - AppSentinels API Security Posture Management: https://appsentinels.ai/blog/api-security-posture-management-from-reactive-protection-to-continuous-governance/
 - Palo Alto Networks ASPM: https://www.paloaltonetworks.com/cyberpedia/aspm-application-security-posture-management
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5d75aebb1e4f8ad8
+-->
+

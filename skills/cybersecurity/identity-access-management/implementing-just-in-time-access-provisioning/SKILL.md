@@ -31,6 +31,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Implementing Just in Time Access Provisioning
@@ -137,3 +138,10 @@ Implement Just-In-Time (JIT) access provisioning to eliminate standing privilege
 - [ ] All JIT events logged to SIEM
 - [ ] Standing privileges reduced by measurable percentage
 - [ ] Mean time to access meets business SLA
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 62f47cf6862e1193
+-->
+

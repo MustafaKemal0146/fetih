@@ -34,6 +34,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Configuring Multi Factor Authentication with Duo
@@ -162,3 +163,10 @@ Dağıt: Cisco Duo multi-factor authentication across enterprise applications, V
 - [ ] Authentication logs forwarded to SIEM
 - [ ] Bypass/emergency access procedures tested
 - [ ] MFA fatigue Tespit alerts configured
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1ab4ac98bb041179
+-->
+

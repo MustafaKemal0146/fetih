@@ -39,6 +39,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Performing Windows Artifact Analysis with Eric Zimmerman Tools
@@ -268,3 +269,10 @@ All EZ Tools produce CSV output that can be:
 - SANS EZ Tools Training: https://www.sans.org/tools/ez-tools
 - SANS FOR508: Advanced Incident Response and Threat Hunting
 - SANS FOR498: Battlefield Forensics & Data Acquisition
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1ade99d0a05c6cae
+-->
+

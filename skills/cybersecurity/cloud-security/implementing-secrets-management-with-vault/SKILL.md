@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Secrets Management with Vault
@@ -327,3 +328,10 @@ CREDENTIAL HYGIENE:
   Average Lease TTL: 2.3 hours
   Secrets Rotated This Month: 12,456
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 10b555b08c1bec9a
+-->
+

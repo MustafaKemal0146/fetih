@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Cloud Threats with Guardduty
@@ -288,3 +289,10 @@ STATISTICS:
   Auto-Remediated: 4
   Pending Investigation: 2
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2599072a94e53cb0
+-->
+

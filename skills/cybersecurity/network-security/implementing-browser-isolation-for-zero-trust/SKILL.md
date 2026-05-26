@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Implementing Browser Isolation for Zero Trust
@@ -364,3 +365,10 @@ print(f"Threats neutralized: {report['cdr_stats']['threats_neutralized']}")
 print(f"DLP violations blocked: {report['dlp_violations_blocked']}")
 print(f"Zero-day attacks prevented: {report['zero_day_blocked']}")
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2e20bee07d54ce30
+-->
+

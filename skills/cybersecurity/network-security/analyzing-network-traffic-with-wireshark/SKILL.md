@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Analyzing Network Traffic with Wireshark
@@ -209,3 +210,10 @@ sha256sum capture.pcapng > capture_hash.txt
 - Query pattern: TXT record requests with base64-encoded subdomains
 - Response pattern: TXT records containing base64-encoded payloads
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4ec5f2480acd5d79
+-->
+

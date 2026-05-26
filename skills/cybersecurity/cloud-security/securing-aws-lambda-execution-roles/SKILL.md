@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Securing Aws Lambda Execution Roles
@@ -368,3 +369,10 @@ POLICY VALIDATION RESULTS:
   Policies with errors:              0
   Policies with suggestions:        12
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: cfcf61f7201a83ff
+-->
+

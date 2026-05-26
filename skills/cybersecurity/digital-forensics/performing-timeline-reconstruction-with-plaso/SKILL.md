@@ -32,6 +32,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Performing Timeline Reconstruction with Plaso
@@ -309,3 +310,10 @@ Timeline Reconstruction Summary:
     Incident Window:   /timeline/incident_window.csv (234K rows)
     Timesketch Import: /timeline/timeline.jsonl
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 11351876488e4254
+-->
+

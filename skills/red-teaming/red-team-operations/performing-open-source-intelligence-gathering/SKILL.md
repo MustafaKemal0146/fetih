@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing Open Source Intelligence Gathering
@@ -148,3 +149,10 @@ Open Source Intelligence (OSINT) gathering is the first active phase of a red te
 - [ ] Credential leak assessment completed
 - [ ] Attack surface map documented
 - [ ] OSINT report compiled for engagement team
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6238d8afb2a933c7
+-->
+

@@ -37,6 +37,7 @@ nist_csf:
 - GV.SC-03
 - GV.SC-06
 - GV.SC-07
+adapted_for: fetih
 ---
 
 # Implementing Sigstore for Software Signing
@@ -177,3 +178,10 @@ Embed signing and verification into build and Dağıt:ment pipelines:
 
 **Policy Check**: Image signed by authorized CI workflow identity
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d05bd7f81b0d1f63
+-->
+

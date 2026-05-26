@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Configuring Network Segmentation with Vlans
@@ -408,3 +409,10 @@ show ip access-lists
 | Unused Ports Shutdown | 10 ports in VLAN 999 |
 | VTP Transparent Mode | Enabled |
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 8cbd94737e9b113a
+-->
+

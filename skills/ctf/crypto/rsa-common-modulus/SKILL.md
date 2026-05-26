@@ -14,6 +14,7 @@ category: crypto
 solved_challenges:
   - "CryptoCTF 2021 - DoRSA (continued fraction variant)"
   - "CryptoHack - Everything is Big"
+adapted_for: fetih
 ---
 
 # RSA Common Modulus Saldırısı
@@ -365,3 +366,10 @@ def quick_common_modulus(n, e1, e2, c1, c2):
 # flag = quick_common_modulus(n, e1, e2, c1, c2)
 # print(flag.decode())
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d49661272a2194a5
+-->
+

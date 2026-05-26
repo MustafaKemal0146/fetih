@@ -35,6 +35,7 @@ nist_csf:
 - PR.AA-05
 - PR.IR-01
 - GV.PO-01
+adapted_for: fetih
 ---
 
 # Dağıt:ing Tailscale for Zero Trust Vpn
@@ -383,3 +384,10 @@ tailscale up --authkey=$TS_AUTHKEY --hostname=ci-runner-$CI_JOB_ID
 - [Headscale - Open Source Control Server](https://github.com/juanfont/headscale)
 - [WireGuard Protocol](https://www.wireguard.com/protocol/)
 - [Tailscale SSH](https://tailscale.com/kb/1193/tailscale-ssh/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e4fd6b767f57a192
+-->
+

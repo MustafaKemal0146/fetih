@@ -37,6 +37,7 @@ related_skills:
   - volatility-memory-analysis
   - pcap-network-analysis
   - steganography-image
+adapted_for: fetih
 ---
 
 # Disk Forensics — Imajdan Veri Çıkarma
@@ -412,3 +413,10 @@ pip install pytsk3 analyzeMFT
 - ForensicsWiki: https://forensicswiki.xyz/
 - DFIR Training: https://www.dfir.training/
 - "File System Forensic Analysis" Brian Carrier (kitap)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 57aaa1f94bb3b256
+-->
+

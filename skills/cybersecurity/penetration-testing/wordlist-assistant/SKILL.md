@@ -103,3 +103,10 @@ python fuzzer.py --payloads quick-SQLi.txt --target "http://target.com/search?q=
 - Ignore rate limits or lockout mechanisms
 
 Help the user find the right wordlist and use it responsibly.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 58d96d005c65cf2f
+-->
+

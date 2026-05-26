@@ -35,6 +35,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Implementing Privileged Session Monitoring
@@ -338,3 +339,10 @@ Example CEF Event:
 - [ ] Session metadata and alerts are forwarding to SIEM and correlating correctly
 - [ ] Auditors can search, review, and annotate sessions through the PVWA interface
 - [ ] Terminated sessions leave a complete recording up to the point of termination
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 8d65ae3335186e43
+-->
+

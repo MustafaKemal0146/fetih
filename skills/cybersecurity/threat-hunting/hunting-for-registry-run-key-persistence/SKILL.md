@@ -30,6 +30,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Registry Run Key Persistence
@@ -71,3 +72,10 @@ Registry Run keys (T1547.001) are one of the most commonly used persistence mech
 ## Expected Output
 
 A JSON report listing suspicious Run key entries with the registry path, value written, modifying process, timestamp, MITRE technique mapping, severity rating, and recommended Sigma Tespit rules.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 926bd5616eab981b
+-->
+

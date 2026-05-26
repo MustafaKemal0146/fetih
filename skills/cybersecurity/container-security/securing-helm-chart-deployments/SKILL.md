@@ -31,6 +31,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Securing Helm Chart Dağıt:ments
@@ -278,3 +279,10 @@ jobs:
 8. **Lint strictly** in CI with `--strict` flag
 9. **Review third-party charts** before Dağıt:ing to production
 10. **Use Helm test hooks** to validate Dağıt:ments post-install
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 75d73540ab7c758e
+-->
+

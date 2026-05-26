@@ -33,6 +33,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Performing Oauth Scope Minimization Review
@@ -626,3 +627,10 @@ Priority 4 (Next Quarter): 31 stale grant revocations
 
 Estimated Scope Reduction:  34% of total permissions
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 52a0a16a9867483b
+-->
+

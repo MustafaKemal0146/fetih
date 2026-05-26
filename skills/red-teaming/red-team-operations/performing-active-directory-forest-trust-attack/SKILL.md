@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing Active Directory Forest Trust Attack
@@ -74,3 +75,10 @@ Active Directory forest trusts enable authentication across organizational bound
 
 - JSON report listing all trust relationships, SID filtering status, foreign principals, trust direction/transitivity, and risk assessment
 - Cross-forest attack path analysis with remediation recommendations
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2c5831cbce68232d
+-->
+

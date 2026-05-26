@@ -9,6 +9,7 @@ metadata:
   fetih:
     tags: [debugging, python, pdb, debugpy, breakpoints, dap, post-mortem]
     related_skills: [systematic-debugging, node-inspect-debugger, debugging-fetih-tui-commands]
+adapted_for: fetih
 ---
 
 # Python Debugger (pdb + debugpy)
@@ -373,3 +374,10 @@ Trigger the handler. `nc 127.0.0.1 4444`, then `w` to see the suspended frame, `
 PYTHONFAULTHANDLER=1 python -m pdb -c continue path/to/entrypoint.py
 # On crash, pdb lands at the frame of the exception with full locals
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 00cbbd3ffd4c20de
+-->
+

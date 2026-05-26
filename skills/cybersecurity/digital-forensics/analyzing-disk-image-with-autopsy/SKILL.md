@@ -32,6 +32,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Disk Image with Autopsy
@@ -240,3 +241,10 @@ Autopsy Case Analysis Summary:
   Timeline Events:  1,234,567 entries (filtered to incident window: 892)
   Report:          /cases/case-2024-001/reports/autopsy_report.html
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 08260fa484de23cf
+-->
+

@@ -26,6 +26,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Syslog Centralization with Rsyslog
@@ -79,3 +80,10 @@ action(type="omfwd" target="10.0.0.1" port="6514" protocol="tcp"
        queue.maxdiskspace="1g" queue.saveonshutdown="on"
        action.resumeRetryCount="-1")
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 98640f162e68c74c
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Analyzing Campaign Attribution Evidence
@@ -250,3 +251,10 @@ def generate_attribution_report(analyzer):
 - [MITRE ATT&CK Groups](https://attack.mitre.org/groups/)
 - [Analysis of Competing Hypotheses](https://www.cia.gov/static/9a5f1162fd0932c29e985f0159f56c07/Tradecraft-Primer-apr09.pdf)
 - [Threat Attribution Framework](https://www.mandiant.com/resources/reports)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a11156e5a22a9eca
+-->
+

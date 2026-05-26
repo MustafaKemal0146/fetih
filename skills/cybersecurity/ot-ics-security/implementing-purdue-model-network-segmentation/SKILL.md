@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Implementing Purdue Model Network Segmentation
@@ -451,3 +452,10 @@ DMZ COMPONENTS:
 FIREWALL RULES: [count] rules generated
 MIGRATION STEPS: [count] phases planned
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e575e82214fd4d9d
+-->
+

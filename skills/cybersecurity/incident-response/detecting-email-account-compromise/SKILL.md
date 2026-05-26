@@ -39,6 +39,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Detection Email Account Compromise
@@ -79,3 +80,10 @@ Email account compromise (EAC) is a prevalent attack vector where adversaries ga
 ## Expected Output
 
 A JSON report listing compromised or suspicious accounts, malicious inbox rules Detected, impossible travel events, suspicious OAuth grants, and recommended containment actions with severity ratings.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a22f9842d4720b4b
+-->
+

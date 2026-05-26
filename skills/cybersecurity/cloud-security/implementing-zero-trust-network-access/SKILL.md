@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Zero Trust Network Access
@@ -349,3 +350,10 @@ MIGRATION STATUS:
   Phase 3 (high-risk apps):     0/6  in progress
   VPN decommission:            Scheduled after Phase 3
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 62ba8de3c8bf8643
+-->
+

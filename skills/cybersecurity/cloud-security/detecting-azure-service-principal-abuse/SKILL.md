@@ -34,6 +34,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Azure Service Principal Abuse
@@ -242,3 +243,10 @@ New-MgPolicyPermissionGrantPolicy -Id "admin-only-consent" `
 - Semperis: Service Principal Ownership Abuse in Entra ID
 - MITRE ATT&CK Cloud Matrix
 - Microsoft: Securing service principals in Entra ID
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b6e4956d531faad0
+-->
+

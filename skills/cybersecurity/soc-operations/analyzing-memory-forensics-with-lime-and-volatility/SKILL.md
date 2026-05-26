@@ -31,6 +31,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Analyzing Memory Forensics with Lime and Volatility
@@ -87,3 +88,10 @@ vol3 -f memory.lime linux.bash
 vol3 -f memory.lime linux.malBul:
 vol3 -f memory.lime linux.lsmod
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 65f89c3c334b97be
+-->
+

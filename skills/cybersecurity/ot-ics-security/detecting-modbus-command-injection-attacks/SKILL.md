@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Detection Modbus Command Injection Attacks
@@ -513,3 +514,10 @@ RECOMMENDED ACTIONS:
   2. Block unauthorized sources at industrial firewall
   3. Validate PLC register values against known-good state
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 89805e83ad4d1e40
+-->
+

@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Conducting Internal Reconnaissance with Bloodhound Ce
@@ -200,3 +201,10 @@ BloodHound Community Edition (CE) is a modern, web-based Active Directory reconn
 - [ ] Custom Cypher queries executed for advanced analysis
 - [ ] Attack paths prioritized by feasibility and stealth
 - [ ] Report generated with all identified paths and evidence
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2142da9779947b87
+-->
+

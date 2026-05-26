@@ -15,6 +15,7 @@ category: web
 solved_challenges:
   - "Real World CTF 2024 - Chatterbox (Java Spring deserialization chain)"
   - "çeşitli CTF pickle RCE"
+adapted_for: fetih
 ---
 
 # Insecure Deserialization
@@ -524,3 +525,10 @@ if __name__ == "__main__":
 - **Java JRMPClient (out-of-band):** Direkt RCE chain işlemiyorsa `JRMPClient` ile önce JRMP listener'a callback al, sonra oradan payload gönder.
 - **Deserialization yeri:** Cookie, body, upload, query param — hepsini kontrol et. Özellikle `viewstate` (ASP.NET), `session` cookie, `__pickle__` parametrelerine dikkat.
 - **Burp Deserialization Scanner:** Burp Pro kullanıyorsan Deserialization Scanner extension'ı yükle, otomatik Java chain deneme yapar.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f52e07e28403e316
+-->
+

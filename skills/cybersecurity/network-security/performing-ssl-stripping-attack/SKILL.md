@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Performing Ssl Stripping Attack
@@ -224,3 +225,10 @@ ping -c 1 192.168.1.1
 3. Add Content-Security-Policy: upgrade-insecure-requests header
 4. Implement certificate transparency monitoring for the domain
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c536e8497e761cc3
+-->
+

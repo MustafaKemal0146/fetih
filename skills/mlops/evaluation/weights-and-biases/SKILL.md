@@ -10,6 +10,7 @@ metadata:
   fetih:
     tags: [MLOps, Weights And Biases, WandB, Experiment Tracking, Hyperparameter Tuning, Model Registry, Collaboration, Real-Time Visualization, PyTorch, TensorFlow, HuggingFace]
 
+adapted_for: fetih
 ---
 
 # Weights & Biases: ML Experiment Tracking & MLOps
@@ -591,4 +592,9 @@ print(f"Share this URL: {run.url}")
 - `references/artifacts.md` - Data and model versioning patterns
 - `references/integrations.md` - Framework-specific examples
 
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f66521d60019b331
+-->
 

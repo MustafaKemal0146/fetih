@@ -26,6 +26,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Container Network Policies with Calico
@@ -67,3 +68,10 @@ Test connectivity between pods to verify policies are correctly enforced.
 ## Expected Output
 
 JSON audit report listing all network policies, unprotected namespaces, policy rule counts, and connectivity test results.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 60292091daa88320
+-->
+

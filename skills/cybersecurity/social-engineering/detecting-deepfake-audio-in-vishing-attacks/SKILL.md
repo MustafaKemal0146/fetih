@@ -31,6 +31,7 @@ nist_csf:
 - PR.AT-01
 - DE.CM-09
 - RS.CO-02
+adapted_for: fetih
 ---
 
 # Detection Deepfake Audio in Vishing Attacks
@@ -233,3 +234,10 @@ file with chain of custody documentation for potential legal action.
 - Background noise from the call environment can reduce classification accuracy
 - Highly sophisticated voice cloning (e.g., fine-tuned VALL-E with 30+ minutes of training data) may evade basic feature analysis
 - Genuine speech transmitted through VoIP may exhibit spectral artifacts similar to deepfakes
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 36bae85ac0588c39
+-->
+

@@ -35,6 +35,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Windows Amcache Artifacts
@@ -225,3 +226,10 @@ Combine Amcache data with other artifacts for a comprehensive timeline:
 - [ ] LinkDate vs. FileKeyLastWriteTimestamp comparison has been performed to tespit etmetimestomping
 - [ ] Amcache Bul:ings are correlated with Prefetch and ShimCache for execution confirmation
 - [ ] Final timeline integrates Amcache data with other forensic artifacts
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4c704505f26409aa
+-->
+

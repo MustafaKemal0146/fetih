@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Gcp Security Assessment with Forseti
@@ -269,3 +270,10 @@ TOP REMEDIATION PRIORITIES:
   3. Rotate 18 service account keys older than 90 days (HIGH)
   4. Enable VPC flow logs on 22 subnets (MEDIUM)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4e13705cb9d7a4cf
+-->
+

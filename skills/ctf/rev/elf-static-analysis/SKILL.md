@@ -16,6 +16,7 @@ category: rev
 solved_challenges:
   - "HTB Cyber Apocalypse 2024 - PackedAway (UPX detect + strings)"
   - "LACTF 2024 - glottem (polyglot POSIX/Node.js)"
+adapted_for: fetih
 ---
 
 # ELF Binary Statik Analiz
@@ -268,3 +269,10 @@ echo "Sonraki adım: Ghidra veya objdump -d için yukarıdaki cheat sheet'e bak"
 - **Constraint/validator** → bkz. z3-constraint-solving SKILL.md
 - Binary çalışmıyorsa: doğru mimariye bak (ARM? MIPS?), `qemu-user-static` dene
 - `strings -n 6` ile minimum uzunluğu artır (kısa sahte stringleri filtreler)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 79bbc85129defcb9
+-->
+

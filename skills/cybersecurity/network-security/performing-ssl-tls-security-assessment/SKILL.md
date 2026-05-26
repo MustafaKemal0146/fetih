@@ -33,6 +33,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Performing Ssl Tls Security Assessment
@@ -73,3 +74,10 @@ Produce a JSON report with compliance Bul:ings and remediation recommendations.
 ## Expected Output
 
 JSON report with supported protocols, accepted cipher suites, certificate details, vulnerability results (Heartbleed, ROBOT), and HSTS status.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e22dccf23026a5bd
+-->
+

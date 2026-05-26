@@ -33,6 +33,7 @@ nist_csf:
 - PR.AA-05
 - ID.RA-01
 - DE.CM-09
+adapted_for: fetih
 ---
 
 # Testing Android Intents for Vulnerabilities
@@ -174,3 +175,10 @@ run app.service.send com.target.app com.target.app.MessengerService \
 - **Permission-protected components**: An exported component may still require a permission. Test with and without the required permission.
 - **Implicit intents vs explicit**: Only implicit intents (action-based) are interceptable by other apps. Explicit intents (specifying target) are secure.
 - **Custom permissions**: Apps can define custom permissions with different protection levels (normal, dangerous, signature). Signature-level permissions are only grantable to apps signed with the same certificate.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d16bd53498fadbc0
+-->
+

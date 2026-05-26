@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Graphql Depth Limit Attack
@@ -426,3 +427,10 @@ GRAPHQL_CONFIG = {
 - GraphQL.org Security: https://graphql.org/learn/security/
 - Escape.tech Cyclic Queries: https://escape.tech/blog/cyclic-queries-and-depth-limit/
 - PortSwigger GraphQL Vulnerabilities: https://portswigger.net/web-security/graphql
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3636891c174c9262
+-->
+

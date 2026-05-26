@@ -32,6 +32,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Siem Use Case Tuning
@@ -69,3 +70,10 @@ SIEM use case tuning reduces alert fatigue by systematically analyzing Tespit ru
 ## Expected Output
 
 JSON report with per-rule tuning recommendations including current FP rate, suggested threshold adjustments, whitelist entries, and projected alert reduction percentages.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 56965b68570c7d6a
+-->
+

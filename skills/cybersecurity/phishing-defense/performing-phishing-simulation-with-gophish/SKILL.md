@@ -34,6 +34,7 @@ nist_csf:
 - DE.CM-09
 - RS.CO-02
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Performing Phishing Simulation with Gophish
@@ -126,3 +127,10 @@ Use the automation script to pull campaign data via GoPhish API and generate det
 - Capture simulated credentials on landing page
 - Generate campaign report with open/click/submit rates
 - Redirect users to awareness training after interaction
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a6d75524e3973db9
+-->
+

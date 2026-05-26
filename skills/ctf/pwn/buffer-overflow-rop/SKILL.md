@@ -22,6 +22,7 @@ solved_challenges:
   - "picoCTF 2024 - ROPfu"
   - "picoCTF 2024 - handoff"
   - "DEF CON CTF Qualifier 2023 - IFUCKUP"
+adapted_for: fetih
 ---
 
 # Buffer Overflow + ROP Chain
@@ -224,3 +225,10 @@ io.interactive()
 - **b'\x0a' (newline) sorunları:** sendline ekstra `\n` ekler; sendafter/send kullan, sonra elle `\n` gönder
 - **Canary var sanmak:** libc leak olmadan canary'yi bypass edemezsin; önce `checksec` çalıştır
 - **32-bit `ret` hizalama:** 32-bit'te hizalama sorunu yok; ekstra `ret` ekleme
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a64ecdeda5e76b0c
+-->
+

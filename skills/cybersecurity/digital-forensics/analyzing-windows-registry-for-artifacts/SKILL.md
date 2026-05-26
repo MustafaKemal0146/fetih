@@ -32,6 +32,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Windows Registry for Artifacts
@@ -279,3 +280,10 @@ Registry Analysis Summary:
   Installed Software:     127 applications
   Suspicious Bul:ings:    3 items flagged for review
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 26c4f578f3725581
+-->
+

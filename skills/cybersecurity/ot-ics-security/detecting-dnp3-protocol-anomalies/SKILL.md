@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Detection Dnp3 Protocol Anomalies
@@ -360,3 +361,10 @@ RECOMMENDATIONS:
   2. Block unauthorized sources at firewall
   3. Enable DNP3 DPI on industrial firewall
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b2676a83402b2498
+-->
+

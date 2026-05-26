@@ -30,6 +30,7 @@ nist_csf:
 - GV.SC-07
 - ID.IM-04
 - PR.PS-04
+adapted_for: fetih
 ---
 
 # Securing Github Actions Workflows
@@ -240,3 +241,10 @@ SECRETS:
 
 SCORE: 6/10 (Remediate 5 HIGH Bul:ings)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b52e92bb1d84ec49
+-->
+

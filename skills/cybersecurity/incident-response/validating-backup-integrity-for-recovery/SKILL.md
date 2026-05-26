@@ -32,6 +32,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Validating Backup Integrity for Recovery
@@ -172,3 +173,10 @@ python agent.py --entropy-scan /restore-test
 - NIST CSF 2.0 RC.RP-03: Backup Integrity Verification
 - CIS Controls v8: Control 11 - Data Recovery
 - CISA Ransomware Guide: https://www.cisa.gov/stopransomware
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2f39e98afa20f592
+-->
+

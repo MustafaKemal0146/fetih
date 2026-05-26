@@ -33,6 +33,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection S3 Data Exfiltration Attempts
@@ -331,3 +332,10 @@ CONTAINMENT ACTIONS:
   [x] Bucket policy restricting to VPC-only access
   [x] TruffleHog scan initiated on developer repositories
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a44dc1f0fca475a2
+-->
+

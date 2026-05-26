@@ -32,6 +32,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Detection T1548 Abuse Elevation Control Mechanism
@@ -142,3 +143,10 @@ User Context: [Account]
 Risk Level: [Critical/High/Medium]
 ATT&CK Technique: [T1548.00x]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: fc9e4cf689a72635
+-->
+

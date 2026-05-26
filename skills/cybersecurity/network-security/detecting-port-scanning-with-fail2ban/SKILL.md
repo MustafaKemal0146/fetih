@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Detection Port Scanning with Fail2ban
@@ -346,3 +347,10 @@ sudo netfilter-persistent save
 | 198.51.100.23 | http-scan | 8 | 02:30 | 18:22 |
 | 203.0.113.100 | sshd | 6 | 05:12 | 21:33 |
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0eae07166c9003d5
+-->
+

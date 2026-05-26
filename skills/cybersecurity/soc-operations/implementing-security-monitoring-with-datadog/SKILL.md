@@ -37,6 +37,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Security Monitoring with Datadog
@@ -399,3 +400,10 @@ with ApiClient(configuration) as api_client:
 - [ ] Notification workflows deliver alerts to Slack, PagerDuty, or Jira for critical and high signals
 - [ ] Suppression queries are configured to reduce false positives on noisy rules
 - [ ] Security Signals API returns results programmatically for automation integration
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9e33b74b69c7a014
+-->
+

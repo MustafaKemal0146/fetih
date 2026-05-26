@@ -30,6 +30,7 @@ related_skills:
   - ret2libc
   - seccomp-sandbox-escape
   - remote-pwn
+adapted_for: fetih
 ---
 
 # SROP — Sigreturn Oriented Programming
@@ -294,3 +295,10 @@ Binary BOF var → checksec
               ├── SECCOMP → seccomp-sandbox-escape skill
               └── heap challenge → heap-exploit skill
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0d537dca41f6af6a
+-->
+

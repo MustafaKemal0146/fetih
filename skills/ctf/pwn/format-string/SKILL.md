@@ -15,6 +15,7 @@ category: pwn
 solved_challenges:
   - "Google CTF 2023 - write-flag-where (CTF bytes as ROP)"
   - "picoCTF format string serisi"
+adapted_for: fetih
 ---
 
 # Format String Exploitation
@@ -288,3 +289,10 @@ payload = fmtstr_payload(OFFSET, writes, write_size="short")  # daha kısa
 ```python
 io.recvuntil(b">>> ", timeout=3)   # timeout ile bekle
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b8048e49b62456aa
+-->
+

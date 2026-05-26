@@ -35,6 +35,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Implementing Ticketing System for Incidents
@@ -434,3 +435,10 @@ Metrics:
   Time to Resolve:     3 hours 37 minutes
   SLA Status:          MET (within 4-hour resolution target)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: cd4b1c7ac91b4a7b
+-->
+

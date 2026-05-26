@@ -33,6 +33,7 @@ nist_csf:
 - GV.SC-07
 - ID.IM-04
 - PR.PS-04
+adapted_for: fetih
 ---
 
 # Integrating Sast Into Github Actions Pipeline
@@ -330,3 +331,10 @@ QUALITY GATE: FAILED
 
 Action Required: Fix blocking Bul:ings before merge is permitted.
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 95d92b84bdab185c
+-->
+

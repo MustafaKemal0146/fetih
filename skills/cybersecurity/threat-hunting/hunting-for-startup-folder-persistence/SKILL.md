@@ -33,6 +33,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Startup Folder Persistence
@@ -70,3 +71,10 @@ Attackers use Windows startup folders for persistence (MITRE ATT&CK T1547.001 �
 
 - JSON report listing all startup folder contents with risk scores, file metadata, and suspicious indicators
 - Real-time monitoring alerts for new file creation in startup directories
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 879003b3ef51041d
+-->
+

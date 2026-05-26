@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Building Cloud Siem with Sentinel
@@ -313,3 +314,10 @@ AUTOMATION:
   Incidents Auto-Enriched: 198
   False Positive Rate: 12%
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 14c1da5be004dcb1
+-->
+

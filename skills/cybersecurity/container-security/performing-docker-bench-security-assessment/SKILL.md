@@ -30,6 +30,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Docker Bench Security Assessment
@@ -141,3 +142,10 @@ docker run --rm docker/docker-bench-security 2>&1 | grep -c "WARN"
 - [Docker Bench Security](https://github.com/docker/docker-bench-security)
 - [CIS Docker Benchmark](https://www.cisecurity.org/benchmark/docker)
 - [Docker Security Best Practices](https://docs.docker.com/engine/security/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5432c1074892a301
+-->
+

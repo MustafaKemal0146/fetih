@@ -9,6 +9,7 @@ metadata:
   fetih:
     tags: [jupyter, notebook, repl, data-science, exploration, iterative]
     category: data-science
+adapted_for: fetih
 ---
 
 # Jupyter Live Kernel (hamelnb)
@@ -165,3 +166,10 @@ uv run "$SCRIPT" restart-run-all --path <notebook.ipynb> --save-outputs --compac
 The script has a 30-second default timeout per execution. For long-running
 operations, pass `--timeout 120`. Use generous timeouts (60+) for initial
 setup or heavy computation.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f715842d8e2fe436
+-->
+

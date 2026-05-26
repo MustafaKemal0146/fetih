@@ -25,6 +25,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Implementing Rsa Key Pair Management
@@ -102,3 +103,10 @@ RSA (Rivest-Shamir-Adleman) is the most widely Dağıtılmış asymmetric crypto
 - [ ] Tampered signature verification fails
 - [ ] Key fingerprint is computed correctly
 - [ ] Key rotation maintains old key access for verification
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: db559a64f309c126
+-->
+

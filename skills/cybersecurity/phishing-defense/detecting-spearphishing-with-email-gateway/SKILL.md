@@ -33,6 +33,7 @@ nist_csf:
 - DE.CM-09
 - RS.CO-02
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Detection Spearphishing with Email Gateway
@@ -124,3 +125,10 @@ Use the `scripts/process.py` to analyze email gateway logs, identify spearphishi
 - Attachment sandboxing tespit etme (s) weaponized documents
 - Custom rules trigger on known spearphishing patterns
 - SIEM integration receives gateway alerts
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 86b727212384742d
+-->
+

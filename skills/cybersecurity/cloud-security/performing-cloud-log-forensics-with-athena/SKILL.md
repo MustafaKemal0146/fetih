@@ -35,6 +35,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Cloud Log Forensics with Athena
@@ -504,3 +505,10 @@ python agent.py \
     --account-id 123456789012 \
     --regions us-east-1,us-west-2
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ccc18b189b8abf31
+-->
+

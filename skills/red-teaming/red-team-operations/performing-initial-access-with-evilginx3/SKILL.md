@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing Initial Access with Evilginx3
@@ -189,3 +190,10 @@ EvilGinx3 is a man-in-the-middle attack framework used for phishing login creden
 - [ ] Session hijack demonstrated in browser with stolen cookies
 - [ ] Post-authentication Erişim: target service confirmed
 - [ ] Evidence documented with screenshots and session logs
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 22b6de127ca0dbd9
+-->
+

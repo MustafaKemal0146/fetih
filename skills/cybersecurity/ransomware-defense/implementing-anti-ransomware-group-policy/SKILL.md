@@ -34,6 +34,7 @@ nist_csf:
 - RS.MA-01
 - RC.RP-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Implementing Anti Ransomware Group Policy
@@ -220,3 +221,10 @@ Get-MpPreference | Select-Object -ExpandProperty AttackSurfaceReductionRules_Act
 - **Microsoft Defender Exploit Guard**: Suite including CFA, ASR rules, and Network Protection
 - **GPResult**: Command-line tool for verifying GPO application status on endpoints
 - **PowerShell Get-MpPreference**: Cmdlet for querying Microsoft Defender configuration including ASR and CFA status
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 71cccaf30dedea1c
+-->
+

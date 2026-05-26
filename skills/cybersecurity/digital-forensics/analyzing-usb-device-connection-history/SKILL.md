@@ -32,6 +32,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Usb Device Connection History
@@ -356,3 +357,10 @@ USB Device History Analysis:
 
   Timeline: /cases/case-2024-001/analysis/usb_timeline.csv
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0d47d10a95ba0604
+-->
+

@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Configuring Pfsense Firewall Rules
@@ -332,3 +333,10 @@ Enable automatic backups to Netgate cloud or local storage
 - VPN: OpenVPN remote access configured with MFA
 - Logging: All traffic forwarded to SIEM (10.10.20.15)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c0016b7c5aab517e
+-->
+

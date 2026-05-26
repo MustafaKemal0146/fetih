@@ -29,6 +29,7 @@ nist_csf:
 - GV.SC-07
 - ID.IM-04
 - PR.PS-04
+adapted_for: fetih
 ---
 
 # Implementing Aqua Security for Container Scanning
@@ -251,3 +252,10 @@ trivy sbom sbom-cyclonedx.json
 - [Trivy Operator for Kubernetes](https://aquasecurity.github.io/trivy-operator/)
 - [Aqua Security Platform](https://www.aquasec.com/products/)
 - [CycloneDX SBOM Specification](https://cyclonedx.org/specification/overview/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: acf42e484f7359c2
+-->
+

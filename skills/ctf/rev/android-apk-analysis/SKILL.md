@@ -30,6 +30,7 @@ related_skills:
   - elf-static-analysis
   - z3-constraint-solving
   - anti-debug-obfuscation
+adapted_for: fetih
 ---
 
 # Android APK Reverse Engineering — Statik + Dinamik
@@ -456,3 +457,10 @@ APK challenge → unzip + apktool
 - Frida codeshare: https://codeshare.frida.re/
 - "Android Hacker's Handbook" (kitap)
 - HackTricks Android: https://book.hacktricks.xyz/mobile-pentesting/android-app-pentesting
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4aaa5ad6a47fb09a
+-->
+

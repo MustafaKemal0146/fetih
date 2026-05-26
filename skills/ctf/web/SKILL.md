@@ -2,6 +2,7 @@
 name: web-category-tools
 description: Web kategorisi SKILL.md — SQLi, XSS, SSRF tarayıcı ve exploit araçları kurma rehberi
 tags: [ctf, web, tools, setup, sqlmap, ffuf, nuclei, nikto]
+adapted_for: fetih
 ---
 
 # Web Kategorisi — Gerekli Araçlar
@@ -301,3 +302,10 @@ EOF
 - **Python library'ler** (`httpx`, `aiohttp`) → custom exploit yazarken
 
 Her skill başında hangi araçlar gerekli gösterilecek!
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: fbac740fdfb703de
+-->
+

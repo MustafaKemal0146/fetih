@@ -32,6 +32,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Performing Steganography Detection
@@ -322,3 +323,10 @@ Steganalysis Summary:
 
   Report: /cases/case-2024-001/analysis/steg_report.json
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1a55a150d51856c8
+-->
+

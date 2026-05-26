@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Shadow Api Endpoints
@@ -376,3 +377,10 @@ plugins:
 - Checkmarx Shadow and Zombie APIs: https://checkmarx.com/learn/api-security/shadow-zombie-apis-undocumented-api-vulnerabilities-threaten-security-posture/
 - Treblle Shadow API Tools: https://treblle.com/blog/top-tools-for-Tespit etme-shadow-apis-and-how-treblle-differs
 - SecureLayer7 Shadow APIs: https://blog.securelayer7.net/shadow-apis-explained-risks-Tespit-and-prevention/
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b7b8d2085748b441
+-->
+

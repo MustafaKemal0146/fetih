@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Api Abuse Detection with Rate Limiting
@@ -399,3 +400,10 @@ Content-Type: application/json
 - API7.ai Rate Limiting Algorithms Guide: https://api7.ai/blog/rate-limiting-guide-algorithms-best-practices
 - Redis Rate Limiting: https://redis.io/glossary/rate-limiting/
 - Rakuten SixthSense API Rate Limiting: https://sixthsense.rakuten.com/blog/API-Rate-Limiting-A-Critical-Layer-for-API-Protection
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 93ddc2bf33537933
+-->
+

@@ -26,6 +26,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Implementing Digital Signatures with Ed25519
@@ -97,3 +98,10 @@ Ed25519 is a high-performance digital signature algorithm using the Edwards curv
 - [ ] Deterministic: same input produces same signature
 - [ ] File signing and verification works correctly
 - [ ] Performance meets or exceeds RSA-3072
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a62f7c1d10d6e903
+-->
+

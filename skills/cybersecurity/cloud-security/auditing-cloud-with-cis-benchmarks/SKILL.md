@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Auditing Cloud with Cis Benchmarks
@@ -254,3 +255,10 @@ REMEDIATION PRIORITY:
   Medium (Fix within 60 days):   CloudWatch alarms, security group restrictions
   Low (Fix within 90 days):      Level 2 controls, informational items
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4ecef680213032ba
+-->
+

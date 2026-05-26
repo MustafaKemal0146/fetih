@@ -37,6 +37,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Building Incident Response Playbook
@@ -276,3 +277,10 @@ Target MTTA: 15 minutes
 Target MTTC: 1 hour
 Target MTTR: 4 hours
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 421d43eb441df9d7
+-->
+

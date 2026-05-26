@@ -32,6 +32,7 @@ nist_csf:
 - DE.CM-09
 - RS.CO-02
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Performing Dmarc Policy Enforcement Rollout
@@ -141,3 +142,10 @@ v=DMARC1; p=quarantine; pct=25; rua=mailto:dmarc-agg@company.com; ruf=mailto:dma
 - Spoofed messages from unauthorized senders are rejected
 - No legitimate mail blocked after full p=reject enforcement
 - Subdomain policy (sp=) also set to reject
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 273d6b04c981e06e
+-->
+

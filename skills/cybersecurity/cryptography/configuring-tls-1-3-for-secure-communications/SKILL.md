@@ -29,6 +29,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Configuring Tls 1 3 for Secure Communications
@@ -116,3 +117,10 @@ TLS 1.3 (RFC 8446) is the latest version of the Transport Layer Security protoco
 - [ ] OCSP stapling is functional
 - [ ] Certificate chain is valid and complete
 - [ ] testssl.sh reports no vulnerabilities
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 46af48dc238791d0
+-->
+

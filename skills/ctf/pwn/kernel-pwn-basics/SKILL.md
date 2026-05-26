@@ -34,6 +34,7 @@ related_skills:
   - ret2libc
   - heap-exploit
   - srop-attack
+adapted_for: fetih
 ---
 
 # Linux Kernel Pwn — Temeller ve LPE Yolu
@@ -433,3 +434,10 @@ Kernel challenge → mitigation tespit
 - pawnyable.cafe kernel pwn: https://pawnyable.cafe/
 - ctf-wiki kernel pwn: https://ctf-wiki.org/en/pwn/linux/kernel-mode/
 - "A Bug Hunter's Diary" (Linux kernel bölümleri)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ce5526ea7d360e29
+-->
+

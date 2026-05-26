@@ -34,6 +34,7 @@ nist_csf:
 - PR.AA-05
 - PR.IR-01
 - GV.PO-01
+adapted_for: fetih
 ---
 
 # Configuring Identity Aware Proxy with Google Iap
@@ -358,3 +359,10 @@ ACCESS LOGS (last 24h):
   Denied by access level:   55
   Unique users:            134
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6c98fe9d319e38b8
+-->
+

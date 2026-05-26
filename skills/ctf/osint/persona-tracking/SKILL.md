@@ -16,6 +16,7 @@ difficulty: medium
 category: osint
 solved_challenges:
   - "IRIS CTF 2024 - OSINT set (persona + bcrypt, wordlist from posts)"
+adapted_for: fetih
 ---
 
 # OSINT Kişi Araştırması (Persona Tracking)
@@ -311,3 +312,10 @@ ARAÇ LİSTESİ:
 [ ] GitHub varsa → git log ile email çıkar
 [ ] web.archive.org'da silinmiş içerik ara
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 22cca443df07ac70
+-->
+

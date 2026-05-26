@@ -35,6 +35,7 @@ nist_csf:
 - PR.AA-05
 - PR.IR-01
 - GV.PO-01
+adapted_for: fetih
 ---
 
 # Configuring Aws Verified Access for Ztna
@@ -452,3 +453,10 @@ aws cloudwatch put-metric-alarm \
 - [Building Zero Trust Across Multi-Account AWS Environments](https://aws.amazon.com/blogs/networking-and-content-delivery/building-zero-trust-access-across-multi-account-aws-environments/)
 - [Visual Guide to AWS Verified Access Setup](https://medium.com/@chaim_sanders/a-visual-guide-to-setting-up-aws-verified-access-1333466f7222)
 - [NIST SP 800-207 Zero Trust Architecture](https://csrc.nist.gov/publications/detail/sp/800-207/final)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1579d147174e1586
+-->
+

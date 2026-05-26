@@ -35,6 +35,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Api Threat Protection with Apigee
@@ -335,3 +336,10 @@ gcloud apigee apis list-Dağıt:ments \
 - Apigee Advanced API Security: https://docs.cloud.google.com/apigee/docs/api-security
 - Apigee OWASP API Top 10: https://docs.apigee.com/api-platform/faq/owasp-top-api-threats
 - Wallarm Apigee Security Policies Guide: https://lab.wallarm.com/what/apigee-api-security-policies-howto/
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c3ada8bdca240dc6
+-->
+

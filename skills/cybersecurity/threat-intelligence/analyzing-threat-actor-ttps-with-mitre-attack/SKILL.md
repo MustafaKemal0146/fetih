@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Analyzing Threat Actor Ttps with Mitre Attack
@@ -277,3 +278,10 @@ for gname, techs in group_techniques.items():
 - [attackcti Python Library](https://github.com/OTRF/ATTACK-Python-Client)
 - [ATT&CK STIX Data](https://github.com/mitre/cti)
 - [ATT&CK Groups](https://attack.mitre.org/groups/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5676e43573504bc4
+-->
+

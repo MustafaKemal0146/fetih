@@ -36,6 +36,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Azure Storage Account Misconfigurations
@@ -71,3 +72,10 @@ Azure Storage accounts are a frequent target for attackers due to misconfigured 
 ## Output
 
 JSON report with per-account Bul:ings, severity ratings (Critical/High/Medium/Low), and remediation recommendations aligned with CIS Azure Benchmark controls.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1241015900f22e68
+-->
+

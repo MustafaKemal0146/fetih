@@ -2,6 +2,7 @@
 name: osint-category-tools
 description: OSINT kategorisi SKILL.md — Kullanıcı araştırması, sosyal medya, subdomain keşfi araçları kurma rehberi
 tags: [ctf, osint, tools, setup, sherlock, maigret]
+adapted_for: fetih
 ---
 
 # OSINT Kategorisi — Gerekli Araçlar
@@ -244,3 +245,10 @@ EOF
 - **Python araçları** → basit, hızlı başlama
 
 Skill okudoğunda başında hangi araçlar gerekli gösterilecek!
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5c9301e220c8bbf8
+-->
+

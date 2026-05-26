@@ -29,6 +29,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Network Policies for Kubernetes
@@ -233,3 +234,10 @@ kubectl run frontend-test --image=busybox --labels=app=frontend --restart=Never 
 - [Calico Network Policies](https://docs.tigera.io/calico/latest/network-policy/)
 - [Cilium Network Policies](https://docs.cilium.io/en/stable/security/policy/)
 - [Network Policy Editor](https://editor.networkpolicy.io/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3baa0ed4a35a0a8b
+-->
+

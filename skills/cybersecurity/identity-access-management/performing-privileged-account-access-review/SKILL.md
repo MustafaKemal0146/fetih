@@ -33,6 +33,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Performing Privileged Account Access Review
@@ -184,3 +185,10 @@ Generate review reports including:
 - [CIS Controls v8 - Control 5: Account Management](https://www.cisecurity.org/controls/account-management)
 - [Netwrix PAM Best Practices Guide](https://netwrix.com/en/resources/guides/privileged-account-management-best-practices/)
 - [StrongDM PAM Best Practices 2025](https://www.strongdm.com/blog/privileged-access-management-best-practices)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c1b0e2ab37e33a3a
+-->
+

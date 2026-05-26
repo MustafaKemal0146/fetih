@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Api Enumeration Attacks
@@ -422,3 +423,10 @@ plugins:
 - Cequence BOLA Prevention: https://www.cequence.ai/solutions/bola-and-enumeration-attack-prevention/
 - Cloudflare API Shield BOLADetect https://community.cloudflare.com/t/api-shield-new-bola-vulnerability-Tespit-for-api-shield/883021
 - Sycope IDOR Tespit via HTTP Traffic Analysis: https://www.sycope.com/post/idor-vulnerability-how-to-Detect-an-attack-on-web-applications-through-http-traffic-analysis
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e77b37f1860381aa
+-->
+

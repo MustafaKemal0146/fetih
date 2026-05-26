@@ -33,6 +33,7 @@ nist_csf:
 - PR.PS-04
 - ID.RA-01
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Performing Fuzzing with Aflplusplus
@@ -83,3 +84,10 @@ and persistent mode for high-throughput fuzzing.
   paths found: 1847
   exec speed: 2145/sec
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 58d86dfb11d3f86c
+-->
+

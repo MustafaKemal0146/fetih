@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Securing Aws Iam Permissions
@@ -313,3 +314,10 @@ SUMMARY:
   Critical: 2 | High: 4 | Medium: 5 | Low: 3
   Compliance Score: 62% (CIS AWS Foundations Benchmark v3.0)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 953be5e20ca5b136
+-->
+

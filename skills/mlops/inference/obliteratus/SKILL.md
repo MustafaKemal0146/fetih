@@ -10,6 +10,7 @@ metadata:
   fetih:
     tags: [Abliteration, Uncensoring, Refusal-Removal, LLM, Weight-Projection, SVD, Mechanistic-Interpretability, HuggingFace, Model-Surgery]
     related_skills: [vllm, gguf, huggingface-tokenizers]
+adapted_for: fetih
 ---
 
 # OBLITERATUS Skill
@@ -340,3 +341,10 @@ Enable with `--contribute` flag. No personal data is collected — only model na
 - **vllm** — Serve abliterated models with high throughput
 - **gguf** — Convert abliterated models to GGUF for llama.cpp
 - **huggingface-tokenizers** — Work with model tokenizers
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f490e13c84329366
+-->
+

@@ -32,6 +32,7 @@ nist_csf:
 - GV.SC-07
 - ID.IM-04
 - PR.PS-04
+adapted_for: fetih
 ---
 
 # Implementing Secret Scanning with Gitleaks
@@ -318,3 +319,10 @@ NEW Bul:INGS (blocking):
 QUALITY GATE: FAILED (3 new Bul:ings)
 Action: Rotate exposed credentials immediately.
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2a678e39e9b2e032
+-->
+

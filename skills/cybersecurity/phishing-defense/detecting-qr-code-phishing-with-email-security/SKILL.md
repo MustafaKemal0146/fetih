@@ -32,6 +32,7 @@ nist_csf:
 - DE.CM-09
 - RS.CO-02
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Detection Qr Code Phishing with Email Security
@@ -126,3 +127,10 @@ QR code phishing (quishing) is a rapidly growing attack vector where malicious U
 - Mobile devices alert on malicious QR destinations
 - User reporting rate for quishing simulations exceeds 50%
 - False positive rate for QR Tespit below 1%
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 34f3bea5f613c464
+-->
+

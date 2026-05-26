@@ -2,6 +2,7 @@
 name: rev-category-tools
 description: Rev kategorisi SKILL.md — Binary analysis, disassembly, symbolic execution araçları kurma rehberi
 tags: [ctf, reverse-engineering, tools, setup, radare2, ghidra, angr]
+adapted_for: fetih
 ---
 
 # Reverse Engineering Kategorisi — Gerekli Araçlar
@@ -304,3 +305,10 @@ EOF
 - **Android** (`androguard`, `frida`, `objection`) → APK analiz için
 
 Skill okudoğunda başında hangi araçlar gerekli gösterilecek!
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 46a255ba9738231f
+-->
+

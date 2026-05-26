@@ -38,6 +38,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Conducting Memory Forensics with Volatility
@@ -264,3 +265,10 @@ C2 IPs:     185.220.101.42, 91.215.85.17
 C2 Domains: [extracted from beacon config]
 Mutexes:    Global\MSCTF.Shared.MUTEX.ZRQ
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 96c508b8d0638a73
+-->
+

@@ -34,6 +34,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Implementing Threat Modeling with Mitre Attack
@@ -373,3 +374,10 @@ INVESTMENT RECOMMENDATION:
   Closing top 10 gaps requires: 2 Tespit engineer FTEs, 60 days
   Expected coverage improvement: 64% -> 76%
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: fc53bb3560665e96
+-->
+

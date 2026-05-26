@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Testing for Xxe Injection Vulnerabilities
@@ -324,3 +325,10 @@ A resume upload feature processes DOCX files. Injecting XXE into the `[Content_T
 4. Implement input validation to reject DTD declarations in XML input
 5. Apply least-privilege file system permissions for the web server user
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 870b73509fba8e4f
+-->
+

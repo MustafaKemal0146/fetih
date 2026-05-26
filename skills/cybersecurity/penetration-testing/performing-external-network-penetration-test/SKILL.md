@@ -35,6 +35,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing External Network Penetration Test
@@ -311,3 +312,10 @@ meterpreter> keyscan_start
 - NIST SP 800-115: Technical Guide to Information Security Testing: https://csrc.nist.gov/publications/detail/sp/800-115/final
 - OSSTMM v3: https://www.isecom.org/OSSTMM.3.pdf
 - MITRE ATT&CK: https://attack.mitre.org/
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0840bd9c8a2da25a
+-->
+

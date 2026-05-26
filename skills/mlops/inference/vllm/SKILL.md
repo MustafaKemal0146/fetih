@@ -10,6 +10,7 @@ metadata:
   fetih:
     tags: [vLLM, Inference Serving, PagedAttention, Continuous Batching, High Throughput, Production, OpenAI API, Quantization, Tensor Parallelism]
 
+adapted_for: fetih
 ---
 
 # vLLM - High-Performance LLM Serving
@@ -368,5 +369,9 @@ Supported platforms: NVIDIA (primary), AMD ROCm, Intel GPUs, TPUs
 - Paper: "Efficient Memory Management for Large Language Model Serving with PagedAttention" (SOSP 2023)
 - Community: https://discuss.vllm.ai
 
-
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a1dda0cfae0a4caf
+-->
 

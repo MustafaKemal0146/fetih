@@ -32,6 +32,7 @@ nist_csf:
 - PR.PS-02
 - DE.CM-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Hardening Linux Endpoint with Cis Benchmark
@@ -217,3 +218,10 @@ oscap xccdf eval \
 - **Breaking SSH access**: Misconfiguring sshd_config (especially PermitRootLogin, PasswordAuthentication) can lock out administrators. Always test SSH configuration changes from a second session.
 - **Not testing firewall rules**: Enabling UFW without allowing SSH first will disconnect remote sessions permanently.
 - **Kernel parameter changes without testing**: Some sysctl settings can break application networking. Test in staging first.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3220cf02396945e5
+-->
+

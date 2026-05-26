@@ -30,6 +30,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing Red Team with Covenant
@@ -75,3 +76,10 @@ Monitor grunt callbacks, execute tasks, and collect output from compromised host
 ## Expected Output
 
 JSON report with listener configuration, active grunts, executed tasks, and task output for engagement documentation.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e81c6969d7853895
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Conducting Cloud Penetration Testing
@@ -262,3 +263,10 @@ Bul:ING SUMMARY BY MITRE ATT&CK TACTIC:
   Discovery:           14 Bul:ings
   Total:               47 Bul:ings
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 618fbb4d74944c98
+-->
+

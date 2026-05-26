@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing Iot Security Assessment
@@ -204,3 +205,10 @@ network entry point with root-level command execution capability.
 3. Encrypt stored WiFi credentials using a hardware-backed key
 4. Dağıt: cameras on an isolated VLAN with no Erişim: the corporate network
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ebeccd8f95e41e27
+-->
+

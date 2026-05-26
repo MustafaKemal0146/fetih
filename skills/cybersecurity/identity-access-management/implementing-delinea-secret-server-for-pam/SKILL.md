@@ -33,6 +33,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Implementing Delinea Secret Server for Pam
@@ -401,3 +402,10 @@ SOX Controls Met:        12/12
 PCI-DSS Requirements:    8/8
 Password Age Violations: 3 (remediation in progress)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4bb632ad43c3960f
+-->
+

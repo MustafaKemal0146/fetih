@@ -8,6 +8,7 @@ triggers:
   - user mentions a CTF competition
   - user shares a hash/encoding to crack
   - user sends a challenge description with file attachments
+adapted_for: fetih
 ---
 
 # CTF Challenge Solver
@@ -396,3 +397,10 @@ For hard problems where 3+ direct attempts failed (complex cryptography, binary 
 - `references/0xsimsar-blockchain-analysis.md` — BNB Chain transaction analysis via public RPC
 - `references/hash-cracking-pipeline.md` — 2-stage hashing pipeline brute-force
 - `references/ying-yang-pcap-analysis.md` — PCAP HTTP body extraction, trap message chains, base64 decoding
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9859e8b3e4235ecc
+-->
+

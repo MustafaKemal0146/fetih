@@ -31,6 +31,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Performing Osint with Spiderfoot
@@ -68,3 +69,10 @@ SpiderFoot is an open-source OSINT automation tool with 200+ modules that integr
 ## Expected Output
 
 JSON report containing OSINT Bul:ings organized by data type (domains, IPs, emails, credentials, DNS records), module source attribution, and target profile summary with risk indicators.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 33539af2d8d12231
+-->
+

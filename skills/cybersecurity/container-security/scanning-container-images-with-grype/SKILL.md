@@ -28,6 +28,7 @@ nist_csf:
 - PR.IR-01
 - ID.AM-08
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Scanning Container Images with Grype
@@ -209,3 +210,10 @@ grype db list
 5. **Scan all layers** - Use `--scope all-layers` to catch vulnerabilities in intermediate layers
 6. **Automate database updates** - Keep the vulnerability database current in CI runners
 7. **Compare scans** - Track vulnerability count over time for regression Tespit
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b2060f6bc8d52cd6
+-->
+

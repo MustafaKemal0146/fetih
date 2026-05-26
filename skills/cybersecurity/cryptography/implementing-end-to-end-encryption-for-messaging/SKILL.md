@@ -23,6 +23,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Implementing End to End Encryption for Messaging
@@ -88,3 +89,10 @@ Each message uses a unique encryption key derived from a ratcheting chain. After
 - [ ] Forward secrecy: old keys cannot decrypt new messages
 - [ ] Out-of-order messages can be decrypted
 - [ ] Tampered messages are rejected by authentication
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5e8d12aabdaeddc5
+-->
+

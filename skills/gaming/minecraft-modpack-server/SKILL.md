@@ -3,6 +3,7 @@ name: minecraft-modpack-server
 description: "Host modded Minecraft servers (CurseForge, Modrinth)."
 tags: [minecraft, gaming, server, neoforge, forge, modpack]
 platforms: [linux, macos]
+adapted_for: fetih
 ---
 
 # Minecraft Modpack Server Setup
@@ -185,3 +186,10 @@ Add hourly cron:
 - Check logs: `tail -f ~/minecraft-server/server/logs/latest.log`
 - Look for "Done (Xs)!" in the log = server is ready
 - Test connection: player adds server IP in Multiplayer
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 31b11c49ecd7f146
+-->
+

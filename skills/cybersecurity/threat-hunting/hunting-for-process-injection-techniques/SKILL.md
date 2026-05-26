@@ -31,6 +31,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Process Injection Techniques
@@ -71,3 +72,10 @@ Process injection (MITRE ATT&CK T1055) allows adversaries to execute code in the
 - Process injection relationship graph
 - MITRE ATT&CK sub-technique mapping (T1055.001-T1055.012)
 - False positive exclusion recommendations
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: dba4cf41400259c1
+-->
+

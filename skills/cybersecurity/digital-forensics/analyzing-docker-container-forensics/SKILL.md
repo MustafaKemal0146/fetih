@@ -32,6 +32,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Docker Container Forensics
@@ -309,3 +310,10 @@ Docker Container Forensics Summary:
 
   Evidence: /cases/case-2024-001/docker/
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9e1eba2e92a2243d
+-->
+

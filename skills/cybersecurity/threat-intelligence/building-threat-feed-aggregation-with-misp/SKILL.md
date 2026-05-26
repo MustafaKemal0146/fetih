@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Building Threat Feed Aggregation with Misp
@@ -350,3 +351,10 @@ exporter.export_ioc_list("blocklist_ips.txt", ioc_types=["ip-dst"], days=7)
 - [PyMISP Documentation](https://pymisp.readthedocs.io/)
 - [Kraven Security: MISP Using Feeds](https://kravensecurity.com/threat-intelligence-with-misp-part-4-using-feeds/)
 - [Cosive: What is MISP](https://www.cosive.com/blog/what-is-misp-the-ultimate-introduction)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9ea3b6e760399182
+-->
+

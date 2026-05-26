@@ -9,6 +9,7 @@ metadata:
   fetih:
     tags: [testing, tdd, development, quality, red-green-refactor]
     related_skills: [systematic-debugging, writing-plans, subagent-driven-development]
+adapted_for: fetih
 ---
 
 # Test-Driven Development (TDD)
@@ -341,3 +342,10 @@ Otherwise → not TDD
 ```
 
 No exceptions without the user's explicit permission.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f6af9f19e9565e6b
+-->
+

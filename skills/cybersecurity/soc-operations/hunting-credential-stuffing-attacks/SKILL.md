@@ -31,6 +31,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Hunting Credential Stuffing Attacks
@@ -79,3 +80,10 @@ spray = df[df["status"] == "failed"].groupby(["source_ip", "password_hash"]).agg
     accounts=("username", "nunique")).reset_index()
 sprays = spray[spray["accounts"] > 10]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4d6bec59c74bacc3
+-->
+

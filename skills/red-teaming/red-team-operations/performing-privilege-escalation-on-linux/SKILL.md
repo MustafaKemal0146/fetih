@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing Privilege Escalation on Linux
@@ -119,3 +120,10 @@ Linux privilege escalation involves elevating from a low-privilege user account 
 - [ ] Root access achieved through identified vector
 - [ ] Evidence documented (screenshots, command output)
 - [ ] Alternative escalation paths identified
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d06b44071902e150
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Dcsync Attacks
@@ -98,3 +99,10 @@ GUID Accessed: [Replication GUID]
 Risk Level: [Critical/High/Medium/Low]
 Recommended Action: [Disable account, reset krbtgt, Araştır:]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5ab4d4f91dfd1548
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.PS-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Detection Ai Model Prompt Injection Attacks
@@ -156,3 +157,10 @@ python agent.py --file historical_prompts.txt --mode full --output json > audit_
 - **Pytector**: Lightweight Python package for prompt injection Tespit supporting local DeBERTa/DistilBERT models and API-based safeguards
 - **OWASP LLM Top 10**: Industry-standard risk taxonomy for LLM application security, with LLM01 dedicated to prompt injection
 - **deepset/prompt-injections**: Hugging Face dataset containing labeled prompt injection examples used for training and evaluating Tespit models
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ec4511ab83c40f0b
+-->
+

@@ -34,6 +34,7 @@ nist_csf:
 - RS.MA-01
 - RC.RP-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Dağıt:ing Decoy Files for Ransomware Detection
@@ -199,3 +200,10 @@ mv /path/to/canary/report.xlsx /path/to/canary/report.xlsx.locked
 - **OSSEC/Wazuh**: Open-source HIDS with built-in file integrity monitoring and alerting capabilities
 - **Elastic Endpoint**: Uses canary files internally for ransomware protection and key capture
 - **Sysmon**: Windows system monitor that logs file creation events (Event ID 11) for canary file monitoring
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f1b6053e07dd890e
+-->
+

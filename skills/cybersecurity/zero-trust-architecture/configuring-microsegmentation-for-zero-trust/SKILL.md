@@ -30,6 +30,7 @@ nist_csf:
 - PR.AA-05
 - PR.IR-01
 - GV.PO-01
+adapted_for: fetih
 ---
 
 # Configuring Microsegmentation for Zero Trust
@@ -182,3 +183,10 @@ Isolate critical applications (PCI cardholder data environment, SWIFT financial 
 - Illumio Core Administration Guide
 - VMware NSX Distributed Firewall Configuration Guide
 - Forrester Zero Trust eXtended (ZTX) Framework
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7d59da33d4c24599
+-->
+

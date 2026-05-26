@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Cloud Dlp for Data Protection
@@ -439,3 +440,10 @@ REMEDIATION ACTIONS:
   Access controls tightened:         14,200
   Sensitivity labels applied:        45,200
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3d7839ff2b66b2c7
+-->
+

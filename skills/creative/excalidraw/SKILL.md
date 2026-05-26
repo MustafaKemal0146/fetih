@@ -11,6 +11,7 @@ metadata:
     tags: [Excalidraw, Diagrams, Flowcharts, Architecture, Visualization, JSON]
     related_skills: []
 
+adapted_for: fetih
 ---
 
 # Excalidraw Diagram Skill
@@ -196,4 +197,9 @@ See `references/colors.md` for full color tables. Quick reference:
 - For dark mode diagrams, see `references/dark-mode.md`
 - For larger examples, see `references/examples.md`
 
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0bd9af2a17058cf8
+-->
 

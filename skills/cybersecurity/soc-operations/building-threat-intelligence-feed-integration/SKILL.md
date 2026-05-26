@@ -35,6 +35,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Building Threat Intelligence Feed Integration
@@ -337,3 +338,10 @@ Actions Today:
   SIEM matches:         121 notable events generated
   False positives:      3 (CDN IPs removed from feed)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c9a08ddb821c742a
+-->
+

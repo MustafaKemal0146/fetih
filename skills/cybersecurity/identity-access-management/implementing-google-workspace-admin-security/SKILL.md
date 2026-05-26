@@ -34,6 +34,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Implementing Google Workspace Admin Security
@@ -446,3 +447,10 @@ Public Link Sharing:    DISABLED
 External Group Members: DISABLED
 Shared Drive Creation:  ADMIN ONLY
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f91ee6563c40d954
+-->
+

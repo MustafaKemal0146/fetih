@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing Physical Intrusion Assessment
@@ -190,3 +191,10 @@ Search external waste containers and recycling bins for:
 - NIST SP 800-116 Rev. 1: Smart Card PIV guidelines
 - Deviant Ollam - Physical Security Assessment methodology
 - MITRE ATT&CK T1200: https://attack.mitre.org/techniques/T1200/
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: afa470a5f5c4c9c4
+-->
+

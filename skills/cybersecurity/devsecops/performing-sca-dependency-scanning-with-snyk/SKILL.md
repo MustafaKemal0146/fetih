@@ -32,6 +32,7 @@ nist_csf:
 - GV.SC-07
 - ID.IM-04
 - PR.PS-04
+adapted_for: fetih
 ---
 
 # Performing Sca Dependency Scanning with Snyk
@@ -243,3 +244,10 @@ LICENSE ISSUES:
 
 QUALITY GATE: FAILED (1 Critical with fix available)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 36ba57ff5e200026
+-->
+

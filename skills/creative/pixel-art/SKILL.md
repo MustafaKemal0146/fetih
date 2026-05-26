@@ -11,6 +11,7 @@ metadata:
     category: creative
     credits:
       - "Hardware palettes and animation loops ported from Synero/pixel-art-studio (MIT) — https://github.com/Synero/pixel-art-studio"
+adapted_for: fetih
 ---
 
 # Pixel Art
@@ -216,3 +217,10 @@ Quantizing before would waste error-diffusion on detail that disappears.
 Named hardware palettes and the procedural animation loops in `pixel_art_video.py`
 are ported from [pixel-art-studio](https://github.com/Synero/pixel-art-studio)
 (MIT). See `ATTRIBUTION.md` in this skill directory for details.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 971bda749b13b006
+-->
+

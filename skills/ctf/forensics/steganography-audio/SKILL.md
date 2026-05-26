@@ -22,6 +22,7 @@ solved_challenges:
   - "CatTheQuest CTF 2024 - Deep Sound Deep Vision (spektogram + DeepSound password → MONSTERS.txt → decimal ASCII → flag)"
   - "çeşitli CTF DTMF decode (telefon tuşları → rakam dizisi → flag)"
   - "ångstromCTF DTMF challenge"
+adapted_for: fetih
 ---
 
 # Ses Steganografi Analizi
@@ -481,3 +482,10 @@ if __name__ == "__main__":
 - **Morse hız değişkeni**: WPM (words per minute) farklı olursa median hesabı bozulur. Kısa/uzun oranı sabit kalır (1:3) ama mutlak süre değişir.
 - **WAV bit derinliği**: 8-bit WAV örnekler işaretsiz (0-255), 16-bit işaretli (-32768 ile 32767). `wave` modülü raw byte döner — bit derinliğine göre yorumla.
 - **Boş/sessiz bölgeler**: Dosyanın sonunda uzun sessizlik varsa binwalk ile kontrol et — başka bir dosya eklenmiş olabilir.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 19356b73f0d854d6
+-->
+

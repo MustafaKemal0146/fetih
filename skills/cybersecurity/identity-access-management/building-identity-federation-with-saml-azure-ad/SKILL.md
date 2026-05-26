@@ -34,6 +34,7 @@ nist_csf:
 - PR.AA-02
 - PR.AA-05
 - PR.AA-06
+adapted_for: fetih
 ---
 
 # Building Identity Federation with Saml Azure Ad
@@ -227,3 +228,10 @@ Remove-AdfsCertificate -CertificateType Token-Signing -Thumbprint $oldThumbprint
 - [AD FS Design Guide](https://learn.microsoft.com/en-us/windows-server/identity/ad-fs/design/ad-fs-design-guide)
 - [Configure AD FS for Azure AD Federation](https://learn.microsoft.com/en-us/entra/identity/hybrid/connect/how-to-connect-fed-management)
 - [SAML 2.0 Authentication - OASIS](https://docs.oasis-open.org/security/saml/v2.0/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 27f3b04254d55110
+-->
+

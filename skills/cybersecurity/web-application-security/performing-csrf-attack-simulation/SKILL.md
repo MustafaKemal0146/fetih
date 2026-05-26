@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Csrf Attack Simulation
@@ -322,3 +323,10 @@ A settings page changes state via GET request (`/settings?disable_2fa=true`). Si
 4. Require re-authentication for sensitive operations (password change, fund transfer)
 5. Use custom request headers (X-Requested-With) for AJAX endpoints
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a7b2e7ecd63703af
+-->
+

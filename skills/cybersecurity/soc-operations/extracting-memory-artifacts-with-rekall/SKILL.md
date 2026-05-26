@@ -27,6 +27,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Extracting Memory Artifacts with Rekall
@@ -85,3 +86,10 @@ psscan_pids = set(p.pid for p in s.plugins.psscan())
 hidden = psscan_pids - pslist_pids
 print(f"Hidden PIDs: {hidden}")
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7772872e55352959
+-->
+

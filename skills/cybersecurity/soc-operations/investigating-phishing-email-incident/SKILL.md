@@ -39,6 +39,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Investigating Phishing Email Incident
@@ -301,3 +302,10 @@ Containment:
 
 Status:       RESOLVED — No evidence of lateral movement post-compromise
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: d3a12f90724d6dcf
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Testing for Xss Vulnerabilities
@@ -207,3 +208,10 @@ refunds, and modify orders. Affects all 23 support agents who view customer tick
 3. Set HttpOnly flag on session cookies to prevent JavaScript access
 4. Sanitize HTML input server-side using a whitelist approach (allow only safe tags)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 8e83e66490239474
+-->
+

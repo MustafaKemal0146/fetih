@@ -33,6 +33,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Building Soc Metrics and Kpi Tracking
@@ -309,3 +310,10 @@ AREAS FOR IMPROVEMENT:
   [2] Night shift MTTD 23% slower than day shift
   [3] 4 critical vulnerability scan tickets overdue on SLA
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: fcfa67e53662e5a1
+-->
+

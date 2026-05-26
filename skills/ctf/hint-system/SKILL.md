@@ -12,6 +12,7 @@ triggers:
   - "çözümü göster"
   - "nudge"
 category: ctf
+adapted_for: fetih
 ---
 
 # CTF Hint System — Aşamalı İpucu Sistemi
@@ -144,3 +145,10 @@ Hint seviyeleri `~/.fetih/ctf_hints.json` dosyasında challenge başına takip e
 - `references/hint-levels.md` — Detaylı ipucu seviyeleri ve pattern kataloğu
 - Siber Vatan CTF Playbook — `skills/red-teaming/siber-vatan-ctf/SKILL.md`
 - CTF Master Solver — `skills/ctf/SKILL.md`
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 8b694ce9ebc51ac1
+-->
+

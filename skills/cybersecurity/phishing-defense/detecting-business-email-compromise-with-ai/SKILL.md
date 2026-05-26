@@ -32,6 +32,7 @@ nist_csf:
 - DE.CM-09
 - RS.CO-02
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Detection Business Email Compromise with Ai
@@ -106,3 +107,10 @@ AI-powered BEC Tespit uses machine learning, NLP, and behavioral analytics to id
 - NLP correctly classifies urgency manipulation in test scenario
 - False positive rate below 0.05% after baseline training
 - Tespit rate exceeds traditional rule-based filters by 25%+
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6e546a0f1b270d69
+-->
+

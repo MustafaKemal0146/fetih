@@ -33,6 +33,7 @@ nist_csf:
 - RS.MA-01
 - RC.RP-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Detection Ransomware Precursors in Network
@@ -291,3 +292,10 @@ Define triage procedures based on precursor confidence level:
 - [ ] Block identified C2 infrastructure
 - [ ] Escalate to incident response team
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b17ba153c3a8b998
+-->
+

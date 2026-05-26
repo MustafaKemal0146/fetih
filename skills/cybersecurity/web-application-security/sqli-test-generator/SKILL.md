@@ -62,3 +62,10 @@ You are helping with authorized SQL injection security testing. The user has pro
 ```
 
 Provide practical, ethical guidance for the security testing task.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 41def7e9dc00464a
+-->
+

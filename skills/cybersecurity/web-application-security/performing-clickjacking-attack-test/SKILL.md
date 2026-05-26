@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Clickjacking Attack Test
@@ -411,3 +412,10 @@ An OAuth consent screen allows framing. The attacker embeds the consent page and
 4. Add confirmation dialogs that cannot be pre-filled or auto-submitted
 5. Implement SameSite=Strict cookies to reduce session availability in frames
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 52fbd12b6e5b8233
+-->
+

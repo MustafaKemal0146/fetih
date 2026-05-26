@@ -25,6 +25,7 @@ metadata:
       - video-generation
     related_skills: [stable-diffusion-image-generation, image_gen]
     category: creative
+adapted_for: fetih
 ---
 
 # ComfyUI
@@ -610,3 +611,10 @@ Use `python3 scripts/health_check.py` to run the whole list at once. Manual:
 - [ ] `check_deps.py` reports `is_ready: true` (or only `node_check_skipped`
       on cloud free tier)
 - [ ] Test run with a small workflow completes; outputs land in `--output-dir`
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: dd9e07d5ec1b9d36
+-->
+

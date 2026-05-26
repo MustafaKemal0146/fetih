@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Aws Privilege Escalation Assessment
@@ -264,3 +265,10 @@ TOTAL ESCALATION PATHS: 4 (2 Critical, 1 High, 1 Medium)
 PERMISSION BOUNDARIES IN PLACE: 0 / 47 IAM principals
 SCP GUARDRAILS BLOCKING ESCALATION: 0 / 3 tested vectors
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b50235eaafd1367a
+-->
+

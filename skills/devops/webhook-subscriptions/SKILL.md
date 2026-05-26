@@ -6,6 +6,7 @@ platforms: [linux, macos, windows]
 metadata:
   fetih:
     tags: [webhook, events, automation, integrations, notifications, push]
+adapted_for: fetih
 ---
 
 # Webhook Subscriptions
@@ -202,3 +203,10 @@ If webhooks aren't working:
 4. **Signature mismatch?** Verify the secret in your service matches the one from `fetih webhook list`. GitHub sends `X-Hub-Signature-256`, GitLab sends `X-Gitlab-Token`.
 5. **Firewall/NAT?** The webhook URL must be reachable from the service. For local development, use a tunnel (ngrok, cloudflared).
 6. **Wrong event type?** Check `--events` filter matches what the service sends. Use `fetih webhook test <name>` to verify the route works.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a37909107d8734ea
+-->
+

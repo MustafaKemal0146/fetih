@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Auditing Terraform Infrastructure for Security
@@ -331,3 +332,10 @@ SUMMARY BY SEVERITY:
   Low:      18 Bul:ings
   Info:     12 Bul:ings
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 522346cd723c1f37
+-->
+

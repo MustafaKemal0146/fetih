@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Testing Jwt Token Security
@@ -303,3 +304,10 @@ The `kid` header parameter is used in a SQL query to look up signing keys. Injec
 4. Validate all JWT claims server-side (iss, aud, exp, nbf)
 5. Use a minimum key length of 256 bits for HMAC secrets
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6d4bf130e5d612e8
+-->
+

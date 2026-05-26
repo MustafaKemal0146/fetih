@@ -34,6 +34,7 @@ nist_csf:
 - PR.DS-02
 - PR.DS-10
 - GV.PO-01
+adapted_for: fetih
 ---
 
 # Implementing Data Loss Prevention with Microsoft Purview
@@ -604,3 +605,10 @@ Use Activity Explorer and the DLP alerts dashboard to monitor policy effectivene
 - Override justification analysis: 78% "Business requirement", 15% "False positive",
   7% "Other"
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: aa1b5dba3e32e7fd
+-->
+

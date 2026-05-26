@@ -38,6 +38,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Performing Insider Threat Investigation
@@ -266,3 +267,10 @@ RECOMMENDATIONS
 3. [Regulatory notification assessment]
 4. [Access control improvements]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a6af5a21dd10a5b7
+-->
+

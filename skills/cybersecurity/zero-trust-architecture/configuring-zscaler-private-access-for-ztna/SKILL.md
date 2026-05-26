@@ -34,6 +34,7 @@ nist_csf:
 - PR.AA-05
 - PR.IR-01
 - GV.PO-01
+adapted_for: fetih
 ---
 
 # Configuring Zscaler Private Access for Ztna
@@ -310,3 +311,10 @@ VPN MIGRATION:
   Users migrated to ZPA: 487 / 500
   VPN decommission date: 2026-03-15
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e7f2c61d89e8429c
+-->
+

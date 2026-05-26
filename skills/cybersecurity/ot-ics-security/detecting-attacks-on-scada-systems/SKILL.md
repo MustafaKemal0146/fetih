@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Detection Attacks on Scada Systems
@@ -698,3 +699,10 @@ RECOMMENDED RESPONSE:
   2. [Verification step]
   3. [Escalation path]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ce2f57a89584bae4
+-->
+

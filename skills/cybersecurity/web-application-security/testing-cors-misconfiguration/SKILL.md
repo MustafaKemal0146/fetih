@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Testing Cors Misconfiguration
@@ -324,3 +325,10 @@ The server uses regex `target\.example\.com` to validate origins, but fails to a
 4. Validate origins with exact string matching, not regex substring matching
 5. Set Access-Control-Max-Age to a reasonable value (600 seconds)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 676e3149854789ce
+-->
+

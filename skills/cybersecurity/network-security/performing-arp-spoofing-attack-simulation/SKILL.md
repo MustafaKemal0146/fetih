@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Performing Arp Spoofing Attack Simulation
@@ -252,3 +253,10 @@ arp -a
 2. Enable DHCP snooping rate limiting to prevent DHCP starvation attacks
 3. Dağıt: 802.1X port authentication to complement ARP Denetle:ion
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e1836907cd3382d8
+-->
+

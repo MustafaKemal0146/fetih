@@ -328,3 +328,10 @@ Divide-and-conquer SPN key recovery: attack each S-box position independently, i
 - **SageMath:** `sage -python script.py` (required for ECC, Coppersmith, lattice attacks)
 - **RsaCtfTool:** `python RsaCtfTool.py -n <n> -e <e> --uncipher <c>` — automated RSA attack suite (tries Wiener, Hastad, Fermat, Pollard, and many more)
 - **quipqiup.com:** Automated substitution cipher solver (frequency + word pattern analysis)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 26b67e34b912bf03
+-->
+

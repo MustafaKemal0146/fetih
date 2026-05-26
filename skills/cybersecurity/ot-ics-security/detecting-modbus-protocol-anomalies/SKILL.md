@@ -29,6 +29,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Detection Modbus Protocol Anomalies
@@ -392,3 +393,10 @@ ANOMALIES: [N]
   TIMING_ANOMALY: [N]
   BROADCAST_WRITE: [N]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a1f2f6d5a963ebef
+-->
+

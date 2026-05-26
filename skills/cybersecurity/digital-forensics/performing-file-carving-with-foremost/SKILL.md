@@ -32,6 +32,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Performing File Carving with Foremost
@@ -295,3 +296,10 @@ File Carving Summary:
   Audit Log: /cases/case-2024-001/carved/foremost_all/audit.txt
   File Catalog: /cases/case-2024-001/analysis/carved_file_catalog.csv
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b0deff81468c5463
+-->
+

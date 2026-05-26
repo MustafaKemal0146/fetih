@@ -34,6 +34,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Performing Ot Network Security Assessment
@@ -593,3 +594,10 @@ DETAILED Bul:INGS:
     Impact: [operational and safety impact]
     Remediation: [specific technical remediation steps]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 393a8e1c65db6fe7
+-->
+

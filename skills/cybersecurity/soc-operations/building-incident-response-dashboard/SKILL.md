@@ -34,6 +34,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Building Incident Response Dashboard
@@ -313,3 +314,10 @@ Key Metrics:
 
 Business Impact: LOW — Finance file server offline, no customer-facing systems affected
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1d80430bbfb0ff83
+-->
+

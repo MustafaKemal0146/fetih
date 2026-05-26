@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Executing Red Team Engagement Planning
@@ -165,3 +166,10 @@ Map organizational threats using MITRE ATT&CK Navigator to select relevant adver
 - conducting-adversary-simulation-with-atomic-red-team
 - performing-assumed-breach-red-team-exercise
 - building-red-team-infrastructure-with-redirectors
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: fac81b35e2411ff3
+-->
+

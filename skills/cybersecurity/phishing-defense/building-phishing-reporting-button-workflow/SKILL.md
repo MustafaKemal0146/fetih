@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-09
 - RS.CO-02
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Building Phishing Reporting Button Workflow
@@ -110,3 +111,10 @@ A phishing reporting button empowers users to flag suspicious emails directly fr
 - Auto-retraction removes confirmed phishing from all inboxes
 - Reporter receives feedback notification with classification
 - Metrics dashboard shows report volume and accuracy trends
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 161a4182823379cc
+-->
+

@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Conducting Pass the Ticket Attack
@@ -109,3 +110,10 @@ Pass-the-Ticket (PtT) is a lateral movement technique that uses stolen Kerberos 
 - [ ] Tickets injected into attacker session
 - [ ] Lateral movement demonstrated using stolen tickets
 - [ ] Evidence captured for reporting
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 101ca5dc90b284c0
+-->
+

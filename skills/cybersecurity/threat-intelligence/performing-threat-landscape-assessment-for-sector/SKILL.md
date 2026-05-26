@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Performing Threat Landscape Assessment for Sector
@@ -301,3 +302,10 @@ generate_sector_report(assessment)
 - [FS-ISAC Financial Sector](https://www.fsisac.com/)
 - [H-ISAC Healthcare Sector](https://h-isac.org/)
 - [CyCognito: Threat Intelligence Lifecycle](https://www.cycognito.com/learn/threat-intelligence/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b36a1a3818ef35dd
+-->
+

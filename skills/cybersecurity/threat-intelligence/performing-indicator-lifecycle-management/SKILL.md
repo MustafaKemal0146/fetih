@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Performing Indicator Lifecycle Management
@@ -153,3 +154,10 @@ class IOCLifecycle:
 - [MISP Indicator Lifecycle](https://www.misp-project.org/)
 - [STIX Indicator Valid From/Until](https://docs.oasis-open.org/cti/stix/v2.1/stix-v2.1.html)
 - [IOC Quality Framework](https://www.first.org/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 17020f05714793d1
+-->
+

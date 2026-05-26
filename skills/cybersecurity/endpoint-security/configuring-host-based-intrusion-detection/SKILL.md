@@ -34,6 +34,7 @@ nist_csf:
 - PR.PS-02
 - DE.CM-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Configuring Host Based Intrusion Detection
@@ -227,3 +228,10 @@ output.elasticsearch:
 - **Ignoring baseline establishment**: First FIM scan creates a baseline. Changes Detected before baseline stabilization are noise, not threats. Allow 48 hours for baseline.
 - **Active response without testing**: Auto-blocking IPs or disabling accounts can cause outages. Test active response rules in a non-production environment first.
 - **Agent enrollment failures**: Agents must successfully enroll with the manager before monitoring begins. Verify firewall rules allow port 1514 and 1515 traffic.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9926e97ef26ac9fc
+-->
+

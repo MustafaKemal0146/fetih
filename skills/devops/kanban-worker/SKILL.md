@@ -7,6 +7,7 @@ metadata:
   fetih:
     tags: [kanban, multi-agent, collaboration, workflow, pitfalls]
     related_skills: [kanban-orchestrator]
+adapted_for: fetih
 ---
 
 # Kanban Worker — Pitfalls and Examples
@@ -182,3 +183,10 @@ Every tool has a CLI equivalent for human operators and scripts:
 - etc.
 
 Use the tools from inside an agent; the CLI exists for the human at the terminal.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6faa5c46d90aec0f
+-->
+

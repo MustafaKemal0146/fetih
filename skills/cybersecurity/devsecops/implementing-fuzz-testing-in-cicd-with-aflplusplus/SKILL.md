@@ -28,6 +28,7 @@ nist_csf:
 - GV.SC-07
 - ID.IM-04
 - PR.PS-04
+adapted_for: fetih
 ---
 
 # Implementing Fuzz Testing in Cicd with Aflplusplus
@@ -273,3 +274,10 @@ afl-whatsup Bul:ings/
 - [AFL++ Fuzzing in Depth Guide](https://aflplus.plus/docs/fuzzing_in_depth/)
 - [Google Testing Handbook - AFL++](https://appsec.guide/docs/fuzzing/c-cpp/aflpp/)
 - [OWASP Fuzzing Guide](https://owasp.org/www-community/Fuzzing)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 503a0fc3ad0ee840
+-->
+

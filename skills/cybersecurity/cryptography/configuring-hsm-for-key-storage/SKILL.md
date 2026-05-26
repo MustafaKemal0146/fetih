@@ -28,6 +28,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Configuring Hsm for Key Storage
@@ -107,3 +108,10 @@ Application --> PKCS#11 API --> HSM Provider --> Hardware HSM
 - [ ] Signing/verification uses HSM-resident keys
 - [ ] Keys cannot be exported (non-extractable)
 - [ ] Key listing shows all HSM-stored objects
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: fdeffd06fa15b559
+-->
+

@@ -33,6 +33,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Detection Dcsync Attack in Active Directory
@@ -160,3 +161,10 @@ Legitimate DC: [Yes/No]
 Known Service Account: [Yes/No]
 Risk Assessment: [Critical - non-DC replication Detected]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2507ed34d38a8c97
+-->
+

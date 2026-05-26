@@ -34,6 +34,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Anomalous Powershell Execution
@@ -83,3 +84,10 @@ and fileless attack techniques even when the attacker uses obfuscation layers.
   "credential_access": 3
 }
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: afbd7a0959523017
+-->
+

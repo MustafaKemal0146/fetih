@@ -34,6 +34,7 @@ nist_csf:
 - PR.IR-01
 - DE.CM-01
 - ID.AM-05
+adapted_for: fetih
 ---
 
 # Monitoring Scada Modbus Traffic Anomalies
@@ -351,3 +352,10 @@ for all scanned devices.
 **Recommended Action**: Araştır: source workstation for compromise
 indicators. Block FC 43 from non-engineering subnets at OT firewall.
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c8d4489d89548cac
+-->
+

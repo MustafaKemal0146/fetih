@@ -11,6 +11,7 @@ metadata:
     related_skills: [obsidian]
 prerequisites:
   commands: [memo]
+adapted_for: fetih
 ---
 
 # Apple Notes
@@ -88,3 +89,10 @@ memo notes -ex                    # Export to HTML/Markdown
 1. Prefer Apple Notes when user wants cross-device sync (iPhone/iPad/Mac)
 2. Use the `memory` tool for agent-internal notes that don't need to sync
 3. Use the `obsidian` skill for Markdown-native knowledge management
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 2a07272ea7e5920e
+-->
+

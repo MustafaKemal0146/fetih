@@ -199,3 +199,10 @@ Lookup usernames across gaming platforms (Steam, Xbox, PSN, MMOs) for character 
 - **VirusTotal** - File/URL reputation
 - **WHOIS** - Domain registration
 - **Wayback Machine** - Historical snapshots
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4b3c2c64a5e72fff
+-->
+

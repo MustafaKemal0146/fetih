@@ -33,6 +33,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Dns Tunneling with Zeek
@@ -153,3 +154,10 @@ Primary Record Type: [A/TXT/CNAME/NULL]
 Data Volume Estimate: [Bytes exfiltrated]
 Risk Level: [Critical/High/Medium/Low]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c3b3c19daf688be2
+-->
+

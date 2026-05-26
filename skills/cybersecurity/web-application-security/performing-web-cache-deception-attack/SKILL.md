@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Web Cache Deception Attack
@@ -190,3 +191,10 @@ curl -s "http://target.com/account/profile/x.css" | grep -i "email\|name\|token\
 - Use path-based routing rules that reject unexpected extensions
 - Enable consistent path normalization between CDN and origin
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 798c1c0776054d9e
+-->
+

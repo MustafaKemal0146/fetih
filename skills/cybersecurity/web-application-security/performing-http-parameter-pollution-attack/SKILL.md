@@ -34,6 +34,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Performing Http Parameter Pollution Attack
@@ -181,3 +182,10 @@ python3 hpp_tester.py --url http://target.com/api/action \
 - Apply WAF rules that tespit etmeduplicate parameter patterns
 - Validate all parameters server-side regardless of client-side checks
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6a481c8590c8ee17
+-->
+

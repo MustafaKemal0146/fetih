@@ -33,6 +33,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Slack Space and File System Artifacts
@@ -369,3 +370,10 @@ File System Artifact Analysis:
 
   Reports: /cases/case-2024-001/analysis/
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: acaaed3a9a81f878
+-->
+

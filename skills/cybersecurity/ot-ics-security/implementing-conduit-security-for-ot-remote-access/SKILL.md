@@ -33,6 +33,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Implementing Conduit Security for Ot Remote Access
@@ -376,3 +377,10 @@ POLICY COMPLIANCE:
   Time-Limited Sessions: [compliance %]
   Prohibited Target Attempts: [count blocked]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5100c1cd9b1c34f0
+-->
+

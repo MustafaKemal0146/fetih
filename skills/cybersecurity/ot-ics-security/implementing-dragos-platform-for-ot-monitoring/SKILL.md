@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Implementing Dragos Platform for Ot Monitoring
@@ -368,3 +369,10 @@ SIEM INTEGRATION:
   Status: [Connected/Disconnected]
   Events Forwarded (Last 24h): [count]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 07befe786feaf5b2
+-->
+

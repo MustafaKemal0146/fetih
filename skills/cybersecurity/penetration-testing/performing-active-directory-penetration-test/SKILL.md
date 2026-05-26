@@ -35,6 +35,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing Active Directory Penetration Test
@@ -241,3 +242,10 @@ mimikatz# misc::skeleton
 - HackTricks AD: https://book.hacktricks.wiki/en/windows-hardening/active-directory-methodology/index.html
 - SpecterOps AD Security: https://specterops.io/blog/
 - MITRE ATT&CK: https://attack.mitre.org/
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b2e461715532770e
+-->
+

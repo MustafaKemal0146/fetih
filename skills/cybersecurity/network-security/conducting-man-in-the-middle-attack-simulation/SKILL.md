@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Conducting Man in the Middle Attack Simulation
@@ -256,3 +257,10 @@ sha256sum mitm_capture.flow mitm_evidence.pcapng >> mitm_report.txt
 3. Enable DAI on access-layer switches for Layer 2 protection
 4. Configure application to reject connections from non-pinned certificates
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 798b805b493e9097
+-->
+

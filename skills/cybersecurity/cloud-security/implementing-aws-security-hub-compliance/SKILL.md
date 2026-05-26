@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Aws Security Hub Compliance
@@ -302,3 +303,10 @@ AUTO-REMEDIATION ACTIONS (Last 30 Days):
   CloudTrail logging re-enabled:      3
   Total auto-remediated Bul:ings:    25
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 757d851eb1df747c
+-->
+

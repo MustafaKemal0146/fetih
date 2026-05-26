@@ -31,6 +31,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Cloud Workload Protection
@@ -82,3 +83,10 @@ ssm.send_command(
     Parameters={"commands": ["ss -tlnp | grep ESTABLISHED"]},
 )
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 14066e79f7b951fa
+-->
+

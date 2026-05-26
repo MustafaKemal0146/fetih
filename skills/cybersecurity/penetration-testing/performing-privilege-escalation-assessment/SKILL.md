@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Performing Privilege Escalation Assessment
@@ -216,3 +217,10 @@ read Erişim: 75,000 customer records including names, emails, and addresses.
 3. Audit all sudo entries for binaries listed in GTFOBins
 4. Implement sudo logging with auditd for all privileged command execution
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f20d595a7010334c
+-->
+

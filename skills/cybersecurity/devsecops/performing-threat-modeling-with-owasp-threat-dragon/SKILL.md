@@ -34,6 +34,7 @@ nist_csf:
 - GV.SC-07
 - ID.IM-04
 - PR.PS-04
+adapted_for: fetih
 ---
 
 # Performing Threat Modeling with Owasp Threat Dragon
@@ -213,3 +214,10 @@ Threat Dragon participates in the CycloneDX Threat Model Bill of Materials (TMBO
 - [OWASP Threat Modeling Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Threat_Modeling_Cheat_Sheet.html)
 - [STRIDE Threat Model](https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-threats)
 - [LINDDUN Privacy Threat Modeling](https://www.linddun.org/)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5456b6adb6e73dcf
+-->
+

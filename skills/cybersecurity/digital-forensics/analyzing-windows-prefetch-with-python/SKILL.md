@@ -36,6 +36,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Windows Prefetch with Python
@@ -127,3 +128,10 @@ Summary:
   Anti-forensics tools:         2 (sdelete64.exe, wevtutil.exe)
   JSON report: /analysis/prefetch_report/prefetch_timeline.json
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4b93e10dbbdce9b0
+-->
+

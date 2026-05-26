@@ -41,6 +41,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Performing Cloud Incident Containment Procedures
@@ -279,3 +280,10 @@ gcloud compute instances delete-access-config compromised-instance \
 - [Unit 42: Responding to Cloud Incidents](https://unit42.paloaltonetworks.com/responding-to-cloud-incidents/)
 - [Wiz: Cloud Incident Response Checklist](https://www.wiz.io/academy/incident-response-checklist)
 - [Microsoft Cloud Security Benchmark - IR](https://learn.microsoft.com/en-us/security/benchmark/azure/mcsb-incident-response)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7e69795757d898ec
+-->
+

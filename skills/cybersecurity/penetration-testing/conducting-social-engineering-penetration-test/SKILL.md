@@ -36,6 +36,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Conducting Social Engineering Penetration Test
@@ -307,3 +308,10 @@ Physical Assessment:
 - Social Engineer Toolkit: https://github.com/trustedsec/social-engineer-toolkit
 - Verizon DBIR: https://www.verizon.com/business/resources/reports/dbir/
 - NIST SP 800-61: Computer Security Incident Handling Guide
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 54646d6e51b4aec9
+-->
+

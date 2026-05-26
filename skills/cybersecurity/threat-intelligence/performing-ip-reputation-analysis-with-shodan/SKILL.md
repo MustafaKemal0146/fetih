@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Performing Ip Reputation Analysis with Shodan
@@ -310,3 +311,10 @@ def correlate_infrastructure(enricher, ip_address):
 - [Query.ai: Leveraging Shodan for Security Research](https://www.query.ai/resources/blogs/leveraging-shodan-for-security-research/)
 - [Torq: Shodan IP Enrichment Workflow](https://kb.torq.io/en/articles/9350284-shodan-ip-address-enrichment-with-cache-workflow-template)
 - [Recorded Future: Shodan Integration](https://support.recordedfuture.com/hc/en-us/articles/115001403928-Shodan)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 9301cf48507d3c46
+-->
+

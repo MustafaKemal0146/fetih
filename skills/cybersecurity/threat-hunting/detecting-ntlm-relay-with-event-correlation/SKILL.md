@@ -37,6 +37,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Detection Ntlm Relay with Event Correlation
@@ -694,3 +695,10 @@ Recommended Actions:
   - Short-term: [Enable SMB/LDAP signing, disable LLMNR/NBT-NS]
   - Long-term: [Migrate to Kerberos, enforce EPA, restrict NTLM via GPO]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: fcf1b1290f5526d5
+-->
+

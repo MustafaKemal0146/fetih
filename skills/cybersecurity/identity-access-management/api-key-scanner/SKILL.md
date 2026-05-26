@@ -191,3 +191,10 @@ for root, dirs, files in os.walk('.'):
 - Implement automated scanning
 
 Help the user find and remediate exposed sensitive data responsibly.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 661a60a83f5294ad
+-->
+

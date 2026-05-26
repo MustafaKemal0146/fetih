@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Detection Network Anomalies with Zeek
@@ -368,3 +369,10 @@ sudo zeekctl netstats
 3. Araştır: self-signed TLS certificate on 198.51.100.33
 4. Block 45.33.32.156 and enforce SSH key-only authentication
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 3e1c40ce746d7f18
+-->
+

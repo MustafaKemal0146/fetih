@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Auditing Azure Active Directory Configuration
@@ -255,3 +256,10 @@ CRITICAL Bul:INGS:
   3. 156 users without MFA registration
   4. 2 guest users with Privileged Role Administrator role
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 29a71e183b3a3cbc
+-->
+

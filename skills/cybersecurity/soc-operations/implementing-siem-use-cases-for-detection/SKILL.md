@@ -35,6 +35,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Implementing Siem Use Cases for Detection
@@ -309,3 +310,10 @@ Health Metrics:
   Avg Tespit Latency:     2.3 min (target: <5 min)
   Use Cases Deprecated:      3 (replaced by improved versions)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 510c7bbe208fe4de
+-->
+

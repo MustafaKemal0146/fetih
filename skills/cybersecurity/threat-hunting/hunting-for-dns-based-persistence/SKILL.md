@@ -33,6 +33,7 @@ nist_csf:
 - DE.AE-02
 - DE.AE-07
 - ID.RA-05
+adapted_for: fetih
 ---
 
 # Hunting for Dns Based Persistence
@@ -79,3 +80,10 @@ Correlate DNS anomalies with threat intelligence feeds, check resolution targets
 ## Expected Output
 
 JSON report listing DNS anomalies with record type, historical changes, risk severity, and remediation recommendations for each Bul:ing.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: b559b64f881fd64b
+-->
+

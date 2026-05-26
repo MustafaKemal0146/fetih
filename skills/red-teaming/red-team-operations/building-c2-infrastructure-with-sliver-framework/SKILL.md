@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Building C2 Infrastructure with Sliver Framework
@@ -214,3 +215,10 @@ Sliver is an open-source, cross-platform adversary emulation framework developed
 - [ ] Post-exploitation modules tested (process listing, .NET assembly execution)
 - [ ] Pivot functionality validated for internal network access
 - [ ] All C2 traffic encrypted and passing through redirectors
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: bc483f13f7574b19
+-->
+

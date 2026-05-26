@@ -32,6 +32,7 @@ nist_csf:
 - PR.AA-01
 - DE.CM-01
 - ID.RA-01
+adapted_for: fetih
 ---
 
 # Implementing Pci Dss Compliance Controls
@@ -155,3 +156,10 @@ PCI DSS 4.0.1 establishes 12 requirements across 6 control objectives for organi
 - PCI SSC Quick Reference Guide
 - PCI DSS 4.0 Summary of Changes
 - UpGuard PCI DSS 4.0 Guide: https://www.upguard.com/blog/pci-compliance
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 0931b7d016a0f586
+-->
+

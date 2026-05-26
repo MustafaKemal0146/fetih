@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-06
 - GV.OV-02
 - DE.AE-07
+adapted_for: fetih
 ---
 
 # Executing Phishing Simulation Campaign
@@ -203,3 +204,10 @@ Analyze campaign results and produce the assessment report:
 4. Conduct targeted training for Finance and Marketing departments
 5. Schedule quarterly phishing simulations to track improvement
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 828ea9c81339bf08
+-->
+

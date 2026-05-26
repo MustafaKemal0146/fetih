@@ -8,6 +8,7 @@ platforms: [macos]
 metadata:
   fetih:
     tags: [FindMy, AirTag, location, tracking, macOS, Apple]
+adapted_for: fetih
 ---
 
 # Find My (Apple)
@@ -129,3 +130,10 @@ Analyze each screenshot with vision to extract coordinates, then compile a route
 2. Use `vision_analyze` to read screenshot content — don't try to parse pixels
 3. For ongoing tracking, use a cronjob to periodically capture and log locations
 4. Respect privacy — only track devices/items the user owns
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 6db96ee2c97f08cd
+-->
+

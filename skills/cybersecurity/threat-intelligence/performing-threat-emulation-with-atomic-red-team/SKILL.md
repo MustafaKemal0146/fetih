@@ -31,6 +31,7 @@ nist_csf:
 - ID.RA-05
 - DE.CM-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Performing Threat Emulation with Atomic Red Team
@@ -82,3 +83,10 @@ for test in tests.get("atomic_tests", []):
     print(f"Test: {test['name']}")
     print(f"  Platforms: {test.get('supported_platforms', [])}")
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 872d7199a873475c
+-->
+

@@ -32,6 +32,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Implementing Iec 62443 Security Zones
@@ -509,3 +510,10 @@ VALIDATION RESULTS:
   Prohibited path tests: [all blocked / exceptions]
   Protocol enforcement: [function code filtering verified]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c71d14cc9893f87e
+-->
+

@@ -216,3 +216,10 @@ Use [field-notes.md](field-notes.md) once you have confirmed the challenge is tr
 - Sandbox and hybrid notes: pyjail crossover, busybox escapes, custom VMs, shell tricks, path sanitizers
 - Kernel and Windows notes: kernel playbooks, SEH, CFG bypass, privilege escalation
 - Historical case notes: older but still reusable CTF exploit patterns
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7f24333719a4a4ce
+-->
+

@@ -37,6 +37,7 @@ nist_csf:
 - RS.MA-02
 - RS.AN-03
 - RC.RP-01
+adapted_for: fetih
 ---
 
 # Analyzing Security Logs with Splunk
@@ -261,3 +262,10 @@ RECOMMENDED tespit etme (IONS)
 2. Threshold alert for LSASS access patterns
 3. Behavioral rule for beacon-interval network traffic
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e1fbd211b454921e
+-->
+

@@ -32,6 +32,7 @@ nist_csf:
 - RS.AN-03
 - DE.AE-02
 - RS.MA-01
+adapted_for: fetih
 ---
 
 # Analyzing Prefetch Files for Execution History
@@ -302,3 +303,10 @@ Prefetch Analysis Summary:
 
   Report: /cases/case-2024-001/analysis/execution_timeline.csv
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 60c6dc961bd8bc54
+-->
+

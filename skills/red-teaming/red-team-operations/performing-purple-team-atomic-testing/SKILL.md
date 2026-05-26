@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - DE.AE-07
 - GV.OV-02
+adapted_for: fetih
 ---
 
 # Performing Purple Team Atomic Testing
@@ -977,3 +978,10 @@ RECOMMENDATIONS
 [HIGH]     Enable exfiltration monitoring data sources
 [MEDIUM]   Increase lateral movement test coverage (3 of 7 tested)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 43c9c1068de31e3e
+-->
+

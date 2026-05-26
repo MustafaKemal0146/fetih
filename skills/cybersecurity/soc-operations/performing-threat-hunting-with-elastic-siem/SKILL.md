@@ -35,6 +35,7 @@ nist_csf:
 - DE.AE-02
 - RS.MA-01
 - DE.AE-06
+adapted_for: fetih
 ---
 
 # Performing Threat Hunting with Elastic Siem
@@ -282,3 +283,10 @@ Actions Taken:
 
 Verdict:      HYPOTHESIS CONFIRMED — 3 true positive Bul:ings escalated to IR
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: a204b26a72307b7f
+-->
+

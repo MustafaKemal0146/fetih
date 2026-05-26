@@ -29,6 +29,7 @@ nist_csf:
 - PR.PS-02
 - DE.CM-01
 - PR.IR-01
+adapted_for: fetih
 ---
 
 # Implementing Memory Protection with Dep Aslr
@@ -99,3 +100,10 @@ GPO: Computer Configuration → Admin Templates → Windows Components
 - **DEP compatibility**: Legacy 32-bit applications may crash with DEP AlwaysOn. Use OptOut with exceptions.
 - **Mandatory ASLR breaking apps**: Some applications are not ASLR-compatible. Test before enforcing ForceReBul:Images.
 - **CFG limited to compiled-in support**: CFG only works for applications compiled with /guard:cf. Cannot be retroactively applied.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e62288b277d4d7cd
+-->
+

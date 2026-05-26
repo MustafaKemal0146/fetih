@@ -35,6 +35,7 @@ nist_csf:
 - PR.AA-01
 - PR.AA-02
 - PR.AA-05
+adapted_for: fetih
 ---
 
 # Implementing Hardware Security Key Authentication
@@ -225,3 +226,10 @@ Plan and execute migration from passwords to passkeys:
 | alice | YubiKey Backup | 2fc0579f... | 2026-02-15 | 2026-03-01 | 12 |
 | bob | YubiKey Primary | 2fc0579f... | 2026-02-16 | 2026-03-19 | 631 |
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 83ae22715908a69d
+-->
+

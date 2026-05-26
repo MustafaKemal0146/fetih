@@ -17,6 +17,7 @@ category: rev
 solved_challenges:
   - "HTB Cyber Apocalypse 2024 - ROT128 (linear hash collision, z3)"
   - "LACTF 2024 - glottem (cross-language validator)"
+adapted_for: fetih
 ---
 
 # Z3 SMT Solver ile CTF Çözme
@@ -355,3 +356,10 @@ if __name__ == '__main__':
 - **Signed vs Unsigned:** BitVec karşılaştırmalarında `UGT`, `ULT` (unsigned) ile `>`, `<` (signed) farkına dikkat
 - bkz. elf-static-analysis SKILL.md (validator'ı bulmak için)
 - bkz. anti-debug-obfuscation SKILL.md (validator çalışmıyorsa)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ea5e6cb1d29a87b6
+-->
+

@@ -31,6 +31,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Scanning Network with Nmap Advanced
@@ -195,3 +196,10 @@ nmap-parse-output full_tcp_scan.xml csv > scan_results.csv
 3. Upgrade MySQL to 8.0.x on 10.10.12.5 and restrict bind address
 4. Change SNMP community strings from "public" on 10.10.3.77
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 304fbfbe795febda
+-->
+

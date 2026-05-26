@@ -33,6 +33,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Gcp Organization Policy Constraints
@@ -280,3 +281,10 @@ gcloud asset search-all-resources \
 - GCP Organization Policy Constraints: https://docs.google.com/resource-manager/docs/organization-policy/org-policy-constraints
 - GCP Policy Intelligence: https://cloud.google.com/policy-intelligence
 - CIS GCP Foundations Benchmark
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 93e7caa385a16ff5
+-->
+

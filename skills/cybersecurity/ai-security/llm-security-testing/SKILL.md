@@ -240,3 +240,10 @@ MIT License - Use responsibly and ethically for authorized testing only.
 ## Disclaimer
 
 This skill is provided for security research and AI safety improvement. Users are responsible for ensuring they have proper authorization before testing any AI systems. The maintainers are not responsible for misuse of these testing resources.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 716bb16815979616
+-->
+

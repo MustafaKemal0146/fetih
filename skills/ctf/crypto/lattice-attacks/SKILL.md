@@ -38,6 +38,7 @@ related_skills:
   - rsa-padding-oracle
   - rsa-common-modulus
   - elliptic-curve-attacks
+adapted_for: fetih
 ---
 
 # Lattice (Kafes) Saldırıları — RSA'nın Matematiksel Sınırları
@@ -323,3 +324,10 @@ RSA challenge → rsa-wiener-attack başarısız
 - Joachim Vandersmissen crypto-attacks: https://github.com/jvdsn/crypto-attacks
 - Coppersmith orjinal makale: "Finding Small Solutions to Small Degree Polynomials" (1996)
 - Boneh-Durfee orjinal: "Cryptanalysis of RSA with Private Key d Less than N^0.292" (1999)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 42160c8e639e2fdb
+-->
+

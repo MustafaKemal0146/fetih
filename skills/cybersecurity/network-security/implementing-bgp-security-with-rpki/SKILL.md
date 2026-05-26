@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-03
 - PR.DS-02
+adapted_for: fetih
 ---
 
 # Implementing Bgp Security with Rpki
@@ -331,3 +332,10 @@ if __name__ == "__main__":
 - [RIPE NCC RPKI Dashboard](https://rpki.ripe.net/)
 - [RFC 6480 - RPKI Architecture](https://www.rfc-editor.org/rfc/rfc6480)
 - [RFC 6811 - BGP Origin AS Validation](https://www.rfc-editor.org/rfc/rfc6811)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 250e5c6ac33644ee
+-->
+

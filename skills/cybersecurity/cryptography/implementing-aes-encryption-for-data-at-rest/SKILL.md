@@ -27,6 +27,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Implementing Aes Encryption for Data At Rest
@@ -117,3 +118,10 @@ Never use raw passwords as encryption keys. Always derive keys using:
 - [ ] Nonces are never reused for the same key
 - [ ] Large files (>1GB) can be processed via streaming
 - [ ] Encrypted file format includes all necessary metadata
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c9eddec93d54cc7d
+-->
+

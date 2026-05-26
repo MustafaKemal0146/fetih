@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Api Key Security Controls
@@ -406,3 +407,10 @@ def process_leaked_keys(leaks_file):
 - Average time to revocation: 3.2 minutes
 - Keys Detected in CI/CD pre-commit: 7 (prevented)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: ee2fd12cae69d515
+-->
+

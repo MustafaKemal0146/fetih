@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Performing Plc Firmware Security Analysis
@@ -495,3 +496,10 @@ VULNERABILITIES FOUND:
     Impact: [Operational impact]
     Remediation: [Fix or mitigation]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 44d4708bb34ab2bd
+-->
+

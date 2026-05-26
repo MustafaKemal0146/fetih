@@ -30,6 +30,7 @@ nist_csf:
 - GV.PO-01
 - ID.RA-01
 - GV.OV-01
+adapted_for: fetih
 ---
 
 # Performing Nist Csf Maturity Assessment
@@ -148,3 +149,10 @@ The NIST Cybersecurity Framework (CSF) 2.0, released in February 2024, provides 
 - NIST SP 800-53 Rev 5 (control catalog that maps to CSF)
 - NIST CSF 2.0 Quick Start Guides
 - CSF 2.0 Reference Tool: https://csrc.nist.gov/projects/cybersecurity-framework
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 721e792857a34291
+-->
+

@@ -26,6 +26,7 @@ nist_csf:
 - PR.DS-01
 - PR.DS-02
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Implementing Zero Knowledge Proof for Authentication
@@ -92,3 +93,10 @@ Zero-Knowledge Proofs (ZKPs) allow a prover to demonstrate Bilgi: a secret (such
 - [ ] Non-interactive proof is verifiable offline
 - [ ] Multiple authentications produce different transcripts
 - [ ] Protocol resists replay attacks
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 7693be5c77077e4c
+-->
+

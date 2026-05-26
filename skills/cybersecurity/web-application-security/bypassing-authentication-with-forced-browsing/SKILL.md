@@ -32,6 +32,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Bypassing Authentication with Forced Browsing
@@ -263,3 +264,10 @@ The `/actuator/env` endpoint is exposed without authentication, revealing enviro
 4. Implement IP-based access restrictions for administrative interfaces
 5. Use a reverse proxy to restrict Erişim: internal-only endpoints
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: c00517b8e15303ca
+-->
+

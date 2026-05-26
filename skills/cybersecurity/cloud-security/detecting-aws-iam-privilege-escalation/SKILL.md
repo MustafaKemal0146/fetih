@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Detection Aws Iam Privilege Escalation
@@ -70,3 +71,10 @@ bu skill uses boto3 and Cloudsplaining-style analysis to identify IAM privilege 
 - List of dangerous permission combinations per principal
 - Wildcard resource policy audit results
 - Remediation recommendations for each Bul:ing
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 1aaa085f2a2fef48
+-->
+

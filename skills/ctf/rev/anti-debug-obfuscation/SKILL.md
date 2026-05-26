@@ -17,6 +17,7 @@ category: rev
 solved_challenges:
   - "DEF CON CTF Qualifier 2023 - IFUCKUP (F2-linear PRNG, SageMath 512×512 linear system over F2)"
   - "HTB Cyber Apocalypse 2024 - PackedAway"
+adapted_for: fetih
 ---
 
 # Anti-Debug ve Obfuscation Çözme
@@ -300,3 +301,10 @@ awatch *0x<adres>
 - Self-modifying code → statik analiz yetersiz kalır, her zaman dinamik doğrula
 - bkz. elf-static-analysis SKILL.md (temel triage için)
 - bkz. z3-constraint-solving SKILL.md (constraint tabanlı çözümler için)
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 552cbc2c19f6ded0
+-->
+

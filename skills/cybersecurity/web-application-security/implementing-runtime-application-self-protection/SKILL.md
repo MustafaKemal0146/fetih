@@ -35,6 +35,7 @@ nist_csf:
 - PR.PS-04
 - ID.RA-01
 - PR.DS-10
+adapted_for: fetih
 ---
 
 # Implementing Runtime Application Self Protection
@@ -81,3 +82,10 @@ Forward RASP alerts to the SIEM for correlation with WAF, IDS, and authenticatio
 ## Expected Output
 
 JSON report containing RASP policy audit results, Detected attack attempts with stack traces, blocked requests summary, and coverage assessment against OWASP Top 10.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: bf483c1b6f0f6487
+-->
+

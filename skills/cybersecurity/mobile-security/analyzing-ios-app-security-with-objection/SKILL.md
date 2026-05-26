@@ -33,6 +33,7 @@ nist_csf:
 - PR.AA-05
 - ID.RA-01
 - DE.CM-09
+adapted_for: fetih
 ---
 
 # Analyzing Ios App Security with Objection
@@ -178,3 +179,10 @@ ios hooking search classes UITextField
 - **Keychain access scope**: Objection can only dump keychain items within the app's access group. System keychain items require separate jailbreak-level tools.
 - **Swift name mangling**: Swift method names are mangled in the runtime. Use `ios hooking list classes` with grep to Bul: demangled names.
 - **Non-persistent changes**: All Objection modifications are runtime-only and reset on app restart. Document Bul:ings immediately.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5da2590bd57c59df
+-->
+

@@ -32,6 +32,7 @@ nist_csf:
 - ID.AM-08
 - GV.SC-06
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Aws Config Rules for Compliance
@@ -337,3 +338,10 @@ ACCOUNT COMPLIANCE RANKING:
   ...
   30. dev-sandbox (account-030):  68% compliant
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 046274f7da6b774b
+-->
+

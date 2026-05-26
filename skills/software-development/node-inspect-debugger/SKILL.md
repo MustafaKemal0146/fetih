@@ -9,6 +9,7 @@ metadata:
   fetih:
     tags: [debugging, nodejs, node-inspect, cdp, breakpoints, ui-tui]
     related_skills: [systematic-debugging, python-debugpy, debugging-fetih-tui-commands]
+adapted_for: fetih
 ---
 
 # Node.js Inspect Debugger
@@ -317,3 +318,10 @@ debug> pause
 debug> bt
 # Now you see the stuck frame
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: e7af6bc74a66adc7
+-->
+

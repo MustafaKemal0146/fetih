@@ -26,6 +26,7 @@ nist_csf:
 - RS.MA-01
 - GV.OV-01
 - DE.AE-02
+adapted_for: fetih
 ---
 
 # Implementing Log Integrity with Blockchain
@@ -68,3 +69,10 @@ python scripts/agent.py --log-file /var/log/syslog --chain-file log_chain.json -
 
 ### Tamper Tespit
 If entry 42 is modified, chain_hash[42] will not match SHA256(chain_hash[41] + ...), and all entries from 42 onward will be flagged as invalid.
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 5adcfc8724fcbfdc
+-->
+

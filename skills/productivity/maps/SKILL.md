@@ -11,6 +11,7 @@ metadata:
     category: productivity
     requires_toolsets: [terminal]
     supersedes: [find-nearby]
+adapted_for: fetih
 ---
 
 # Maps Skill
@@ -193,3 +194,10 @@ python3 ~/.fetih/skills/maps/scripts/maps_client.py search "Statue of Liberty"
 python3 ~/.fetih/skills/maps/scripts/maps_client.py nearby --near "Times Square" --category restaurant --limit 3
 # Should return a list of restaurants within ~500m of Times Square
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 943d337f9663ed73
+-->
+

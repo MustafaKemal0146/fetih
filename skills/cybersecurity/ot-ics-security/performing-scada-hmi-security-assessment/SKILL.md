@@ -35,6 +35,7 @@ nist_csf:
 - DE.CM-01
 - ID.AM-05
 - GV.OC-02
+adapted_for: fetih
 ---
 
 # Performing Scada Hmi Security Assessment
@@ -324,3 +325,10 @@ COMPLIANCE STATUS:
   IEC 62443 SL-T: [target level]
   IEC 62443 SL-A: [achieved level]
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: f1a3b5dfbafc0982
+-->
+

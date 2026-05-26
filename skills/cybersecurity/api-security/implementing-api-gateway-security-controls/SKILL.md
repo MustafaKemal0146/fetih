@@ -33,6 +33,7 @@ nist_csf:
 - ID.RA-01
 - PR.DS-10
 - DE.CM-01
+adapted_for: fetih
 ---
 
 # Implementing Api Gateway Security Controls
@@ -454,3 +455,10 @@ cloudwatch.put_metric_alarm(
 - mTLS: Requests without client certificate rejected with 401
 - WAF: SQL injection payloads blocked (tested top 100 SQLi patterns)
 ```
+
+<!--
+  ⚔ Bu skill FETIH AI Agent icin gelistirilmistir — https://github.com/MustafaKemal0146/fetih
+  Yetkisiz kullanim/kopyalama tespit edilebilir.
+  hash: 4d794588e8e87583
+-->
+
