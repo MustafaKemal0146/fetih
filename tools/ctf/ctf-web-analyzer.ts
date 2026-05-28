@@ -39,8 +39,9 @@ const SQLI_PAYLOADS = [
   "' AND 1=CONVERT(int, @@version)--",
 ];
 
-function detectSQLi(input: string, params: Record<string, string>): VulnDetail[] {
+function detectSQLi(url: string, input: string, params: Record<string, string>): VulnDetail[] {
   const vulns: VulnDetail[] = [];
+  const targetUrl = url || 'TARGET_URL';
 
   // Response'ta SQL hata mesajı var mı?
   const hasError = SQLI_ERROR_PATTERNS.some(p => p.test(input));
@@ -51,7 +52,7 @@ function detectSQLi(input: string, params: Record<string, string>): VulnDetail[]
       severity: 'critical',
       evidence: `SQL hata mesajı tespit edildi: ${match}`,
       payloads: SQLI_PAYLOADS,
-      tool_command: `sqlmap -u "${Object.keys(params)[0] ?? 'URL'}" --dbs --batch`,
+      tool_command: `sqlmap -u "${targetUrl}" --dbs --batch`,
     });
   }
 
@@ -64,7 +65,7 @@ function detectSQLi(input: string, params: Record<string, string>): VulnDetail[]
         parameter: key,
         evidence: `Sayısal parametre: ${key}=${val}`,
         payloads: SQLI_PAYLOADS,
-        tool_command: `sqlmap -u "URL" -p "${key}" --dbs --batch`,
+        tool_command: `sqlmap -u "${targetUrl}" -p "${key}" --dbs --batch`,
       });
     }
     // Tek tırnak içeren parametre
@@ -75,7 +76,7 @@ function detectSQLi(input: string, params: Record<string, string>): VulnDetail[]
         parameter: key,
         evidence: `Parametre tek tırnak içeriyor: ${key}`,
         payloads: SQLI_PAYLOADS,
-        tool_command: `sqlmap -u "URL" -p "${key}" --level=3 --batch`,
+        tool_command: `sqlmap -u "${targetUrl}" -p "${key}" --level=3 --batch`,
       });
     }
   }
@@ -304,7 +305,7 @@ export function analyzeWeb(input: string): WebAnalysisResult {
   flags.push(...bodyFlags);
 
   // Analizler
-  vulns.push(...detectSQLi(input, params));
+  vulns.push(...detectSQLi(url, input, params));
   vulns.push(...detectXSS(input, headers, params));
   vulns.push(...detectLFI(url, params));
   vulns.push(...detectIDOR(url, params));

@@ -16,8 +16,9 @@ const SQLI_PAYLOADS = [
     "' UNION SELECT NULL--",
     "' AND 1=CONVERT(int, @@version)--",
 ];
-function detectSQLi(input, params) {
+function detectSQLi(url, input, params) {
     const vulns = [];
+    const targetUrl = url || 'TARGET_URL';
     // Response'ta SQL hata mesajı var mı?
     const hasError = SQLI_ERROR_PATTERNS.some(p => p.test(input));
     if (hasError) {
@@ -27,7 +28,7 @@ function detectSQLi(input, params) {
             severity: 'critical',
             evidence: `SQL hata mesajı tespit edildi: ${match}`,
             payloads: SQLI_PAYLOADS,
-            tool_command: `sqlmap -u "${Object.keys(params)[0] ?? 'URL'}" --dbs --batch`,
+            tool_command: `sqlmap -u "${targetUrl}" --dbs --batch`,
         });
     }
     // Sayısal parametre var mı?
@@ -39,7 +40,7 @@ function detectSQLi(input, params) {
                 parameter: key,
                 evidence: `Sayısal parametre: ${key}=${val}`,
                 payloads: SQLI_PAYLOADS,
-                tool_command: `sqlmap -u "URL" -p "${key}" --dbs --batch`,
+                tool_command: `sqlmap -u "${targetUrl}" -p "${key}" --dbs --batch`,
             });
         }
         // Tek tırnak içeren parametre
@@ -50,7 +51,7 @@ function detectSQLi(input, params) {
                 parameter: key,
                 evidence: `Parametre tek tırnak içeriyor: ${key}`,
                 payloads: SQLI_PAYLOADS,
-                tool_command: `sqlmap -u "URL" -p "${key}" --level=3 --batch`,
+                tool_command: `sqlmap -u "${targetUrl}" -p "${key}" --level=3 --batch`,
             });
         }
     }
@@ -247,7 +248,7 @@ export function analyzeWeb(input) {
     const bodyFlags = input.match(/flag\{[^}]+\}/gi) ?? [];
     flags.push(...bodyFlags);
     // Analizler
-    vulns.push(...detectSQLi(input, params));
+    vulns.push(...detectSQLi(url, input, params));
     vulns.push(...detectXSS(input, headers, params));
     vulns.push(...detectLFI(url, params));
     vulns.push(...detectIDOR(url, params));
