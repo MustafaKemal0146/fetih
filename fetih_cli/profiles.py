@@ -451,7 +451,27 @@ def _read_distribution_meta(profile_dir: Path) -> tuple:
 
 
 def _read_config_model(profile_dir: Path) -> tuple:
-    """Read model/provider from a profile's config.yaml. Returns (model, provider)."""
+    """Read model/provider from config.yaml, with session-model override.
+
+    Resolution order:
+    1. ``~/.fetih/.last_model`` (last non-global /model switch — sticky)
+    2. ``config.yaml`` ``model.default`` / ``model.provider``
+    3. Falls back to None
+
+    The session-model file is written by ``switch_model()`` whenever the
+    user runs ``/model <name>`` without ``--global``. It survives restarts
+    so the user's last choice is always remembered.
+    """
+    # 1. Session-model override (last /model without --global)
+    try:
+        from fetih_cli.model_switch import load_last_session_model
+        session = load_last_session_model()
+        if session:
+            return session.get("model"), session.get("provider")
+    except Exception:
+        pass
+
+    # 2. config.yaml
     config_path = profile_dir / "config.yaml"
     if not config_path.exists():
         return None, None

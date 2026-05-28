@@ -1023,7 +1023,7 @@ def switch_model(
         warnings.append(fetih_warn)
 
     # --- Build result ---
-    return ModelSwitchResult(
+    result = ModelSwitchResult(
         success=True,
         new_model=new_model,
         target_provider=target_provider,
@@ -1038,6 +1038,72 @@ def switch_model(
         model_info=model_info,
         is_global=is_global,
     )
+
+    # ── Auto-persist session model ──
+    # When the user switches models without --global, save the choice to a
+    # session file so it survives restarts. --global still writes to config.yaml
+    # (the canonical source), but session-file gives /model the "sticky" behaviour
+    # users expect: "I changed it, it should still be there tomorrow."
+    if not is_global:
+        _save_last_session_model(result)
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# Session model persistence (non-global /model sticky behaviour)
+# ---------------------------------------------------------------------------
+
+def _last_session_model_path() -> Path:
+    """Return path to the session-model preference file."""
+    from pathlib import Path as _Path
+    from fetih_constants import get_fetih_home
+    return get_fetih_home() / ".last_model"
+
+
+def _save_last_session_model(result: ModelSwitchResult) -> None:
+    """Save the model choice to ~/.fetih/.last_model for next session."""
+    try:
+        import json as _json
+        data = {
+            "model": result.new_model,
+            "provider": result.target_provider,
+            "base_url": result.base_url,
+            "api_mode": result.api_mode,
+            "ts": __import__("time").time(),
+        }
+        _last_session_model_path().write_text(_json.dumps(data, ensure_ascii=False))
+    except Exception:
+        pass  # Best-effort, never break model switch over a file write
+
+
+def load_last_session_model() -> Optional[dict]:
+    """Load the last session's model preference, or None if unavailable/stale.
+
+    Returns a dict with keys ``model``, ``provider``, or None when:
+    - The file doesn't exist
+    - The file is older than 30 days (stale)
+    - The file can't be parsed
+    """
+    path = _last_session_model_path()
+    if not path.exists():
+        return None
+    try:
+        import json as _json, time as _time
+        data = _json.loads(path.read_text(encoding="utf-8"))
+        # Stale after 30 days
+        age = _time.time() - data.get("ts", 0)
+        if age > 30 * 86400:
+            try:
+                path.unlink()
+            except OSError:
+                pass
+            return None
+        if data.get("model"):
+            return data
+    except Exception:
+        pass
+    return None
 
 
 # ---------------------------------------------------------------------------
