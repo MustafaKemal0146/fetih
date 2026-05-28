@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fetih"
-version = "1.0.0"
+version = "1.0.1"
 description = "FETIH — CTF/OSINT siber operasyon ajanlık sistemi. HİÇBİR SİSTEM GÜVENLİ DEĞİLDİR."
 readme = "README.md"
 requires-python = ">=3.11"

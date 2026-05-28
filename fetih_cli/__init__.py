@@ -14,8 +14,8 @@ Subcommandlar:
 import os
 import sys
 
-__version__ = "1.0.0"
-__release_date__ = "2026.5.28"
+__version__ = "1.0.1"
+__release_date__ = "2026.5.29"
 
 
 def _ensure_utf8():
