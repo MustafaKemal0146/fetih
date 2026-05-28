@@ -377,9 +377,40 @@ def get_latest_release_tag(repo_dir: Optional[Path] = None) -> Optional[tuple]:
     return _latest_release_cache
 
 
+def _get_tag_date(repo_dir: Optional[Path] = None) -> Optional[str]:
+    """Return the date of the latest git tag in 'YYYY.M.D' format, or None."""
+    repo_dir = repo_dir or _resolve_repo_dir()
+    if repo_dir is None:
+        return None
+    try:
+        result = subprocess.run(
+            ["git", "tag", "--sort=-creatordate", "--format=%(creatordate:short)",
+             "--list", "v*"],
+            capture_output=True, text=True, timeout=3,
+            cwd=str(repo_dir),
+        )
+    except Exception:
+        return None
+    if result.returncode != 0:
+        return None
+    date_str = (result.stdout or "").strip().split("\n")[0]
+    if not date_str:
+        return None
+    # Convert YYYY-MM-DD → YYYY.M.D (strip leading zeros in month/day)
+    try:
+        parts = date_str.split("-")
+        year, month, day = parts[0], str(int(parts[1])), str(int(parts[2]))
+        return f"{year}.{month}.{day}"
+    except (IndexError, ValueError):
+        return None
+
+
 def format_banner_version_label() -> str:
     """Return the version label shown in the startup banner title."""
-    base = f"FETIH v{VERSION} ({RELEASE_DATE})"
+    # Prefer git tag date over hardcoded __release_date__
+    tag_date = _get_tag_date()
+    date_str = tag_date or RELEASE_DATE
+    base = f"FETIH v{VERSION} ({date_str})"
     state = get_git_banner_state()
     if not state:
         return base

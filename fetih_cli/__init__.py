@@ -15,7 +15,7 @@ import os
 import sys
 
 __version__ = "1.0.0"
-__release_date__ = "2026.5.24"
+__release_date__ = "2026.5.28"
 
 
 def _ensure_utf8():
