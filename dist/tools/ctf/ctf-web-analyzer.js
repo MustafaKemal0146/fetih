@@ -65,8 +65,9 @@ const XSS_PAYLOADS = [
     '"><svg onload=alert(1)>',
     "'><script>alert(document.domain)</script>",
 ];
-function detectXSS(input, headers, params) {
+function detectXSS(url, input, headers, params) {
     const vulns = [];
+    const targetUrl = url || 'TARGET_URL';
     const contentType = headers['content-type'] ?? headers['Content-Type'] ?? '';
     const isHtml = contentType.includes('text/html') || input.includes('<html') || input.includes('<!DOCTYPE');
     const hasXssProtection = 'x-xss-protection' in headers || 'X-XSS-Protection' in headers;
@@ -80,7 +81,7 @@ function detectXSS(input, headers, params) {
                 parameter: key,
                 evidence: `Parametre değeri (${val}) response'ta yansıyor`,
                 payloads: XSS_PAYLOADS,
-                tool_command: `dalfox url "URL?${key}=FUZZ" --mining-dom`,
+                tool_command: `dalfox url "${targetUrl}?${key}=FUZZ" --mining-dom`,
             });
         }
     }
@@ -128,7 +129,7 @@ function detectLFI(url, params) {
                 parameter: key,
                 evidence: `LFI'ya açık parametre: ${key}=${val}`,
                 payloads: LFI_PAYLOADS,
-                tool_command: `ffuf -u "URL?${key}=FUZZ" -w /usr/share/wordlists/lfi.txt`,
+                tool_command: `ffuf -u "${url}?${key}=FUZZ" -w /usr/share/wordlists/lfi.txt`,
             });
             vulns[vulns.length - 1].payloads.push(...(isLinux ? LFI_LINUX_FILES : LFI_WINDOWS_FILES));
         }
@@ -249,7 +250,7 @@ export function analyzeWeb(input) {
     flags.push(...bodyFlags);
     // Analizler
     vulns.push(...detectSQLi(url, input, params));
-    vulns.push(...detectXSS(input, headers, params));
+    vulns.push(...detectXSS(url, input, headers, params));
     vulns.push(...detectLFI(url, params));
     vulns.push(...detectIDOR(url, params));
     // Dizin keşfi
