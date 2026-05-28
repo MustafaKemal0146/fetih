@@ -8050,8 +8050,16 @@ class FETIHCLI:
             self._handle_report_command(cmd_original)
         elif canonical == "auto-solve":
             self._handle_auto_solve_command(cmd_original)
+        elif canonical == "computer-use":
+            self._handle_computer_use_command(cmd_original)
         elif canonical == "hint":
             self._handle_hint_command(cmd_original)
+        elif canonical == "learnings":
+            self._handle_learnings_command(cmd_original)
+        elif canonical == "update":
+            self._handle_update_command(cmd_original)
+        elif canonical == "dashboard":
+            self._handle_dashboard_command(cmd_original)
         else:
             # Check for user-defined quick commands (bypass agent loop, no LLM call)
             base_cmd = cmd_lower.split()[0]
@@ -9124,6 +9132,67 @@ class FETIHCLI:
         else:
             _cprint(f"  {_DIM}Solver talebi alindi.{_RST}")
 
+    def _handle_computer_use_command(self, cmd: str):
+        """Handle /computer-use — toggle desktop control on/off/status."""
+        parts = cmd.strip().split()
+        sub = parts[1] if len(parts) > 1 else "status"
+
+        from tools.computer_use_tool import enable_desktop, disable_desktop, is_desktop_enabled
+        from tools.computer_use.pyautogui_backend import pyautogui_backend_available
+        from tools.computer_use.cua_backend import cua_driver_binary_available
+
+        if sub == "on":
+            # Check backends
+            on_macos = __import__('sys').platform == "darwin"
+            cua_ok = cua_driver_binary_available()
+            pya_ok = pyautogui_backend_available()
+
+            if on_macos and not cua_ok:
+                _cprint(f"  {_DIM}⚠️  cua-driver bulunamadi. Yuklemek icin:{_RST}")
+                _cprint(f"  {_DIM}    fetih computer-use install{_RST}")
+                _cprint(f"  {_DIM}  veya:{_RST}")
+                _cprint(f"  {_DIM}    /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/trycua/cua/main/libs/cua-driver/scripts/install.sh)\"{_RST}")
+                return
+            elif not on_macos and not pya_ok:
+                _cprint(f"  {_DIM}⚠️  Masaustu kontrolu kullanilamaz.{_RST}")
+                _cprint(f"  {_DIM}  GUI oturumu gerekli (headless sunucuda calismaz).{_RST}")
+                _cprint(f"  {_DIM}  DISPLAY={__import__('os').environ.get('DISPLAY', 'YOK')}{_RST}")
+                return
+
+            result = enable_desktop()
+            if result:
+                _cprint(f"  {_ACCENT}🖥️  Masaustu kontrolu AKTIF{_RST}")
+                backend = "cua-driver (arka planda)" if (on_macos and cua_ok) else "pyautogui"
+                _cprint(f"  {_DIM}  Backend: {backend}{_RST}")
+                _cprint(f"  {_DIM}  FAILSAFE: fareyi sol ust koseye cekerseniz durur{_RST}")
+                _cprint(f"  {_DIM}  Kapatmak icin: /computer-use off{_RST}")
+                # Invalidate tool cache so the model picks up the new tool
+                from tools.registry import invalidate_check_fn_cache
+                invalidate_check_fn_cache()
+            else:
+                _cprint(f"  {_DIM}⚠️  Masaustu kontrolu baslatilamadi.{_RST}")
+
+        elif sub == "off":
+            disable_desktop()
+            from tools.registry import invalidate_check_fn_cache
+            invalidate_check_fn_cache()
+            _cprint(f"  {_DIM}🖥️  Masaustu kontrolu KAPATILDI{_RST}")
+
+        else:  # status
+            is_on = is_desktop_enabled()
+            on_macos = __import__('sys').platform == "darwin"
+            cua_ok = cua_driver_binary_available()
+            pya_ok = pyautogui_backend_available()
+
+            _cprint(f"  🖥️  {_ACCENT}Masaustu Kontrolu Durumu{_RST}")
+            status_text = f"{_ACCENT}AKTIF{_RST}" if is_on else f"{_DIM}KAPALI{_RST}"
+            _cprint(f"  Durum: {status_text}")
+            _cprint(f"  Platform: {__import__('sys').platform}")
+            _cprint(f"  cua-driver: {'✅ yuklu' if cua_ok else '❌ yok'}")
+            _cprint(f"  pyautogui: {'✅ hazir' if pya_ok else '❌ yok (GUI oturumu gerekli)'}")
+            if not is_on:
+                _cprint(f"  {_DIM}  Acmak icin: /computer-use on{_RST}")
+
     def _handle_hint_command(self, cmd: str):
         """Handle /hint — CTF progressive hint system."""
         parts = cmd.strip().split()
@@ -9139,6 +9208,177 @@ class FETIHCLI:
             _cprint(f"  {_DIM}💡 CTF ipucu ({subcommand}) hazirlaniyor...{_RST}")
         else:
             _cprint(f"  {_DIM}Ipucu talebi alindi.{_RST}")
+
+    def _handle_learnings_command(self, cmd: str):
+        """Handle /learnings — self-improving agent knowledge base."""
+        parts = cmd.strip().split()
+        sub = parts[1] if len(parts) > 1 else "list"
+
+        try:
+            from fetih_cli.learnings import (
+                list_learnings, search_learnings, get_learning_stats,
+            )
+
+            if sub == "stats":
+                stats = get_learning_stats()
+                _cprint(f"  🧠 {_ACCENT}FETIH Ogrenme Veritabani{_RST}")
+                _cprint(f"  {_DIM}Toplam ogrenim: {stats['total']}{_RST}")
+                _cprint(f"  {_DIM}Terfi eden: {stats.get('promoted', 0)}{_RST}")
+                if stats.get('by_category'):
+                    _cprint(f"  {_DIM}Kategoriler: {stats['by_category']}{_RST}")
+                if stats.get('by_priority'):
+                    _cprint(f"  {_DIM}Oncelikler: {stats['by_priority']}{_RST}")
+                return
+
+            if sub == "search" and len(parts) > 2:
+                query = " ".join(parts[2:])
+                results = search_learnings(query, limit=10)
+                if not results:
+                    _cprint(f"  {_DIM}'{query}' icin ogrenim bulunamadi.{_RST}")
+                    return
+                _cprint(f"  🧠 {_ACCENT}Arama: {query} ({len(results)} sonuc){_RST}")
+                for e in results:
+                    prio_emoji = {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(e.priority, "⚪")
+                    _cprint(f"  {prio_emoji} {e.id} [{e.category}] {e.trigger[:80]}")
+                return
+
+            # Default: list learnings
+            entries = list_learnings(limit=25)
+            if not entries:
+                _cprint(f"  {_DIM}Henuz hic ogrenim kaydedilmemis.{_RST}")
+                _cprint(f"  {_DIM}FETIH calistikca otomatik olarak ogrenimleri buraya kaydeder.{_RST}")
+                return
+            _cprint(f"  🧠 {_ACCENT}Son Ogrenimler ({len(entries)}){_RST}")
+            for e in entries[-10:]:
+                prio_emoji = {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(e.priority, "⚪")
+                _cprint(f"  {prio_emoji} {e.id} [{e.category}] {e.trigger[:80]}")
+        except Exception as e:
+            _cprint(f"  {_DIM}✗ Ogrenim sistemi hatasi: {e}{_RST}")
+
+    def _handle_update_command(self, cmd: str):
+        """Handle /update — check and apply FETIH updates."""
+        parts = cmd.strip().split()
+        sub = parts[1] if len(parts) > 1 else "--check"
+
+        try:
+            from fetih_cli.updater import (
+                check_for_updates, apply_update, rollback_update, get_update_status,
+            )
+
+            if sub == "--status":
+                status = get_update_status()
+                _cprint(f"  ⬆️  {_ACCENT}FETIH Guncelleme Durumu{_RST}")
+                _cprint(f"  {_DIM}Mevcut surum: {status['current_version']}{_RST}")
+                if status.get('applied_version'):
+                    _cprint(f"  {_DIM}Uygulanan: {status['applied_version']}{_RST}")
+                _cprint(f"  {_DIM}Toplam guncelleme: {status['update_count']}{_RST}")
+                if status.get('history'):
+                    _cprint(f"  {_DIM}Son guncellemeler:{_RST}")
+                    for h in status['history'][-3:]:
+                        _cprint(f"  {_DIM}  {h['ts'][:10]} {h['previous_version']} → {h['new_version']}{_RST}")
+                return
+
+            if sub == "--apply":
+                _cprint(f"  ⬆️  {_DIM}Guncelleme uygulaniyor...{_RST}")
+                result = apply_update()
+                if result.get('success'):
+                    _cprint(f"  {_ACCENT}✓ Guncellendi: {result['previous_version']} → {result['new_version']}{_RST}")
+                    _cprint(f"  {_DIM}  Yontem: {result.get('method', 'unknown')}{_RST}")
+                else:
+                    _cprint(f"  {_DIM}✗ Guncelleme basarisiz: {result.get('message', 'Bilinmeyen hata')}{_RST}")
+                return
+
+            if sub == "--rollback":
+                _cprint(f"  ⬆️  {_DIM}Rollback yapiliyor...{_RST}")
+                result = rollback_update()
+                if result.get('success'):
+                    _cprint(f"  {_ACCENT}✓ Rollback: {result.get('rolled_back_to', '?')}{_RST}")
+                else:
+                    _cprint(f"  {_DIM}✗ Rollback basarisiz: {result.get('message', 'Bilinmeyen hata')}{_RST}")
+                return
+
+            # Default: check
+            result = check_for_updates()
+            current = result.get('current_version', '?')
+            latest = result.get('latest_version')
+            if latest is None:
+                _cprint(f"  ⬆️  {_DIM}Guncelleme kontrol edilemedi (GitHub API erisilemedi){_RST}")
+            elif result.get('update_available'):
+                _cprint(f"  ⬆️  {_ACCENT}Guncelleme mevcut!{_RST}")
+                _cprint(f"  {_DIM}  Mevcut: {current}  →  Yeni: {latest}{_RST}")
+                if result.get('release_url'):
+                    _cprint(f"  {_DIM}  Link: {result['release_url']}{_RST}")
+                _cprint(f"  {_DIM}  Guncellemek icin: /update --apply{_RST}")
+            else:
+                _cprint(f"  ⬆️  {_DIM}FETIH guncel ({current}){_RST}")
+        except Exception as e:
+            _cprint(f"  {_DIM}✗ Guncelleme hatasi: {e}{_RST}")
+
+    def _handle_dashboard_command(self, cmd: str):
+        """Handle /dashboard — FETIH status dashboard with stats."""
+        try:
+            from fetih_cli import __version__
+            from fetih_cli.learnings import get_learning_stats
+
+            # Get hook stats if available
+            hook_stats = {}
+            try:
+                from fetih_cli.agent_hooks import get_hook_stats
+                hook_stats = get_hook_stats()
+            except ImportError:
+                pass
+
+            learning_stats = get_learning_stats()
+
+            _cprint(f"")
+            _cprint(f"  ╔══════════════════════════════════════╗")
+            _cprint(f"  ║     {_ACCENT}FETIH v{__version__} Durum Panosu{_RST}       ║")
+            _cprint(f"  ╚══════════════════════════════════════╝")
+            _cprint(f"")
+
+            # Session info
+            _cprint(f"  {_ACCENT}📋 Oturum{_RST}")
+            _cprint(f"  {_DIM}  Session ID: {self.session_id}{_RST}")
+            _cprint(f"  {_DIM}  Model: {self.model}{_RST}")
+            _cprint(f"  {_DIM}  Enabled toolsets: {', '.join(self.enabled_toolsets) if hasattr(self, 'enabled_toolsets') else 'default'}{_RST}")
+
+            # Tool stats
+            if hook_stats.get('tools', {}).get('total_calls', 0) > 0:
+                tools = hook_stats['tools']
+                _cprint(f"")
+                _cprint(f"  {_ACCENT}🔧 Tool Istatistikleri{_RST}")
+                _cprint(f"  {_DIM}  Toplam cagri: {tools['total_calls']} (basarisiz: {tools['failed']}){_RST}")
+                if tools.get('timing'):
+                    for tool_name, timing in sorted(tools['timing'].items(), key=lambda x: x[1]['count'], reverse=True)[:5]:
+                        _cprint(f"  {_DIM}  {tool_name}: {timing['count']}x, avg {timing['avg_ms']}ms{_RST}")
+
+            # Model stats
+            if hook_stats.get('model', {}).get('total_calls', 0) > 0:
+                model = hook_stats['model']
+                _cprint(f"")
+                _cprint(f"  {_ACCENT}🤖 Model Istatistikleri{_RST}")
+                _cprint(f"  {_DIM}  Toplam API cagrisi: {model['total_calls']}{_RST}")
+                if model.get('timing', {}).get('avg_ms'):
+                    _cprint(f"  {_DIM}  Ort. yanit suresi: {model['timing']['avg_ms']}ms{_RST}")
+
+            # Learning stats
+            _cprint(f"")
+            _cprint(f"  {_ACCENT}🧠 Ogrenim Veritabani{_RST}")
+            _cprint(f"  {_DIM}  Toplam ogrenim: {learning_stats['total']}{_RST}")
+            _cprint(f"  {_DIM}  Terfi eden: {learning_stats.get('promoted', 0)}{_RST}")
+
+            # Errors
+            if hook_stats.get('errors', {}).get('total', 0) > 0:
+                _cprint(f"")
+                _cprint(f"  {_ACCENT}⚠️ Hata Istatistikleri{_RST}")
+                _cprint(f"  {_DIM}  Toplam hata: {hook_stats['errors']['total']}{_RST}")
+                if hook_stats['errors'].get('by_type'):
+                    for err_type, count in sorted(hook_stats['errors']['by_type'].items(), key=lambda x: x[1], reverse=True)[:5]:
+                        _cprint(f"  {_DIM}  {err_type}: {count}{_RST}")
+
+            _cprint(f"")
+        except Exception as e:
+            _cprint(f"  {_DIM}✗ Dashboard hatasi: {e}{_RST}")
 
     def _handle_fast_command(self, cmd: str):
         """Handle /fast — toggle fast mode (OpenAI Priority Processing / Anthropic Fast Mode)."""

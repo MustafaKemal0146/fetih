@@ -130,14 +130,39 @@ def _get_backend() -> ComputerUseBackend:
     global _backend
     with _backend_lock:
         if _backend is None:
-            backend_name = os.environ.get("FETIH_COMPUTER_USE_BACKEND", "cua").lower()
-            if backend_name in {"cua", "cua-driver", ""}:
-                from tools.computer_use.cua_backend import CuaDriverBackend
-                _backend = CuaDriverBackend()
-            elif backend_name == "noop":  # pragma: no cover
+            backend_name = os.environ.get("FETIH_COMPUTER_USE_BACKEND", "").lower()
+            # On macOS, cua-driver is the preferred backend (background, no focus steal)
+            if backend_name in {"cua", "cua-driver"} or (not backend_name and sys.platform == "darwin"):
+                from tools.computer_use.cua_backend import CuaDriverBackend, cua_driver_binary_available
+                if cua_driver_binary_available():
+                    _backend = CuaDriverBackend()
+                elif sys.platform != "darwin":
+                    # Fall through to pyautogui on non-macOS
+                    pass
+                else:
+                    _backend = CuaDriverBackend()  # will fail at start() with a clear message
+            # On Linux/Windows, or if explicitly set to pyautogui:
+            if _backend is None:
+                if backend_name in {"pyautogui", "pya", ""} or True:
+                    from tools.computer_use.pyautogui_backend import (
+                        PyAutoGUIBackend,
+                        pyautogui_backend_available,
+                    )
+                    if pyautogui_backend_available():
+                        _backend = PyAutoGUIBackend()
+                    else:
+                        raise RuntimeError(
+                            "Desktop control unavailable: no suitable backend.\n"
+                            "On macOS: install cua-driver (fetih computer-use install)\n"
+                            "On Linux/Windows: ensure a GUI session is running with DISPLAY set"
+                        )
+            if backend_name == "noop":  # pragma: no cover
                 _backend = _NoopBackend()
-            else:
-                raise RuntimeError(f"Unknown FETIH_COMPUTER_USE_BACKEND={backend_name!r}")
+            if _backend is None:
+                raise RuntimeError(
+                    f"No computer_use backend available for platform {sys.platform}. "
+                    f"Set FETIH_COMPUTER_USE_BACKEND=pyautogui or FETIH_COMPUTER_USE_BACKEND=cua"
+                )
             _backend.start()
         return _backend
 
@@ -508,12 +533,22 @@ def _element_to_dict(e: UIElement) -> Dict[str, Any]:
 def check_computer_use_requirements() -> bool:
     """Return True iff computer_use can run on this host.
 
-    Conditions: macOS + cua-driver binary installed (or override via env).
+    Cross-platform: cua-driver on macOS, pyautogui on Linux/Windows.
     """
-    if sys.platform != "darwin":
-        return False
-    from tools.computer_use.cua_backend import cua_driver_binary_available
-    return cua_driver_binary_available()
+    # Check if user explicitly set a backend
+    backend_choice = os.environ.get("FETIH_COMPUTER_USE_BACKEND", "").lower()
+    if backend_choice == "noop":
+        return True
+
+    # Try cua-driver first on macOS
+    if sys.platform == "darwin" and backend_choice not in {"pyautogui", "pya"}:
+        from tools.computer_use.cua_backend import cua_driver_binary_available
+        if cua_driver_binary_available():
+            return True
+
+    # Fall back to pyautogui (cross-platform)
+    from tools.computer_use.pyautogui_backend import pyautogui_backend_available
+    return pyautogui_backend_available()
 
 
 def get_computer_use_schema() -> Dict[str, Any]:

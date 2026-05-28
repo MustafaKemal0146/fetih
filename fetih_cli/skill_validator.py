@@ -1,651 +1,637 @@
-"""FETIH Skill Validator — 754 SKILL.md dosyasini tarar, hatalari tespit eder, raporlar.
+"""Skill validator: health check for all SKILL.md files.
 
-Kontroller:
-  - YAML frontmatter gecerliligi
-  - Zorunlu alanlar (name, description, triggers)
-  - MITRE ATT&CK ID formati (T\\d{4}(\\.\\d{3})?)
-  - NIST CSF ID formati
-  - Duplicate name/trigger tespiti
-  - Tag tip kontrolu (string olmali)
-  - Reference link gecerliligi
-  - Ceviri artifact'leri ("Tespit et:", "Detection etme")
+Scans the skills directory and validates every SKILL.md for:
+  - Valid YAML frontmatter
+  - Required fields (name, description, triggers, category)
+  - Valid MITRE ATT&CK IDs (T####.### format)
+  - Duplicate triggers across skills
+  - Duplicate names across skills
+  - Broken /references/ links
+  - Translation artifacts (common pattern from language models)
+  - Tags that are strings (not numeric)
 
-Kullanim:
-  fetih validate-skills                         -> tum skill'leri tara
-  fetih validate-skills --category malware-analysis -> tek kategori
-  fetih validate-skills --fix                   -> otomatik duzelt
-  fetih validate-skills --report                -> markdown rapor olustur
-  fetih validate-skills --json                  -> JSON cikti
+Usage:
+  fetih validate-skills               Scan all skills
+  fetih validate-skills --category X  Scan specific category
+  fetih validate-skills --fix         Auto-fix correctable issues
+  fetih validate-skills --report      Generate detailed markdown report
 """
 
 from __future__ import annotations
 
 import json
+import logging
 import os
 import re
 import sys
-from collections import defaultdict
+from collections import Counter, defaultdict
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from fetih_constants import get_skills_dir
+logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Renk sabitleri
+# Constants
 # ---------------------------------------------------------------------------
-_RED    = "\033[0;31m"
-_GREEN  = "\033[0;32m"
-_YELLOW = "\033[0;33m"
-_BLUE   = "\033[0;34m"
-_CYAN   = "\033[0;36m"
-_BOLD   = "\033[1m"
-_DIM    = "\033[2m"
-_NC     = "\033[0m"
 
-def _c(color: str, text: str) -> str:
-    if sys.stdout.isatty():
-        return f"{color}{text}{_NC}"
-    return text
+SKILLS_DIR = Path(os.environ.get(
+    "FETIH_SKILLS_DIR",
+    str(Path(__file__).resolve().parent.parent / "skills")
+))
 
-# ---------------------------------------------------------------------------
-# Pattern'ler
-# ---------------------------------------------------------------------------
-_VALID_MITRE_PATTERN = re.compile(r'^T\d{4}(\.\d{3})?$')
+# Valid MITRE ATT&CK ID pattern: T#### or T####.###
+MITRE_ID_RE = re.compile(r'^T\d{4}(\.\d{3})?$')
 
-_ARTIFACT_PATTERNS = [
-    (re.compile(r'\bTespit\s+et:', re.IGNORECASE), 'tr:Tespit et:'),
-    (re.compile(r'\bDetection\s+etme\b', re.IGNORECASE), 'tr:Detection etme'),
-    (re.compile(r'\bBul:', re.IGNORECASE), 'tr:Bul:'),
-    (re.compile(r'\bSunu\s+olustur:', re.IGNORECASE), 'tr:Sunu olustur:'),
-    (re.compile(r'\bBelirle:', re.IGNORECASE), 'tr:Belirle:'),
-    (re.compile(r'\bDagit:', re.IGNORECASE), 'tr:Dagit:'),
-    (re.compile(r'\bKullanma:', re.IGNORECASE), 'tr:Kullanma:'),
-    (re.compile(r'\bBilgi:', re.IGNORECASE), 'tr:Bilgi:'),
-    (re.compile(r'\bYeterli\b', re.IGNORECASE), 'tr:Yeterli'),
-    (re.compile(r'\bAdim\b', re.IGNORECASE), 'tr:Adim'),
+# Valid NIST CSF ID pattern
+NIST_ID_RE = re.compile(r'^[A-Z]{2,3}\.(?:[A-Z]{2,3}-\d+|[A-Z]{2,3})$')
+
+# Translation artifact patterns (concerning signals from LLM-generated content)
+ARTIFACT_PATTERNS = [
+    (re.compile(r'\b(Tespit et:|Detection etme:|Tespit etmek)', re.IGNORECASE),
+     "Translation artifact: Turkish-English mix"),
+    (re.compile(r'\b(İlk olarak|Öncelikle|Sonuç olarak|Bu nedenle)\b', re.IGNORECASE),
+     "Filler phrase (consider removing)"),
 ]
 
+# Required frontmatter fields
+REQUIRED_FIELDS = {"name", "description", "triggers"}
 
-# ---------------------------------------------------------------------------
-# Check fonksiyonlari
-# ---------------------------------------------------------------------------
-
-def _check_yaml_valid(frontmatter: Dict, content: str) -> Tuple[bool, str]:
-    if not content.startswith('---'):
-        return False, "Frontmatter YAML baslangici (---) bulunamadi"
-    end_match = re.search(r'\n---\s*\n', content[3:])
-    if not end_match:
-        return False, "Frontmatter YAML sonu (---) bulunamadi"
-    if not frontmatter:
-        return False, "Frontmatter bos veya parse edilemedi"
-    return True, ""
-
-
-def _check_name(frontmatter: Dict) -> Tuple[bool, str]:
-    name = frontmatter.get('name')
-    if not name:
-        return False, "Eksik 'name' alani"
-    if not isinstance(name, str):
-        return False, f"'name' string olmali, su an: {type(name).__name__}"
-    if len(name.strip()) < 3:
-        return False, f"'name' cok kisa: '{name}'"
-    return True, ""
-
-
-def _check_description(frontmatter: Dict) -> Tuple[bool, str]:
-    desc = frontmatter.get('description')
-    if not desc:
-        return False, "Eksik 'description' alani"
-    if not isinstance(desc, str):
-        return False, f"'description' string olmali, su an: {type(desc).__name__}"
-    if len(desc.strip()) < 10:
-        return False, f"'description' cok kisa ({len(desc)} karakter)"
-    return True, ""
-
-
-def _check_triggers(frontmatter: Dict) -> Tuple[bool, str]:
-    triggers = frontmatter.get('triggers', [])
-    if not triggers:
-        return False, "Eksik veya bos 'triggers' listesi"
-    if not isinstance(triggers, list):
-        return False, f"'triggers' liste olmali, su an: {type(triggers).__name__}"
-    if len(triggers) == 0:
-        return False, "'triggers' listesi bos"
-    return True, ""
-
-
-def _check_category(frontmatter: Dict) -> Tuple[bool, str]:
-    category = frontmatter.get('category')
-    if not category:
-        return False, "Eksik 'category' alani"
-    return True, ""
-
-
-def _check_mitre_ids(frontmatter: Dict) -> Tuple[bool, str]:
-    mitre = frontmatter.get('mitre_attack', [])
-    if not mitre:
-        return True, ""
-    if not isinstance(mitre, list):
-        return False, f"'mitre_attack' liste olmali, su an: {type(mitre).__name__}"
-    invalid = []
-    for mid in mitre:
-        mid_str = str(mid).strip()
-        if not _VALID_MITRE_PATTERN.match(mid_str):
-            invalid.append(mid_str)
-    if invalid:
-        return False, f"Gecersiz MITRE ATT&CK ID formati: {', '.join(invalid)}"
-    return True, ""
-
-
-def _check_nist_ids(frontmatter: Dict) -> Tuple[bool, str]:
-    nist = frontmatter.get('nist_csf', [])
-    if not nist:
-        return True, ""
-    if not isinstance(nist, list):
-        return False, f"'nist_csf' liste olmali, su an: {type(nist).__name__}"
-    invalid = []
-    for nid in nist:
-        nid_str = str(nid).strip()
-        if not re.match(r'^[A-Z]{2,4}\.[A-Z]{2,4}-\d{2}$', nid_str):
-            invalid.append(nid_str)
-    if invalid:
-        return False, f"NIST CSF ID formati supheli: {', '.join(invalid)} (beklenen: XX.YY-ZZ)"
-    return True, ""
-
-
-def _check_tags_are_strings(frontmatter: Dict) -> Tuple[bool, str]:
-    tags = frontmatter.get('tags', [])
-    if not tags:
-        return True, ""
-    if not isinstance(tags, list):
-        return False, f"'tags' liste olmali, su an: {type(tags).__name__}"
-    non_strings = []
-    for t in tags:
-        if not isinstance(t, str):
-            non_strings.append(f"{t} ({type(t).__name__})")
-    if non_strings:
-        return False, f"String olmayan tag'ler: {', '.join(non_strings)}"
-    return True, ""
-
-
-def _check_references(skill_dir: Path) -> Tuple[bool, str]:
-    skill_md = skill_dir / "SKILL.md"
-    if not skill_md.exists():
-        return True, ""
-    try:
-        content = skill_md.read_text(encoding='utf-8')
-    except Exception:
-        return True, ""
-    refs = re.findall(r'(?:references|scripts)/[^\s)\]]+', content)
-    broken = []
-    for ref in refs:
-        ref_path = skill_dir / ref
-        if not ref_path.exists():
-            broken.append(ref)
-    if broken:
-        return False, f"Kirik referans linkleri: {', '.join(broken[:5])}"
-    return True, ""
-
-
-def _check_artifact_patterns(content: str) -> Tuple[bool, str]:
-    found = []
-    for pattern, label in _ARTIFACT_PATTERNS:
-        if pattern.search(content):
-            found.append(label)
-    if found:
-        return False, f"Ceviri artifact'leri: {', '.join(found)}"
-    return True, ""
-
-
-def _check_no_duplicate_name(
-    name: str, skill_path: str, all_names: Dict[str, List[str]]
-) -> Tuple[bool, str]:
-    if name in all_names and len(all_names[name]) > 1:
-        others = [p for p in all_names[name] if p != skill_path]
-        if others:
-            return False, f"Duplicate name '{name}' - diger: {others[0]}"
-    return True, ""
+# Recommended frontmatter fields
+RECOMMENDED_FIELDS = {"category", "tags", "mitre_ids", "nist_ids", "references"}
 
 
 # ---------------------------------------------------------------------------
-# ValidationResult
+# Validation result types
 # ---------------------------------------------------------------------------
+
+class SkillIssue:
+    """A single validation issue."""
+    __slots__ = ("level", "skill_path", "field", "message", "fixable")
+
+    def __init__(self, level: str, skill_path: str, field: str, message: str, fixable: bool = False):
+        self.level = level       # "error", "warning", "info"
+        self.skill_path = skill_path
+        self.field = field
+        self.message = message
+        self.fixable = fixable
+
 
 class ValidationResult:
-    __slots__ = ('skill_path', 'skill_name', 'errors', 'warnings', 'fixes_applied')
+    """Aggregate result for a single skill."""
+    __slots__ = ("skill_path", "name", "category", "issues", "frontmatter")
 
-    def __init__(self, skill_path: str, skill_name: str = ""):
+    def __init__(self, skill_path: str):
         self.skill_path = skill_path
-        self.skill_name = skill_name
-        self.errors: List[str] = []
-        self.warnings: List[str] = []
-        self.fixes_applied: List[str] = []
+        self.name = ""
+        self.category = ""
+        self.issues: List[SkillIssue] = []
+        self.frontmatter: Dict[str, Any] = {}
+
+    @property
+    def error_count(self) -> int:
+        return sum(1 for i in self.issues if i.level == "error")
+
+    @property
+    def warning_count(self) -> int:
+        return sum(1 for i in self.issues if i.level == "warning")
 
     @property
     def has_errors(self) -> bool:
-        return len(self.errors) > 0
-
-    @property
-    def has_warnings(self) -> bool:
-        return len(self.warnings) > 0
-
-    @property
-    def is_clean(self) -> bool:
-        return not self.has_errors and not self.has_warnings
+        return any(i.level == "error" for i in self.issues)
 
 
 # ---------------------------------------------------------------------------
-# Frontmatter parser
+# YAML frontmatter parser (no PyYAML dependency needed for simple checks)
 # ---------------------------------------------------------------------------
 
-def _parse_frontmatter_robust(content: str) -> Tuple[Dict[str, Any], str]:
-    if not content.startswith('---'):
-        return {}, content
-    end_match = re.search(r'\n---\s*\n', content[3:])
-    if not end_match:
-        return {}, content
-    yaml_content = content[3:end_match.start() + 3]
-    body = content[end_match.end() + 3:]
-    try:
-        import yaml
-        loader = getattr(yaml, 'CSafeLoader', yaml.SafeLoader)
-        parsed = yaml.load(yaml_content, Loader=loader)
-        if isinstance(parsed, dict):
-            return parsed, body
-    except Exception:
-        pass
-    # Fallback: basit key: value parsing
-    fm: Dict[str, Any] = {}
-    try:
-        for line in yaml_content.strip().split('\n'):
-            line = line.strip()
-            if ':' in line:
-                key, _, val = line.partition(':')
-                key = key.strip()
-                val = val.strip()
-                if val.startswith('[') and val.endswith(']'):
-                    items = [v.strip().strip('"').strip("'") for v in val[1:-1].split(',')]
-                    fm[key] = [i for i in items if i]
+def _parse_frontmatter(content: str) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    """Parse YAML frontmatter from SKILL.md content.
+
+    Returns (parsed_dict, error_message). Uses simple regex-based parsing
+    for basic type inference; doesn't require PyYAML.
+    """
+    # Match ---\n...\n---
+    match = re.match(r'^---\s*\n(.*?)\n---\s*\n', content, re.DOTALL)
+    if not match:
+        return None, "No YAML frontmatter (--- blocks) found"
+
+    yaml_text = match.group(1)
+
+    data: Dict[str, Any] = {}
+    current_key = None
+    current_list: List[str] = []
+
+    for line in yaml_text.split("\n"):
+        # Skip empty lines and comments
+        if not line.strip() or line.strip().startswith("#"):
+            if current_list and current_key:
+                data[current_key] = current_list
+                current_list = []
+                current_key = None
+            continue
+
+        # List item
+        list_match = re.match(r'^\s+-\s+(.+)', line)
+        if list_match:
+            current_list.append(list_match.group(1).strip())
+            continue
+
+        # Flush current list
+        if current_list and current_key:
+            data[current_key] = current_list
+            current_list = []
+            current_key = None
+
+        # Key: value
+        kv_match = re.match(r'^(\w[\w_-]*)\s*:\s*(.*)', line)
+        if kv_match:
+            key = kv_match.group(1)
+            value = kv_match.group(2).strip()
+
+            # Unquoted null/true/false
+            if value.lower() in ("true", "yes", "on"):
+                value_parsed: Any = True
+            elif value.lower() in ("false", "no", "off"):
+                value_parsed = False
+            elif value.lower() in ("null", "~", ""):
+                value_parsed = None
+            else:
+                # Remove surrounding quotes
+                if (value.startswith('"') and value.endswith('"')) or \
+                   (value.startswith("'") and value.endswith("'")):
+                    value_parsed = value[1:-1]
                 else:
-                    fm[key] = val.strip('"').strip("'")
-    except Exception:
-        pass
-    return fm, body
+                    value_parsed = value
+
+            data[key] = value_parsed
+            current_key = key
+
+    # Flush remaining list
+    if current_list and current_key:
+        data[current_key] = current_list
+
+    return data, None
 
 
 # ---------------------------------------------------------------------------
-# Ana validator
+# Validation checks
 # ---------------------------------------------------------------------------
 
-def validate_skill(skill_path: Path, all_names: Dict[str, List[str]]) -> ValidationResult:
-    rel_path = str(skill_path)
-    result = ValidationResult(rel_path)
-
-    if not skill_path.exists():
-        result.errors.append("Dosya bulunamadi")
-        return result
+def _validate_skill(skill_path: Path) -> ValidationResult:
+    """Validate a single SKILL.md file."""
+    result = ValidationResult(str(skill_path))
 
     try:
-        content = skill_path.read_text(encoding='utf-8')
+        content = skill_path.read_text(encoding="utf-8")
     except Exception as e:
-        result.errors.append(f"Dosya okunamadi: {e}")
+        result.issues.append(SkillIssue("error", str(skill_path), "file", f"Cannot read: {e}"))
         return result
 
-    frontmatter, body = _parse_frontmatter_robust(content)
-
-    ok, msg = _check_yaml_valid(frontmatter, content)
-    if not ok:
-        result.errors.append(msg)
+    # Parse frontmatter
+    frontmatter, fm_error = _parse_frontmatter(content)
+    if fm_error:
+        result.issues.append(SkillIssue("error", str(skill_path), "frontmatter", fm_error, True))
         return result
 
-    name = str(frontmatter.get('name', ''))
-    result.skill_name = name
+    if frontmatter is None:
+        result.issues.append(SkillIssue("error", str(skill_path), "frontmatter", "Empty or missing frontmatter"))
+        return result
 
-    ok, msg = _check_name(frontmatter)
-    if not ok:
-        result.errors.append(msg)
+    result.frontmatter = frontmatter
 
-    ok, msg = _check_description(frontmatter)
-    if not ok:
-        result.errors.append(msg)
+    # Required fields
+    result.name = frontmatter.get("name", "")
+    for field in REQUIRED_FIELDS:
+        if field not in frontmatter or not frontmatter[field]:
+            result.issues.append(SkillIssue(
+                "error", str(skill_path), field,
+                f"Missing required field: '{field}'",
+                fixable=(field == "category"),
+            ))
 
-    ok, msg = _check_triggers(frontmatter)
-    if not ok:
-        result.errors.append(msg)
+    # Category auto-inference
+    if "category" not in frontmatter or not frontmatter.get("category"):
+        # Try to infer from path
+        path_str = str(skill_path)
+        for cat in ["cybersecurity", "ctf", "osint", "pentest", "exploitation",
+                     "malware-analysis", "cloud-security", "web-security",
+                     "steganography", "cryptography", "forensics", "reversing",
+                     "mobile-security", "iot-security", "network-security"]:
+            if cat in path_str.lower():
+                result.issues.append(SkillIssue(
+                    "warning", str(skill_path), "category",
+                    f"Missing category — auto-detected as '{cat}'",
+                    fixable=True,
+                ))
+                result.category = cat
+                break
+        else:
+            result.category = ""
+    else:
+        result.category = str(frontmatter.get("category", ""))
 
-    ok, msg = _check_category(frontmatter)
-    if not ok:
-        result.warnings.append(msg)
+    # Description quality
+    desc = str(frontmatter.get("description", ""))
+    if desc and len(desc) < 10:
+        result.issues.append(SkillIssue(
+            "warning", str(skill_path), "description",
+            f"Description too short ({len(desc)} chars)",
+        ))
 
-    ok, msg = _check_mitre_ids(frontmatter)
-    if not ok:
-        result.errors.append(msg)
+    # MITRE ATT&CK ID validation
+    mitre_ids = frontmatter.get("mitre_ids", [])
+    if isinstance(mitre_ids, str):
+        mitre_ids = [mitre_ids]
+    for mid in mitre_ids:
+        if not MITRE_ID_RE.match(str(mid)):
+            result.issues.append(SkillIssue(
+                "warning", str(skill_path), "mitre_ids",
+                f"Invalid MITRE ATT&CK ID format: '{mid}' (expected T####.###)",
+            ))
 
-    ok, msg = _check_nist_ids(frontmatter)
-    if not ok:
-        result.warnings.append(msg)
+    # NIST CSF ID validation
+    nist_ids = frontmatter.get("nist_ids", [])
+    if isinstance(nist_ids, str):
+        nist_ids = [nist_ids]
+    for nid in nist_ids:
+        if not NIST_ID_RE.match(str(nid)):
+            result.issues.append(SkillIssue(
+                "info", str(skill_path), "nist_ids",
+                f"Possibly invalid NIST CSF ID: '{nid}'",
+            ))
 
-    ok, msg = _check_tags_are_strings(frontmatter)
-    if not ok:
-        result.errors.append(msg)
+    # Trigger validation
+    triggers = frontmatter.get("triggers", [])
+    if isinstance(triggers, str):
+        triggers = [triggers]
+    if not triggers:
+        result.issues.append(SkillIssue(
+            "error", str(skill_path), "triggers",
+            "No triggers defined",
+        ))
+    else:
+        # Check for empty triggers
+        for t in triggers:
+            if not str(t).strip():
+                result.issues.append(SkillIssue(
+                    "error", str(skill_path), "triggers",
+                    "Empty trigger string found",
+                ))
 
-    ok, msg = _check_no_duplicate_name(name, rel_path, all_names)
-    if not ok:
-        result.warnings.append(msg)
+    # Tags validation
+    tags = frontmatter.get("tags", [])
+    if isinstance(tags, str):
+        tags = [t.strip() for t in tags.split(",")]
+    for tag in tags:
+        tag_str = str(tag)
+        if tag_str.isdigit():
+            result.issues.append(SkillIssue(
+                "warning", str(skill_path), "tags",
+                f"Numeric tag found: '{tag_str}' (should be a string keyword)",
+                fixable=True,
+            ))
 
-    if 'orchestrator' not in name.lower():
-        ok, msg = _check_references(skill_path.parent)
-        if not ok:
-            result.warnings.append(msg)
+    # Translation artifact check
+    for pattern, label in ARTIFACT_PATTERNS:
+        if pattern.search(content):
+            result.issues.append(SkillIssue(
+                "info", str(skill_path), "content",
+                f"Translation artifact detected: {label}",
+            ))
 
-    ok, msg = _check_artifact_patterns(content)
-    if not ok:
-        result.warnings.append(msg)
+    # Reference link validation
+    ref_links = re.findall(r'\[.*?\]\((\.?/?references/[^)]+)\)', content)
+    for link in ref_links:
+        ref_path = (skill_path.parent / link).resolve()
+        if not ref_path.exists():
+            result.issues.append(SkillIssue(
+                "warning", str(skill_path), "references",
+                f"Broken reference link: {link}",
+            ))
 
     return result
 
 
+# ---------------------------------------------------------------------------
+# Cross-skill validation
+# ---------------------------------------------------------------------------
+
+def _cross_validate(results: List[ValidationResult]) -> List[SkillIssue]:
+    """Check for duplicate names and triggers across skills."""
+    issues: List[SkillIssue] = []
+
+    # Duplicate names
+    name_counter = Counter(r.name for r in results if r.name)
+    for name, count in name_counter.items():
+        if count > 1:
+            dupes = [r.skill_path for r in results if r.name == name]
+            issues.append(SkillIssue(
+                "error", dupes[0], "name",
+                f"Duplicate skill name '{name}' in {count} files: {', '.join(dupes)}",
+            ))
+
+    # Duplicate triggers
+    trigger_map: Dict[str, List[str]] = defaultdict(list)
+    for r in results:
+        triggers = r.frontmatter.get("triggers", [])
+        if isinstance(triggers, str):
+            triggers = [triggers]
+        for t in triggers:
+            t_lower = str(t).lower().strip()
+            if t_lower:
+                trigger_map[t_lower].append(r.skill_path)
+
+    for trigger, paths in trigger_map.items():
+        if len(paths) > 3:  # More than 3 skills sharing same trigger
+            issues.append(SkillIssue(
+                "warning", paths[0], "triggers",
+                f"Trigger '{trigger}' shared by {len(paths)} skills — consider making more specific",
+            ))
+
+    # Ambiguous triggers (too short)
+    for trigger, paths in trigger_map.items():
+        if len(trigger) < 5 and len(paths) > 1:
+            issues.append(SkillIssue(
+                "info", paths[0], "triggers",
+                f"Very short trigger '{trigger}' ({len(trigger)} chars) shared by {len(paths)} skills",
+            ))
+
+    return issues
+
+
+# ---------------------------------------------------------------------------
+# Auto-fix
+# ---------------------------------------------------------------------------
+
 def _auto_fix_skill(skill_path: Path, result: ValidationResult) -> int:
-    fix_count = 0
-    try:
-        content = skill_path.read_text(encoding='utf-8')
-    except Exception:
+    """Auto-fix fixable issues in a skill. Returns number of fixes applied."""
+    fixes = 0
+    fixable_issues = [i for i in result.issues if i.fixable]
+
+    if not fixable_issues:
         return 0
 
-    original = content
-    frontmatter, body = _parse_frontmatter_robust(content)
+    try:
+        content = skill_path.read_text(encoding="utf-8")
+        new_content = content
 
-    # Fix 1: Eksik category -> parent dizin adi
-    if not frontmatter.get('category') and 'category' in str(skill_path.parent):
-        cat = skill_path.parent.name
-        if content.startswith('---'):
-            end_idx = content.find('---', 3)
-            if end_idx > 0:
-                new_fm = content[:end_idx].rstrip() + f'\ncategory: {cat}\n'
-                content = new_fm + content[end_idx:]
-                fix_count += 1
-                result.fixes_applied.append(f"category: {cat} (otomatik)")
+        for issue in fixable_issues:
+            if issue.field == "category" and result.category:
+                # Add category field to frontmatter
+                new_content = re.sub(
+                    r'(^---\s*\n)',
+                    f'\\1category: {result.category}\n',
+                    new_content,
+                    count=1,
+                )
+                fixes += 1
 
-    # Fix 2: Tag'leri string'e cevir
-    tags = frontmatter.get('tags', [])
-    if tags and any(not isinstance(t, str) for t in tags):
-        fixed_tags = [str(t) for t in tags]
-        tag_lines = '\n'.join(f'  - {t}' for t in fixed_tags)
-        content = re.sub(
-            r'tags:\s*\n(\s*-\s+[^\n]+\n)*',
-            f'tags:\n{tag_lines}\n',
-            content
-        )
-        fix_count += 1
-        result.fixes_applied.append("tags string'e cevrildi")
+            if issue.field == "tags" and "numeric tag" in issue.message:
+                # Convert numeric tags to strings
+                # This requires more careful editing; skip for now
+                pass
 
-    if content != original:
-        try:
-            skill_path.write_text(content, encoding='utf-8')
-        except Exception:
-            pass
+        if new_content != content:
+            skill_path.write_text(new_content, encoding="utf-8")
+            logger.info("Auto-fixed %d issues in %s", fixes, skill_path)
+    except Exception as e:
+        logger.warning("Auto-fix failed for %s: %s", skill_path, e)
 
-    return fix_count
+    return fixes
 
 
-def validate_all_skills(
-    skills_dir: Optional[Path] = None,
-    category: Optional[str] = None,
+# ---------------------------------------------------------------------------
+# Main API
+# ---------------------------------------------------------------------------
+
+def validate_skills(
+    category: str = "",
     auto_fix: bool = False,
-) -> Tuple[List[ValidationResult], Dict[str, int]]:
-    if skills_dir is None:
-        skills_dir = get_skills_dir()
+    skills_dir: Optional[Path] = None,
+) -> Dict[str, Any]:
+    """Validate all SKILL.md files.
 
+    Returns a summary dict with total stats, issues by level, and a detailed
+    report if --report is passed.
+    """
+    base_dir = skills_dir or SKILLS_DIR
+    if not base_dir.exists():
+        return {"error": f"Skills directory not found: {base_dir}", "total": 0}
+
+    # Find all SKILL.md files
+    skill_files = list(base_dir.glob("**/SKILL.md"))
+
+    if category:
+        skill_files = [f for f in skill_files if category in str(f).lower()]
+
+    total = len(skill_files)
     results: List[ValidationResult] = []
-    skill_files: List[Path] = []
+    error_count = 0
+    warning_count = 0
+    info_count = 0
+    total_fixes = 0
 
-    for root, dirs, files in os.walk(str(skills_dir)):
-        dirs[:] = [d for d in dirs if d not in ('.git', '.github', '.hub', '.archive')]
-        if 'SKILL.md' in files:
-            skill_path = Path(root) / 'SKILL.md'
-            if category:
-                rel = skill_path.relative_to(skills_dir)
-                if category not in str(rel):
-                    continue
-            skill_files.append(skill_path)
-
-    # Duplicate name tespiti
-    all_names: Dict[str, List[str]] = defaultdict(list)
-    for sf in skill_files:
-        try:
-            content = sf.read_text(encoding='utf-8')
-            fm, _ = _parse_frontmatter_robust(content)
-            name = str(fm.get('name', ''))
-            if name:
-                all_names[name].append(str(sf))
-        except Exception:
-            pass
-
-    for sf in skill_files:
-        result = validate_skill(sf, all_names)
-        if auto_fix and (result.has_errors or result.has_warnings):
-            fixed = _auto_fix_skill(sf, result)
-            if fixed > 0:
-                result = validate_skill(sf, all_names)
-                if not result.fixes_applied:
-                    result.fixes_applied.append(f"{fixed} duzeltme uygulandi")
+    # Validate each skill
+    for skill_path in skill_files:
+        result = _validate_skill(skill_path)
         results.append(result)
 
-    stats = {
-        'total': len(results),
-        'clean': sum(1 for r in results if r.is_clean),
-        'errors': sum(1 for r in results if r.has_errors),
-        'warnings': sum(1 for r in results if r.has_warnings and not r.has_errors),
-        'fixed': sum(1 for r in results if r.fixes_applied),
-        'total_errors': sum(len(r.errors) for r in results),
-        'total_warnings': sum(len(r.warnings) for r in results),
+        error_count += result.error_count
+        warning_count += result.warning_count
+
+        if auto_fix and result.has_errors:
+            fixes = _auto_fix_skill(skill_path, result)
+            total_fixes += fixes
+
+    # Cross-validation
+    cross_issues = _cross_validate(results)
+    for issue in cross_issues:
+        if issue.level == "error":
+            error_count += 1
+        elif issue.level == "warning":
+            warning_count += 1
+        else:
+            info_count += 1
+
+    # Build result
+    error_skills = [r for r in results if r.has_errors]
+    warning_skills = [r for r in results if r.warning_count > 0]
+
+    return {
+        "total": total,
+        "passed": total - len(error_skills),
+        "errors": error_count,
+        "warnings": warning_count,
+        "info": info_count,
+        "fixes_applied": total_fixes,
+        "error_skills": [
+            {"path": r.skill_path, "name": r.name, "count": r.error_count}
+            for r in error_skills
+        ],
+        "warning_skills": [
+            {"path": r.skill_path, "name": r.name, "count": r.warning_count}
+            for r in warning_skills[:20]  # Top 20
+        ],
+        "cross_issues": [
+            {"level": i.level, "field": i.field, "message": i.message}
+            for i in cross_issues
+        ],
+        "detailed_issues": [
+            {
+                "level": i.level,
+                "skill": os.path.relpath(r.skill_path, str(base_dir)),
+                "field": i.field,
+                "message": i.message,
+            }
+            for r in error_skills
+            for i in r.issues
+            if i.level in ("error", "warning")
+        ][:100],  # Cap at 100 detailed issues
     }
-    return results, stats
 
 
-# ---------------------------------------------------------------------------
-# Cikti formatlayicilari
-# ---------------------------------------------------------------------------
-
-def print_results(results: List[ValidationResult], stats: Dict[str, int]):
-    total = stats['total']
-    clean = stats['clean']
-    errors = stats['errors']
-    warnings = stats['warnings']
-    fixed = stats['fixed']
-    total_errs = stats['total_errors']
-    total_warns = stats['total_warnings']
-
-    print()
-    print(_c(_BOLD, "+" + "-" * 50 + "+"))
-    print(_c(_BOLD, "|" + "  FETIH Skill Validator - Sonuclar".ljust(48) + "  |"))
-    print(_c(_BOLD, "+" + "-" * 50 + "+"))
-    print()
-    print(f"  Toplam skill:  {_c(_CYAN, str(total))}")
-    print(f"  Temiz:         {_c(_GREEN, str(clean))} ({clean*100//max(total,1)}%)")
-    if warnings:
-        print(f"  Uyarili:       {_c(_YELLOW, str(warnings))} ({warnings*100//max(total,1)}%)")
-    if errors:
-        print(f"  Hatali:        {_c(_RED, str(errors))} ({errors*100//max(total,1)}%)")
-    if fixed:
-        print(f"  Duzeltilen:    {_c(_GREEN, str(fixed))}")
-    print(f"  Toplam hata:   {_c(_RED if total_errs else _DIM, str(total_errs))}")
-    print(f"  Toplam uyari:  {_c(_YELLOW if total_warns else _DIM, str(total_warns))}")
-    print()
-
-    error_results = [r for r in results if r.has_errors]
-    if error_results:
-        print(_c(_RED + _BOLD, "--- Hatalar ---"))
-        print()
-        for r in error_results:
-            print(f"  {_c(_RED, 'X')} {_c(_BOLD, r.skill_path)}")
-            if r.skill_name:
-                print(f"    {_c(_DIM, f'Skill: {r.skill_name}')}")
-            for e in r.errors:
-                print(f"    {_c(_RED, '->')} {e}")
-            print()
-
-    warn_results = [r for r in results if r.has_warnings and not r.has_errors]
-    if warn_results:
-        print(_c(_YELLOW + _BOLD, "--- Uyarilar ---"))
-        print()
-        for r in warn_results:
-            print(f"  {_c(_YELLOW, '/!\\')} {_c(_BOLD, r.skill_path)}")
-            if r.skill_name:
-                print(f"    {_c(_DIM, f'Skill: {r.skill_name}')}")
-            for w in r.warnings:
-                print(f"    {_c(_YELLOW, '->')} {w}")
-            print()
-
-    fixed_results = [r for r in results if r.fixes_applied]
-    if fixed_results:
-        print(_c(_GREEN + _BOLD, "--- Otomatik Duzeltmeler ---"))
-        print()
-        for r in fixed_results:
-            print(f"  {_c(_GREEN, '/')} {r.skill_path}")
-            for f in r.fixes_applied:
-                print(f"    {_c(_GREEN, 'v')} {f}")
-            print()
-
-    print(_c(_BOLD, "-" * 52))
-    if errors == 0 and warnings == 0:
-        print(_c(_GREEN + _BOLD, f"  Tum {total} skill hatasiz!"))
-    elif errors == 0:
-        print(_c(_YELLOW, f"  {total} skill tarandi, {warnings} uyari var, kritik hata yok."))
-    else:
-        print(_c(_RED, f"  {errors} skill'de kritik hata var! Duzeltilmesi onerilir."))
-    print()
-
-
-def generate_markdown_report(results: List[ValidationResult], stats: Dict[str, int]) -> str:
-    from datetime import datetime
+def generate_report(summary: Dict[str, Any], output_path: Optional[Path] = None) -> str:
+    """Generate a detailed markdown validation report."""
     lines = [
-        "# FETIH Skill Validation Report",
-        f"\n**Tarih:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-        "\n## Ozet\n",
-        "| Metrik | Deger |",
-        "|--------|-------|",
-        f"| Toplam skill | {stats['total']} |",
-        f"| Temiz | {stats['clean']} ({stats['clean']*100//max(stats['total'],1)}%) |",
-        f"| Uyarili | {stats['warnings']} |",
-        f"| Hatali | {stats['errors']} |",
-        f"| Toplam hata | {stats['total_errors']} |",
-        f"| Toplam uyari | {stats['total_warnings']} |",
+        f"# FETIH Skill Validation Report",
+        f"**Generated:** {datetime.now().isoformat()[:19]}",
+        f"",
+        f"## Summary",
+        f"",
+        f"| Metric | Value |",
+        f"|--------|-------|",
+        f"| Total skills scanned | {summary.get('total', 0)} |",
+        f"| Passed ✅ | {summary.get('passed', 0)} |",
+        f"| Errors ❌ | {summary.get('errors', 0)} |",
+        f"| Warnings ⚠️ | {summary.get('warnings', 0)} |",
+        f"| Info ℹ️ | {summary.get('info', 0)} |",
+        f"| Auto-fixes applied | {summary.get('fixes_applied', 0)} |",
+        f"",
     ]
-    if stats['fixed']:
-        lines.append(f"| Otomatik duzeltilen | {stats['fixed']} |")
 
-    error_results = [r for r in results if r.has_errors]
-    if error_results:
-        lines.append(f"\n## Hatalar ({len(error_results)})\n")
-        for r in error_results:
-            lines.append(f"### {r.skill_name or r.skill_path}")
-            lines.append(f"- **Dosya:** `{r.skill_path}`")
-            for e in r.errors:
-                lines.append(f"- :x: {e}")
-            lines.append("")
+    # Error skills
+    if summary.get("error_skills"):
+        lines.append("## Skills with Errors ❌")
+        lines.append("")
+        for sk in summary["error_skills"]:
+            lines.append(f"- **{sk['name'] or 'unnamed'}** ({sk['count']} errors): `{sk['path']}`")
+        lines.append("")
 
-    warn_results = [r for r in results if r.has_warnings and not r.has_errors]
-    if warn_results:
-        lines.append(f"\n## Uyarilar ({len(warn_results)})\n")
-        for r in warn_results:
-            lines.append(f"### {r.skill_name or r.skill_path}")
-            lines.append(f"- **Dosya:** `{r.skill_path}`")
-            for w in r.warnings:
-                lines.append(f"- :warning: {w}")
-            lines.append("")
+    # Warning skills
+    if summary.get("warning_skills"):
+        lines.append("## Skills with Warnings ⚠️")
+        lines.append("")
+        for sk in summary["warning_skills"]:
+            lines.append(f"- **{sk['name'] or 'unnamed'}** ({sk['count']} warnings): `{sk['path']}`")
+        lines.append("")
 
-    if not error_results and not warn_results:
-        lines.append(f"\n:tada: **Tum {stats['total']} skill hatasiz!**\n")
+    # Cross-validation issues
+    if summary.get("cross_issues"):
+        lines.append("## Cross-Skill Issues 🔗")
+        lines.append("")
+        for issue in summary["cross_issues"]:
+            emoji = {"error": "❌", "warning": "⚠️", "info": "ℹ️"}.get(issue["level"], "•")
+            lines.append(f"- {emoji} **{issue['field']}**: {issue['message']}")
+        lines.append("")
 
-    return '\n'.join(lines)
+    # Detailed issues
+    if summary.get("detailed_issues"):
+        lines.append("## Detailed Issues (first 100)")
+        lines.append("")
+        lines.append("| Level | Skill | Field | Issue |")
+        lines.append("|-------|-------|-------|-------|")
+        for issue in summary["detailed_issues"]:
+            emoji = {"error": "❌", "warning": "⚠️", "info": "ℹ️"}.get(issue["level"], "•")
+            skill_short = issue["skill"].split("/")[-2] if "/" in issue["skill"] else issue["skill"]
+            lines.append(
+                f"| {emoji} | {skill_short} | {issue['field']} | "
+                f"{issue['message'][:100]} |"
+            )
+        lines.append("")
+
+    report = "\n".join(lines)
+
+    if output_path:
+        try:
+            output_path.write_text(report, encoding="utf-8")
+            logger.info("Report written to %s", output_path)
+        except Exception as e:
+            logger.warning("Failed to write report: %s", e)
+
+    return report
 
 
 # ---------------------------------------------------------------------------
-# CLI / Slash entry points
+# CLI entry point (called by cli.py's _handle_validate_skills_command)
 # ---------------------------------------------------------------------------
-
-def run_validator(
-    category: Optional[str] = None,
-    auto_fix: bool = False,
-    report: bool = False,
-    json_output: bool = False,
-    skills_dir: Optional[Path] = None,
-) -> int:
-    if skills_dir is None:
-        skills_dir = get_skills_dir()
-    if not skills_dir.exists():
-        print(_c(_RED, f"Hata: Skills dizini bulunamadi: {skills_dir}"))
-        return 2
-
-    print(_c(_CYAN, f"Skills dizini: {skills_dir}"))
-    if category:
-        print(_c(_CYAN, f"Kategori filtresi: {category}"))
-    print(_c(_DIM, "Taranıyor..."))
-
-    results, stats = validate_all_skills(skills_dir, category, auto_fix)
-
-    if json_output:
-        data = {
-            'stats': stats,
-            'results': [
-                {
-                    'path': r.skill_path, 'name': r.skill_name,
-                    'errors': r.errors, 'warnings': r.warnings,
-                    'fixes_applied': r.fixes_applied, 'clean': r.is_clean,
-                }
-                for r in results
-            ]
-        }
-        print(json.dumps(data, indent=2, ensure_ascii=False))
-    else:
-        print_results(results, stats)
-        if report:
-            report_path = Path('/tmp/fetih-skill-validation-report.md')
-            report_path.write_text(generate_markdown_report(results, stats), encoding='utf-8')
-            print(_c(_GREEN, f"  Markdown raporu: {report_path}"))
-
-    if stats['errors'] > 0:
-        return 2
-    elif stats['warnings'] > 0:
-        return 1
-    return 0
-
-
-def cmd_validate_skills(args):
-    return run_validator(
-        category=getattr(args, 'category', None),
-        auto_fix=getattr(args, 'fix', False),
-        report=getattr(args, 'report', False),
-        json_output=getattr(args, 'json', False),
-    )
-
 
 def handle_validate_skills_slash(cmd: str) -> int:
+    """Handle /validate-skills slash command. Returns exit code (0=clean)."""
     parts = cmd.strip().split()
-    args_list = parts[1:] if len(parts) > 1 else []
-
-    category = None
+    category = ""
     auto_fix = False
-    report = False
-    json_output = False
+    do_report = False
 
-    i = 0
-    while i < len(args_list):
-        arg = args_list[i]
-        if arg == '--category' and i + 1 < len(args_list):
-            category = args_list[i + 1]
+    i = 1
+    while i < len(parts):
+        if parts[i] == "--category" and i + 1 < len(parts):
+            category = parts[i + 1]
             i += 2
-        elif arg == '--fix':
+        elif parts[i] == "--fix":
             auto_fix = True
             i += 1
-        elif arg == '--report':
-            report = True
+        elif parts[i] == "--report":
+            do_report = True
             i += 1
-        elif arg == '--json':
-            json_output = True
+        elif parts[i] == "--json":
+            i += 1  # Handled in caller
+        elif parts[i] in (
+            "malware-analysis", "cloud-security", "threat-hunting",
+            "web-application-security", "network-security", "incident-response",
+            "vulnerability-assessment", "penetration-testing", "exploitation",
+        ):
+            category = parts[i]
             i += 1
         else:
             i += 1
 
-    return run_validator(category, auto_fix, report, json_output)
+    print("═══ FETIH Skill Validator ═══")
+    summary = validate_skills(category=category, auto_fix=auto_fix)
+
+    total = summary.get("total", 0)
+    errors = summary.get("errors", 0)
+    warnings = summary.get("warnings", 0)
+    passed = summary.get("passed", 0)
+
+    # Progress
+    pct = (passed / total * 100) if total > 0 else 0
+    print(f"Toplam skill: {total}")
+    print(f"✓ Gecen: {passed} ({pct:.1f}%)")
+    if errors > 0:
+        print(f"✗ Hata: {errors}")
+    if warnings > 0:
+        print(f"⚠ Uyari: {warnings}")
+    if summary.get("fixes_applied", 0) > 0:
+        print(f"🔧 Otomatik duzeltme: {summary['fixes_applied']}")
+
+    # Show error skills
+    if summary.get("error_skills"):
+        print("\n─── Hatalı Skill'ler ✗ ───")
+        for sk in summary["error_skills"]:
+            print(f"  ✗ {sk['name'] or 'unnamed'}: {sk['path']}")
+
+    # Cross-issues
+    if summary.get("cross_issues"):
+        print("\n─── Çapraz Sorunlar ───")
+        for issue in summary["cross_issues"][:10]:
+            emoji = {"error": "✗", "warning": "⚠", "info": "ℹ️"}.get(issue["level"], "•")
+            print(f"  {emoji} {issue['message'][:120]}")
+
+    # Generate report if requested
+    if do_report:
+        output_path = Path(os.environ.get("FETIH_HOME", os.path.expanduser("~/.fetih"))) / "skill_validation_report.md"
+        report = generate_report(summary, output_path)
+        print(f"\nDetayli rapor: {output_path}")
+
+    return 0 if errors == 0 else 1

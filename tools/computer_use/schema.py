@@ -16,14 +16,15 @@ from typing import Any, Dict
 COMPUTER_USE_SCHEMA: Dict[str, Any] = {
     "name": "computer_use",
     "description": (
-        "Drive the macOS desktop in the background — screenshots, mouse, "
-        "keyboard, scroll, drag — without stealing the user's cursor, "
-        "keyboard focus, or Space. Preferred workflow: call with "
-        "action='capture' (mode='som' gives numbered element overlays), "
-        "then click by `element` index for reliability. Pixel coordinates "
-        "are supported for models trained on them. Works on any window — "
-        "hidden, minimized, on another Space, or behind another app. "
-        "macOS only; requires cua-driver to be installed."
+        "Bilgisayari kontrol et: ekran goruntusu al, mouse'u hareket ettir, "
+        "tikla, klavyeyle yaz, scroll yap, surukle birak. "
+        "Cross-platform: macOS (cua-driver, arka planda), Linux/Windows "
+        "(pyautogui, farenizi hareket ettirir). "
+        "ONCE /computer-use on YAZARAK AKTIF ETMENIZ GEREKIR. "
+        "Tercih edilen akis: action='capture' mode='som' ile grid overlay'li "
+        "ekran goruntusu al, sonra coordinate=[x,y] ile tikla. "
+        "FAILSAFE: fareyi sol ust koseye cekerseniz tum islemler durur. "
+        "Tum aksiyonlar audit log'a kaydedilir."
     ),
     "parameters": {
         "type": "object",

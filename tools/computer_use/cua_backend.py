@@ -77,6 +77,19 @@ def _is_arm_mac() -> bool:
     return _is_macos() and platform.machine() == "arm64"
 
 
+def _draw_safety_border_on_b64(png_b64: str) -> str:
+    """Draw red safety border on a base64 PNG screenshot (macOS path)."""
+    try:
+        import base64 as _b64
+        import cv2, numpy as np
+        raw = _b64.b64decode(png_b64)
+        from tools.computer_use.pyautogui_backend import _draw_safety_border
+        bordered = _draw_safety_border(raw)
+        return _b64.b64encode(bordered).decode("ascii")
+    except Exception:
+        return png_b64
+
+
 def cua_driver_binary_available() -> bool:
     """True if `cua-driver` is on $PATH or FETIH_CUA_DRIVER_CMD resolves."""
     return bool(shutil.which(_CUA_DRIVER_CMD))

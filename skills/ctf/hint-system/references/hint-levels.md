@@ -1,127 +1,87 @@
-# Hint Level Reference — Detaylı İpucu Pattern Kataloğu
+# CTF Hint Seviyeleri Detaylı Rehberi
 
-Bu dosya, her CTF kategorisi için 3 seviyeli ipucu pattern'lerini içerir.
+## Level 1: Nudge (Genel Yönlendirme)
 
----
+**Amaç:** Kullanıcıya challenge'ın doğasını anlatmak ama çözümü kendisinin bulmasını sağlamak.
 
-## Web Exploitation
+**Ne zaman verilir:** `/hint` komutuyla.
 
-### Level 1 Patterns
-- "Sayfa kaynağını görüntüle (Ctrl+U veya view-source:). Gizli HTML yorumları var mı?"
-- "JavaScript dosyalarını incele. fetch() çağrıları hangi endpoint'lere gidiyor?"
-- "Bu bir web challenge'ı. Input validation, authentication bypass, veya injection odaklı olabilir."
-- "HTTP response header'larını kontrol et. Cookie'lerde özel bir şey var mı?"
-- "robots.txt dosyasını kontrol et — gizli endpoint'ler olabilir."
+**İçerik:**
+- Challenge kategorisi
+- Genel yaklaşım stratejisi
+- Hangi tür zafiyet/teknik aranmalı
+- İlk bakılacak yer
 
-### Level 2 Patterns
-- "Login formunda SQL injection dene: username alanına `'` karakteri koy, hata dönüyor mu?"
-- "/api/ endpoint'ini keşfet. JSON dönen bir admin endpoint'i olabilir."
-- "Cookie'deki JWT token'ını decode et (jwt.io). Header'da `alg: none` yapmayı dene."
-- "File upload varsa, extension bypass dene: shell.php.jpg, shell.php%00.jpg"
-- "SSRF için URL parametrelerini kontrol et. İç ağa istek yapılabiliyor mu?"
-- "SSTI testi: `{{7*7}}` yaz, 49 dönüyor mu?"
+**Yasaklar:**
+- Spesifik komutlar
+- Kesin çözüm adımları
+- Tool isimleri
 
-### Level 3 Patterns
-- "`' OR 1=1--` ile login bypass. Admin paneline yönlendirileceksin."
-- "JWT'yi şu şekilde forge'la: Header: `{'alg':'none'}`, Payload: `{'username':'admin'}`"
-- "File upload'da Content-Type: image/png ama içerik PHP web shell olsun."
-- "SSRF ile `http://localhost:8080/admin` endpoint'ine istek at."
+## Level 2: Direction (Teknik Yön)
 
----
+**Amaç:** Kullanıcıya hangi spesifik tekniği/aracı kullanacağını söylemek.
 
-## Cryptography
+**Ne zaman verilir:** `/hint more` komutuyla.
 
-### Level 1 Patterns
-- "Bu şifreli bir metin. Önce encoding katmanlarını kontrol et — base64, hex, ROT13?"
-- "Ciphertext uzunluğuna bak. Blok cipher (AES/DES) mı, stream cipher mı?"
-- "Anahtar tekrar kullanımı var mı? Aynı key'le şifrelenmiş birden fazla mesaj var mı?"
+**İçerik:**
+- Kullanılacak tool
+- Denenecek payload/teknik
+- Analiz edilecek spesifik alan
+- Beklenen davranış
 
-### Level 2 Patterns
-- "Base64 decode et, sonra XOR dene. Key uzunluğunu bulmak için Hamming distance kullan."
-- "RSA'da n, e, c verilmiş. n'i factorize etmeyi dene (factordb.com)."
-- "AES-CBC'de IV sabit mi? Padding oracle attack'ı mümkün olabilir."
-- "Hash formatına bak: $2a$ bcrypt, $6$ SHA-512. Rockyou wordlist ile dene."
+**Yasaklar:**
+- Tam komut satırı (kısaltılmış olabilir)
+- Flag konumu
+- Final çözüm
 
-### Level 3 Patterns
-- "Python ile çözüm: `Crypto.Cipher.AES.new(key, AES.MODE_CBC, iv)` kullanarak decrypt et."
-- "RSA için: factordb'dan p ve q'yu al, phi = (p-1)*(q-1), d = inverse(e, phi), m = pow(c, d, n)"
-- "Hashcat komutu: `hashcat -m 3200 hash.txt rockyou.txt`"
+## Level 3: Solution (Çözüm Yolu)
 
----
+**Amaç:** Tam çözüm yolunu adım adım anlatmak.
 
-## Reverse Engineering
+**Ne zaman verilir:** `/hint solution` komutuyla.
 
-### Level 1 Patterns
-- "Binary dosyasını `file` ve `strings` komutlarıyla analiz et."
-- "32-bit mi 64-bit mi? Hangi mimari için derlenmiş?"
-- "strings çıktısında 'flag', 'password', 'correct', 'wrong' gibi kelimeler ara."
+**İçerik:**
+- Adım adım çözüm
+- Komutlar (tam veya parametreleri maskelenmiş)
+- Beklenen çıktılar
+- Flag formatı
 
-### Level 2 Patterns
-- "Ghidra'da main() fonksiyonunu bul. Karşılaştırma (CMP) instruction'larına bak."
-- "Sembolik execution dene — angr ile flag'i otomatik bulabilirsin."
-- "Anti-debugging var mı? ptrace, isDebuggerPresent çağrılarını kontrol et."
-- "APK ise: apktool ile decompile et, smali kodunda flag kontrolü ara."
+**Yasaklar:**
+- Flag'in kendisi (asla!)
+- Sadece flag'i yazıp geçmek
 
-### Level 3 Patterns
-- "main+0x1234 adresindeki JNE instruction'ını NOP'la patch'le."
-- "angr ile: `proj = angr.Project('./binary'); state = proj.factory.entry_state(); simgr = proj.factory.simgr(state); simgr.explore(find=0xADDR_SUCCESS)`"
-- "APK'da: libnative.so'yu Ghidra'da aç, JNI fonksiyonunda string karşılaştırması var."
+## Kategori Bazlı İpucu Şablonları
 
----
+### Web
+- Level 1: "Bu bir [XSS/SQLi/CSRF/SSRF/LFI/...] challenge'ı. [Input/Header/Cookie] alanlarına odaklan."
+- Level 2: "[Parametre] alanına [payload] dene. [Tool] ile test edebilirsin."
+- Level 3: "[Tool] kullanarak [spesifik komut]. Sonuçta [beklenen çıktı] görmelisin."
 
-## Forensics
+### Reverse Engineering
+- Level 1: "Binary [stripped/packed/obfuscated]. [Ghidra/IDA/x64dbg] ile analiz et."
+- Level 2: "[Fonksiyon adı] fonksiyonuna bak. [Register/değişken] önemli."
+- Level 3: "[Adresteki] check'i patch'le/NOP'la. Alternatif olarak [çözüm yolu]."
 
-### Level 1 Patterns
-- "Dosya tipini doğrula (`file` komutu). Uzantı ile gerçek tip uyuşuyor mu?"
-- "Metadata'ya bak: exiftool ile EXIF, ID3 tag'leri, gizli veri ara."
-- "strings komutuyla dosyada düz metin ara. 'flag', 'password' geçiyor mu?"
+### Cryptography
+- Level 1: "[Base64/Hex/XOR/AES/RSA] kullanılmış olabilir. Şifreli metnin yapısını analiz et."
+- Level 2: "Anahtar uzunluğu [N] byte. [Tool] ile brute-force/frekans analizi yap."
+- Level 3: "Anahtar [değer]. [Tool] ile: `[komut]`. Çıktıda flag formatını ara."
 
-### Level 2 Patterns
-- "binwalk ile gömülü dosyaları çıkar. İçinde zip, resim, veya başka dosya var mı?"
-- "PCAP ise: Wireshark'ta TCP stream'lerini takip et. HTTP objelerini export et."
-- "Memory dump ise: volatility ile process list, network connections, cmdline ara."
-- "Disk image ise: Autopsy ile silinmiş dosyaları kurtar."
+### Forensics
+- Level 1: "Dosya [PCAP/image/memory dump/disk image]. [Wireshark/Volatility/Autopsy] ile incele."
+- Level 2: "[Protokol/offset/timeline] bölgesine odaklan. Şüpheli [paket/process/dosya] var."
+- Level 3: "[Spesifik konum]'daki veriyi [tool] ile extract et: `[komut]`"
 
-### Level 3 Patterns
-- "PCAP'te HTTP stream 5'te base64 encoded flag var. Export et ve decode et."
-- "Memory dump'ta PID 2184'ün memory'sini dump et: `vol3 -f mem.dmp windows.memmap --pid 2184 --dump`"
-- "Silinmiş dosyayı kurtar: sleuthkit ile inode'u bul ve icat ile extract et."
+### Pwn/Binary Exploitation
+- Level 1: "Buffer overflow var. [checksec] ile korumaları kontrol et."
+- Level 2: "Offset [N]'de EIP/RIP kontrolü var. [ROPgadget/one_gadget] ile gadget ara."
+- Level 3: "Exploit: `[pwntools script özeti]`. Remote: `[connect komutu]`"
 
----
+## Yaygın Tuzaklar ve Kör Noktalar
 
-## Steganography
-
-### Level 1 Patterns
-- "Bu bir steganografi challenge'ı. Dosyada gizli veri var."
-- "Görsel ise: LSB (Least Significant Bit), metadata, renk kanallarına bak."
-- "Ses dosyası ise: spektrogram, LSB, faz kodlaması olabilir."
-
-### Level 2 Patterns
-- "zsteg ile PNG'deki tüm LSB kombinasyonlarını tara: `zsteg -a image.png`"
-- "steghide ile şifre dene: `steghide extract -sf image.jpg` (boş şifre veya 'password')"
-- "Ses dosyasında: Sonic Visualiser veya Audacity ile spektrogram görüntüle."
-- "exiftool ile tüm metadata'yı gör: `exiftool -a -u -g1 file.jpg`"
-
-### Level 3 Patterns
-- "zsteg çıktısında b1,rgb,lsb,xy kanalında flag var: `zsteg -E b1,rgb,lsb,xy image.png`"
-- "SSTV sinyali var! qsstv ile decode et veya scripts/sstv_decoder.py kullan."
-- "binwalk -e ile içinden zip çıktı. Zip'in şifresini kirala."
-
----
-
-## Binary Exploitation (Pwn)
-
-### Level 1 Patterns
-- "Binary'de buffer overflow olabilir. ASLR, DEP, Stack Canary kontrollerini yap."
-- "checksec ile güvenlik önlemlerini gör: `checksec --file=binary`"
-- "Hangi fonksiyonlar çağrılıyor? system(), execve(), win() fonksiyonu var mı?"
-
-### Level 2 Patterns
-- "GDB ile buffer boyutunu bul. Pattern create ile offset hesapla."
-- "ROP chain oluştur. Gadget'ları ROPgadget ile bul."
-- "Format string varsa: %x,%x ile stack leak, %n ile arbitrary write."
-
-### Level 3 Patterns
-- "pwntools template: offset=40, pop_rdi=0x400123, system=0x400456, /bin/sh=0x600789"
-- "Exploit: `payload = b'A'*40 + p64(pop_rdi) + p64(binsh) + p64(system)`"
-- "Return-to-libc: leak libc adresi, offset hesapla, one_gadget kullan."
+1. **Overthinking:** Bazen çözüm sandığından basittir. Temel kontrolleri atlama.
+2. **Tool fixation:** Tek bir tool'a takılıp kalma. Aynı işi yapan alternatif tool'lar var.
+3. **Category bias:** Web sandığın şey crypto olabilir. Challenge'ı yeniden sınıflandırmayı dene.
+4. **Hint ignorance:** Challenge açıklamasındaki ipuçlarını gözden kaçırma.
+5. **Encoding layers:** Birden fazla encoding katmanı olabilir (base64 → hex → rot13).
+6. **Steganography blindness:** Görüntü/dosya içinde gizli veri olabilir. Her zaman strings/hexdump yap.
