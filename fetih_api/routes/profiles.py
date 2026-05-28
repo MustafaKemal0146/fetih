@@ -7,9 +7,12 @@ from fetih_api.models.schemas import ProfileInfo, ProfilesListResponse, ProfileC
 
 router = APIRouter()
 
+# Modül yüklenirken orijinal home'u sakla (activate sonrası değişmesin diye)
+_ORIGINAL_HOME = os.environ.get("FETIH_HOME", os.path.expanduser("~/.fetih"))
+
 
 def _get_profiles_dir() -> Path:
-    return Path(os.environ.get("FETIH_HOME", os.path.expanduser("~/.fetih"))) / "profiles"
+    return Path(_ORIGINAL_HOME) / "profiles"
 
 
 @router.get("/profiles", response_model=ProfilesListResponse)
