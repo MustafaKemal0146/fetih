@@ -2,7 +2,7 @@
 from __future__ import annotations
 import os, sys, time, platform
 from fastapi import APIRouter, Query
-from fetih_api.models.schemas import HealthResponse, StatusResponse
+from api.models.schemas import HealthResponse, StatusResponse
 
 router = APIRouter()
 _start_time = time.time()

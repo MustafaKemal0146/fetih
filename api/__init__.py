@@ -1,8 +1,7 @@
 """FETIH REST API — HTTP API sunucusu.
 
 Kullanım:
-    python -m fetih_api.server
-    fetih api serve
+    python -m api.server
 """
 
 __version__ = "1.0.0"

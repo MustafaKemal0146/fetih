@@ -1,7 +1,7 @@
 """Plugin yönetimi rotaları."""
 from __future__ import annotations
 from fastapi import APIRouter, HTTPException
-from fetih_api.models.schemas import PluginInfo, PluginInstallRequest
+from api.models.schemas import PluginInfo, PluginInstallRequest
 
 router = APIRouter()
 _plugins: dict[str, dict] = {}

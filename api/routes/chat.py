@@ -3,11 +3,11 @@ from __future__ import annotations
 import uuid, time, json, asyncio
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import StreamingResponse
-from fetih_api.models.schemas import (
+from api.models.schemas import (
     ChatRequest, ChatResponse, ToolCall, UsageInfo,
     BackgroundTaskResponse,
 )
-from fetih_api.routes.deps import get_or_create_agent, submit_background_task, get_task_status
+from api.routes.deps import get_or_create_agent, submit_background_task, get_task_status
 
 router = APIRouter()
 
@@ -133,7 +133,7 @@ async def list_tasks():
 @router.get("/chat/tasks/{task_id}", response_model=BackgroundTaskResponse)
 async def get_task(task_id: str):
     """Belirli arkaplan görevinin durumu."""
-    from fetih_api.routes.deps import _active_tasks
+    from api.routes.deps import _active_tasks
     task = _active_tasks.get(task_id)
     if not task:
         raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
@@ -148,7 +148,7 @@ async def get_task(task_id: str):
 @router.delete("/chat/tasks/{task_id}")
 async def cancel_task(task_id: str):
     """Arkaplan görevini iptal et."""
-    from fetih_api.routes.deps import _active_tasks
+    from api.routes.deps import _active_tasks
     if task_id not in _active_tasks:
         raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
     _active_tasks[task_id]["status"] = "cancelled"

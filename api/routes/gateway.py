@@ -2,7 +2,7 @@
 from __future__ import annotations
 import os, time, platform as _platform
 from fastapi import APIRouter
-from fetih_api.models.schemas import GatewayStatusResponse, GatewayActionRequest, PlatformInfo
+from api.models.schemas import GatewayStatusResponse, GatewayActionRequest, PlatformInfo
 
 router = APIRouter()
 _gateway_start_time = time.time()

@@ -3,8 +3,8 @@
 FETIH REST API Sunucusu — Tam yönetim HTTP API.
 
 Kullanım:
-    python -m fetih_api.server
-    python -m fetih_api.server --port 1453 --host 0.0.0.0
+    python -m api.server
+    python -m api.server --port 1453 --host 0.0.0.0
 
 Env:
     FETIH_API_PORT  — Port (varsayılan: 1453)
@@ -28,7 +28,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from fetih_api.routes import (
+from api.routes import (
     chat, models, sessions, skills, tools, config,
     gateway, profiles, files, plugins, cron_routes,
     system_routes,
@@ -109,7 +109,7 @@ def main():
     """)
 
     uvicorn.run(
-        "fetih_api.server:app",
+        "api.server:app",
         host=args.host,
         port=args.port,
         reload=args.reload,

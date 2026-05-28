@@ -1,11 +1,11 @@
 """Model yönetimi rotaları."""
 from __future__ import annotations
 from fastapi import APIRouter, HTTPException, Query
-from fetih_api.models.schemas import (
+from api.models.schemas import (
     ModelInfo, ModelsListResponse, ModelSwitchRequest,
     ModelParamsRequest, ProviderCreateRequest,
 )
-from fetih_api.routes.deps import get_agent_config
+from api.routes.deps import get_agent_config
 
 router = APIRouter()
 

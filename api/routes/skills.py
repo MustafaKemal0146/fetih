@@ -3,7 +3,7 @@ from __future__ import annotations
 import os, sys, yaml
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, Query
-from fetih_api.models.schemas import (
+from api.models.schemas import (
     SkillInfo, SkillsListResponse, SkillSearchRequest,
 )
 

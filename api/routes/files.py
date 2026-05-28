@@ -4,7 +4,7 @@ import uuid, os, shutil, time
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, UploadFile, File, Query
 from fastapi.responses import FileResponse
-from fetih_api.models.schemas import FileInfo
+from api.models.schemas import FileInfo
 
 router = APIRouter()
 _upload_dir = Path("/tmp/fetih_uploads")

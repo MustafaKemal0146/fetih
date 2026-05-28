@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from fastapi import APIRouter, HTTPException
-from fetih_api.models.schemas import ProfileInfo, ProfilesListResponse, ProfileCreateRequest
+from api.models.schemas import ProfileInfo, ProfilesListResponse, ProfileCreateRequest
 
 router = APIRouter()
 

@@ -2,7 +2,7 @@
 from __future__ import annotations
 import uuid
 from fastapi import APIRouter, HTTPException
-from fetih_api.models.schemas import CronJobInfo, CronCreateRequest
+from api.models.schemas import CronJobInfo, CronCreateRequest
 
 router = APIRouter()
 _cron_jobs: dict[str, dict] = {}

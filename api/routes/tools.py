@@ -1,7 +1,7 @@
 """Tool yönetimi rotaları."""
 from __future__ import annotations
 from fastapi import APIRouter, HTTPException
-from fetih_api.models.schemas import ToolInfo, ToolsListResponse, ToolsModifyRequest
+from api.models.schemas import ToolInfo, ToolsListResponse, ToolsModifyRequest
 
 router = APIRouter()
 
