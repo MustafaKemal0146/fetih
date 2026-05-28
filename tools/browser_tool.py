@@ -3043,6 +3043,79 @@ def browser_get_images(task_id: Optional[str] = None) -> str:
         return json.dumps(_copy_fallback_warning(response, result), ensure_ascii=False)
 
 
+def browser_dom(
+    selector: str,
+    attribute: Optional[str] = None,
+    all_matches: bool = True,
+    task_id: Optional[str] = None,
+) -> str:
+    """Extract DOM elements from the current page by CSS selector.
+
+    Non-vision fallback for models that can't process screenshots. Instead
+    of taking a screenshot and asking a vision model, this extracts text
+    content and attributes from specific DOM elements using CSS selectors.
+
+    Args:
+        selector: CSS selector (e.g. 'body', '.content', '#main', 'h1,h2')
+        attribute: Extract only this attribute ('href', 'src', 'alt', ...)
+        all_matches: Return all matches (True) or first only (False)
+        task_id: Session identifier
+
+    Returns:
+        JSON with extracted elements (text, tag, attributes, visibility)
+    """
+    if not task_id:
+        return json.dumps({"error": "task_id gerekli", "success": False})
+
+    # Build eval JS to extract DOM elements
+    limit = 50 if all_matches else 1
+    js_code = f"""
+    (() => {{
+        const results = [];
+        const els = document.querySelectorAll({json.dumps(selector)});
+        const limit = {limit};
+        for (let i = 0; i < Math.min(els.length, limit); i++) {{
+            const el = els[i];
+            const info = {{
+                index: i,
+                tag: el.tagName.toLowerCase(),
+                visible: !!(el.offsetParent || el.getClientRects().length),
+                rect: (() => {{
+                    const r = el.getBoundingClientRect();
+                    return {{ x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) }};
+                }})(),
+            }};
+            if ({json.dumps(attribute is not None)}) {{
+                info.value = el[{json.dumps(attribute)}] || el.getAttribute({json.dumps(attribute)}) || '';
+            }} else {{
+                info.text = (el.textContent || '').trim().replace(/\\s+/g, ' ').slice(0, 500);
+            }}
+            // Common attributes
+            info.attrs = {{}};
+            for (const attr of ['id', 'class', 'href', 'src', 'alt', 'title', 'placeholder', 'type', 'name', 'value', 'aria-label']) {{
+                const v = el[attr] || el.getAttribute(attr);
+                if (v) info.attrs[attr] = typeof v === 'string' ? v.slice(0, 200) : String(v).slice(0, 200);
+            }}
+            results.push(info);
+        }}
+        return {{ total: els.length, shown: results.length, elements: results }};
+    }})()
+    """
+
+    cmd_result = _run_browser_command(
+        "eval", {"code": js_code}, task_id, timeout=8
+    )
+
+    if not cmd_result.get("success"):
+        return json.dumps({
+            "error": cmd_result.get("error", "DOM extraction failed"),
+            "hint": "Try browser_snapshot(full=true) instead",
+            "success": False,
+        })
+
+    return cmd_result.get("snapshot", cmd_result.get("output", "{}"))
+
+
 def browser_vision(question: str, annotate: bool = False, task_id: Optional[str] = None) -> str:
     """
     Take a screenshot of the current page and analyze it with vision AI.
@@ -3063,6 +3136,32 @@ def browser_vision(question: str, annotate: bool = False, task_id: Optional[str]
     Returns:
         JSON string with vision analysis results and screenshot_path
     """
+    # ── DOM fallback: no vision model configured → textual snapshot instead ──
+    if not _model_supports_vision():
+        logger.info(
+            "browser_vision called but no vision model available — "
+            "falling back to DOM snapshot"
+        )
+        snapshot = browser_snapshot(full=True, task_id=task_id)
+        dom_content = browser_dom(selector="body", task_id=task_id)
+        # Also grab form elements and links for richer context
+        forms = browser_dom(selector="form, input, select, textarea, button", task_id=task_id)
+        links = browser_dom(selector="a[href]", attribute="href", task_id=task_id)
+        return json.dumps({
+            "success": True,
+            "mode": "dom_fallback",
+            "warning": (
+                "Vision model not available — returned DOM-based page content. "
+                "Use browser_dom(selector='...') to inspect specific elements. "
+                "Set AUXILIARY_VISION_MODEL env var to enable screenshot analysis."
+            ),
+            "question": question,
+            "snapshot": json.loads(snapshot) if isinstance(snapshot, str) else snapshot,
+            "body_content": json.loads(dom_content) if isinstance(dom_content, str) else dom_content,
+            "form_elements": json.loads(forms) if isinstance(forms, str) else forms,
+            "links": json.loads(links) if isinstance(links, str) else links,
+        })
+
     if _is_camofox_mode():
         from tools.browser_camofox import camofox_vision
         return camofox_vision(question, annotate, task_id)
@@ -3591,6 +3690,47 @@ def _running_in_docker() -> bool:
         return False
 
 
+def _model_supports_vision() -> bool:
+    """Check whether the currently active model supports image/vision input.
+
+    Returns True when a vision model is explicitly configured (via
+    ``AUXILIARY_VISION_MODEL`` env var) OR the primary model advertises vision
+    support via models.dev metadata. Returns False when neither source
+    indicates vision capability — in that case ``browser_vision`` is hidden
+    from the tool list and the agent is steered toward DOM-based inspection.
+    """
+    # Explicit vision model override — fastest path
+    if _get_vision_model():
+        return True
+
+    # Fall back to models.dev metadata for the primary model
+    try:
+        from agent.models_dev import get_model_capabilities
+        from fetih_cli.config import load_config
+        cfg = load_config()
+        provider = (cfg.get("model_provider") or cfg.get("model_provider", "")).strip()
+        model = (cfg.get("model") or "").strip()
+        if provider and model:
+            caps = get_model_capabilities(provider, model)
+            if caps and caps.supports_vision:
+                return True
+    except Exception:
+        pass
+
+    return False
+
+
+def check_vision_support() -> bool:
+    """Check function for ``browser_vision`` tool registration.
+
+    Returns True when the current model can process screenshots (vision
+    capable), False otherwise.  When False, the tool is hidden from the
+    agent's available-tool list so it won't waste turns calling a tool
+    that can only return textual DOM fallback.
+    """
+    return _model_supports_vision()
+
+
 def check_browser_requirements() -> bool:
     """
     Check if browser tool requirements are met.
@@ -3783,8 +3923,51 @@ registry.register(
     toolset="browser",
     schema=_BROWSER_SCHEMA_MAP["browser_vision"],
     handler=lambda args, **kw: browser_vision(question=args.get("question", ""), annotate=args.get("annotate", False), task_id=kw.get("task_id")),
-    check_fn=check_browser_requirements,
+    check_fn=lambda: check_browser_requirements() and check_vision_support(),
     emoji="👁️",
+)
+registry.register(
+    name="browser_dom",
+    toolset="browser",
+    schema={
+        "name": "browser_dom",
+        "description": (
+            "Extract specific DOM elements from the current page by CSS selector "
+            "(e.g., 'body', '.content', '#main', 'form', 'h1, h2, h3'). "
+            "Returns text content, attributes (href, src, alt, title, placeholder), "
+            "and computed visibility. Essential for models without vision: use "
+            "this instead of browser_vision to 'see' what's on the page by "
+            "reading its structure. Combine with browser_snapshot for navigation "
+            "and browser_dom for targeted content extraction."
+        ),
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "selector": {
+                    "type": "string",
+                    "description": "CSS selector to extract (e.g., 'body', '.main-content', '#login-form', 'a[href]', 'img', 'h1,h2,h3')"
+                },
+                "attribute": {
+                    "type": "string",
+                    "description": "Optional: extract only this attribute (e.g., 'href' for links, 'src' for images, 'alt' for alt text). Omit to extract text content."
+                },
+                "all": {
+                    "type": "boolean",
+                    "description": "Return all matching elements (default: true). Set to false for first match only."
+                },
+                "task_id": {"type": "string", "description": "Task ID for session tracking"}
+            },
+            "required": ["selector"]
+        }
+    },
+    handler=lambda args, **kw: browser_dom(
+        selector=args.get("selector", "body"),
+        attribute=args.get("attribute"),
+        all_matches=args.get("all", True),
+        task_id=kw.get("task_id"),
+    ),
+    check_fn=check_browser_requirements,
+    emoji="🔍",
 )
 registry.register(
     name="browser_console",
