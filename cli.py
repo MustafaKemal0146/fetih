@@ -3404,10 +3404,25 @@ class FETIHCLI:
         except Exception:
             return f"⚕ {self.model if getattr(self, 'model', None) else 'FETIH'}"
 
+    def _is_computer_use_active(self) -> bool:
+        """Return True when desktop control is currently enabled."""
+        try:
+            from tools.computer_use_tool import is_desktop_enabled
+            return is_desktop_enabled()
+        except Exception:
+            return False
+
     def _get_status_bar_fragments(self):
         if not self._status_bar_visible or getattr(self, '_model_picker_state', None):
             return []
         try:
+            # ── Computer-use mode: full red status bar ─────────────────────
+            if self._is_computer_use_active():
+                width = self._get_tui_terminal_width()
+                text = " 🖥️ MASAUSTU KONTROLU AKTIF  │  fareyi (0,0) kösesine çek = DURDUR "
+                trimmed = self._trim_status_bar_text(text, width - 2)
+                return [("class:status-bar-computer-use", f" {trimmed} ")]
+
             snapshot = self._get_status_bar_snapshot()
             # Use prompt_toolkit's own terminal width when running inside the
             # TUI — shutil.get_terminal_size() can return stale or fallback
@@ -9217,6 +9232,9 @@ class FETIHCLI:
                 print(f"\n  🖥️  FETIH DESKTOP CONTROL: ON (FAILSAFE: upper-left corner to abort)\n")
                 from tools.registry import invalidate_check_fn_cache
                 invalidate_check_fn_cache()
+                # Trigger TUI style refresh so status bar turns red immediately
+                self._apply_tui_skin_style()
+                self._invalidate(min_interval=0.0)
             else:
                 _cprint(f"\n  {_BOLD_RED}⚠️  Masaustu kontrolu baslatilamadi.{_RST}\n")
 
@@ -9224,6 +9242,9 @@ class FETIHCLI:
             disable_desktop()
             from tools.registry import invalidate_check_fn_cache
             invalidate_check_fn_cache()
+            # Trigger TUI style refresh so status bar returns to normal
+            self._apply_tui_skin_style()
+            self._invalidate(min_interval=0.0)
             _cprint(f"\n  {_BOLD_GREEN}╔══ MASAUSTU KONTROLU KAPATILDI ══╗{_RST}")
             _cprint(f"  {_BOLD_GREEN}║{_RST}  🖥️  FETIH artık ekranınızı kontrol edemez.")
             _cprint(f"  {_BOLD_GREEN}║{_RST}  Tekrar acmak icin: /computer-use on")
@@ -13787,6 +13808,8 @@ class FETIHCLI:
             'status-bar-bad': 'bg:#1a1a2e #FF8C00 bold',
             'status-bar-critical': 'bg:#1a1a2e #FF6B6B bold',
             'status-bar-yolo': 'bg:#1a1a2e #FF4444 bold',
+            # Computer-use mode: full crimson red background
+            'status-bar-computer-use': 'bg:#8B0000 #FFFFFF bold',
             # Bronze horizontal rules around the input area
             'input-rule': '#CD7F32',
             # Clipboard image attachment badges

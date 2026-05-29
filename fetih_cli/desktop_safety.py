@@ -134,8 +134,13 @@ def _get_blocked_combos() -> List[Set[str]]:
 
 
 _KEY_ALIASES_GLOBAL = {
-    "command": "cmd", "control": "ctrl", "alt": "option",
-    "⌘": "cmd", "⌥": "option", "win": "cmd", "super": "cmd",
+    "command": "cmd", "control": "ctrl",
+    # "option" is the macOS name for Alt; normalize to "alt" so blocked combos match
+    "option": "alt",
+    "⌘": "cmd", "⌥": "alt",
+    # On macOS "win/super" maps to "cmd"; on Windows/Linux keep as "win"
+    **( {"win": "cmd", "super": "cmd"} if _PLATFORM == "darwin"
+        else {"super": "win"} ),
     "return": "enter", "esc": "escape", "del": "delete",
 }
 
