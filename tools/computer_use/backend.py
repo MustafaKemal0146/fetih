@@ -1,132 +1,150 @@
-"""Unified cross-platform backend dispatcher.
+"""Abstract backend interface for computer use.
 
-Selects the right backend at call time:
-  - macOS + cua-driver available → cua_backend (no focus steal)
-  - Everything else → pyautogui_backend
+Any implementation (cua-driver over MCP, pyautogui, noop, future Linux/Windows)
+must return the shape described below. All methods synchronous; async is
+handled inside the backend implementation if needed.
 """
 
 from __future__ import annotations
 
-import logging
-import sys
-from typing import Optional, Tuple
-
-logger = logging.getLogger(__name__)
-
-_PLATFORM = sys.platform
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Optional, Tuple
 
 
-def _use_cua() -> bool:
-    """Return True when cua-driver should be used (macOS + binary present)."""
-    if _PLATFORM != "darwin":
-        return False
-    try:
-        from tools.computer_use.cua_backend import cua_driver_binary_available
-        return cua_driver_binary_available()
-    except Exception:
-        return False
+@dataclass
+class UIElement:
+    """One interactable element on the current screen."""
+
+    index: int                       # 1-based SOM index
+    role: str                        # AX role (AXButton, AXTextField, ...)
+    label: str = ""                  # AXTitle / AXDescription / AXValue snippet
+    bounds: Tuple[int, int, int, int] = (0, 0, 0, 0)  # x, y, w, h (logical px)
+    app: str = ""                    # owning bundle ID or app name
+    pid: int = 0                     # owning process PID
+    window_id: int = 0               # SkyLight / CG window ID
+    attributes: Dict[str, Any] = field(default_factory=dict)
+
+    def center(self) -> Tuple[int, int]:
+        x, y, w, h = self.bounds
+        return x + w // 2, y + h // 2
 
 
-def screenshot(region: Optional[Tuple[int, int, int, int]] = None) -> str:
-    """Return base64-encoded PNG screenshot."""
-    if _use_cua() and region is None:
-        from tools.computer_use.cua_backend import screenshot as _ss
-        return _ss()
-    from tools.computer_use.pyautogui_backend import screenshot as _ss
-    return _ss(region=region)
+@dataclass
+class CaptureResult:
+    """Result of a screen capture call.
+
+    At least one of png_b64 / elements is populated depending on capture mode:
+      * mode="vision" → png_b64 only
+      * mode="ax"     → elements only
+      * mode="som"    → both (default): PNG already has numbered overlays
+                         drawn by the backend, and `elements` holds the
+                         matching index → element mapping.
+    """
+
+    mode: str
+    width: int                      # screenshot width (logical px, pre-Anthropic-scale)
+    height: int
+    png_b64: Optional[str] = None
+    elements: List[UIElement] = field(default_factory=list)
+    # Optional: the target app/window the elements were captured for.
+    app: str = ""
+    window_title: str = ""
+    # Raw bytes we sent to Anthropic, for token estimation.
+    png_bytes_len: int = 0
 
 
-def click(x: int, y: int, button: str = "left") -> None:
-    if _use_cua():
-        from tools.computer_use import cua_backend as _b
-        _b.click(x, y, button)
-    else:
-        from tools.computer_use import pyautogui_backend as _b
-        _b.click(x, y, button=button)
+@dataclass
+class ActionResult:
+    """Result of any action (click / type / scroll / drag / key / wait)."""
+
+    ok: bool
+    action: str
+    message: str = ""                # human-readable summary
+    # Optional trailing screenshot — set when the caller asked for a
+    # post-action capture or the backend always returns one.
+    capture: Optional[CaptureResult] = None
+    # Arbitrary extra fields for debugging / telemetry.
+    meta: Dict[str, Any] = field(default_factory=dict)
 
 
-def double_click(x: int, y: int) -> None:
-    if _use_cua():
-        from tools.computer_use import cua_backend as _b
-        _b.double_click(x, y)
-    else:
-        from tools.computer_use import pyautogui_backend as _b
-        _b.double_click(x, y)
+class ComputerUseBackend(ABC):
+    """Lifecycle: `start()` before first use, `stop()` at shutdown."""
 
+    @abstractmethod
+    def start(self) -> None: ...
 
-def right_click(x: int, y: int) -> None:
-    if _use_cua():
-        from tools.computer_use import cua_backend as _b
-        _b.right_click(x, y)
-    else:
-        from tools.computer_use import pyautogui_backend as _b
-        _b.right_click(x, y)
+    @abstractmethod
+    def stop(self) -> None: ...
 
+    @abstractmethod
+    def is_available(self) -> bool:
+        """Return True if the backend can be used on this host right now.
 
-def middle_click(x: int, y: int) -> None:
-    from tools.computer_use import pyautogui_backend as _b
-    _b.middle_click(x, y)
+        Used by check_fn gating and by the post-setup wizard.
+        """
 
+    # ── Capture ─────────────────────────────────────────────────────
+    @abstractmethod
+    def capture(self, mode: str = "som", app: Optional[str] = None) -> CaptureResult: ...
 
-def move_mouse(x: int, y: int, duration: float = 0.2) -> None:
-    if _use_cua():
-        from tools.computer_use import cua_backend as _b
-        _b.move_mouse(x, y)
-    else:
-        from tools.computer_use import pyautogui_backend as _b
-        _b.move_mouse(x, y, duration=duration)
+    # ── Pointer actions ─────────────────────────────────────────────
+    @abstractmethod
+    def click(
+        self,
+        *,
+        element: Optional[int] = None,
+        x: Optional[int] = None,
+        y: Optional[int] = None,
+        button: str = "left",           # left | right | middle
+        click_count: int = 1,
+        modifiers: Optional[List[str]] = None,
+    ) -> ActionResult: ...
 
+    @abstractmethod
+    def drag(
+        self,
+        *,
+        from_element: Optional[int] = None,
+        to_element: Optional[int] = None,
+        from_xy: Optional[Tuple[int, int]] = None,
+        to_xy: Optional[Tuple[int, int]] = None,
+        button: str = "left",
+        modifiers: Optional[List[str]] = None,
+    ) -> ActionResult: ...
 
-def type_text(text: str, interval: float = 0.0) -> None:
-    if _use_cua():
-        from tools.computer_use import cua_backend as _b
-        _b.type_text(text)
-    else:
-        from tools.computer_use import pyautogui_backend as _b
-        _b.type_text(text, interval=interval)
+    @abstractmethod
+    def scroll(
+        self,
+        *,
+        direction: str,                 # up | down | left | right
+        amount: int = 3,                # wheel ticks
+        element: Optional[int] = None,
+        x: Optional[int] = None,
+        y: Optional[int] = None,
+        modifiers: Optional[List[str]] = None,
+    ) -> ActionResult: ...
 
+    # ── Keyboard ────────────────────────────────────────────────────
+    @abstractmethod
+    def type_text(self, text: str) -> ActionResult: ...
 
-def press_key(keys: str) -> None:
-    if _use_cua():
-        from tools.computer_use import cua_backend as _b
-        _b.press_key(keys)
-    else:
-        from tools.computer_use import pyautogui_backend as _b
-        _b.press_key(keys)
+    @abstractmethod
+    def key(self, keys: str) -> ActionResult:
+        """Send a key combo, e.g. 'cmd+s', 'ctrl+alt+t', 'return'."""
 
+    # ── Introspection ───────────────────────────────────────────────
+    @abstractmethod
+    def list_apps(self) -> List[Dict[str, Any]]:
+        """Return running apps with bundle IDs, PIDs, window counts."""
 
-def scroll(x: int, y: int, direction: str = "down", amount: int = 3) -> None:
-    if _use_cua():
-        from tools.computer_use import cua_backend as _b
-        _b.scroll(x, y, direction, amount)
-    else:
-        from tools.computer_use import pyautogui_backend as _b
-        _b.scroll(x, y, direction=direction, amount=amount)
+    @abstractmethod
+    def focus_app(self, app: str, raise_window: bool = False) -> ActionResult:
+        """Route input to `app` (by name or bundle ID). Default: focus without raise."""
 
-
-def drag(from_x: int, from_y: int, to_x: int, to_y: int,
-         duration: float = 0.5) -> None:
-    if _use_cua():
-        from tools.computer_use import cua_backend as _b
-        _b.drag(from_x, from_y, to_x, to_y)
-    else:
-        from tools.computer_use import pyautogui_backend as _b
-        _b.drag(from_x, from_y, to_x, to_y, duration=duration)
-
-
-def get_screen_size() -> Tuple[int, int]:
-    if _use_cua():
-        from tools.computer_use import cua_backend as _b
-        return _b.get_screen_size()
-    from tools.computer_use import pyautogui_backend as _b
-    return _b.get_screen_size()
-
-
-def get_mouse_position() -> Tuple[int, int]:
-    from tools.computer_use import pyautogui_backend as _b
-    return _b.get_mouse_position()
-
-
-def wait(seconds: float) -> None:
-    from tools.computer_use import pyautogui_backend as _b
-    _b.wait(seconds)
+    # ── Timing ──────────────────────────────────────────────────────
+    def wait(self, seconds: float) -> ActionResult:
+        """Default implementation: time.sleep."""
+        import time
+        time.sleep(max(0.0, min(seconds, 30.0)))
+        return ActionResult(ok=True, action="wait", message=f"waited {seconds:.2f}s")

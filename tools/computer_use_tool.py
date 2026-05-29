@@ -1,58 +1,83 @@
-"""computer_use_tool — global enable/disable switch + public API.
+"""Shim for tool discovery. Registers `computer_use` with tools.registry.
 
-This module is imported by ``cli.py`` for the ``/computer-use`` command.
-It wraps the registry-based tool with a simple on/off flag that the
-approval callback and system prompt can interrogate.
+The real implementation lives in the `tools/computer_use/` package to keep
+the file structure clean. This shim exists because tools.registry auto-imports
+`tools/*.py` — we need a top-level module to trigger the registration.
+
+SAFETY: computer_use is DISABLED by default. The user must explicitly run
+`/computer-use on` to enable it. This prevents accidental desktop control
+in headless/server environments.
 """
 
 from __future__ import annotations
 
-import logging
-import threading
+import os
 
-logger = logging.getLogger(__name__)
+from tools.computer_use.schema import COMPUTER_USE_SCHEMA
+from tools.computer_use.tool import (
+    check_computer_use_requirements,
+    handle_computer_use,
+    set_approval_callback,
+)
+from tools.registry import registry
 
-_lock = threading.Lock()
-_desktop_enabled = False
-_approval_callback = None
 
+def _is_desktop_enabled() -> bool:
+    """Check if user has explicitly enabled desktop control AND backend is available."""
+    enabled = os.environ.get("FETIH_DESKTOP_ENABLED", "").strip() in ("1", "true", "yes", "on")
+    if not enabled:
+        return False
+    return check_computer_use_requirements()
 
-# ---------------------------------------------------------------------------
-# Public API used by cli.py
-# ---------------------------------------------------------------------------
 
 def enable_desktop() -> bool:
-    """Enable desktop control. Returns True on success."""
-    global _desktop_enabled
-    with _lock:
-        # Trigger tool module import so it self-registers
-        try:
-            import tools.computer_use.tool  # noqa: F401
-        except Exception as exc:
-            logger.warning("computer_use tool import failed: %s", exc)
-            return False
-        _desktop_enabled = True
-        return True
+    """Enable desktop control for this session. Returns True if backend is available."""
+    backend_ok = check_computer_use_requirements()
+    if backend_ok:
+        os.environ["FETIH_DESKTOP_ENABLED"] = "1"
+    return backend_ok
 
 
 def disable_desktop() -> None:
-    """Disable desktop control."""
-    global _desktop_enabled
-    with _lock:
-        _desktop_enabled = False
+    """Disable desktop control for this session."""
+    os.environ.pop("FETIH_DESKTOP_ENABLED", None)
 
 
 def is_desktop_enabled() -> bool:
-    """Return True when desktop control is currently active."""
-    return _desktop_enabled
+    """Check if desktop control is currently enabled."""
+    return os.environ.get("FETIH_DESKTOP_ENABLED", "").strip() in ("1", "true", "yes", "on")
 
 
-def set_approval_callback(cb) -> None:
-    """Wire up the CLI approval dialog for computer_use actions."""
-    global _approval_callback
-    _approval_callback = cb
-    try:
-        from tools.computer_use.tool import set_approval_callback as _set
-        _set(cb)
-    except Exception:
-        pass
+_PLATFORM = __import__('sys').platform
+if _PLATFORM == "darwin":
+    _BACKEND_DESC = "macOS masaüstü kontrolü (cua-driver ile arka planda, fareyi çalmaz)"
+else:
+    _BACKEND_DESC = f"{'Linux' if _PLATFORM == 'linux' else 'Windows'} masaüstü kontrolü (pyautogui ile — farenizi hareket ettirir, ekranınızı kullanır)"
+
+
+registry.register(
+    name="computer_use",
+    toolset="computer_use",
+    schema=COMPUTER_USE_SCHEMA,
+    handler=lambda args, **kw: handle_computer_use(args, **kw),
+    check_fn=_is_desktop_enabled,
+    requires_env=["FETIH_DESKTOP_ENABLED"],
+    description=(
+        f"{_BACKEND_DESC}. "
+        "KULLANIM: /computer-use on ile aktif et. "
+        "Aksiyonlar: capture (ekran goruntusu), click, type, key, scroll, drag, "
+        "wait, list_apps, focus_app. "
+        "GUVENLIK: FAILSAFE aktif (mouse sol ust koseye cekilirse durur). "
+        "Tum aksiyonlar ~/.fetih/desktop_audit.log dosyasina kaydedilir."
+    ),
+)
+
+
+__all__ = [
+    "handle_computer_use",
+    "set_approval_callback",
+    "check_computer_use_requirements",
+    "enable_desktop",
+    "disable_desktop",
+    "is_desktop_enabled",
+]

@@ -1,220 +1,556 @@
-"""computer_use tool — self-registers with the tool registry.
+"""Entry point for the `computer_use` tool.
 
-Imported by ``discover_builtin_tools()`` and by ``tools/computer_use_tool.py``.
+Universal (any-model) macOS desktop control via cua-driver's background
+computer-use primitive. Replaces #4562's Anthropic-native `computer_20251124`
+approach — the schema here is standard OpenAI function-calling so every
+tool-capable model can drive it.
+
+Return contract
+---------------
+For text-only results (wait, key, list_apps, focus_app, failures, etc.):
+  JSON string.
+
+For captures / actions with `capture_after=True`:
+  A dict wrapped as the OpenAI-style multi-part tool-message content:
+
+      {
+        "_multimodal": True,
+        "content": [
+            {"type": "text", "text": "<human-readable summary + SOM index>"},
+            {"type": "image_url",
+             "image_url": {"url": "data:image/png;base64,<b64>"}},
+        ],
+        "text_summary": "<text used for fallback string content>",
+      }
+
+  run_agent.py's tool-message builder inspects `_multimodal` and emits a
+  list-shaped `content` for OpenAI-compatible providers. The Anthropic
+  adapter splices the base64 image into a `tool_result` block (see
+  `agent/anthropic_adapter.py`). Every provider that supports multi-part
+  tool content gets the image; text-only providers see the summary only.
 """
 
 from __future__ import annotations
 
-import base64
 import json
 import logging
-from typing import Any, Dict, Optional
+import os
+import re
+import sys
+import threading
+from typing import Any, Dict, List, Optional, Tuple
 
-from tools.registry import registry, tool_error
-from tools.computer_use.schema import COMPUTER_USE_SCHEMA
-from fetih_cli.desktop_safety import (
-    validate_desktop_action,
-    log_desktop_action,
-    format_approval_prompt,
+from tools.computer_use.backend import (
+    ActionResult,
+    CaptureResult,
+    ComputerUseBackend,
+    UIElement,
 )
 
 logger = logging.getLogger(__name__)
 
+
 # ---------------------------------------------------------------------------
-# Approval callback (set by CLI before first use)
+# Approval & safety
 # ---------------------------------------------------------------------------
 
-_approval_callback = None   # callable(action, args, summary) -> verdict str
+_approval_callback = None
 
 
 def set_approval_callback(cb) -> None:
+    """Register a callback for computer_use approval prompts (used by CLI).
+
+    Matches the terminal_tool._approval_callback pattern. The callback
+    receives (action, args, summary) and returns one of:
+      "approve_once" | "approve_session" | "always_approve" | "deny".
+    """
     global _approval_callback
     _approval_callback = cb
 
 
-def _request_approval(action: str, args: Dict) -> str:
-    """Ask for user approval; return 'approved' or 'denied'."""
-    if _approval_callback is None:
-        return "approved"   # Non-interactive — auto-approve
-    summary = format_approval_prompt(action, args)
-    try:
-        verdict = _approval_callback(action, args, summary)
-        if verdict in {"approve_once", "approve_session", "always_approve"}:
-            return "approved"
-        return "denied"
-    except Exception:
-        return "denied"
+# Actions that read, not mutate. Always allowed.
+_SAFE_ACTIONS = frozenset({"capture", "wait", "list_apps"})
+
+# Actions that mutate user-visible state. Go through approval.
+_DESTRUCTIVE_ACTIONS = frozenset({
+    "click", "double_click", "right_click", "middle_click",
+    "drag", "scroll", "type", "key", "set_value", "focus_app",
+})
+
+# Hard-blocked key combinations. Mirrored from #4562 — these are destructive
+# regardless of approval level (e.g. logout kills the session FETIH runs in).
+_BLOCKED_KEY_COMBOS = {
+    frozenset({"cmd", "shift", "backspace"}),   # empty trash
+    frozenset({"cmd", "option", "backspace"}),   # force delete
+    frozenset({"cmd", "ctrl", "q"}),             # lock screen
+    frozenset({"cmd", "shift", "q"}),            # log out
+    frozenset({"cmd", "option", "shift", "q"}),  # force log out
+}
+
+_KEY_ALIASES = {"command": "cmd", "control": "ctrl", "alt": "option", "⌘": "cmd", "⌥": "option"}
+
+
+def _canon_key_combo(keys: str) -> frozenset:
+    parts = [p.strip().lower() for p in re.split(r"\s*\+\s*", keys) if p.strip()]
+    parts = [_KEY_ALIASES.get(p, p) for p in parts]
+    return frozenset(parts)
+
+
+# Dangerous text patterns for the `type` action. Same list as #4562.
+_BLOCKED_TYPE_PATTERNS = [
+    re.compile(r"curl\s+[^|]*\|\s*bash", re.IGNORECASE),
+    re.compile(r"curl\s+[^|]*\|\s*sh", re.IGNORECASE),
+    re.compile(r"wget\s+[^|]*\|\s*bash", re.IGNORECASE),
+    re.compile(r"\bsudo\s+rm\s+-[rf]", re.IGNORECASE),
+    re.compile(r"\brm\s+-rf\s+/\s*$", re.IGNORECASE),
+    re.compile(r":\s*\(\)\s*\{\s*:\|:\s*&\s*\}", re.IGNORECASE),  # fork bomb
+]
+
+
+def _is_blocked_type(text: str) -> Optional[str]:
+    for pat in _BLOCKED_TYPE_PATTERNS:
+        if pat.search(text):
+            return pat.pattern
+    return None
 
 
 # ---------------------------------------------------------------------------
-# Handler
+# Backend selection — env-swappable for tests
 # ---------------------------------------------------------------------------
 
-def _handle_computer_use(
-    action: str,
-    coordinate: Optional[list] = None,
-    text: Optional[str] = None,
-    keys: Optional[str] = None,
-    direction: Optional[str] = None,
-    amount: int = 3,
-    from_coordinate: Optional[list] = None,
-    to_coordinate: Optional[list] = None,
-    duration: float = 0.2,
-    interval: float = 0.0,
-    **_extra: Any,
-) -> str:
-    """Execute a desktop action and return a JSON result string."""
-    from tools.computer_use_tool import is_desktop_enabled
+# Per-process cached backend; lazily instantiated on first call.
+_backend_lock = threading.Lock()
+_backend: Optional[ComputerUseBackend] = None
+# Session-scoped approval state.
+_session_auto_approve = False
+_always_allow: set = set()  # action names the user unlocked for the session
 
-    if not is_desktop_enabled():
-        return tool_error(
-            "Desktop control is disabled. Run '/computer-use on' to enable it."
-        )
 
-    args = {
-        "coordinate": coordinate,
-        "text": text,
-        "keys": keys,
-        "direction": direction,
-        "amount": amount,
-        "from_coordinate": from_coordinate,
-        "to_coordinate": to_coordinate,
-        "duration": duration,
-    }
+def _get_backend() -> ComputerUseBackend:
+    global _backend
+    with _backend_lock:
+        if _backend is None:
+            backend_name = os.environ.get("FETIH_COMPUTER_USE_BACKEND", "").lower()
+            # On macOS, cua-driver is the preferred backend (background, no focus steal)
+            if backend_name in {"cua", "cua-driver"} or (not backend_name and sys.platform == "darwin"):
+                from tools.computer_use.cua_backend import CuaDriverBackend, cua_driver_binary_available
+                if cua_driver_binary_available():
+                    _backend = CuaDriverBackend()
+                elif sys.platform != "darwin":
+                    # Fall through to pyautogui on non-macOS
+                    pass
+                else:
+                    _backend = CuaDriverBackend()  # will fail at start() with a clear message
+            # On Linux/Windows, or if explicitly set to pyautogui:
+            if _backend is None:
+                if backend_name in {"pyautogui", "pya", ""} or True:
+                    from tools.computer_use.pyautogui_backend import (
+                        PyAutoGUIBackend,
+                        pyautogui_backend_available,
+                    )
+                    if pyautogui_backend_available():
+                        _backend = PyAutoGUIBackend()
+                    else:
+                        raise RuntimeError(
+                            "Desktop control unavailable: no suitable backend.\n"
+                            "On macOS: install cua-driver (fetih computer-use install)\n"
+                            "On Linux/Windows: ensure a GUI session is running with DISPLAY set"
+                        )
+            if backend_name == "noop":  # pragma: no cover
+                _backend = _NoopBackend()
+            if _backend is None:
+                raise RuntimeError(
+                    f"No computer_use backend available for platform {sys.platform}. "
+                    f"Set FETIH_COMPUTER_USE_BACKEND=pyautogui or FETIH_COMPUTER_USE_BACKEND=cua"
+                )
+            _backend.start()
+        return _backend
 
-    # Safety validation
-    allowed, err_msg = validate_desktop_action(action, args)
-    if not allowed:
-        return tool_error(err_msg or f"Action '{action}' blocked by safety layer")
 
-    # Approval for tier ≥2 actions
-    from fetih_cli.desktop_safety import get_safety_tier, requires_approval
-    if requires_approval(action, approval_level=2):
-        verdict = _request_approval(action, args)
-        if verdict != "approved":
-            log_desktop_action(action, args, False, "denied by user", approved=False)
-            return tool_error(f"Action '{action}' denied by user")
+def reset_backend_for_tests() -> None:  # pragma: no cover
+    """Test helper — tear down the cached backend."""
+    global _backend, _session_auto_approve, _always_allow
+    with _backend_lock:
+        if _backend is not None:
+            try:
+                _backend.stop()
+            except Exception:
+                pass
+        _backend = None
+    _session_auto_approve = False
+    _always_allow = set()
 
-    # ── Execute ──────────────────────────────────────────────────────────
-    from tools.computer_use import backend as B
 
-    try:
-        if action == "screenshot":
-            b64 = B.screenshot()
-            log_desktop_action("screenshot", {}, True)
-            # Return multimodal result
+class _NoopBackend(ComputerUseBackend):  # pragma: no cover
+    """Test/CI stub. Records calls; returns trivial results."""
+
+    def __init__(self) -> None:
+        self.calls: List[Tuple[str, Dict[str, Any]]] = []
+        self._started = False
+
+    def start(self) -> None: self._started = True
+    def stop(self) -> None: self._started = False
+    def is_available(self) -> bool: return True
+
+    def capture(self, mode: str = "som", app: Optional[str] = None) -> CaptureResult:
+        self.calls.append(("capture", {"mode": mode, "app": app}))
+        return CaptureResult(mode=mode, width=1024, height=768, png_b64=None,
+                             elements=[], app=app or "", window_title="")
+
+    def click(self, **kw) -> ActionResult:
+        self.calls.append(("click", kw))
+        return ActionResult(ok=True, action="click")
+
+    def drag(self, **kw) -> ActionResult:
+        self.calls.append(("drag", kw))
+        return ActionResult(ok=True, action="drag")
+
+    def scroll(self, **kw) -> ActionResult:
+        self.calls.append(("scroll", kw))
+        return ActionResult(ok=True, action="scroll")
+
+    def type_text(self, text: str) -> ActionResult:
+        self.calls.append(("type", {"text": text}))
+        return ActionResult(ok=True, action="type")
+
+    def key(self, keys: str) -> ActionResult:
+        self.calls.append(("key", {"keys": keys}))
+        return ActionResult(ok=True, action="key")
+
+    def list_apps(self) -> List[Dict[str, Any]]:
+        self.calls.append(("list_apps", {}))
+        return []
+
+    def focus_app(self, app: str, raise_window: bool = False) -> ActionResult:
+        self.calls.append(("focus_app", {"app": app, "raise": raise_window}))
+        return ActionResult(ok=True, action="focus_app")
+
+
+# ---------------------------------------------------------------------------
+# Dispatch
+# ---------------------------------------------------------------------------
+
+def handle_computer_use(args: Dict[str, Any], **kwargs) -> Any:
+    """Main entry point — dispatched by tools.registry.
+
+    Returns either a JSON string (text-only) or a dict marked `_multimodal`
+    (image + summary) which run_agent.py wraps into the tool message.
+    """
+    action = (args.get("action") or "").strip().lower()
+    if not action:
+        return json.dumps({"error": "missing `action`"})
+
+    # Safety: validate actions before approval prompt.
+    if action == "type":
+        text = args.get("text", "")
+        pat = _is_blocked_type(text)
+        if pat:
             return json.dumps({
-                "_multimodal": True,
-                "content": [
-                    {
-                        "type": "image",
-                        "source": {
-                            "type": "base64",
-                            "media_type": "image/png",
-                            "data": b64,
-                        },
-                    }
-                ],
-                "text_summary": "Screenshot taken.",
+                "error": f"blocked pattern in type text: {pat!r}",
+                "hint": "Dangerous shell patterns cannot be typed via computer_use.",
             })
 
-        elif action in ("click", "double_click", "right_click", "middle_click"):
-            if coordinate is None:
-                return tool_error("'coordinate' required for click actions")
-            x, y = int(coordinate[0]), int(coordinate[1])
-            if action == "click":
-                B.click(x, y)
-            elif action == "double_click":
-                B.double_click(x, y)
-            elif action == "right_click":
-                B.right_click(x, y)
-            elif action == "middle_click":
-                B.middle_click(x, y)
-            log_desktop_action(action, {"x": x, "y": y}, True)
-            return json.dumps({"ok": True, "action": action, "x": x, "y": y})
+    if action == "key":
+        keys = args.get("keys", "")
+        combo = _canon_key_combo(keys)
+        for blocked in _BLOCKED_KEY_COMBOS:
+            if blocked.issubset(combo) and len(blocked) <= len(combo):
+                return json.dumps({
+                    "error": f"blocked key combo: {sorted(blocked)}",
+                    "hint": "Destructive system shortcuts are hard-blocked.",
+                })
 
-        elif action == "move_mouse":
-            if coordinate is None:
-                return tool_error("'coordinate' required for move_mouse")
-            x, y = int(coordinate[0]), int(coordinate[1])
-            B.move_mouse(x, y, duration=duration)
-            log_desktop_action("move_mouse", {"x": x, "y": y}, True)
-            return json.dumps({"ok": True, "action": "move_mouse", "x": x, "y": y})
+    # Approval gate (destructive actions only).
+    if action in _DESTRUCTIVE_ACTIONS:
+        err = _request_approval(action, args)
+        if err is not None:
+            return err
 
-        elif action == "type":
-            if not text:
-                return tool_error("'text' required for type action")
-            B.type_text(text, interval=interval)
-            log_desktop_action("type", {"text": text}, True)
-            return json.dumps({"ok": True, "typed": len(text)})
+    # Dispatch to backend.
+    try:
+        backend = _get_backend()
+    except Exception as e:
+        return json.dumps({
+            "error": f"computer_use backend unavailable: {e}",
+            "hint": "Run `fetih tools` and enable Computer Use to install cua-driver.",
+        })
 
-        elif action == "key":
-            if not keys:
-                return tool_error("'keys' required for key action")
-            B.press_key(keys)
-            log_desktop_action("key", {"keys": keys}, True)
-            return json.dumps({"ok": True, "keys": keys})
+    try:
+        return _dispatch(backend, action, args)
+    except Exception as e:
+        logger.exception("computer_use %s failed", action)
+        return json.dumps({"error": f"{action} failed: {e}"})
 
-        elif action == "scroll":
-            coord = coordinate or [0, 0]
-            x, y = int(coord[0]), int(coord[1])
-            B.scroll(x, y, direction=direction or "down", amount=int(amount))
-            log_desktop_action("scroll", {"x": x, "y": y, "dir": direction}, True)
-            return json.dumps({"ok": True, "scrolled": direction or "down", "amount": amount})
 
-        elif action == "drag":
-            if from_coordinate is None or to_coordinate is None:
-                return tool_error("'from_coordinate' and 'to_coordinate' required for drag")
-            fx, fy = int(from_coordinate[0]), int(from_coordinate[1])
-            tx, ty = int(to_coordinate[0]), int(to_coordinate[1])
-            B.drag(fx, fy, tx, ty, duration=duration)
-            log_desktop_action("drag", {"from": [fx, fy], "to": [tx, ty]}, True)
-            return json.dumps({"ok": True, "dragged_to": [tx, ty]})
+def _request_approval(action: str, args: Dict[str, Any]) -> Optional[str]:
+    """Return None if approved, or a JSON error string if denied."""
+    global _session_auto_approve, _always_allow
+    if _session_auto_approve:
+        return None
+    if action in _always_allow:
+        return None
+    cb = _approval_callback
+    if cb is None:
+        # No CLI approval wired — default allow. Gateway approval is handled
+        # one layer out via the normal tool-approval infra.
+        return None
+    summary = _summarize_action(action, args)
+    try:
+        verdict = cb(action, args, summary)
+    except Exception as e:
+        logger.warning("approval callback failed: %s", e)
+        verdict = "deny"
+    if verdict == "approve_once":
+        return None
+    if verdict == "approve_session" or verdict == "always_approve":
+        _always_allow.add(action)
+        if verdict == "always_approve":
+            _session_auto_approve = True
+        return None
+    return json.dumps({"error": "denied by user", "action": action})
 
-        elif action == "get_screen_size":
-            w, h = B.get_screen_size()
-            return json.dumps({"width": w, "height": h})
 
-        elif action == "get_mouse_position":
-            x, y = B.get_mouse_position()
-            return json.dumps({"x": x, "y": y})
+def _summarize_action(action: str, args: Dict[str, Any]) -> str:
+    if action in {"click", "double_click", "right_click", "middle_click"}:
+        if args.get("element") is not None:
+            return f"{action} element #{args['element']}"
+        coord = args.get("coordinate")
+        if coord:
+            return f"{action} at {tuple(coord)}"
+        return action
+    if action == "drag":
+        src = args.get("from_element") or args.get("from_coordinate")
+        dst = args.get("to_element") or args.get("to_coordinate")
+        return f"drag {src} → {dst}"
+    if action == "scroll":
+        return f"scroll {args.get('direction', '?')} x{args.get('amount', 3)}"
+    if action == "type":
+        text = args.get("text", "")
+        return f"type {text[:60]!r}" + ("..." if len(text) > 60 else "")
+    if action == "key":
+        return f"key {args.get('keys', '')!r}"
+    if action == "focus_app":
+        return f"focus {args.get('app', '')!r}" + (" (raise)" if args.get("raise_window") else "")
+    return action
 
-        elif action == "wait":
-            secs = float(duration) if duration else 1.0
-            B.wait(secs)
-            return json.dumps({"ok": True, "waited": secs})
 
+def _dispatch(backend: ComputerUseBackend, action: str, args: Dict[str, Any]) -> Any:
+    capture_after = bool(args.get("capture_after"))
+
+    if action == "capture":
+        mode = str(args.get("mode", "som"))
+        if mode not in {"som", "vision", "ax"}:
+            return json.dumps({"error": f"bad mode {mode!r}; use som|vision|ax"})
+        cap = backend.capture(mode=mode, app=args.get("app"))
+        return _capture_response(cap)
+
+    if action == "wait":
+        seconds = float(args.get("seconds", 1.0))
+        res = backend.wait(seconds)
+        return _text_response(res)
+
+    if action == "list_apps":
+        apps = backend.list_apps()
+        return json.dumps({"apps": apps, "count": len(apps)})
+
+    if action == "focus_app":
+        app = args.get("app")
+        if not app:
+            return json.dumps({"error": "focus_app requires `app`"})
+        res = backend.focus_app(app, raise_window=bool(args.get("raise_window")))
+        return _maybe_follow_capture(backend, res, capture_after)
+
+    if action in {"click", "double_click", "right_click", "middle_click"}:
+        button = args.get("button")
+        click_count = 1
+        if action == "double_click":
+            click_count = 2
+        elif action == "right_click":
+            button = "right"
+        elif action == "middle_click":
+            button = "middle"
         else:
-            return tool_error(f"Unknown action: {action!r}")
+            button = button or "left"
+        element = args.get("element")
+        coord = args.get("coordinate") or (None, None)
+        x, y = (coord[0], coord[1]) if coord and coord[0] is not None else (None, None)
+        res = backend.click(
+            element=element if element is not None else None,
+            x=x, y=y, button=button or "left", click_count=click_count,
+            modifiers=args.get("modifiers"),
+        )
+        return _maybe_follow_capture(backend, res, capture_after)
 
-    except RuntimeError as exc:
-        log_desktop_action(action, args, False, str(exc))
-        return tool_error(str(exc))
-    except Exception as exc:
-        logger.exception("computer_use action=%s failed", action)
-        log_desktop_action(action, args, False, str(exc))
-        return tool_error(f"computer_use error: {exc}")
+    if action == "drag":
+        res = backend.drag(
+            from_element=args.get("from_element"),
+            to_element=args.get("to_element"),
+            from_xy=tuple(args["from_coordinate"]) if args.get("from_coordinate") else None,
+            to_xy=tuple(args["to_coordinate"]) if args.get("to_coordinate") else None,
+            button=args.get("button", "left"),
+            modifiers=args.get("modifiers"),
+        )
+        return _maybe_follow_capture(backend, res, capture_after)
+
+    if action == "scroll":
+        coord = args.get("coordinate") or (None, None)
+        res = backend.scroll(
+            direction=args.get("direction", "down"),
+            amount=int(args.get("amount", 3)),
+            element=args.get("element"),
+            x=coord[0] if coord and coord[0] is not None else None,
+            y=coord[1] if coord and coord[1] is not None else None,
+            modifiers=args.get("modifiers"),
+        )
+        return _maybe_follow_capture(backend, res, capture_after)
+
+    if action == "type":
+        res = backend.type_text(args.get("text", ""))
+        return _maybe_follow_capture(backend, res, capture_after)
+
+    if action == "key":
+        res = backend.key(args.get("keys", ""))
+        return _maybe_follow_capture(backend, res, capture_after)
+
+    if action == "set_value":
+        value = args.get("value")
+        if value is None:
+            return json.dumps({"error": "set_value requires `value`"})
+        res = backend.set_value(value=str(value), element=args.get("element"))
+        return _maybe_follow_capture(backend, res, capture_after)
+
+    return json.dumps({"error": f"unknown action {action!r}"})
 
 
 # ---------------------------------------------------------------------------
-# Availability check
+# Response shaping
 # ---------------------------------------------------------------------------
 
-def _is_available() -> bool:
-    """Return True when at least one backend can execute actions."""
+def _text_response(res: ActionResult) -> str:
+    payload: Dict[str, Any] = {"ok": res.ok, "action": res.action}
+    if res.message:
+        payload["message"] = res.message
+    if res.meta:
+        payload["meta"] = res.meta
+    return json.dumps(payload)
+
+
+def _capture_response(cap: CaptureResult) -> Any:
+    element_index = _format_elements(cap.elements)
+    summary_lines = [
+        f"capture mode={cap.mode} {cap.width}x{cap.height}"
+        + (f" app={cap.app}" if cap.app else "")
+        + (f" window={cap.window_title!r}" if cap.window_title else ""),
+        f"{len(cap.elements)} interactable element(s):",
+    ]
+    if element_index:
+        summary_lines.extend(element_index)
+    summary = "\n".join(summary_lines)
+
+    if cap.png_b64 and cap.mode != "ax":
+        # Detect actual image format from base64 magic bytes so the MIME type
+        # matches what the data contains (cua-driver may return JPEG or PNG).
+        # JPEG: base64 starts with /9j/   PNG: starts with iVBOR
+        _b64_prefix = cap.png_b64[:8]
+        _mime = "image/jpeg" if _b64_prefix.startswith("/9j/") else "image/png"
+        return {
+            "_multimodal": True,
+            "content": [
+                {"type": "text", "text": summary},
+                {"type": "image_url",
+                 "image_url": {"url": f"data:{_mime};base64,{cap.png_b64}"}},
+            ],
+            "text_summary": summary,
+            "meta": {"mode": cap.mode, "width": cap.width, "height": cap.height,
+                     "elements": len(cap.elements), "png_bytes": cap.png_bytes_len},
+        }
+    # AX-only (or image missing): text path.
+    return json.dumps({
+        "mode": cap.mode,
+        "width": cap.width,
+        "height": cap.height,
+        "app": cap.app,
+        "window_title": cap.window_title,
+        "elements": [_element_to_dict(e) for e in cap.elements],
+        "summary": summary,
+    })
+
+
+def _maybe_follow_capture(
+    backend: ComputerUseBackend, res: ActionResult, do_capture: bool,
+) -> Any:
+    if not do_capture:
+        return _text_response(res)
+    try:
+        cap = backend.capture(mode="som")
+    except Exception as e:
+        logger.warning("follow-up capture failed: %s", e)
+        return _text_response(res)
+    # Combine action summary with the capture.
+    resp = _capture_response(cap)
+    if isinstance(resp, dict) and resp.get("_multimodal"):
+        prefix = f"[{res.action}] ok={res.ok}" + (f" — {res.message}" if res.message else "")
+        resp["content"][0]["text"] = prefix + "\n\n" + resp["content"][0]["text"]
+        resp["text_summary"] = prefix + "\n\n" + resp["text_summary"]
+        return resp
+    # Fallback: action + text capture merged.
+    try:
+        data = json.loads(resp)
+    except (TypeError, json.JSONDecodeError):
+        data = {"capture": resp}
+    data["action"] = res.action
+    data["ok"] = res.ok
+    if res.message:
+        data["message"] = res.message
+    return json.dumps(data)
+
+
+def _format_elements(elements: List[UIElement], max_lines: int = 40) -> List[str]:
+    out: List[str] = []
+    for e in elements[:max_lines]:
+        label = e.label.replace("\n", " ")[:60]
+        out.append(f"  #{e.index} {e.role} {label!r} @ {e.bounds}"
+                   + (f" [{e.app}]" if e.app else ""))
+    if len(elements) > max_lines:
+        out.append(f"  ... +{len(elements) - max_lines} more (call capture with app= to narrow)")
+    return out
+
+
+def _element_to_dict(e: UIElement) -> Dict[str, Any]:
+    return {
+        "index": e.index,
+        "role": e.role,
+        "label": e.label,
+        "bounds": list(e.bounds),
+        "app": e.app,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Availability check (used by the tool registry check_fn)
+# ---------------------------------------------------------------------------
+
+def check_computer_use_requirements() -> bool:
+    """Return True iff computer_use can run on this host.
+
+    Cross-platform: cua-driver on macOS, pyautogui on Linux/Windows.
+    """
+    # Check if user explicitly set a backend
+    backend_choice = os.environ.get("FETIH_COMPUTER_USE_BACKEND", "").lower()
+    if backend_choice == "noop":
+        return True
+
+    # Try cua-driver first on macOS
+    if sys.platform == "darwin" and backend_choice not in {"pyautogui", "pya"}:
+        from tools.computer_use.cua_backend import cua_driver_binary_available
+        if cua_driver_binary_available():
+            return True
+
+    # Fall back to pyautogui (cross-platform)
     from tools.computer_use.pyautogui_backend import pyautogui_backend_available
-    from tools.computer_use.cua_backend import cua_driver_binary_available
-    return pyautogui_backend_available() or cua_driver_binary_available()
+    return pyautogui_backend_available()
 
 
-# ---------------------------------------------------------------------------
-# Register
-# ---------------------------------------------------------------------------
-
-registry.register(
-    name="computer_use",
-    schema=COMPUTER_USE_SCHEMA,
-    handler=_handle_computer_use,
-    toolset="computer_use",
-    check_fn=_is_available,
-)
+def get_computer_use_schema() -> Dict[str, Any]:
+    from tools.computer_use.schema import COMPUTER_USE_SCHEMA
+    return COMPUTER_USE_SCHEMA
