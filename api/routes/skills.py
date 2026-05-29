@@ -1,12 +1,13 @@
 """Skill yönetimi rotaları."""
 from __future__ import annotations
-import os, sys, yaml
+import os, sys, logging, yaml
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, Query
 from api.models.schemas import (
     SkillInfo, SkillsListResponse, SkillSearchRequest,
 )
 
+logger = logging.getLogger("fetih.api.skills")
 router = APIRouter()
 
 _skills_cache: list[SkillInfo] | None = None
@@ -22,7 +23,7 @@ def _load_skills() -> list[SkillInfo]:
     skills = []
     for sk_md in _skills_dir.rglob("SKILL.md"):
         try:
-            with open(sk_md) as f:
+            with open(sk_md, encoding="utf-8") as f:
                 content = f.read()
             fm = {}
             if content.startswith("---"):
@@ -42,8 +43,8 @@ def _load_skills() -> list[SkillInfo]:
                 source=fm.get("source"),
                 file_path=rel_path,
             ))
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Skill yüklenemedi (%s): %s", sk_md, e)
 
     _skills_cache = skills
     return skills

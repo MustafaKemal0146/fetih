@@ -1,10 +1,11 @@
 """Konfigürasyon rotaları."""
 from __future__ import annotations
-import os, yaml
+import os, logging, yaml
 from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from api.models.schemas import ConfigValueResponse, ConfigSetRequest, ConfigPatchRequest
 
+logger = logging.getLogger("fetih.api.config")
 router = APIRouter()
 
 _home = Path(os.environ.get("FETIH_HOME", os.path.expanduser("~/.fetih")))
@@ -15,23 +16,23 @@ _env_path = _home / ".env"
 def _read_config() -> dict:
     if _config_path.exists():
         try:
-            with open(_config_path) as f:
+            with open(_config_path, encoding="utf-8") as f:
                 return yaml.safe_load(f) or {}
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("config.yaml okunamadı: %s", e)
     return {}
 
 
 def _write_config(cfg: dict):
     _home.mkdir(parents=True, exist_ok=True)
-    with open(_config_path, "w") as f:
+    with open(_config_path, "w", encoding="utf-8") as f:
         yaml.dump(cfg, f, default_flow_style=False, allow_unicode=True)
 
 
 def _read_env() -> dict:
     env = {}
     if _env_path.exists():
-        with open(_env_path) as f:
+        with open(_env_path, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line and not line.startswith("#") and "=" in line:
@@ -44,7 +45,7 @@ def _write_env(env: dict):
     _home.mkdir(parents=True, exist_ok=True)
     existing = _read_env()
     existing.update(env)
-    with open(_env_path, "w") as f:
+    with open(_env_path, "w", encoding="utf-8") as f:
         for k, v in existing.items():
             f.write(f'{k}="{v}"\n')
 
