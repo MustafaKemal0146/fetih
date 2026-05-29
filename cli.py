@@ -4974,7 +4974,7 @@ class FETIHCLI:
         # Handle /rollback diff <N>
         if args[0].lower() == "diff":
             if len(args) < 2:
-                print("  Usage: /rollback diff <N>")
+                print("  Kullanım: /rollback diff <N>")
                 return
             checkpoints = mgr.list_checkpoints(cwd)
             if not checkpoints:
@@ -5094,7 +5094,7 @@ class FETIHCLI:
 
         elif subcmd in {"restore", "rewind"}:
             if len(parts) < 3:
-                print("  Usage: /snapshot restore <snapshot-id>")
+                print("  Kullanım: /snapshot restore <snapshot-id>")
                 # Show hint with most recent snapshot
                 snaps = list_quick_snapshots(limit=1)
                 if snaps:
@@ -5124,14 +5124,14 @@ class FETIHCLI:
                 try:
                     keep = int(parts[2])
                 except ValueError:
-                    print("  Usage: /snapshot prune [keep-count]")
+                    print("  Kullanım: /snapshot prune [keep-count]")
                     return
             deleted = prune_quick_snapshots(keep=keep)
             print(f"  Pruned {deleted} old snapshot(s) (keeping {keep}).")
 
         else:
             print(f"  Unknown subcommand: {subcmd}")
-            print("  Usage: /snapshot [list|create [label]|restore <id>|prune [N]]")
+            print("  Kullanım: /snapshot [list|create [label]|restore <id>|prune [N]]")
 
     def _handle_stop_command(self):
         """Handle /stop — kill all running background processes.
@@ -5259,7 +5259,7 @@ class FETIHCLI:
             try:
                 idx = int(arg) - 1
             except ValueError:
-                _cprint("  Usage: /copy [number]")
+                _cprint("  Kullanım: /copy [number]")
                 return
             if idx < 0 or idx >= len(assistant):
                 _cprint(f"  Invalid response number. Use 1-{len(assistant)}.")
@@ -5288,7 +5288,7 @@ class FETIHCLI:
         raw_args = (cmd_original.split(None, 1)[1].strip() if " " in cmd_original else "")
         if not raw_args:
             hint = _termux_example_image_path() if _is_termux_environment() else "/path/to/image.png"
-            _cprint(f"  {_DIM}Usage: /image <path>  e.g. /image {hint}{_RST}")
+            _cprint(f"  {_DIM}Kullanım: /image <dosya-yolu>  örn. /image {hint}{_RST}")
             return
 
         path_token, _remainder = _split_path_input(raw_args)
@@ -5305,7 +5305,7 @@ class FETIHCLI:
         if _remainder:
             _cprint(f"  {_DIM}Now type your prompt (or use --image in single-query mode): {_remainder}{_RST}")
         elif _is_termux_environment():
-            _cprint(f"  {_DIM}Tip: type your next message, or run fetih chat -q --image {_termux_example_image_path(image_path.name)} \"What do you see?\"{_RST}")
+            _cprint(f"  {_DIM}İpucu: sonraki mesajını yaz veya şunu çalıştır: fetih chat -q --image {_termux_example_image_path(image_path.name)} \"What do you see?\"{_RST}")
 
     def _preprocess_images_with_vision(self, text: str, images: list, *, announce: bool = True) -> str:
         """Analyze attached images via the vision tool and return enriched text.
@@ -5472,19 +5472,19 @@ class FETIHCLI:
         is_running = bool(getattr(self, "_agent_running", False))
 
         lines = [
-            "FETIH CLI Status",
+            "FETIH CLI Durum",
             "",
-            f"Session ID: {self.session_id}",
-            f"Path: {display_fetih_home()}",
+            f"Oturum ID: {self.session_id}",
+            f"Dizin: {display_fetih_home()}",
         ]
         if title:
-            lines.append(f"Title: {title}")
+            lines.append(f"Başlık: {title}")
         lines.extend([
             f"Model: {model} ({provider})",
-            f"Created: {created_at.strftime('%Y-%m-%d %H:%M')}",
-            f"Last Activity: {updated_at.strftime('%Y-%m-%d %H:%M')}",
-            f"Tokens: {total_tokens:,}",
-            f"Agent Running: {'Yes' if is_running else 'No'}",
+            f"Oluşturma: {created_at.strftime('%Y-%m-%d %H:%M')}",
+            f"Son Aktivite: {updated_at.strftime('%Y-%m-%d %H:%M')}",
+            f"Token: {total_tokens:,}",
+            f"Ajan Çalışıyor: {'Evet' if is_running else 'Hayır'}",
         ])
 
         # Session recap — pure local compute summary of recent activity
@@ -5526,10 +5526,10 @@ class FETIHCLI:
 
         try:
             from fetih_cli.skin_engine import get_active_help_header
-            header = get_active_help_header("(^_^)? Available Commands")
+            header = get_active_help_header("(^_^)? Kullanılabilir Komutlar")
         except Exception:
-            header = "(^_^)? Available Commands"
-        header = (header or "").strip() or "(^_^)? Available Commands"
+            header = "(^_^)? Kullanılabilir Komutlar"
+        header = (header or "").strip() or "(^_^)? Kullanılabilir Komutlar"
         inner_width = 55
         if len(header) > inner_width:
             header = header[:inner_width]
@@ -5551,7 +5551,7 @@ class FETIHCLI:
                     f"    [bold {_accent_hex()}]{cmd:<22}[/] [dim]-[/] {_escape(info['description'])}"
                 )
 
-        _cprint(f"\n  {_DIM}Tip: Just type your message to chat with FETIH!{_RST}")
+        _cprint(f"\n  {_DIM}İpucu: FETIH ile sohbet etmek için mesajını yaz!{_RST}")
         _cprint(f"  {_DIM}Multi-line: Alt+Enter for a new line{_RST}")
         _cprint(f"  {_DIM}Draft editor: Ctrl+G (Alt+G in VSCode/Cursor){_RST}")
         if _is_termux_environment():
@@ -5569,7 +5569,7 @@ class FETIHCLI:
         
         # Header
         print()
-        title = "(^_^)/ Available Tools"
+        title = "(^_^)/ Kullanılabilir Araçlar"
         width = 78
         pad = width - len(title)
         print("+" + "-" * width + "+")
@@ -5659,7 +5659,7 @@ class FETIHCLI:
 
         names = parts[2:]
         if not names:
-            print(f"(._.) Usage: /tools {subcommand} <name> [name ...]")
+            print(f"(._.) Kullanım: /tools {subcommand} <name> [name ...]")
             print(f"  Built-in toolset:  /tools {subcommand} web")
             print(f"  MCP tool:          /tools {subcommand} github:create_issue")
             return
@@ -5686,7 +5686,7 @@ class FETIHCLI:
         
         # Header
         print()
-        title = "(^_^)b Available Toolsets"
+        title = "(^_^)b Kullanılabilir Araç Setleri"
         width = 58
         pad = width - len(title)
         print("+" + "-" * width + "+")
@@ -5707,7 +5707,7 @@ class FETIHCLI:
         print()
         print("  (*) = currently enabled")
         print()
-        print("  Tip: Use 'all' or '*' to enable all toolsets")
+        print("  İpucu: Tüm araç setlerini etkinleştirmek için 'all' veya '*' yaz")
         print("  Example: python cli.py --toolsets web,terminal")
         print()
     
@@ -6030,7 +6030,7 @@ class FETIHCLI:
 
         parts = cmd_original.split(maxsplit=1)
         if len(parts) < 2 or not parts[1].strip():
-            _cprint("  Usage: /handoff <platform>")
+            _cprint("  Kullanım: /handoff <platform>")
             _cprint("  Hands the current session off to that platform's home channel.")
             _cprint("  The CLI session ends here; resume it later with /resume.")
             return True
@@ -6165,10 +6165,10 @@ class FETIHCLI:
         target = parts[1].strip() if len(parts) > 1 else ""
 
         if not target:
-            _cprint("  Usage: /resume <session_id_or_title>")
+            _cprint("  Kullanım: /resume <session_id_or_title>")
             if self._show_recent_sessions(reason="resume"):
                 return
-            _cprint("  Tip:   Use /history or `fetih sessions list` to find sessions.")
+            _cprint("  İpucu: Oturumları bulmak için /history veya `fetih sessions list` kullan.")
             return
 
         if not self._session_db:
@@ -7168,7 +7168,7 @@ class FETIHCLI:
     def _handle_codex_runtime(self, cmd_original: str) -> None:
         """Handle /codex-runtime — toggle the codex app-server runtime opt-in.
 
-        Usage:
+        Kullanım:
             /codex-runtime                       — show current state
             /codex-runtime auto                  — FETIH default (chat_completions)
             /codex-runtime codex_app_server      — hand turns to codex subprocess
@@ -7203,7 +7203,7 @@ class FETIHCLI:
             _cprint(f"  {prefix} {line}" if line.startswith("openai_runtime")
                     else f"    {line}")
         if result.success and result.requires_new_session:
-            _cprint("    Tip: `/reset` starts a new session immediately.")
+            _cprint("    İpucu: `/reset` hemen yeni bir oturum başlatır.")
 
     def _should_handle_model_command_inline(self, text: str, has_images: bool = False) -> bool:
         """Return True when /model should be handled immediately on the UI thread."""
@@ -7358,13 +7358,13 @@ class FETIHCLI:
                     print(f"(^_^) Personality set to '{personality_name}' (session only)")
                 print(f"  \"{self.system_prompt[:60]}{'...' if len(self.system_prompt) > 60 else ''}\"")
             else:
-                print(f"(._.) Unknown personality: {personality_name}")
-                print(f"  Available: none, {', '.join(self.personalities.keys())}")
+                print(f"(._.) Bilinmeyen kişilik: {personality_name}")
+                print(f"  Mevcut: none, {', '.join(self.personalities.keys())}")
         else:
             # Show available personalities
             print()
             print("+" + "-" * 50 + "+")
-            print("|" + " " * 12 + "(^o^)/ Personalities" + " " * 15 + "|")
+            print("|" + " " * 12 + "(^o^)/ Kişilikler" + " " * 15 + "|")
             print("+" + "-" * 50 + "+")
             print()
             print(f"  {'none':<12} - (no personality overlay)")
@@ -7375,7 +7375,7 @@ class FETIHCLI:
                     preview = str(prompt)[:50]
                 print(f"  {name:<12} - {preview}")
             print()
-            print("  Usage: /personality <name>")
+            print("  Kullanım: /personality <name>")
             print()
     
     def _handle_cron_command(self, cmd: str):
@@ -7521,7 +7521,7 @@ class FETIHCLI:
         if subcommand in {"add", "create"}:
             positionals = opts["positionals"]
             if not positionals:
-                print("(._.) Usage: /cron add <schedule> <prompt>")
+                print("(._.) Kullanım: /cron add <schedule> <prompt>")
                 return
             schedule = opts["schedule"] or positionals[0]
             prompt = opts["prompt"] or " ".join(positionals[1:])
@@ -7551,7 +7551,7 @@ class FETIHCLI:
         if subcommand == "edit":
             positionals = opts["positionals"]
             if not positionals:
-                print("(._.) Usage: /cron edit <job_id> [--schedule ...] [--prompt ...] [--skill ...]")
+                print("(._.) Kullanım: /cron edit <job_id> [--schedule ...] [--prompt ...] [--skill ...]")
                 return
             job_id = positionals[0]
             existing = get_job(job_id)
@@ -7599,7 +7599,7 @@ class FETIHCLI:
         if subcommand in {"pause", "resume", "run", "remove", "rm", "delete"}:
             positionals = opts["positionals"]
             if not positionals:
-                print(f"(._.) Usage: /cron {subcommand} <job_id>")
+                print(f"(._.) Kullanım: /cron {subcommand} <job_id>")
                 return
             job_id = positionals[0]
             action = "remove" if subcommand in {"remove", "rm", "delete"} else subcommand
@@ -7621,7 +7621,7 @@ class FETIHCLI:
             return
 
         print(f"(._.) Unknown cron command: {subcommand}")
-        print("  Available: list, add, edit, pause, resume, run, remove")
+        print("  Mevcut: list, add, edit, pause, resume, run, remove")
 
     def _handle_curator_command(self, cmd: str):
         """Handle /curator slash command.
@@ -7831,7 +7831,7 @@ class FETIHCLI:
                         _tip_color = get_active_skin().get_color("banner_dim", "#B8860B")
                     except Exception:
                         _tip_color = "#B8860B"
-                    cc.print(f"[dim {_tip_color}]✦ Tip: {_tip}[/]")
+                    cc.print(f"[dim {_tip_color}]✦ İpucu: {_tip}[/]")
                 except Exception:
                     pass
             else:
@@ -7846,7 +7846,7 @@ class FETIHCLI:
                         _tip_color = get_active_skin().get_color("banner_dim", "#B8860B")
                     except Exception:
                         _tip_color = "#B8860B"
-                    self._console_print(f"[dim {_tip_color}]✦ Tip: {_tip}[/]")
+                    self._console_print(f"[dim {_tip_color}]✦ İpucu: {_tip}[/]")
                 except Exception:
                     pass
         elif canonical == "history":
@@ -7888,17 +7888,17 @@ class FETIHCLI:
                         from fetih_state import format_session_db_unavailable
                         _cprint(f"  {format_session_db_unavailable()}")
                 else:
-                    _cprint("  Usage: /title <your session title>")
+                    _cprint("  Kullanım: /title <your session title>")
             # Show current title and session ID if no argument given
             elif self._session_db:
-                _cprint(f"  Session ID: {self.session_id}")
+                _cprint(f"  Oturum ID: {self.session_id}")
                 session = self._session_db.get_session(self.session_id)
                 if session and session.get("title"):
-                    _cprint(f"  Title: {session['title']}")
+                    _cprint(f"  Başlık: {session['title']}")
                 elif self._pending_title:
-                    _cprint(f"  Title (pending): {self._pending_title}")
+                    _cprint(f"  Başlık (bekleyen): {self._pending_title}")
                 else:
-                    _cprint("  No title set. Usage: /title <your session title>")
+                    _cprint("  Başlık yok. Kullanım: /title <başlık>")
             else:
                 from fetih_state import format_session_db_unavailable
                 _cprint(f"  {format_session_db_unavailable()}")
@@ -8037,7 +8037,7 @@ class FETIHCLI:
             parts = cmd_original.split(None, 1)
             payload = parts[1].strip() if len(parts) > 1 else ""
             if not payload:
-                _cprint("  Usage: /queue <prompt>")
+                _cprint("  Kullanım: /queue <prompt>")
             else:
                 self._pending_input.put(payload)
                 if self._agent_running:
@@ -8053,7 +8053,7 @@ class FETIHCLI:
             parts = cmd_original.split(None, 1)
             payload = parts[1].strip() if len(parts) > 1 else ""
             if not payload:
-                _cprint("  Usage: /steer <prompt>")
+                _cprint("  Kullanım: /steer <prompt>")
             elif self._agent_running and self.agent is not None and hasattr(self.agent, "steer"):
                 try:
                     accepted = self.agent.steer(payload)
@@ -8215,7 +8215,7 @@ class FETIHCLI:
         """
         parts = cmd.strip().split(maxsplit=1)
         if len(parts) < 2 or not parts[1].strip():
-            _cprint("  Usage: /background <prompt>")
+            _cprint("  Kullanım: /background <prompt>")
             _cprint("  Example: /background Summarize the top HN stories today")
             _cprint("  The task runs in a separate session and results display here when done.")
             return
@@ -8578,7 +8578,7 @@ class FETIHCLI:
 
         else:
             print()
-            print("Usage: /browser connect|disconnect|status")
+            print("Kullanım: /browser connect|disconnect|status")
             print()
             print("   connect      Connect browser tools to your live Chrome session")
             print("   disconnect   Revert to default browser backend")
@@ -8726,7 +8726,7 @@ class FETIHCLI:
 
         if verb == "remove":
             if not rest:
-                _cprint("  Usage: /subgoal remove <n>")
+                _cprint("  Kullanım: /subgoal remove <n>")
                 return
             try:
                 idx = int(rest.split()[0])
@@ -8897,7 +8897,7 @@ class FETIHCLI:
                 marker = " ●" if s["name"] == current else "  "
                 source = f" ({s['source']})" if s["source"] == "user" else ""
                 print(f"   {marker} {s['name']}{source} — {s['description']}")
-            print("\n  Usage: /skin <name>")
+            print("\n  Kullanım: /skin <name>")
             print(f"  Custom skins: drop a YAML file in {display_fetih_home()}/skins/\n")
             return
 
@@ -8905,7 +8905,7 @@ class FETIHCLI:
         available = {s["name"] for s in list_skins()}
         if new_skin not in available:
             print(f"  Unknown skin: {new_skin}")
-            print(f"  Available: {', '.join(sorted(available))}")
+            print(f"  Mevcut: {', '.join(sorted(available))}")
             return
 
         set_active_skin(new_skin)
@@ -8923,7 +8923,7 @@ class FETIHCLI:
     def _handle_footer_command(self, cmd_original: str) -> None:
         """Toggle or inspect ``display.runtime_footer.enabled`` from the CLI.
 
-        Usage:
+        Kullanım:
             /footer           → toggle
             /footer on|off    → explicit
             /footer status    → show current state
@@ -8960,7 +8960,7 @@ class FETIHCLI:
         elif arg == "":
             new_state = not current
         else:
-            _cprint("  Usage: /footer [on|off|status]")
+            _cprint("  Kullanım: /footer [on|off|status]")
             return
 
         if save_config_value("display.runtime_footer.enabled", new_state):
@@ -9022,7 +9022,7 @@ class FETIHCLI:
     def _handle_reasoning_command(self, cmd: str):
         """Handle /reasoning — manage effort level and display toggle.
 
-        Usage:
+        Kullanım:
             /reasoning              Show current effort level and display state
             /reasoning <level>      Set reasoning effort (none, minimal, low, medium, high, xhigh)
             /reasoning show|on      Show model thinking/reasoning in output
@@ -9042,7 +9042,7 @@ class FETIHCLI:
             display_state = "on ✓" if self.show_reasoning else "off"
             _cprint(f"  {_ACCENT}Reasoning effort:  {level}{_RST}")
             _cprint(f"  {_ACCENT}Reasoning display: {display_state}{_RST}")
-            _cprint(f"  {_DIM}Usage: /reasoning <none|minimal|low|medium|high|xhigh|show|hide>{_RST}")
+            _cprint(f"  {_DIM}Kullanım: /reasoning <none|minimal|low|medium|high|xhigh|show|hide>{_RST}")
             return
 
         arg = parts[1].strip().lower()
@@ -9083,7 +9083,7 @@ class FETIHCLI:
     def _handle_busy_command(self, cmd: str):
         """Handle /busy — control what Enter does while FETIH is working.
 
-        Usage:
+        Kullanım:
             /busy               Show current busy input mode
             /busy status        Show current busy input mode
             /busy queue         Queue input for the next turn instead of interrupting
@@ -9100,13 +9100,13 @@ class FETIHCLI:
             else:
                 _behavior = "interrupts current run"
             _cprint(f"  {_DIM}Enter while busy: {_behavior}{_RST}")
-            _cprint(f"  {_DIM}Usage: /busy [queue|steer|interrupt|status]{_RST}")
+            _cprint(f"  {_DIM}Kullanım: /busy [queue|steer|interrupt|status]{_RST}")
             return
 
         arg = parts[1].strip().lower()
         if arg not in {"queue", "interrupt", "steer"}:
             _cprint(f"  {_DIM}(._.) Unknown argument: {arg}{_RST}")
-            _cprint(f"  {_DIM}Usage: /busy [queue|steer|interrupt|status]{_RST}")
+            _cprint(f"  {_DIM}Kullanım: /busy [queue|steer|interrupt|status]{_RST}")
             return
 
         self.busy_input_mode = arg
@@ -9644,35 +9644,35 @@ class FETIHCLI:
         )
         elapsed = format_duration_compact((datetime.now() - self.session_start).total_seconds())
 
-        print("  📊 Session Token Usage")
+        print("  📊 Oturum Token Kullanımı")
         print(f"  {'─' * 40}")
         print(f"  Model:                     {agent.model}")
-        print(f"  Input tokens:              {input_tokens:>10,}")
-        print(f"  Cache read tokens:         {cache_read_tokens:>10,}")
-        print(f"  Cache write tokens:        {cache_write_tokens:>10,}")
-        print(f"  Output tokens:             {output_tokens:>10,}")
+        print(f"  Girdi token:               {input_tokens:>10,}")
+        print(f"  Cache okuma token:         {cache_read_tokens:>10,}")
+        print(f"  Cache yazma token:         {cache_write_tokens:>10,}")
+        print(f"  Çıktı token:               {output_tokens:>10,}")
         if reasoning_tokens:
-            print(f"  ↳ Reasoning (subset):      {reasoning_tokens:>10,}")
-        print(f"  Prompt tokens (total):     {prompt:>10,}")
-        print(f"  Completion tokens:         {completion:>10,}")
-        print(f"  Total tokens:              {total:>10,}")
-        print(f"  API calls:                 {calls:>10,}")
-        print(f"  Session duration:          {elapsed:>10}")
-        print(f"  Cost status:              {cost_result.status:>10}")
-        print(f"  Cost source:              {cost_result.source:>10}")
+            print(f"  ↳ Düşünme (alt küme):      {reasoning_tokens:>10,}")
+        print(f"  Prompt token (toplam):     {prompt:>10,}")
+        print(f"  Tamamlama token:           {completion:>10,}")
+        print(f"  Toplam token:              {total:>10,}")
+        print(f"  API çağrısı:               {calls:>10,}")
+        print(f"  Oturum süresi:             {elapsed:>10}")
+        print(f"  Maliyet durumu:            {cost_result.status:>10}")
+        print(f"  Maliyet kaynağı:           {cost_result.source:>10}")
         if cost_result.amount_usd is not None:
             prefix = "~" if cost_result.status == "estimated" else ""
-            print(f"  Total cost:              {prefix}${float(cost_result.amount_usd):>10.4f}")
+            print(f"  Toplam maliyet:           {prefix}${float(cost_result.amount_usd):>10.4f}")
         elif cost_result.status == "included":
-            print(f"  Total cost:              {'included':>10}")
+            print(f"  Toplam maliyet:           {'dahil':>10}")
         else:
-            print(f"  Total cost:              {'n/a':>10}")
+            print(f"  Toplam maliyet:           {'yok':>10}")
         print(f"  {'─' * 40}")
-        print(f"  Current context:  {last_prompt:,} / {ctx_len:,} ({pct:.0f}%)")
-        print(f"  Messages:         {msg_count}")
-        print(f"  Compressions:     {compressions}")
+        print(f"  Mevcut bağlam:    {last_prompt:,} / {ctx_len:,} ({pct:.0f}%)")
+        print(f"  Mesajlar:         {msg_count}")
+        print(f"  Sıkıştırma:       {compressions}")
         if cost_result.status == "unknown":
-            print(f"  Note:             Pricing unknown for {agent.model}")
+            print(f"  Not:              {agent.model} için fiyatlandırma bilinmiyor")
 
         # Account limits -- fetched off-thread with a hard timeout so slow
         # provider APIs don't hang the prompt.
@@ -11740,16 +11740,16 @@ class FETIHCLI:
                 except Exception:
                     pass
 
-            print("Resume this session with:")
+            print("Bu oturumu şununla devam ettir:")
             print(f"  fetih --resume {self.session_id}")
             if session_title:
                 print(f"  fetih -c \"{session_title}\"")
             print()
-            print(f"Session:        {self.session_id}")
+            print(f"Oturum:        {self.session_id}")
             if session_title:
-                print(f"Title:          {session_title}")
-            print(f"Duration:       {duration_str}")
-            print(f"Messages:       {msg_count} ({user_msgs} user, {tool_calls} tool calls)")
+                print(f"Başlık:        {session_title}")
+            print(f"Süre:          {duration_str}")
+            print(f"Mesajlar:      {msg_count} ({user_msgs} kullanıcı, {tool_calls} araç çağrısı)")
         else:
             try:
                 from fetih_cli.skin_engine import get_active_goodbye
@@ -12012,10 +12012,10 @@ class FETIHCLI:
         try:
             from fetih_cli.skin_engine import get_active_skin
             _welcome_skin = get_active_skin()
-            _welcome_text = _welcome_skin.get_branding("welcome", "Welcome to FETIH! Type your message or /help for commands.")
+            _welcome_text = _welcome_skin.get_branding("welcome", "FETIH'e hoş geldin! Mesajını yaz veya /help yaz.")
             _welcome_color = _welcome_skin.get_color("banner_text", "#FFF8DC")
         except Exception:
-            _welcome_text = "Welcome to FETIH! Type your message or /help for commands."
+            _welcome_text = "FETIH'e hoş geldin! Mesajını yaz veya /help yaz."
             _welcome_color = "#FFF8DC"
         self._console_print(f"[{_welcome_color}]{_welcome_text}[/]")
 
@@ -12068,7 +12068,7 @@ class FETIHCLI:
                 _tip_color = _welcome_skin.get_color("banner_dim", "#B8860B")
             except Exception:
                 _tip_color = "#B8860B"
-            self._console_print(f"[dim {_tip_color}]✦ Tip: {_tip}[/]")
+            self._console_print(f"[dim {_tip_color}]✦ İpucu: {_tip}[/]")
         except Exception:
             pass  # Tips are non-critical — never break startup
 

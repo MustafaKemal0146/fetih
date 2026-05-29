@@ -4070,9 +4070,9 @@ def main(
     print("\n" + "=" * 50)
     print("📋 CONVERSATION SUMMARY")
     print("=" * 50)
-    print(f"✅ Completed: {result['completed']}")
-    print(f"📞 API Calls: {result['api_calls']}")
-    print(f"💬 Messages: {len(result['messages'])}")
+    print(f"✅ Tamamlandı: {result['completed']}")
+    print(f"📞 API Çağrısı: {result['api_calls']}")
+    print(f"💬 Mesajlar: {len(result['messages'])}")
     
     if result['final_response']:
         print("\n🎯 FINAL RESPONSE:")

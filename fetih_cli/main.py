@@ -871,19 +871,19 @@ def _print_tui_exit_summary(
             db.close()
 
     print()
-    print("Resume this session with:")
+    print("Bu oturumu şununla devam ettir:")
     print(f"  fetih --tui --resume {target}")
     if title:
         print(f'  fetih --tui -c "{title}"')
     print()
-    print(f"Session:        {target}")
+    print(f"Oturum:         {target}")
     if title:
-        print(f"Title:          {title}")
-    print(f"Messages:       {message_count}")
+        print(f"Başlık:         {title}")
+    print(f"Mesajlar:       {message_count}")
     print(
-        "Tokens:         "
-        f"{total_tokens} (in {input_tokens}, out {output_tokens}, "
-        f"cache {cache_read_tokens + cache_write_tokens}, reasoning {reasoning_tokens})"
+        "Tokenler:       "
+        f"{total_tokens} (girdi {input_tokens}, çıktı {output_tokens}, "
+        f"cache {cache_read_tokens + cache_write_tokens}, düşünme {reasoning_tokens})"
     )
 
 
