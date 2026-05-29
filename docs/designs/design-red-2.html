@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FETIH TUI — Kırmızı 2: Görev Panosu (canlı)</title>
+<style>
+  :root{
+    --bg:#070202; --panel:#0e0405; --card:#130607; --ink:#F1E6CF; --dim:#9a7d6c; --mut:#6E584B;
+    --crimson:#DD4A3A; --red:#ef5350; --redbright:#ff5b4a; --deep:#9F1C1C;
+    --bronze:#C7A96B; --bar-bg:#2A1212; --ok:#7BC96F; --warn:#C7A96B; --line:#2a1210;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(70% 50% at 100% 0%,rgba(159,28,28,.18),transparent 55%),
+      radial-gradient(60% 50% at 0% 100%,rgba(221,74,58,.10),transparent 55%),var(--bg);
+    color:var(--ink);font-family:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+    display:flex;justify-content:center;padding:34px 16px;min-height:100vh}
+  .wrap{width:100%;max-width:960px}
+  .cap{color:var(--mut);font-size:11px;letter-spacing:.22em;text-transform:uppercase;margin:0 2px 14px}
+  .cap b{color:var(--crimson)}
+  .term{background:var(--bg);border:1px solid #3a1512;border-radius:11px;overflow:hidden;
+    box-shadow:0 0 0 1px #000,0 0 40px rgba(159,28,28,.14),0 22px 60px rgba(0,0,0,.7)}
+  .bar{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line)}
+  .d{width:10px;height:10px;border-radius:50%;border:1px solid #50201c}
+  .d.on{background:var(--crimson);border-color:var(--crimson);box-shadow:0 0 9px rgba(221,74,58,.7)}
+  .bar .t{margin-left:8px;color:var(--mut);font-size:11px}
+  .bar .badge{margin-left:auto;background:var(--deep);color:#ffeede;font-size:10.5px;font-weight:700;
+    padding:2px 10px;border-radius:20px;letter-spacing:.1em}
+
+  /* compact banner strip */
+  .head{display:flex;align-items:center;gap:18px;padding:14px 20px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#160708,transparent)}
+  pre.logo{margin:0;font-size:7px;line-height:1.04;overflow-x:auto;
+    background:linear-gradient(180deg,var(--redbright),var(--crimson) 55%,var(--deep));
+    -webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 8px rgba(221,74,58,.3))}
+  .head .meta{font-size:12px;color:var(--dim);line-height:1.7}
+  .head .meta b{color:var(--ink)} .head .meta .c{color:var(--crimson)} .head .meta .br{color:var(--bronze)}
+
+  .grid{display:grid;grid-template-columns:1.4fr 1fr;gap:0}
+  .left{padding:18px 20px;border-right:1px solid var(--line)}
+  .right{padding:18px 18px;background:linear-gradient(180deg,rgba(159,28,28,.05),transparent)}
+
+  .h3{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--crimson);margin:0 0 12px;font-weight:700}
+  .h3::before{content:"⚔ "}
+
+  /* transcript */
+  .msg{margin:0 0 13px}
+  .msg .who{font-size:11px;font-weight:700;margin-bottom:3px}
+  .msg.user .who{color:var(--bronze)} .msg.ai .who{color:var(--crimson)}
+  .msg .bub{padding:8px 12px;border-radius:9px;border:1px solid var(--line);background:var(--card)}
+  .msg.user .bub{border-left:2px solid var(--bronze)}
+  .msg.ai .bub{border-left:2px solid var(--crimson)}
+  .msg p{margin:0;color:var(--ink);font-size:13px;line-height:1.5}
+
+  /* live thinking line in transcript */
+  .liveln{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:9px;
+    border:1px dashed #50201c;background:rgba(221,74,58,.06);margin:0 0 12px}
+  .liveln .face{color:var(--redbright);font-weight:700;min-width:112px;text-shadow:0 0 10px rgba(255,91,74,.5)}
+  .liveln .verb{color:var(--ink)} .liveln .spin{color:var(--crimson);font-weight:700;margin-left:auto}
+
+  .pr{display:flex;gap:10px;align-items:center;margin-top:6px;background:var(--card);
+    border:1px solid var(--line);border-radius:9px;padding:9px 12px}
+  .pr .s{color:var(--crimson);font-weight:700}
+  .pr .ph{color:var(--mut);font-size:13px}
+  .cur{display:inline-block;width:8px;height:15px;background:var(--crimson);animation:b 1.1s steps(1) infinite;vertical-align:-2px}
+  @keyframes b{50%{opacity:0}}
+
+  /* RIGHT: activity widgets */
+  .widget{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px 14px;margin:0 0 13px}
+  .widget .wt{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--bronze);margin:0 0 10px;display:flex}
+  .widget .wt .n{margin-left:auto;color:var(--mut)}
+
+  /* big thinking gauge */
+  .gauge{display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 0 2px}
+  .gauge .big{font-size:26px;color:var(--redbright);text-shadow:0 0 16px rgba(255,91,74,.45);font-weight:700;min-height:34px}
+  .gauge .gv{color:var(--ink);font-size:13px}
+  .gauge .gv .spin{color:var(--crimson)}
+  .gauge .bar{width:100%;height:7px;border-radius:4px;background:#150a0a;border:1px solid #3a1512;overflow:hidden;position:relative;margin-top:6px}
+  .gauge .bar i{position:absolute;inset:0;width:26%;background:linear-gradient(90deg,var(--crimson),var(--redbright))}
+  .gauge .blk{letter-spacing:2px;color:var(--crimson);font-size:13px}
+  .gauge .blk .e{color:var(--mut)}
+
+  /* tool log */
+  .log .ln{display:flex;gap:8px;align-items:center;font-size:12px;padding:2px 0;color:var(--dim)}
+  .log .ic{width:16px;text-align:center}
+  .log .nm{color:var(--ink)} .log .du{margin-left:auto;color:var(--mut)}
+  .log .ok{color:var(--ok)} .log .run{color:var(--crimson)}
+
+  /* todo */
+  .todo .it{display:flex;gap:9px;align-items:center;font-size:12.5px;padding:3px 0}
+  .todo .bx{width:15px;text-align:center}
+  .todo .done{color:var(--ok)} .todo .done .tx{color:var(--mut);text-decoration:line-through}
+  .todo .cur{display:inline;width:auto;height:auto;background:none;animation:none}
+  .todo .now .bx{color:var(--crimson)} .todo .now .tx{color:var(--ink)}
+  .todo .wait .bx{color:var(--mut)} .todo .wait .tx{color:var(--dim)}
+
+  .status{display:flex;align-items:center;gap:0;border-top:1px solid #3a1512;
+    padding:9px 16px;font-size:12px;color:var(--dim);background:var(--bar-bg)}
+  .status .seg{padding:0 13px;display:flex;gap:7px;align-items:center}
+  .status .seg:first-child{padding-left:0}
+  .status .sep{color:#50201c}
+  .status .st{color:var(--bronze);font-weight:600}
+  .status .busy{color:var(--redbright)}
+  .status .r{margin-left:auto;color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cap">Kırmızı 2 · <b>Görev Panosu</b> — iki sütun: transcript + canlı aktivite/düşünme paneli</div>
+  <div class="term">
+    <div class="bar"><span class="d on"></span><span class="d"></span><span class="d"></span>
+      <span class="t">fetih — ares</span><span class="badge">DÜŞÜNÜYOR</span></div>
+
+    <div class="head">
+<pre class="logo">███████╗███████╗████████╗██╗██╗  ██╗
+██╔════╝██╔════╝╚══██╔══╝██║██║  ██║
+█████╗  █████╗     ██║   ██║███████║
+██╔══╝  ██╔══╝     ██║   ██║██╔══██║
+██║     ███████╗   ██║   ██║██║  ██║
+╚═╝     ╚══════╝   ╚═╝   ╚═╝╚═╝  ╚═╝</pre>
+      <div class="meta">
+        <span class="c">⚔ FETIH</span> · CTF/OSINT Ajan Sistemi<br>
+        v<b>1.0.1</b> (2026.5.29) · <span class="br">skin: ares</span> · session <b>a3f9c2</b>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- LEFT: transcript -->
+      <div class="left">
+        <div class="h3">Görüşme</div>
+        <div class="msg user"><div class="who">SEN</div><div class="bub"><p>10.10.14.3 hedefine sız ve root flag'i al.</p></div></div>
+        <div class="msg ai"><div class="who">FETIH</div><div class="bub"><p>Anlaşıldı. Önce tam port taraması, sonra servis bazlı zafiyet analizi yapıyorum. 8080'de Apache 2.4.49 tespit ettim — path traversal denenecek.</p></div></div>
+
+        <!-- canlı düşünme satırı -->
+        <div class="liveln">
+          <span class="face" id="face">(⚔️_⚔️)</span>
+          <span class="verb" id="verb">analiz ediliyor</span>
+          <span class="spin" id="spin">⠋</span>
+        </div>
+
+        <div class="pr"><span class="s">❯</span><span class="ph">mesaj yaz veya / ile komut…</span><span class="cur"></span></div>
+      </div>
+
+      <!-- RIGHT: activity -->
+      <div class="right">
+        <!-- thinking gauge -->
+        <div class="widget">
+          <div class="wt">Düşünme <span class="n" id="el">0:03</span></div>
+          <div class="gauge">
+            <div class="big" id="bigface">(⚔️_⚔️)</div>
+            <div class="gv"><span id="verb2">analiz ediliyor</span> <span class="spin" id="spin2">⠋</span></div>
+            <div class="blk" id="blk">[<span class="e">░░░░░░░░░░</span>]</div>
+            <div class="bar"><i id="pb"></i></div>
+          </div>
+        </div>
+
+        <!-- tool log -->
+        <div class="widget log">
+          <div class="wt">Araç Akışı <span class="n">live</span></div>
+          <div class="ln"><span class="ic">💻</span><span class="nm">terminal</span><span class="du">2.3s</span><span class="ok">✓</span></div>
+          <div class="ln"><span class="ic">🔍</span><span class="nm">web_search</span><span class="du">1.1s</span><span class="ok">✓</span></div>
+          <div class="ln"><span class="ic">📖</span><span class="nm">read_file</span><span class="du">0.2s</span><span class="ok">✓</span></div>
+          <div class="ln"><span class="ic">🐍</span><span class="nm">execute_code</span><span class="du" id="runt">1.4s</span><span class="run">▸</span></div>
+        </div>
+
+        <!-- todo -->
+        <div class="widget todo">
+          <div class="wt">Görevler <span class="n">2/4</span></div>
+          <div class="it done"><span class="bx">✓</span><span class="tx">Port taraması (nmap)</span></div>
+          <div class="it done"><span class="bx">✓</span><span class="tx">Servis tespiti</span></div>
+          <div class="it now"><span class="bx">▸</span><span class="tx">Exploit PoC oluştur</span></div>
+          <div class="it wait"><span class="bx">○</span><span class="tx">Root flag'i oku</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="status">
+      <div class="seg"><span class="st">⚕ claude-opus-4-8</span></div>
+      <span class="sep">│</span>
+      <div class="seg">ctx <span class="st">52K</span>/200K · <span class="ok" id="pct">26%</span></div>
+      <span class="sep">│</span>
+      <div class="seg busy" id="sbverb">⚔ analiz ediliyor</div>
+      <span class="sep">│</span>
+      <div class="seg">⏱ <span id="el2">0:03</span></div>
+      <div class="r">▶ 1 görev · ⚠ YOLO</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const FACES = ["(⚔️_⚔️)","(◉_◉)⚡","(¬_¬)🔍","( •_•)>⌐■-■","(⌐■_■)🏹","(｀ω´)⚔","◉⌓◉","⚡▂⚡","[▓▓▓▓]","▓▒░LOAD░▒▓","◉_◉","✦_✦","⚔_⚔","🔓_🔓","FETIH"];
+  const VERBS = ["analiz ediliyor","taranıyor","inceleniyor","değerlendiriliyor","hesaplanıyor","çözümleniyor","keşfediliyor","araştırılıyor","işleniyor","sentezleniyor","sorgulanıyor","doğrulanıyor","yürütülüyor","kontrol ediliyor","tetikleniyor"];
+  const SPIN = ["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"];
+  const el=(id)=>document.getElementById(id);
+  let i=0; setInterval(()=>{ const s=SPIN[i++ % SPIN.length]; el('spin').textContent=s; el('spin2').textContent=s; }, 90);
+  let f=0; setInterval(()=>{ const x=FACES[f++ % FACES.length]; el('face').textContent=x; el('bigface').textContent=x; }, 700);
+  let v=0; setInterval(()=>{ const w=VERBS[v++ % VERBS.length]; el('verb').textContent=w; el('verb2').textContent=w; el('sbverb').textContent="⚔ "+w; }, 1500);
+  let t=3,pct=26;
+  setInterval(()=>{ t++; const m=Math.floor(t/60),s=String(t%60).padStart(2,'0'); el('el').textContent=`${m}:${s}`; el('el2').textContent=`${m}:${s}`;
+    pct=Math.min(70,pct+(Math.random()<.4?1:0)); el('pct').textContent=pct+"%"; el('pb').style.width=pct+"%";
+    const fill=Math.round(pct/10); el('blk').innerHTML="["+"█".repeat(fill)+"<span class='e'>"+"░".repeat(10-fill)+"</span>]"; }, 1000);
+</script>
+</body>
+</html>
