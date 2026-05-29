@@ -15,6 +15,14 @@ from tools.environments.base import BaseEnvironment, _pipe_stdin
 
 _IS_WINDOWS = platform.system() == "Windows"
 
+# Windows: detect "start <app>" GUI-launch commands that would cause
+# pipe-inheritance hangs when run through bash with stdout=PIPE.
+# Matches: start [title] program,  cmd /c start...,  cmd //c start...
+_START_COMMAND_RE = re.compile(
+    r'^\s*(?:cmd(?:\.exe)?\s+(?:/+[cC]\s+))?start\b',
+    re.IGNORECASE,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -426,6 +434,83 @@ class LocalEnvironment(BaseEnvironment):
             cwd = os.path.expanduser(cwd)
         super().__init__(cwd=cwd or os.getcwd(), timeout=timeout, env=env)
         self.init_session()
+
+    # ------------------------------------------------------------------
+    # Override execute() to intercept Windows GUI-launch commands
+    # ------------------------------------------------------------------
+
+    def execute(
+        self,
+        command: str,
+        cwd: str = "",
+        *,
+        timeout: int | None = None,
+        stdin_data: str | None = None,
+    ) -> dict:
+        """Execute a command. On Windows, intercepts 'start' GUI-launch
+        commands to avoid the pipe-inheritance hang where launched GUI apps
+        (chrome, notepad, explorer, etc.) inherit the stdout PIPE handle,
+        preventing pipe EOF until the GUI app exits (causing 90–120s hangs).
+        """
+        if _IS_WINDOWS and _START_COMMAND_RE.match(command):
+            return self._execute_start_command(command, cwd=cwd or self.cwd)
+        return super().execute(
+            command, cwd=cwd, timeout=timeout, stdin_data=stdin_data,
+        )
+
+    def _execute_start_command(self, command: str, cwd: str) -> dict:
+        """Run a ``start <app>`` GUI-launch command on Windows **without**
+        bash and without PIPE stdout, so the launched GUI process never
+        inherits a pipe handle.
+
+        Uses ``shell=True`` to go through cmd.exe's built-in ``start``
+        command directly.  ``close_fds=True`` + no PIPE means the GUI app
+        receives only standard console handles — no lingering pipe write-end
+        that would prevent EOF and hang the terminal tool.
+
+        Returns immediately after the process is spawned; the GUI app runs
+        independently.
+        """
+        # Normalise Git Bash POSIX paths (``/c/Users/x``) → ``C:\\Users\\x``
+        effective_cwd = _msys_to_windows_path(cwd) if _IS_WINDOWS else cwd
+        if not os.path.isdir(effective_cwd):
+            effective_cwd = _resolve_safe_cwd(effective_cwd)
+
+        try:
+            # DEVNULL for all three standard streams → no PIPE handle exists
+            # for the GUI child to inherit.  CREATE_NO_WINDOW suppresses the
+            # brief cmd.exe console flash; the GUI app still opens its own
+            # window because ``start`` uses CREATE_NEW_CONSOLE internally.
+            subprocess.Popen(
+                command,
+                shell=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                stdin=subprocess.DEVNULL,
+                cwd=effective_cwd,
+                creationflags=subprocess.CREATE_NO_WINDOW,
+            )
+            # Don't wait — the GUI app runs independently.  The Popen object
+            # is dropped; Python's GC will reap the zombie process later.
+        except Exception as exc:
+            return {
+                "output": f"[hata] GUI uygulaması başlatılamadı: {exc}",
+                "returncode": 1,
+            }
+
+        # Extract a display-friendly app name for the output message.
+        app_name = ""
+        m = re.search(
+            r'\bstart\b\s+(?:"[^"]*"\s+)?("?)([^\s"/]+)\1',
+            command, re.IGNORECASE,
+        )
+        if m:
+            app_name = f" ({m.group(2)})"
+
+        return {
+            "output": f"GUI uygulaması başlatıldı{app_name}",
+            "returncode": 0,
+        }
 
     def get_temp_dir(self) -> str:
         """Return a shell-safe writable temp dir for local execution.
