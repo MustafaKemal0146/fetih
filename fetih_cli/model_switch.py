@@ -1039,13 +1039,13 @@ def switch_model(
         is_global=is_global,
     )
 
-    # ── Auto-persist session model ──
-    # When the user switches models without --global, save the choice to a
-    # session file so it survives restarts. --global still writes to config.yaml
-    # (the canonical source), but session-file gives /model the "sticky" behaviour
-    # users expect: "I changed it, it should still be there tomorrow."
-    if not is_global:
-        _save_last_session_model(result)
+    # ── Auto-persist last chosen model ──
+    # Always record the most-recent model choice in the session file so it
+    # survives restarts and is never shadowed by a stale value. --global also
+    # writes to config.yaml (the canonical source); writing the session file in
+    # both cases keeps "latest choice wins" consistent across restarts — without
+    # this, an old .last_model could override a newer --global switch on reload.
+    _save_last_session_model(result)
 
     return result
 
