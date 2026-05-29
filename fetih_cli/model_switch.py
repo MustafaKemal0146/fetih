@@ -1063,6 +1063,8 @@ def _last_session_model_path() -> Path:
 
 def _save_last_session_model(result: ModelSwitchResult) -> None:
     """Save the model choice to ~/.fetih/.last_model for next session."""
+    import logging as _logging
+    _log = _logging.getLogger(__name__)
     try:
         import json as _json
         data = {
@@ -1072,9 +1074,12 @@ def _save_last_session_model(result: ModelSwitchResult) -> None:
             "api_mode": result.api_mode,
             "ts": __import__("time").time(),
         }
-        _last_session_model_path().write_text(_json.dumps(data, ensure_ascii=False))
-    except Exception:
-        pass  # Best-effort, never break model switch over a file write
+        path = _last_session_model_path()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(_json.dumps(data, ensure_ascii=False))
+        _log.debug("Saved session model to %s: %s", path, result.new_model)
+    except Exception as exc:
+        _log.warning("Failed to save session model: %s", exc)
 
 
 def load_last_session_model() -> Optional[dict]:

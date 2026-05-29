@@ -18,15 +18,52 @@ import re
 import sys
 from typing import Any, Dict, List, Optional, Tuple
 
-import pyautogui
-
 _PLATFORM = sys.platform  # "linux", "darwin", "win32"
 
+# Lazy import: pyautogui is NOT required just to import this module.
+# Only functions that actually use desktop control need it.
+pyautogui = None  # type: ignore[assignment]
+
+def _ensure_pyautogui() -> bool:
+    """Try to import pyautogui. Returns True on success, False if not installed.
+
+    pyautogui calls sys.exit() when tkinter is missing (Linux headless).
+    We catch SystemExit in addition to ImportError so the module loads
+    gracefully on headless CI/GitHub Actions/Docker environments.
+    """
+    global pyautogui, FailSafeException
+    if pyautogui is not None:
+        return True
+    try:
+        import pyautogui as _pya
+        pyautogui = _pya
+        FailSafeException = _pya.FailSafeException
+        return True
+    except (ImportError, SystemExit):
+        return False
+
+
+# Fallback for FailSafeException when pyautogui is not installed
+class _FailSafeException(Exception):
+    """Stand-in for pyautogui.FailSafeException."""
+
+# Module-level alias: starts as stand-in, updated to real FailSafeException
+# when pyautogui is first successfully imported.
+FailSafeException: type = _FailSafeException
+
+
 # Platform-specific imports
-try:
-    import pygetwindow as gw
-except ImportError:
-    gw = None  # type: ignore[assignment]
+gw = None  # type: ignore[assignment]
+def _ensure_pygetwindow() -> bool:
+    global gw
+    if gw is not None:
+        return True
+    try:
+        import pygetwindow as _gw
+        gw = _gw
+        return True
+    except ImportError:
+        return False
 
 from tools.computer_use.backend import (
     ActionResult,
@@ -69,12 +106,17 @@ else:
 
 
 def _is_pyautogui_available() -> bool:
-    """Return True if pyautogui can actually control the desktop."""
+    """Return True if pyautogui can actually control the desktop.
+
+    Safe to call even when pyautogui is not installed — returns False.
+    """
     try:
+        if not _ensure_pyautogui():
+            return False
         if _PLATFORM == "linux":
             if not os.environ.get("DISPLAY") and not os.environ.get("WAYLAND_DISPLAY"):
                 return False
-        pyautogui.size()
+        pyautogui.size()  # type: ignore[union-attr]
         return True
     except Exception:
         return False
@@ -357,16 +399,20 @@ def _draw_som_grid(
 # ---------------------------------------------------------------------------
 
 def _clamp_coords(x: int, y: int) -> Tuple[int, int]:
-    sw, sh = pyautogui.size()
+    if not _ensure_pyautogui():
+        return (x, y)
+    sw, sh = pyautogui.size()  # type: ignore[union-attr]
     return (max(0, min(x, sw - 1)), max(0, min(y, sh - 1)))
 
 
 def _smooth_move(x: int, y: int, duration: float = 0.3) -> None:
+    if not _ensure_pyautogui():
+        return
     x, y = _clamp_coords(x, y)
     try:
-        pyautogui.moveTo(x, y, duration=duration)
+        pyautogui.moveTo(x, y, duration=duration)  # type: ignore[union-attr]
     except Exception:
-        pyautogui.moveTo(x, y)
+        pyautogui.moveTo(x, y)  # type: ignore[union-attr]
 
 
 def _normalize_key_combo(keys: str) -> Tuple[str, ...]:
@@ -375,17 +421,21 @@ def _normalize_key_combo(keys: str) -> Tuple[str, ...]:
 
 
 def _hold_modifiers(modifiers: List[str]) -> None:
+    if not _ensure_pyautogui():
+        return
     for mod in modifiers:
         try:
-            pyautogui.keyDown(_KEY_ALIASES.get(mod.lower(), mod.lower()))
+            pyautogui.keyDown(_KEY_ALIASES.get(mod.lower(), mod.lower()))  # type: ignore[union-attr]
         except Exception:
             pass
 
 
 def _release_modifiers(modifiers: List[str]) -> None:
+    if not _ensure_pyautogui():
+        return
     for mod in reversed(modifiers):
         try:
-            pyautogui.keyUp(_KEY_ALIASES.get(mod.lower(), mod.lower()))
+            pyautogui.keyUp(_KEY_ALIASES.get(mod.lower(), mod.lower()))  # type: ignore[union-attr]
         except Exception:
             pass
 
@@ -401,8 +451,9 @@ class PyAutoGUIBackend(ComputerUseBackend):
         self._grid_rows = grid_rows
         self._grid_cols = grid_cols
         self._started = False
-        pyautogui.FAILSAFE = True
-        pyautogui.PAUSE = 0.1
+        if _ensure_pyautogui():
+            pyautogui.FAILSAFE = True  # type: ignore[union-attr]
+            pyautogui.PAUSE = 0.1  # type: ignore[union-attr]
 
     # ── Lifecycle ────────────────────────────────────────────────────
 
@@ -526,7 +577,7 @@ class PyAutoGUIBackend(ComputerUseBackend):
                 _release_modifiers(modifiers)
             return ActionResult(True, "click",
                 f"{button} click x{click_count} at ({px},{py})")
-        except pyautogui.FailSafeException:
+        except FailSafeException:
             return ActionResult(False, "click", "FAILSAFE: mouse at corner (0,0)")
         except Exception as e:
             return ActionResult(False, "click", str(e))
@@ -552,7 +603,7 @@ class PyAutoGUIBackend(ComputerUseBackend):
                 _release_modifiers(modifiers)
             return ActionResult(True, "drag",
                 f"dragged ({fx},{fy}) → ({tx},{ty})")
-        except pyautogui.FailSafeException:
+        except FailSafeException:
             return ActionResult(False, "drag", "FAILSAFE triggered")
         except Exception as e:
             return ActionResult(False, "drag", str(e))
@@ -577,7 +628,7 @@ class PyAutoGUIBackend(ComputerUseBackend):
             if modifiers:
                 _release_modifiers(modifiers)
             return ActionResult(True, "scroll", f"scrolled {direction} x{amount}")
-        except pyautogui.FailSafeException:
+        except FailSafeException:
             return ActionResult(False, "scroll", "FAILSAFE triggered")
         except Exception as e:
             return ActionResult(False, "scroll", str(e))
@@ -589,7 +640,7 @@ class PyAutoGUIBackend(ComputerUseBackend):
             interval = max(0.05, min(0.2, 12.0 / max(1, len(text))))
             pyautogui.write(text, interval=interval)
             return ActionResult(True, "type", f"typed {len(text)} chars")
-        except pyautogui.FailSafeException:
+        except FailSafeException:
             return ActionResult(False, "type", "FAILSAFE triggered")
         except Exception as e:
             return ActionResult(False, "type", str(e))
@@ -599,7 +650,7 @@ class PyAutoGUIBackend(ComputerUseBackend):
             normalized = _normalize_key_combo(keys)
             pyautogui.hotkey(*normalized)
             return ActionResult(True, "key", f"pressed {keys!r}")
-        except pyautogui.FailSafeException:
+        except FailSafeException:
             return ActionResult(False, "key", "FAILSAFE triggered")
         except Exception as e:
             return ActionResult(False, "key", str(e))
@@ -682,10 +733,11 @@ class PyAutoGUIBackend(ComputerUseBackend):
                     cx = matched.left + matched.width // 2
                     cy = matched.top + matched.height // 2
                     _smooth_move(cx, cy)
-                    pyautogui.click()
+                    if _ensure_pyautogui():
+                        pyautogui.click()  # type: ignore[union-attr]
                     return ActionResult(True, "focus_app",
                         f"focused {matched.title!r}")
-            except pyautogui.FailSafeException:
+            except FailSafeException:
                 return ActionResult(False, "focus_app", "FAILSAFE triggered")
             except Exception as e:
                 logger.warning("pygetwindow focus failed: %s", e)
@@ -725,14 +777,16 @@ class PyAutoGUIBackend(ComputerUseBackend):
                 logger.warning("wmctrl focus failed: %s", e)
 
         # === Strategy 4: Alt+Tab on all platforms (last resort) ===
-        try:
-            pyautogui.keyDown("alt")
-            pyautogui.press("tab")
-            pyautogui.keyUp("alt")
-            return ActionResult(True, "focus_app",
-                "used Alt+Tab to switch windows")
-        except Exception as e:
-            return ActionResult(False, "focus_app", str(e))
+        if _ensure_pyautogui():
+            try:
+                pyautogui.keyDown("alt")  # type: ignore[union-attr]
+                pyautogui.press("tab")   # type: ignore[union-attr]
+                pyautogui.keyUp("alt")   # type: ignore[union-attr]
+                return ActionResult(True, "focus_app",
+                    "used Alt+Tab to switch windows")
+            except Exception as e:
+                return ActionResult(False, "focus_app", str(e))
+        return ActionResult(False, "focus_app", "pyautogui not available")
 
     def _active_window_title(self) -> Optional[str]:
         if gw is None:
