@@ -827,6 +827,27 @@ def _detect_tool_failure(tool_name: str, result: str | None) -> tuple[bool, str]
     return False, ""
 
 
+def _launch_app_name(command: str) -> str:
+    """Return the app name for a Windows ``start <app>`` launcher command.
+
+    Turns ``start chrome "url"`` (or ``cmd.exe /c "start chrome ..."``) into
+    just ``chrome`` so the TUI can show "chrome başlatılıyor" instead of the
+    raw shell line. Returns "" when the command is not a start-launcher.
+    """
+    import re
+    text = str(command or "").strip()
+    if not text:
+        return ""
+    m = re.search(r'\bstart\b\s+(?:"[^"]*"\s+)?("?)([^\s"]+)\1', text, re.IGNORECASE)
+    if not m:
+        return ""
+    app = m.group(2).strip()
+    # Skip URLs / flags accidentally captured as the first token.
+    if app.startswith(("/", "-")) or "://" in app:
+        return ""
+    return app
+
+
 def get_cute_tool_message(
     tool_name: str, args: dict, duration: float, result: str | None = None,
 ) -> str:
@@ -878,7 +899,11 @@ def get_cute_tool_message(
         domain = url.replace("https://", "").replace("http://", "").split("/")[0]
         return _wrap(f"┊ 🕸️  tarıyor  {_trunc(domain, 35)}  {dur}")
     if tool_name == "terminal":
-        return _wrap(f"┊ 💻 $         {_trunc(args.get('command', ''), 42)}  {dur}")
+        cmd = args.get("command", "")
+        app = _launch_app_name(cmd)
+        if app:
+            return _wrap(f"┊ 💻 {_trunc(app, 30)} başlatılıyor  {dur}")
+        return _wrap(f"┊ 💻 $         {_trunc(cmd, 42)}  {dur}")
     if tool_name == "process":
         action = args.get("action", "?")
         sid = args.get("session_id", "")[:12]

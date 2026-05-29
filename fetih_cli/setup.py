@@ -241,7 +241,7 @@ def prompt_choice(question: str, choices: list, default: int = 0, description: s
     idx = _curses_prompt_choice(question, choices, default, description=description)
     if idx >= 0:
         if idx == default:
-            print_info("  Skipped (keeping current)")
+            print_info("  Atlandı (mevcut korunuyor)")
             print()
             return default
         print()
@@ -360,7 +360,7 @@ def _print_setup_summary(config: dict, fetih_home):
     """Print the setup completion summary."""
     # Tool availability summary
     print()
-    print_header("Tool Availability Summary")
+    print_header("Araç Kullanılabilirlik Özeti")
 
     tool_status = []
     subscription_features = get_nous_subscription_features(config)
@@ -374,9 +374,9 @@ def _print_setup_summary(config: dict, fetih_home):
         _vision_backends = []
 
     if _vision_backends:
-        tool_status.append(("Vision (image analysis)", True, None))
+        tool_status.append(("Görüntü (görsel analiz)", True, None))
     else:
-        tool_status.append(("Vision (image analysis)", False, "run 'fetih setup' to configure"))
+        tool_status.append(("Görüntü (görsel analiz)", False, "run 'fetih setup' to configure"))
 
     # Mixture of Agents — requires OpenRouter specifically (calls multiple models)
     if get_env_value("OPENROUTER_API_KEY"):
@@ -510,7 +510,7 @@ def _print_setup_summary(config: dict, fetih_home):
         else:
             tool_status.append(("Text-to-Speech (KittenTTS — not installed)", False, "run 'fetih setup tts'"))
     else:
-        tool_status.append(("Text-to-Speech (Edge TTS)", True, None))
+        tool_status.append(("Metni Sese Çevirme (Edge TTS)", True, None))
 
     if subscription_features.modal.managed_by_nous:
         tool_status.append(("Modal Execution (Nous subscription)", True, None))
@@ -542,19 +542,19 @@ def _print_setup_summary(config: dict, fetih_home):
         tool_status.append(("Skills Hub (GitHub)", False, "GITHUB_TOKEN"))
 
     # Terminal (always available if system deps met)
-    tool_status.append(("Terminal/Commands", True, None))
+    tool_status.append(("Terminal/Komutlar", True, None))
 
     # Task planning (always available, in-memory)
-    tool_status.append(("Task Planning (todo)", True, None))
+    tool_status.append(("Görev Planlama (todo)", True, None))
 
     # Skills (always available -- bundled skills + user-created skills)
-    tool_status.append(("Skills (view, create, edit)", True, None))
+    tool_status.append(("Yetenekler (görüntüle, oluştur, düzenle)", True, None))
 
     # Print status
     available_count = sum(1 for _, avail, _ in tool_status if avail)
     total_count = len(tool_status)
 
-    print_info(f"{available_count}/{total_count} tool categories available:")
+    print_info(f"{total_count} araç kategorisinden {available_count} tanesi kullanılabilir:")
     print()
 
     for name, available, missing_var in tool_status:
@@ -562,7 +562,7 @@ def _print_setup_summary(config: dict, fetih_home):
             print(f"   {color('✓', Colors.GREEN)} {name}")
         else:
             print(
-                f"   {color('✗', Colors.RED)} {name} {color(f'(missing {missing_var})', Colors.DIM)}"
+                f"   {color('✗', Colors.RED)} {name} {color(f'(eksik: {missing_var})', Colors.DIM)}"
             )
 
     print()
@@ -570,10 +570,10 @@ def _print_setup_summary(config: dict, fetih_home):
     disabled_tools = [(name, var) for name, avail, var in tool_status if not avail]
     if disabled_tools:
         print_warning(
-            "Some tools are disabled. Run 'fetih setup tools' to configure them,"
+            "Bazı araçlar devre dışı. Yapılandırmak için 'fetih setup tools' çalıştırın,"
         )
         from fetih_constants import display_fetih_home as _dhh
-        print_warning(f"or edit {_dhh()}/.env directly to add the missing API keys.")
+        print_warning(f"ya da eksik API anahtarlarını eklemek için {_dhh()}/.env dosyasını doğrudan düzenleyin.")
         print()
 
     # Done banner
@@ -585,7 +585,7 @@ def _print_setup_summary(config: dict, fetih_home):
     )
     print(
         color(
-            "│              ✓ Setup Complete!                          │", Colors.GREEN
+            "│              ✓ Kurulum Tamamlandı!                      │", Colors.GREEN
         )
     )
     print(
@@ -597,44 +597,44 @@ def _print_setup_summary(config: dict, fetih_home):
 
     # Show file locations prominently
     from fetih_constants import display_fetih_home as _dhh
-    print(color(f"📁 All your files are in {_dhh()}/:", Colors.CYAN, Colors.BOLD))
+    print(color(f"📁 Tüm dosyalarınız şurada: {_dhh()}/:", Colors.CYAN, Colors.BOLD))
     print()
-    print(f"   {color('Settings:', Colors.YELLOW)}  {get_config_path()}")
-    print(f"   {color('API Keys:', Colors.YELLOW)}  {get_env_path()}")
+    print(f"   {color('Ayarlar:', Colors.YELLOW)}  {get_config_path()}")
+    print(f"   {color('API Anahtarları:', Colors.YELLOW)}  {get_env_path()}")
     print(
-        f"   {color('Data:', Colors.YELLOW)}      {fetih_home}/cron/, sessions/, logs/"
+        f"   {color('Veri:', Colors.YELLOW)}      {fetih_home}/cron/, sessions/, logs/"
     )
     print()
 
     print(color("─" * 60, Colors.DIM))
     print()
-    print(color("📝 To edit your configuration:", Colors.CYAN, Colors.BOLD))
+    print(color("📝 Yapılandırmanızı düzenlemek için:", Colors.CYAN, Colors.BOLD))
     print()
-    print(f"   {color('fetih setup', Colors.GREEN)}          Re-run the full wizard")
-    print(f"   {color('fetih setup model', Colors.GREEN)}    Change model/provider")
-    print(f"   {color('fetih setup terminal', Colors.GREEN)} Change terminal backend")
-    print(f"   {color('fetih setup gateway', Colors.GREEN)}  Configure messaging")
-    print(f"   {color('fetih setup tools', Colors.GREEN)}    Configure tool providers")
+    print(f"   {color('fetih setup', Colors.GREEN)}          Tam sihirbazı yeniden çalıştır")
+    print(f"   {color('fetih setup model', Colors.GREEN)}    Model/sağlayıcı değiştir")
+    print(f"   {color('fetih setup terminal', Colors.GREEN)} Terminal arka ucunu değiştir")
+    print(f"   {color('fetih setup gateway', Colors.GREEN)}  Mesajlaşmayı yapılandır")
+    print(f"   {color('fetih setup tools', Colors.GREEN)}    Araç sağlayıcılarını yapılandır")
     print()
-    print(f"   {color('fetih config', Colors.GREEN)}         View current settings")
+    print(f"   {color('fetih config', Colors.GREEN)}         Mevcut ayarları görüntüle")
     print(
-        f"   {color('fetih config edit', Colors.GREEN)}    Open config in your editor"
+        f"   {color('fetih config edit', Colors.GREEN)}    Yapılandırmayı editörde aç"
     )
-    print(f"   {color('fetih config set <key> <value>', Colors.GREEN)}")
-    print("                          Set a specific value")
+    print(f"   {color('fetih config set <anahtar> <değer>', Colors.GREEN)}")
+    print("                          Belirli bir değeri ayarla")
     print()
-    print("   Or edit the files directly:")
+    print("   Ya da dosyaları doğrudan düzenleyin:")
     print(f"   {color(f'nano {get_config_path()}', Colors.DIM)}")
     print(f"   {color(f'nano {get_env_path()}', Colors.DIM)}")
     print()
 
     print(color("─" * 60, Colors.DIM))
     print()
-    print(color("🚀 Ready to go!", Colors.CYAN, Colors.BOLD))
+    print(color("🚀 Kullanmaya hazır!", Colors.CYAN, Colors.BOLD))
     print()
-    print(f"   {color('fetih', Colors.GREEN)}              Start chatting")
-    print(f"   {color('fetih gateway', Colors.GREEN)}      Start messaging gateway")
-    print(f"   {color('fetih doctor', Colors.GREEN)}       Check for issues")
+    print(f"   {color('fetih', Colors.GREEN)}              Sohbete başla")
+    print(f"   {color('fetih gateway', Colors.GREEN)}      Mesajlaşma gateway'ini başlat")
+    print(f"   {color('fetih doctor', Colors.GREEN)}       Sorunları kontrol et")
     print()
 
 
@@ -799,9 +799,9 @@ def setup_model_provider(config: dict, *, quick: bool = False):
     """
     from fetih_cli.config import load_config, save_config
 
-    print_header("Inference Provider")
-    print_info("Choose how to connect to your main chat model.")
-    print_info(f"   Guide: {_DOCS_BASE}/integrations/providers")
+    print_header("Çıkarım Sağlayıcısı")
+    print_info("Ana sohbet modelinize nasıl bağlanacağınızı seçin.")
+    print_info(f"   Kılavuz: {_DOCS_BASE}/integrations/providers")
     print()
 
     # Delegate to the shared fetih model flow — handles provider picker,
@@ -811,11 +811,11 @@ def setup_model_provider(config: dict, *, quick: bool = False):
         select_provider_and_model()
     except (SystemExit, KeyboardInterrupt):
         print()
-        print_info("Provider setup skipped.")
+        print_info("Sağlayıcı kurulumu atlandı.")
     except Exception as exc:
         logger.debug("select_provider_and_model error during setup: %s", exc)
-        print_warning(f"Provider setup encountered an error: {exc}")
-        print_info("You can try again later with: fetih model")
+        print_warning(f"Sağlayıcı kurulumunda bir hata oluştu: {exc}")
+        print_info("Daha sonra şununla tekrar deneyebilirsiniz: fetih model")
 
     # Re-sync the wizard's config dict from what cmd_model saved to disk.
     # This is critical: cmd_model writes to disk via its own load/save cycle,
@@ -1393,10 +1393,10 @@ def setup_tts(config: dict):
 def setup_terminal_backend(config: dict):
     """Configure the terminal execution backend."""
     import platform as _platform
-    print_header("Terminal Backend")
-    print_info("Choose where FETIH runs shell commands and code.")
-    print_info("This affects tool execution, file access, and isolation.")
-    print_info(f"   Guide: {_DOCS_BASE}/developer-guide/environments")
+    print_header("Terminal Arka Ucu")
+    print_info("FETIH'in kabuk komutlarını ve kodu nerede çalıştıracağını seçin.")
+    print_info("Bu; araç yürütmeyi, dosya erişimini ve yalıtımı etkiler.")
+    print_info(f"   Kılavuz: {_DOCS_BASE}/developer-guide/environments")
     print()
 
     current_backend = cfg_get(config, "terminal", "backend", default="local")
@@ -1404,48 +1404,48 @@ def setup_terminal_backend(config: dict):
 
     # Build backend choices with descriptions
     terminal_choices = [
-        "Local - run directly on this machine (default)",
-        "Docker - isolated container with configurable resources",
-        "Modal - serverless cloud sandbox",
-        "SSH - run on a remote machine",
-        "Daytona - persistent cloud development environment",
-        "Vercel Sandbox - cloud microVM with snapshot filesystem persistence",
+        "Yerel - doğrudan bu makinede çalıştır (varsayılan)",
+        "Docker - yapılandırılabilir kaynaklı yalıtılmış konteyner",
+        "Modal - sunucusuz bulut sanal alanı",
+        "SSH - uzak bir makinede çalıştır",
+        "Daytona - kalıcı bulut geliştirme ortamı",
+        "Vercel Sandbox - anlık dosya sistemi kalıcılığı olan bulut microVM",
     ]
     idx_to_backend = {0: "local", 1: "docker", 2: "modal", 3: "ssh", 4: "daytona", 5: "vercel_sandbox"}
     backend_to_idx = {"local": 0, "docker": 1, "modal": 2, "ssh": 3, "daytona": 4, "vercel_sandbox": 5}
 
     next_idx = 6
     if is_linux:
-        terminal_choices.append("Singularity/Apptainer - HPC-friendly container")
+        terminal_choices.append("Singularity/Apptainer - HPC dostu konteyner")
         idx_to_backend[next_idx] = "singularity"
         backend_to_idx["singularity"] = next_idx
         next_idx += 1
 
     # Add keep current option
     keep_current_idx = next_idx
-    terminal_choices.append(f"Keep current ({current_backend})")
+    terminal_choices.append(f"Mevcut olanı koru ({current_backend})")
     idx_to_backend[keep_current_idx] = current_backend
 
     terminal_idx = prompt_choice(
-        "Select terminal backend:", terminal_choices, keep_current_idx
+        "Terminal arka ucunu seçin:", terminal_choices, keep_current_idx
     )
 
     selected_backend = idx_to_backend.get(terminal_idx)
 
     if terminal_idx == keep_current_idx:
-        print_info(f"Keeping current backend: {current_backend}")
+        print_info(f"Mevcut arka uç korunuyor: {current_backend}")
         return
 
     config.setdefault("terminal", {})["backend"] = selected_backend
 
     if selected_backend == "local":
-        print_success("Terminal backend: Local")
-        print_info("Commands run directly on this machine.")
+        print_success("Terminal arka ucu: Yerel")
+        print_info("Komutlar doğrudan bu makinede çalışır.")
 
         # Gateway/cron working directory
         print()
-        print_info("Gateway working directory:")
-        print_info("  Used by Telegram/Discord/cron sessions.")
+        print_info("Gateway çalışma dizini:")
+        print_info("  Telegram/Discord/cron oturumları tarafından kullanılır.")
         print_info("  CLI/TUI always uses your launch directory instead.")
         current_cwd = cfg_get(config, "terminal", "cwd", default="")
         cwd = prompt("  Gateway working directory", current_cwd or str(Path.home()))
@@ -1779,12 +1779,12 @@ def _apply_default_agent_settings(config: dict):
     })
 
     save_config(config)
-    print_success("Applied recommended defaults:")
-    print_info("  Max iterations: 90")
-    print_info("  Tool progress: all")
-    print_info("  Compression threshold: 0.50")
-    print_info("  Session reset: inactivity (1440 min) + daily (4:00)")
-    print_info("  Run `fetih setup agent` later to customize.")
+    print_success("Önerilen varsayılanlar uygulandı:")
+    print_info("  Maks. iterasyon: 90")
+    print_info("  Araç ilerlemesi: tümü")
+    print_info("  Sıkıştırma eşiği: 0.50")
+    print_info("  Oturum sıfırlama: hareketsizlik (1440 dk) + günlük (4:00)")
+    print_info("  Özelleştirmek için sonra `fetih setup agent` çalıştırın.")
 
 
 def setup_agent_settings(config: dict):
@@ -2998,14 +2998,14 @@ def _offer_openclaw_migration(fetih_home: Path) -> bool:
         return False
 
     print()
-    print_header("OpenClaw Installation Detected")
-    print_info(f"Found OpenClaw data at {openclaw_dir}")
-    print_info("FETIH can preview what would be imported before making any changes.")
+    print_header("OpenClaw Kurulumu Tespit Edildi")
+    print_info(f"OpenClaw verisi şurada bulundu: {openclaw_dir}")
+    print_info("FETIH, herhangi bir değişiklik yapmadan önce neyin içe aktarılacağını önizleyebilir.")
     print()
 
-    if not prompt_yes_no("Would you like to see what can be imported?", default=True):
+    if not prompt_yes_no("Neyin içe aktarılabileceğini görmek ister misiniz?", default=True):
         print_info(
-            "Skipping migration. You can run it later with: fetih claw migrate --dry-run"
+            "Geçiş atlanıyor. Daha sonra şununla çalıştırabilirsiniz: fetih claw migrate --dry-run"
         )
         return False
 
@@ -3248,7 +3248,7 @@ def run_setup_wizard(args):
     )
     print(
         color(
-            "│  Press Ctrl+C at any time to exit.                     │", Colors.MAGENTA
+            "│  Çıkmak için istediğiniz an Ctrl+C'ye basın.            │", Colors.MAGENTA
         )
     )
     print(
@@ -3271,13 +3271,13 @@ def run_setup_wizard(args):
             return
 
         print()
-        print_header("Reconfigure")
-        print_success("You already have FETIH configured.")
-        print_info("Running the full wizard — each prompt shows your current value.")
-        print_info("Press Enter to keep it, or type a new value to change it.")
+        print_header("Yeniden Yapılandırma")
+        print_success("FETIH zaten yapılandırılmış.")
+        print_info("Tam sihirbaz çalışıyor — her soru mevcut değerinizi gösterir.")
+        print_info("Korumak için Enter'a basın, değiştirmek için yeni bir değer girin.")
         print_info("")
-        print_info("Tip: jump straight to a section with 'fetih setup model|terminal|")
-        print_info("     gateway|tools|agent', or fill only missing items with --quick.")
+        print_info("İpucu: doğrudan bir bölüme atlamak için 'fetih setup model|terminal|")
+        print_info("     gateway|tools|agent' kullanın, ya da --quick ile sadece eksikleri doldurun.")
         # Fall through to the "Full Setup — run all sections" block below.
         # --reconfigure is now the default on existing installs; the flag
         # is preserved for backwards compatibility but is a no-op here.
@@ -3288,7 +3288,7 @@ def run_setup_wizard(args):
         # --reconfigure / --quick on a fresh install are meaningless — fall
         # through to the normal first-time flow.
         if reconfigure_requested or quick_requested:
-            print_info("No existing configuration found — running first-time setup.")
+            print_info("Mevcut yapılandırma bulunamadı — ilk kurulum çalışıyor.")
             print()
 
         # Offer OpenClaw migration before configuration begins
@@ -3296,9 +3296,9 @@ def run_setup_wizard(args):
         if migration_ran:
             config = load_config()
 
-        setup_mode = prompt_choice("How would you like to set up FETIH?", [
-            "Quick setup — provider, model & messaging (recommended)",
-            "Full setup — configure everything",
+        setup_mode = prompt_choice("FETIH'i nasıl kurmak istersiniz?", [
+            "Hızlı kurulum — sağlayıcı, model ve mesajlaşma (önerilen)",
+            "Tam kurulum — her şeyi yapılandır",
         ], 0)
 
         if setup_mode == 0:
@@ -3306,19 +3306,19 @@ def run_setup_wizard(args):
             return
 
     # ── Full Setup — run all sections ──
-    print_header("Configuration Location")
-    print_info(f"Config file:  {get_config_path()}")
-    print_info(f"Secrets file: {get_env_path()}")
-    print_info(f"Data folder:  {fetih_home}")
-    print_info(f"Install dir:  {PROJECT_ROOT}")
+    print_header("Yapılandırma Konumu")
+    print_info(f"Yapılandırma dosyası: {get_config_path()}")
+    print_info(f"Gizli anahtar dosyası: {get_env_path()}")
+    print_info(f"Veri klasörü:  {fetih_home}")
+    print_info(f"Kurulum dizini: {PROJECT_ROOT}")
     print()
-    print_info("You can edit these files directly or use 'fetih config edit'")
+    print_info("Bu dosyaları doğrudan düzenleyebilir ya da 'fetih config edit' kullanabilirsiniz")
 
     if migration_ran:
         print()
-        print_info("Settings were imported from OpenClaw.")
-        print_info("Each section below will show what was imported — press Enter to keep,")
-        print_info("or choose to reconfigure if needed.")
+        print_info("Ayarlar OpenClaw'dan içe aktarıldı.")
+        print_info("Aşağıdaki her bölüm neyin içe aktarıldığını gösterir — korumak için Enter'a basın,")
+        print_info("ya da gerekiyorsa yeniden yapılandırmayı seçin.")
 
     # Section 1: Model & Provider
     if not (migration_ran and _skip_configured_section(config, "model", "Model & Provider")):
@@ -3369,10 +3369,10 @@ def _run_first_time_quick_setup(config: dict, fetih_home, is_existing: bool):
     # Step 4: Offer messaging gateway setup
     print()
     gateway_choice = prompt_choice(
-        "Connect a messaging platform? (Telegram, Discord, etc.)",
+        "Bir mesajlaşma platformu bağlansın mı? (Telegram, Discord, vb.)",
         [
-            "Set up messaging now (recommended)",
-            "Skip — set up later with 'fetih setup gateway'",
+            "Mesajlaşmayı şimdi kur (önerilen)",
+            "Atla — sonra 'fetih setup gateway' ile kur",
         ],
         0,
     )
@@ -3382,11 +3382,11 @@ def _run_first_time_quick_setup(config: dict, fetih_home, is_existing: bool):
         save_config(config)
 
     print()
-    print_success("Setup complete! You're ready to go.")
+    print_success("Kurulum tamamlandı! Kullanmaya hazırsınız.")
     print()
-    print_info("  Configure all settings:    fetih setup")
+    print_info("  Tüm ayarları yapılandır:   fetih setup")
     if gateway_choice != 0:
-        print_info("  Connect Telegram/Discord:  fetih setup gateway")
+        print_info("  Telegram/Discord bağla:    fetih setup gateway")
     print()
 
     _print_setup_summary(config, fetih_home)

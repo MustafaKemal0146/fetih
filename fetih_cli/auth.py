@@ -1508,9 +1508,9 @@ def resolve_provider(
         pass  # boto3 not installed — skip Bedrock auto-detection
 
     raise AuthError(
-        "No inference provider configured. Run 'fetih model' to choose a "
-        "provider and model, or set an API key (OPENROUTER_API_KEY, "
-        "OPENAI_API_KEY, etc.) in ~/.fetih/.env.",
+        "Çıkarım sağlayıcısı yapılandırılmamış. Sağlayıcı ve model seçmek için "
+        "'fetih model' çalıştırın ya da ~/.fetih/.env içine bir API anahtarı "
+        "(OPENROUTER_API_KEY, OPENAI_API_KEY, vb.) ekleyin.",
         code="no_provider_configured",
     )
 
@@ -5828,14 +5828,14 @@ def _prompt_model_selection(
         else:
             base = mid
         if mid == current_model:
-            base += "  ← currently in use"
+            base += "  ← şu an kullanımda"
         return base
 
     # Default cursor on the current model (index 0 if it was reordered to top)
     default_idx = 0
 
     # Build a pricing header hint for the menu title
-    menu_title = "Select default model:"
+    menu_title = "Varsayılan modeli seçin:"
     if has_pricing:
         # Align the header with the model column.
         # Each choice is "  {label}" (2 spaces) and simple_term_menu prepends
@@ -5855,8 +5855,8 @@ def _prompt_model_selection(
         from simple_term_menu import TerminalMenu
 
         choices = [f"  {_label(mid)}" for mid in ordered]
-        choices.append("  Enter custom model name")
-        choices.append("  Skip (keep current)")
+        choices.append("  Özel model adı gir")
+        choices.append("  Atla (mevcut olanı koru)")
 
         # Print the unavailable block BEFORE the menu via regular print().
         # simple_term_menu pads title lines to terminal width (causes wrapping),
@@ -5871,7 +5871,7 @@ def _prompt_model_selection(
             print()
             print(f"{_DIM}  ── Upgrade at {_upgrade_url} for paid models ──{_RESET}")
             print()
-            effective_title = "Available free models:"
+            effective_title = "Kullanılabilir ücretsiz modeller:"
         else:
             effective_title = menu_title
 
@@ -5894,7 +5894,7 @@ def _prompt_model_selection(
         if idx < len(ordered):
             return ordered[idx]
         elif idx == len(ordered):
-            custom = input("Enter model name: ").strip()
+            custom = input("Model adını girin: ").strip()
             return custom if custom else None
         return None
     except (ImportError, NotImplementedError, OSError, subprocess.SubprocessError):
@@ -5906,8 +5906,8 @@ def _prompt_model_selection(
     for i, mid in enumerate(ordered, 1):
         print(f"  {i:>{num_width}}. {_label(mid)}")
     n = len(ordered)
-    print(f"  {n + 1:>{num_width}}. Enter custom model name")
-    print(f"  {n + 2:>{num_width}}. Skip (keep current)")
+    print(f"  {n + 1:>{num_width}}. Özel model adı gir")
+    print(f"  {n + 2:>{num_width}}. Atla (mevcut olanı koru)")
 
     if _unavailable:
         _upgrade_url = (portal_url or DEFAULT_NOUS_PORTAL_URL).rstrip("/")

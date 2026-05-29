@@ -1833,14 +1833,14 @@ def select_provider_and_model(args=None):
                 "available providers, or run 'fetih doctor' to diagnose config "
                 "issues."
             )
-            print(f"Warning: {warning} Falling back to auto provider detection.")
+            print(f"Uyarı: {warning} Otomatik sağlayıcı tespitine geçiliyor.")
     if active is None:
         try:
             active = resolve_provider("auto")
         except AuthError as exc:
             if effective_provider == "auto":
                 warning = format_auth_error(exc)
-                print(f"Warning: {warning} Falling back to auto provider detection.")
+                print(f"Uyarı: {warning} Otomatik sağlayıcı tespitine geçiliyor.")
             active = None  # no provider yet; default to first in list
 
     # Detect custom endpoint
@@ -1853,8 +1853,8 @@ def select_provider_and_model(args=None):
     active_label = provider_labels.get(active, active) if active else "none"
 
     print()
-    print(f"  Current model:    {current_model}")
-    print(f"  Active provider:  {active_label}")
+    print(f"  Mevcut model:    {current_model}")
+    print(f"  Aktif sağlayıcı:  {active_label}")
     print()
 
     # Step 1: Provider selection — flat list from CANONICAL_PROVIDERS
@@ -2478,7 +2478,7 @@ def _prompt_provider_choice(choices, *, default=0):
     try:
         from fetih_cli.setup import _curses_prompt_choice
 
-        idx = _curses_prompt_choice("Select provider:", choices, default)
+        idx = _curses_prompt_choice("Sağlayıcı seçin:", choices, default)
         if idx >= 0:
             print()
             return idx
@@ -2486,22 +2486,22 @@ def _prompt_provider_choice(choices, *, default=0):
         pass
 
     # Fallback: numbered list
-    print("Select provider:")
+    print("Sağlayıcı seçin:")
     for i, c in enumerate(choices, 1):
         marker = "→" if i - 1 == default else " "
         print(f"  {marker} {i}. {c}")
     print()
     while True:
         try:
-            val = input(f"Choice [1-{len(choices)}] ({default + 1}): ").strip()
+            val = input(f"Seçim [1-{len(choices)}] ({default + 1}): ").strip()
             if not val:
                 return default
             idx = int(val) - 1
             if 0 <= idx < len(choices):
                 return idx
-            print(f"Please enter 1-{len(choices)}")
+            print(f"Lütfen 1-{len(choices)} arası girin")
         except ValueError:
-            print("Please enter a number")
+            print("Lütfen bir sayı girin")
         except (KeyboardInterrupt, EOFError):
             print()
             return None
@@ -5572,14 +5572,14 @@ def _model_flow_anthropic(config, current_model=""):
     if needs_auth:
         # Show auth method choice
         print()
-        print("  Choose authentication method:")
+        print("  Kimlik doğrulama yöntemini seçin:")
         print()
-        print("    1. Claude Pro/Max subscription (OAuth login)")
-        print("    2. Anthropic API key (pay-per-token)")
-        print("    3. Cancel")
+        print("    1. Claude Pro/Max aboneliği (OAuth giriş)")
+        print("    2. Anthropic API anahtarı (kullandıkça öde)")
+        print("    3. İptal")
         print()
         try:
-            choice = input("  Choice [1/2/3]: ").strip()
+            choice = input("  Seçim [1/2/3]: ").strip()
         except (KeyboardInterrupt, EOFError):
             print()
             return
@@ -5590,23 +5590,23 @@ def _model_flow_anthropic(config, current_model=""):
 
         elif choice == "2":
             print()
-            print("  Get an API key at: https://platform.claude.com/settings/keys")
+            print("  API anahtarı alın: https://platform.claude.com/settings/keys")
             print()
             try:
                 import getpass
 
-                api_key = getpass.getpass("  API key (sk-ant-...): ").strip()
+                api_key = getpass.getpass("  API anahtarı (sk-ant-...): ").strip()
             except (KeyboardInterrupt, EOFError):
                 print()
                 return
             if not api_key:
-                print("  Cancelled.")
+                print("  İptal edildi.")
                 return
             save_anthropic_api_key(api_key, save_fn=save_env_value)
-            print("  ✓ API key saved.")
+            print("  ✓ API anahtarı kaydedildi.")
 
         else:
-            print("  No change.")
+            print("  Değişiklik yok.")
             return
     print()
 
@@ -5616,7 +5616,7 @@ def _model_flow_anthropic(config, current_model=""):
         selected = _prompt_model_selection(model_list, current_model=current_model)
     else:
         try:
-            selected = input("Model name (e.g., claude-sonnet-4-20250514): ").strip()
+            selected = input("Model adı (örn. claude-sonnet-4-20250514): ").strip()
         except (KeyboardInterrupt, EOFError):
             selected = None
 
@@ -5637,9 +5637,9 @@ def _model_flow_anthropic(config, current_model=""):
         save_config(cfg)
         deactivate_provider()
 
-        print(f"Default model set to: {selected} (via Anthropic)")
+        print(f"Varsayılan model ayarlandı: {selected} (Anthropic üzerinden)")
     else:
-        print("No change.")
+        print("Değişiklik yok.")
 
 
 def cmd_login(args):

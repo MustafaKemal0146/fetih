@@ -294,14 +294,14 @@ def _radio_numbered_fallback(
 ) -> int:
     """Text-based numbered fallback for radio selection."""
     print(color(f"\n  {title}", Colors.YELLOW))
-    print(color("  Select by number, Enter to confirm.\n", Colors.DIM))
+    print(color("  Numarayla seçin, onaylamak için Enter'a basın.\n", Colors.DIM))
 
     for i, label in enumerate(items):
         marker = color("(\u25cf)", Colors.GREEN) if i == selected else "(\u25cb)"
         print(f"  {marker} {i + 1:>2}. {label}")
     print()
     try:
-        val = input(color(f"  Choice [default {selected + 1}]: ", Colors.DIM)).strip()
+        val = input(color(f"  Seçim [varsayılan {selected + 1}]: ", Colors.DIM)).strip()
         if not val:
             return selected
         idx = int(val) - 1
