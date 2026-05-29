@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FETIH TUI — Kırmızı 1: Savaş Konsolu (canlı)</title>
+<style>
+  :root{
+    --bg:#080203; --panel:#0e0405; --ink:#F1E6CF; --dim:#9a7d6c; --mut:#6E584B;
+    --crimson:#DD4A3A; --red:#ef5350; --redbright:#ff5b4a; --deep:#9F1C1C;
+    --bronze:#C7A96B; --bar-bg:#2A1212;
+    --ok:#7BC96F; --line:#27110f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:
+      radial-gradient(90% 60% at 50% -10%,rgba(221,74,58,.14),transparent 60%),var(--bg);
+    color:var(--ink);font-family:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+    display:flex;justify-content:center;padding:36px 16px;min-height:100vh}
+  .wrap{width:100%;max-width:920px}
+  .cap{color:var(--mut);font-size:11px;letter-spacing:.22em;text-transform:uppercase;margin:0 2px 14px}
+  .cap b{color:var(--crimson)}
+  .term{background:var(--bg);border:1px solid #3a1512;border-radius:10px;overflow:hidden;
+    box-shadow:0 0 0 1px #000,0 0 36px rgba(221,74,58,.12),0 22px 60px rgba(0,0,0,.7)}
+  .bar{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#160708,transparent)}
+  .d{width:10px;height:10px;border-radius:50%;border:1px solid #50201c}
+  .d.on{background:var(--crimson);border-color:var(--crimson);box-shadow:0 0 9px rgba(221,74,58,.7)}
+  .bar .t{margin-left:8px;color:var(--mut);font-size:11px;letter-spacing:.08em}
+  .bar .live{margin-left:auto;color:var(--crimson);font-size:10.5px;letter-spacing:.18em;display:flex;align-items:center;gap:6px}
+  .bar .live .pulse{width:8px;height:8px;border-radius:50%;background:var(--crimson);animation:pulse 1.1s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(221,74,58,.6)}70%{box-shadow:0 0 0 7px rgba(221,74,58,0)}100%{box-shadow:0 0 0 0 rgba(221,74,58,0)}}
+  .scr{padding:20px 24px 16px;font-size:13.5px;line-height:1.55}
+
+  pre.logo{margin:0;font-size:10px;line-height:1.05;overflow-x:auto;
+    background:linear-gradient(180deg,var(--redbright),var(--crimson) 55%,var(--deep));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 0 10px rgba(221,74,58,.35))}
+  .sub{margin:11px 0 0;color:var(--dim);font-size:12.5px}
+  .sub b{color:var(--ink)} .sub .c{color:var(--crimson)} .sub .br{color:var(--bronze)}
+
+  hr{border:0;height:1px;margin:18px 0;background:linear-gradient(90deg,transparent,#3a1512,transparent)}
+  .secline{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+  .secline h2{margin:0;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--crimson);white-space:nowrap;font-weight:700}
+  .secline h2::before{content:"⚔ "}
+  .secline .ln{flex:1;height:1px;background:#2a1210}
+  .secline .n{color:var(--mut);font-size:11px}
+
+  .tools{display:grid;grid-template-columns:repeat(2,1fr);gap:5px 24px}
+  .t-row{display:flex;align-items:center;gap:10px;padding:3px 0}
+  .t-row .ic{width:18px;text-align:center}
+  .t-row .nm{color:var(--ink)}
+  .t-row .pre{color:var(--deep)}
+  .t-row .ds{margin-left:auto;color:var(--mut);font-size:11px}
+
+  .sk{margin:5px 0}
+  .sk .k{color:var(--bronze)} .sk .k::before{content:"▸ "}
+  .sk .v{color:var(--ink)} .sk .v span{color:var(--mut)}
+
+  /* chat + thinking */
+  .resp{padding-left:13px;border-left:2px solid var(--bronze);margin:0 0 14px}
+  .resp .lbl{color:#1a0707;background:var(--bronze);font-weight:700;padding:1px 8px;border-radius:3px}
+  .resp p{margin:8px 0 0;color:var(--ink)}
+
+  .thinking{display:flex;align-items:center;gap:12px;padding:10px 13px;margin:0 0 12px;
+    background:rgba(221,74,58,.07);border:1px solid #3a1512;border-radius:9px}
+  .thinking .face{color:var(--redbright);font-weight:700;min-width:118px;text-shadow:0 0 10px rgba(255,91,74,.5)}
+  .thinking .verb{color:var(--ink)}
+  .thinking .spin{color:var(--crimson);font-weight:700}
+  .thinking .dots{color:var(--crimson)}
+  .thinking .el{margin-left:auto;color:var(--mut);font-size:12px}
+
+  .stream{font-size:12.5px;margin:0 0 6px}
+  .stream .ln{display:flex;align-items:center;gap:9px;padding:2px 0;color:var(--dim)}
+  .stream .pfx{color:var(--mut)}
+  .stream .ic{width:18px;text-align:center}
+  .stream .vb{color:var(--bronze);min-width:54px}
+  .stream .dt{color:var(--ink);flex:1}
+  .stream .du{color:var(--mut)}
+  .stream .ok{color:var(--ok)}
+  .stream .run{color:var(--crimson)}
+
+  .pr{display:flex;gap:10px;align-items:center;margin-top:8px}
+  .pr .s{color:var(--crimson);font-weight:700}
+  .pr .ph{color:var(--mut)}
+  .cur{display:inline-block;width:8px;height:15px;background:var(--crimson);
+    animation:b 1.1s steps(1) infinite;vertical-align:-2px}
+  @keyframes b{50%{opacity:0}}
+
+  .status{display:flex;align-items:center;gap:0;border-top:1px solid #3a1512;
+    padding:9px 16px;font-size:12px;color:var(--dim);background:var(--bar-bg)}
+  .status .seg{padding:0 13px;display:flex;gap:7px;align-items:center}
+  .status .seg:first-child{padding-left:0}
+  .status .sep{color:#50201c}
+  .status .st{color:var(--bronze);font-weight:600}
+  .status .busy{color:var(--redbright)}
+  .pbar{width:120px;height:6px;border-radius:4px;background:#150a0a;border:1px solid #3a1512;overflow:hidden;position:relative}
+  .pbar i{position:absolute;inset:0;width:22%;background:var(--ok);border-radius:4px}
+  .status .ok{color:var(--ok)}
+  .status .r{margin-left:auto;color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cap">Kırmızı 1 · <b>Savaş Konsolu</b> — crimson/bronze, canlı düşünme + tool akışı</div>
+  <div class="term">
+    <div class="bar"><span class="d on"></span><span class="d"></span><span class="d"></span>
+      <span class="t">fetih — ares</span>
+      <span class="live"><span class="pulse"></span>ÇALIŞIYOR</span></div>
+    <div class="scr">
+
+<pre class="logo">███████╗███████╗████████╗██╗██╗  ██╗
+██╔════╝██╔════╝╚══██╔══╝██║██║  ██║
+█████╗  █████╗     ██║   ██║███████║
+██╔══╝  ██╔══╝     ██║   ██║██╔══██║
+██║     ███████╗   ██║   ██║██║  ██║
+╚═╝     ╚══════╝   ╚═╝   ╚═╝╚═╝  ╚═╝</pre>
+      <div class="sub"><span class="c">⚔ FETIH</span> · CTF/OSINT Ajan Sistemi · v<b>1.0.1</b> (2026.5.29) · <span class="br">skin: ares</span> · session <b>a3f9c2</b></div>
+
+      <hr>
+
+      <div class="secline"><h2>Available Tools</h2><span class="ln"></span><span class="n">8</span></div>
+      <div class="tools">
+        <div class="t-row"><span class="ic">💻</span><span class="pre">[+]</span><span class="nm">terminal</span><span class="ds">shell</span></div>
+        <div class="t-row"><span class="ic">🔍</span><span class="pre">[+]</span><span class="nm">web_search</span><span class="ds">arama</span></div>
+        <div class="t-row"><span class="ic">📖</span><span class="pre">[+]</span><span class="nm">read_file</span><span class="ds">oku</span></div>
+        <div class="t-row"><span class="ic">✍️</span><span class="pre">[+]</span><span class="nm">write_file</span><span class="ds">yaz</span></div>
+        <div class="t-row"><span class="ic">🌐</span><span class="pre">[+]</span><span class="nm">browser_navigate</span><span class="ds">web</span></div>
+        <div class="t-row"><span class="ic">🐍</span><span class="pre">[+]</span><span class="nm">execute_code</span><span class="ds">python</span></div>
+        <div class="t-row"><span class="ic">📋</span><span class="pre">[+]</span><span class="nm">todo</span><span class="ds">görev</span></div>
+        <div class="t-row"><span class="ic">🔀</span><span class="pre">[+]</span><span class="nm">delegate_task</span><span class="ds">alt-ajan</span></div>
+      </div>
+
+      <hr>
+
+      <div class="secline"><h2>Available Skills</h2><span class="ln"></span><span class="n">18</span></div>
+      <div class="sk"><span class="k">general:</span><span class="v">autopilot, bugfix, dashboard, docs, <span>investigate</span></span></div>
+      <div class="sk"><span class="k">research:</span><span class="v">deep-research, verify, <span>code-review</span></span></div>
+      <div class="sk"><span class="k">security:</span><span class="v">security-review, <span>recon, exploit-dev</span></span></div>
+
+      <hr>
+
+      <div class="secline"><h2>Chat</h2><span class="ln"></span></div>
+
+      <div class="resp"><span class="lbl">⚕ FETIH</span>
+        <p>Hedef <b>10.10.14.3</b> için keşif başlattım. Servis taraması ve zafiyet analizini sırayla yürütüyorum.</p>
+      </div>
+
+      <!-- CANLI DÜŞÜNME (KAWAII_THINKING + THINKING_VERBS + braille spinner) -->
+      <div class="thinking">
+        <span class="face" id="face">(⚔️_⚔️)</span>
+        <span class="verb" id="verb">analiz ediliyor</span><span class="dots" id="dots">…</span>
+        <span class="spin" id="spin">⠋</span>
+        <span class="el" id="el">0:03</span>
+      </div>
+
+      <!-- TOOL EXECUTION STREAM (┊ emoji verb detail duration) -->
+      <div class="stream">
+        <div class="ln"><span class="pfx">┊</span><span class="ic">💻</span><span class="vb">$</span><span class="dt">nmap -sV -p- 10.10.14.3</span><span class="du">2.3s</span><span class="ok">✓</span></div>
+        <div class="ln"><span class="pfx">┊</span><span class="ic">🔍</span><span class="vb">search</span><span class="dt">"Apache 2.4.49 path traversal CVE"</span><span class="du">1.1s</span><span class="ok">✓</span></div>
+        <div class="ln"><span class="pfx">┊</span><span class="ic">📖</span><span class="vb">read</span><span class="dt">/etc/nginx/sites-enabled/default</span><span class="du">0.2s</span><span class="ok">✓</span></div>
+        <div class="ln"><span class="pfx">┊</span><span class="ic">🐍</span><span class="vb">code</span><span class="dt">exploit_poc.py — payload oluşturuluyor</span><span class="du run" id="runt">1.4s</span><span class="run">▸</span></div>
+      </div>
+
+      <div class="pr"><span class="s">❯</span><span class="ph">mesaj yaz veya / ile komut…</span><span class="cur"></span></div>
+
+    </div>
+    <div class="status">
+      <div class="seg"><span class="st">⚕ claude-opus-4-8</span></div>
+      <span class="sep">│</span>
+      <div class="seg">ctx <span class="st">52K</span>/200K</div>
+      <span class="sep">│</span>
+      <div class="seg"><span class="pbar"><i id="pb"></i></span><span class="ok" id="pct">26%</span></div>
+      <span class="sep">│</span>
+      <div class="seg busy" id="sbverb">⚔ analiz ediliyor</div>
+      <span class="sep">│</span>
+      <div class="seg">⏱ 0:03</div>
+      <div class="r">▶ 1 görev · ⚠ YOLO</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Gerçek FETIH verileri (agent/display.py)
+  const FACES = ["(⚔️_⚔️)","(◉_◉)⚡","(¬_¬)🔍","( •_•)>⌐■-■","(⌐■_■)🏹","(｀ω´)⚔","◉⌓◉","⚡▂⚡","[▓▓▓▓]","▓▒░LOAD░▒▓","◉_◉","✦_✦","⚔_⚔","🔓_🔓","FETIH"];
+  const VERBS = ["analiz ediliyor","taranıyor","inceleniyor","değerlendiriliyor","hesaplanıyor","çözümleniyor","keşfediliyor","araştırılıyor","işleniyor","sentezleniyor","sorgulanıyor","doğrulanıyor","yürütülüyor","kontrol ediliyor","tetikleniyor"];
+  const DOTS = ["","·","··","···"];
+  const SPIN = ["⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"];
+  let i=0;
+  const el=(id)=>document.getElementById(id);
+  setInterval(()=>{ el('spin').textContent = SPIN[i % SPIN.length]; i++; }, 90);
+  let f=0; setInterval(()=>{ el('face').textContent = FACES[f++ % FACES.length]; }, 700);
+  let v=0; setInterval(()=>{ const w=VERBS[v++ % VERBS.length]; el('verb').textContent=w; el('sbverb').textContent="⚔ "+w; }, 1500);
+  let d=0; setInterval(()=>{ el('dots').textContent = DOTS[d++ % DOTS.length]; }, 400);
+  // elapsed timer + progress drift
+  let t=3, pct=26;
+  setInterval(()=>{ t++; const m=Math.floor(t/60), s=String(t%60).padStart(2,'0'); el('el').textContent=`${m}:${s}`;
+    pct=Math.min(60, pct + (Math.random()<.4?1:0)); el('pct').textContent=pct+"%"; el('pb').style.width=pct+"%"; }, 1000);
+</script>
+</body>
+</html>

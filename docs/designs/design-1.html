@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FETIH TUI — Siyah 1: Mono Minimal</title>
+<style>
+  :root{
+    --bg:#000000; --ink:#ededed; --dim:#8a8a8a; --mut:#555;
+    --accent:#e8a13a;            /* tek vurgu: amber */
+    --ok:#7fbf7f; --line:#1c1c1c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#000;color:var(--ink);
+    font-family:ui-monospace,"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+    display:flex;justify-content:center;padding:40px 16px;min-height:100vh}
+  .wrap{width:100%;max-width:880px}
+  .cap{color:var(--mut);font-size:11px;letter-spacing:.22em;text-transform:uppercase;margin:0 2px 14px}
+  .cap b{color:var(--accent)}
+  .term{background:var(--bg);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .bar{display:flex;align-items:center;gap:7px;padding:10px 14px;border-bottom:1px solid var(--line)}
+  .d{width:9px;height:9px;border-radius:50%;background:#222}
+  .bar .t{margin-left:8px;color:var(--mut);font-size:11px}
+  .scr{padding:26px 28px 18px;font-size:13.5px;line-height:1.6}
+
+  pre.logo{margin:0;font-size:10px;line-height:1.05;color:var(--accent);overflow-x:auto}
+  .sub{color:var(--dim);font-size:12.5px;margin:10px 0 0;letter-spacing:.03em}
+  .sub b{color:var(--ink)}
+  hr{border:0;border-top:1px solid var(--line);margin:22px 0}
+
+  .sec{color:var(--accent);font-size:11px;letter-spacing:.2em;text-transform:uppercase;
+    margin:0 0 12px;font-weight:700}
+  .sec::after{content:"";display:inline-block;width:100%;}
+  .secline{display:flex;align-items:center;gap:12px;margin:0 0 14px}
+  .secline h2{margin:0;color:var(--accent);font-size:11px;letter-spacing:.2em;text-transform:uppercase;font-weight:700;white-space:nowrap}
+  .secline .ln{flex:1;height:1px;background:var(--line)}
+
+  .tools{display:grid;grid-template-columns:repeat(2,1fr);gap:3px 36px}
+  .t-row{display:flex;gap:12px;align-items:baseline}
+  .t-row .ic{width:16px;text-align:center;opacity:.85}
+  .t-row .nm{color:var(--ink)}
+  .t-row .ds{margin-left:auto;color:var(--mut);font-size:11.5px}
+
+  .sk{margin:4px 0;color:var(--ink)}
+  .sk .k{color:var(--dim);display:inline-block;min-width:90px}
+  .sk .v span{color:var(--mut)}
+
+  .resp{margin:8px 0 0;padding-left:14px;border-left:2px solid var(--accent)}
+  .resp .lbl{color:var(--accent);font-weight:700}
+  .resp p{margin:6px 0 0}
+  .pr{display:flex;gap:10px;align-items:center;margin-top:16px}
+  .pr .s{color:var(--accent);font-weight:700}
+  .pr .ph{color:var(--mut)}
+  .cur{display:inline-block;width:8px;height:15px;background:var(--accent);
+    animation:b 1.1s steps(1) infinite;vertical-align:-2px}
+  @keyframes b{50%{opacity:0}}
+
+  .status{display:flex;align-items:center;gap:0;border-top:1px solid var(--line);
+    padding:9px 16px;font-size:12px;color:var(--dim)}
+  .status .seg{padding:0 13px;display:flex;gap:7px;align-items:center}
+  .status .seg:first-child{padding-left:0}
+  .status .sep{color:#2a2a2a}
+  .status .st{color:var(--accent);font-weight:600}
+  .status .ok{color:var(--ok)}
+  .pbar{width:110px;height:4px;background:#161616;border-radius:2px;overflow:hidden;position:relative}
+  .pbar::after{content:"";position:absolute;inset:0;width:22%;background:var(--ok)}
+  .status .r{margin-left:auto;color:var(--mut)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cap">Siyah 1 · <b>Mono Minimal</b> — saf siyah, tek amber vurgu, bol boşluk</div>
+  <div class="term">
+    <div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span><span class="t">fetih</span></div>
+    <div class="scr">
+
+<pre class="logo">███████╗███████╗████████╗██╗██╗  ██╗
+██╔════╝██╔════╝╚══██╔══╝██║██║  ██║
+█████╗  █████╗     ██║   ██║███████║
+██╔══╝  ██╔══╝     ██║   ██║██╔══██║
+██║     ███████╗   ██║   ██║██║  ██║
+╚═╝     ╚══════╝   ╚═╝   ╚═╝╚═╝  ╚═╝</pre>
+      <div class="sub">⚔ CTF/OSINT Ajan Sistemi · v<b>1.0.1</b> (2026.5.29) · session <b>a3f9c2</b></div>
+
+      <hr>
+
+      <div class="secline"><h2>Available Tools</h2><span class="ln"></span></div>
+      <div class="tools">
+        <div class="t-row"><span class="ic">💻</span><span class="nm">terminal</span><span class="ds">shell</span></div>
+        <div class="t-row"><span class="ic">🔍</span><span class="nm">web_search</span><span class="ds">arama</span></div>
+        <div class="t-row"><span class="ic">📖</span><span class="nm">read_file</span><span class="ds">oku</span></div>
+        <div class="t-row"><span class="ic">✍️</span><span class="nm">write_file</span><span class="ds">yaz</span></div>
+        <div class="t-row"><span class="ic">🔧</span><span class="nm">patch</span><span class="ds">düzenle</span></div>
+        <div class="t-row"><span class="ic">🌐</span><span class="nm">browser_navigate</span><span class="ds">web</span></div>
+        <div class="t-row"><span class="ic">🐍</span><span class="nm">execute_code</span><span class="ds">python</span></div>
+        <div class="t-row"><span class="ic">🔀</span><span class="nm">delegate_task</span><span class="ds">alt-ajan</span></div>
+      </div>
+
+      <hr>
+
+      <div class="secline"><h2>Available Skills</h2><span class="ln"></span></div>
+      <div class="sk"><span class="k">general:</span><span class="v">autopilot, bugfix, dashboard, docs, <span>investigate</span></span></div>
+      <div class="sk"><span class="k">research:</span><span class="v">deep-research, verify, <span>code-review</span></span></div>
+      <div class="sk"><span class="k">security:</span><span class="v">security-review, <span>recon, exploit-dev</span></span></div>
+
+      <hr>
+
+      <div class="secline"><h2>Chat</h2><span class="ln"></span></div>
+      <div class="resp">
+        <span class="lbl">⚕ FETIH</span>
+        <p>Port taraması bitti — 22, 80, 8080 açık. 8080 için zafiyet taramasına geçiyorum.</p>
+      </div>
+      <div class="pr"><span class="s">❯</span><span class="ph">mesaj yaz veya / ile komut…</span><span class="cur"></span></div>
+
+    </div>
+    <div class="status">
+      <div class="seg"><span class="st">⚕ claude-opus-4-8</span></div>
+      <span class="sep">│</span>
+      <div class="seg">ctx <span class="st">45K</span>/200K</div>
+      <span class="sep">│</span>
+      <div class="seg"><span class="pbar"></span><span class="ok">22%</span></div>
+      <span class="sep">│</span>
+      <div class="seg">⏱ 2:34</div>
+      <div class="r">▶ 1 görev</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
