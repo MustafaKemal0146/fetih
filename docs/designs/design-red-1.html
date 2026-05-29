@@ -20,7 +20,7 @@
   .cap{color:var(--mut);font-size:11px;letter-spacing:.22em;text-transform:uppercase;margin:0 2px 14px}
   .cap b{color:var(--crimson)}
   .term{background:var(--bg);border:1px solid #3a1512;border-radius:10px;overflow:hidden;
-    box-shadow:0 0 0 1px #000,0 0 36px rgba(221,74,58,.12),0 22px 60px rgba(0,0,0,.7)}
+    box-shadow:0 0 0 1px #000,0 0 36px rgba(221,74,58,.12),0 22px 60px rgba(0,0,0,.7);margin-bottom:28px}
   .bar{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--line);
     background:linear-gradient(180deg,#160708,transparent)}
   .d{width:10px;height:10px;border-radius:50%;border:1px solid #50201c}
@@ -97,6 +97,19 @@
   .pbar i{position:absolute;inset:0;width:22%;background:var(--ok);border-radius:4px}
   .status .ok{color:var(--ok)}
   .status .r{margin-left:auto;color:var(--mut)}
+
+  /* exit block */
+  .exit{font-size:12px;line-height:1.75;color:var(--dim);padding:0}
+  .exit b{color:var(--ink)} .exit .h{color:var(--crimson)}
+  .exit .cmd{color:var(--bronze)}
+
+  /* slash help grid */
+  .hlp{display:grid;grid-template-columns:repeat(2,1fr);gap:2px 28px;font-size:11.5px;margin:0}
+  .hlp .hcmd{color:var(--crimson);white-space:nowrap;font-weight:600}
+  .hlp .hdsc{color:var(--mut)}
+
+  .cat{color:var(--bronze);font-size:11px;letter-spacing:.15em;margin:14px 0 6px;font-weight:700}
+  .cat::before{content:"▾ "}
 </style>
 </head>
 <body>
@@ -114,11 +127,11 @@
 ██╔══╝  ██╔══╝     ██║   ██║██╔══██║
 ██║     ███████╗   ██║   ██║██║  ██║
 ╚═╝     ╚══════╝   ╚═╝   ╚═╝╚═╝  ╚═╝</pre>
-      <div class="sub"><span class="c">⚔ FETIH</span> · CTF/OSINT Ajan Sistemi · v<b>1.0.1</b> (2026.5.29) · <span class="br">skin: ares</span> · session <b>a3f9c2</b></div>
+      <div class="sub"><span class="c">⚔ FETIH</span> · CTF/OSINT Ajanı · v<b>1.0.1</b> (2026.5.29) · <span class="br">skin: ares</span> · oturum <b>a3f9c2</b> · <span style="color:#9a7d6c;font-size:11px">github.com/MustafaKemal0146/fetih</span></div>
 
       <hr>
 
-      <div class="secline"><h2>Available Tools</h2><span class="ln"></span><span class="n">8</span></div>
+      <div class="secline"><h2>Araçlar</h2><span class="ln"></span><span class="n">19 araç · 8 set</span></div>
       <div class="tools">
         <div class="t-row"><span class="ic">💻</span><span class="pre">[+]</span><span class="nm">terminal</span><span class="ds">shell</span></div>
         <div class="t-row"><span class="ic">🔍</span><span class="pre">[+]</span><span class="nm">web_search</span><span class="ds">arama</span></div>
@@ -132,14 +145,14 @@
 
       <hr>
 
-      <div class="secline"><h2>Available Skills</h2><span class="ln"></span><span class="n">18</span></div>
-      <div class="sk"><span class="k">general:</span><span class="v">autopilot, bugfix, dashboard, docs, <span>investigate</span></span></div>
-      <div class="sk"><span class="k">research:</span><span class="v">deep-research, verify, <span>code-review</span></span></div>
-      <div class="sk"><span class="k">security:</span><span class="v">security-review, <span>recon, exploit-dev</span></span></div>
+      <div class="secline"><h2>Skill'ler</h2><span class="ln"></span><span class="n">911</span></div>
+      <div class="sk"><span class="k">ctf:</span><span class="v">aes-cbc-bitflip, web-sqli, binary-exploit, <span>forensics-carving…</span></span></div>
+      <div class="sk"><span class="k">siber:</span><span class="v">malware-analiz, cloud-guvenlik, <span>pentest-report, osint…</span></span></div>
+      <div class="sk"><span class="k">red-team:</span><span class="v">c2-altyapi, phishing, <span>lateral-movement, exfil…</span></span></div>
 
       <hr>
 
-      <div class="secline"><h2>Chat</h2><span class="ln"></span></div>
+      <div class="secline"><h2>Sohbet</h2><span class="ln"></span></div>
 
       <div class="resp"><span class="lbl">⚕ FETIH</span>
         <p>Hedef <b>10.10.14.3</b> için keşif başlattım. Servis taraması ve zafiyet analizini sırayla yürütüyorum.</p>
@@ -161,7 +174,7 @@
         <div class="ln"><span class="pfx">┊</span><span class="ic">🐍</span><span class="vb">code</span><span class="dt">exploit_poc.py — payload oluşturuluyor</span><span class="du run" id="runt">1.4s</span><span class="run">▸</span></div>
       </div>
 
-      <div class="pr"><span class="s">❯</span><span class="ph">mesaj yaz veya / ile komut…</span><span class="cur"></span></div>
+      <div class="pr"><span class="s">❯</span><span class="ph">FETIH'e hoş geldin! Mesajını yaz veya /help yaz…</span><span class="cur"></span></div>
 
     </div>
     <div class="status">
@@ -176,6 +189,96 @@
       <div class="seg">⏱ 0:03</div>
       <div class="r">▶ 1 görev · ⚠ YOLO</div>
     </div>
+  </div>
+</div>
+
+<!-- ═══ PANEL 2: Çıkış Özeti + Slash Komutları ═══ -->
+<div class="term">
+  <div class="bar"><span class="d"></span><span class="d"></span><span class="d"></span>
+    <span class="t">fetih — oturum sonlandı</span>
+    <span class="live" style="color:var(--mut)"><span class="pulse" style="background:var(--mut);animation:none;box-shadow:none"></span>ÇIKIŞ</span></div>
+  <div class="scr">
+
+    <div class="secline"><h2>Çıkış Özeti</h2><span class="ln"></span></div>
+
+    <div class="exit">
+      <span class="h">Bu oturumu şununla devam ettir:</span><br>
+      &nbsp;&nbsp;<span class="cmd">fetih --resume 20260529_173508_43062b</span><br>
+      &nbsp;&nbsp;<span class="cmd">fetih -c "Hedef Sistem Keşfi"</span><br>
+      <br>
+      <b>Oturum:</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;20260529_173508_43062b<br>
+      <b>Başlık:</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Hedef Sistem Keşfi<br>
+      <b>Süre:</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4dk 32sn<br>
+      <b>Mesajlar:</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12 (5 kullanıcı, 7 araç çağrısı)
+    </div>
+
+    <hr>
+
+    <div class="secline"><h2>Kullanılabilir Komutlar</h2><span class="ln"></span><span class="n">/help</span></div>
+
+    <div class="cat">Oturum</div>
+    <div class="hlp">
+      <div><span class="hcmd">/new</span> <span class="hdsc">Yeni oturum başlat</span></div>
+      <div><span class="hcmd">/clear</span> <span class="hdsc">Ekranı temizle + yeni oturum</span></div>
+      <div><span class="hcmd">/history</span> <span class="hdsc">Konuşma geçmişini göster</span></div>
+      <div><span class="hcmd">/save</span> <span class="hdsc">Konuşmayı kaydet</span></div>
+      <div><span class="hcmd">/retry</span> <span class="hdsc">Son mesajı tekrar dene</span></div>
+      <div><span class="hcmd">/undo</span> <span class="hdsc">Son mesaj çiftini sil</span></div>
+      <div><span class="hcmd">/title</span> <span class="hdsc">Oturum başlığı belirle</span></div>
+      <div><span class="hcmd">/status</span> <span class="hdsc">Oturum bilgilerini göster</span></div>
+      <div><span class="hcmd">/resume</span> <span class="hdsc">Kayıtlı oturumu devam ettir</span></div>
+      <div><span class="hcmd">/sessions</span> <span class="hdsc">Önceki oturumları listele</span></div>
+      <div><span class="hcmd">/background</span> <span class="hdsc">Arka planda çalıştır (bg)</span></div>
+      <div><span class="hcmd">/goal</span> <span class="hdsc">Kalıcı hedef belirle</span></div>
+    </div>
+
+    <div class="cat">Yapılandırma</div>
+    <div class="hlp">
+      <div><span class="hcmd">/model</span> <span class="hdsc">Model değiştir (provider)</span></div>
+      <div><span class="hcmd">/config</span> <span class="hdsc">Yapılandırmayı göster</span></div>
+      <div><span class="hcmd">/personality</span> <span class="hdsc">Kişilik seç (14 seçenek)</span></div>
+      <div><span class="hcmd">/skin</span> <span class="hdsc">Tema değiştir (ares/mono/slate)</span></div>
+      <div><span class="hcmd">/statusbar</span> <span class="hdsc">Durum çubuğunu aç/kapat</span></div>
+      <div><span class="hcmd">/yolo</span> <span class="hdsc">YOLO modu (onayları atla)</span></div>
+      <div><span class="hcmd">/reasoning</span> <span class="hdsc">Düşünme seviyesi</span></div>
+      <div><span class="hcmd">/fast</span> <span class="hdsc">Hızlı mod aç/kapat</span></div>
+      <div><span class="hcmd">/voice</span> <span class="hdsc">Ses modu</span></div>
+      <div><span class="hcmd">/busy</span> <span class="hdsc">Enter tuşu davranışı</span></div>
+    </div>
+
+    <div class="cat">Araçlar & Skill</div>
+    <div class="hlp">
+      <div><span class="hcmd">/tools</span> <span class="hdsc">Araçları yönet</span></div>
+      <div><span class="hcmd">/toolsets</span> <span class="hdsc">Araç setlerini listele</span></div>
+      <div><span class="hcmd">/skills</span> <span class="hdsc">Skill ara/yükle/incele</span></div>
+      <div><span class="hcmd">/browser</span> <span class="hdsc">Chrome CDP bağlantısı</span></div>
+      <div><span class="hcmd">/download-tools</span> <span class="hdsc">86 CTF aracı indir/kur</span></div>
+      <div><span class="hcmd">/validate-skills</span> <span class="hdsc">Skill sağlık kontrolü</span></div>
+      <div><span class="hcmd">/report</span> <span class="hdsc">Pentest raporu oluştur</span></div>
+      <div><span class="hcmd">/auto-solve</span> <span class="hdsc">CTF otomatik çöz</span></div>
+      <div><span class="hcmd">/computer-use</span> <span class="hdsc">Masaüstü kontrolü (desktop)</span></div>
+      <div><span class="hcmd">/hint</span> <span class="hdsc">CTF ipucu sistemi (ipucu)</span></div>
+      <div><span class="hcmd">/dashboard</span> <span class="hdsc">Durum panosu (stats)</span></div>
+      <div><span class="hcmd">/learnings</span> <span class="hdsc">Öğrenme veritabanı</span></div>
+    </div>
+
+    <div class="cat">Bilgi & Çıkış</div>
+    <div class="hlp">
+      <div><span class="hcmd">/help</span> <span class="hdsc">Komutları göster</span></div>
+      <div><span class="hcmd">/usage</span> <span class="hdsc">Token kullanımı</span></div>
+      <div><span class="hcmd">/whoami</span> <span class="hdsc">Yetki seviyesi</span></div>
+      <div><span class="hcmd">/copy</span> <span class="hdsc">Son yanıtı panoya kopyala</span></div>
+      <div><span class="hcmd">/update</span> <span class="hdsc">FETIH güncelle (upgrade)</span></div>
+      <div><span class="hcmd">/debug</span> <span class="hdsc">Hata raporu yükle</span></div>
+      <div><span class="hcmd">/quit</span> <span class="hdsc">Çıkış (exit)</span></div>
+    </div>
+
+    <hr>
+    <div style="color:var(--mut);font-size:11px;text-align:center">
+      FETIH'e hoş geldin! Mesajını yaz veya /help yaz. · 76 komut · 911 skill<br>
+      <span style="color:var(--deep)">github.com/MustafaKemal0146/fetih</span>
+    </div>
+
   </div>
 </div>
 
