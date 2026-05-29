@@ -25,11 +25,19 @@ _PLATFORM = sys.platform  # "linux", "darwin", "win32"
 pyautogui = None  # type: ignore[assignment]
 
 def _ensure_pyautogui() -> bool:
-    """Try to import pyautogui. Returns True on success, False if not installed.
+    """Try to import pyautogui. Returns True on success, False if unavailable.
 
-    pyautogui calls sys.exit() when tkinter is missing (Linux headless).
-    We catch SystemExit in addition to ImportError so the module loads
-    gracefully on headless CI/GitHub Actions/Docker environments.
+    The import can fail in several ways on headless / partial-display hosts:
+      * ImportError       — pyautogui (or a dependency) is not installed.
+      * SystemExit        — pyautogui calls sys.exit() when tkinter is missing.
+      * KeyError / others — mouseinfo reads os.environ['DISPLAY'] at import
+                            time and raises when no display is present.
+    We therefore catch *any* exception and degrade gracefully.
+
+    Retry semantics: on failure we drop the half-initialized modules from
+    sys.modules and reset our global to None, so a later call genuinely
+    re-imports (e.g. once DISPLAY is set) instead of returning a cached
+    broken module.
     """
     global pyautogui, FailSafeException
     if pyautogui is not None:
@@ -39,7 +47,13 @@ def _ensure_pyautogui() -> bool:
         pyautogui = _pya
         FailSafeException = _pya.FailSafeException
         return True
-    except (ImportError, SystemExit):
+    except Exception:
+        # Drop any half-initialized modules so a later retry (e.g. after
+        # DISPLAY is set) re-runs their initialization instead of returning
+        # the cached broken module.
+        for _m in ("pyautogui", "mouseinfo", "pyscreeze"):
+            sys.modules.pop(_m, None)
+        pyautogui = None
         return False
 
 
@@ -549,7 +563,10 @@ class PyAutoGUIBackend(ComputerUseBackend):
         except Exception as e:
             logger.warning("Failed to list windows: %s", e)
 
-        w, h = pyautogui.size()
+        if _ensure_pyautogui():
+            w, h = pyautogui.size()
+        else:
+            w, h = 0, 0
         return CaptureResult(
             mode="ax", width=w, height=h,
             png_b64=None, elements=elements,
@@ -567,6 +584,8 @@ class PyAutoGUIBackend(ComputerUseBackend):
                 "element-index clicks not supported; use pixel coordinates")
         if x is None or y is None:
             return ActionResult(False, "click", "x,y coordinates required")
+        if not _ensure_pyautogui():
+            return ActionResult(False, "click", "pyautogui unavailable")
         try:
             px, py = _clamp_coords(x, y)
             if modifiers:
@@ -592,6 +611,8 @@ class PyAutoGUIBackend(ComputerUseBackend):
         if not from_xy or not to_xy:
             return ActionResult(False, "drag",
                 "from_coordinate and to_coordinate required")
+        if not _ensure_pyautogui():
+            return ActionResult(False, "drag", "pyautogui unavailable")
         try:
             fx, fy = _clamp_coords(*from_xy)
             tx, ty = _clamp_coords(*to_xy)
@@ -615,6 +636,8 @@ class PyAutoGUIBackend(ComputerUseBackend):
         if element is not None:
             return ActionResult(False, "scroll",
                 "element-index scroll not supported; use pixel coordinates")
+        if not _ensure_pyautogui():
+            return ActionResult(False, "scroll", "pyautogui unavailable")
         try:
             if x is not None and y is not None:
                 _smooth_move(x, y)
@@ -636,6 +659,8 @@ class PyAutoGUIBackend(ComputerUseBackend):
     # ── Keyboard ─────────────────────────────────────────────────────
 
     def type_text(self, text: str) -> ActionResult:
+        if not _ensure_pyautogui():
+            return ActionResult(False, "type", "pyautogui unavailable")
         try:
             interval = max(0.05, min(0.2, 12.0 / max(1, len(text))))
             pyautogui.write(text, interval=interval)
@@ -646,6 +671,8 @@ class PyAutoGUIBackend(ComputerUseBackend):
             return ActionResult(False, "type", str(e))
 
     def key(self, keys: str) -> ActionResult:
+        if not _ensure_pyautogui():
+            return ActionResult(False, "key", "pyautogui unavailable")
         try:
             normalized = _normalize_key_combo(keys)
             pyautogui.hotkey(*normalized)
@@ -661,6 +688,8 @@ class PyAutoGUIBackend(ComputerUseBackend):
         if element is not None:
             return ActionResult(False, "set_value",
                 "element-index set_value not supported on pyautogui backend")
+        if not _ensure_pyautogui():
+            return ActionResult(False, "set_value", "pyautogui unavailable")
         try:
             pyautogui.write(value, interval=0.05)
             return ActionResult(True, "set_value", f"set value to {value!r}")
