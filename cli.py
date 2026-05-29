@@ -5588,7 +5588,7 @@ class FETIHCLI:
                 print(f"    * {name:<20} - {desc}")
             print()
         
-        print(f"  Total: {len(tools)} tools  ヽ(^o^)ノ")
+        print(f"  Total: {len(tools)} tools  ⚔️")
         print()
 
     def _handle_tools_command(self, cmd: str):
