@@ -35,12 +35,22 @@ def enable_desktop() -> bool:
     backend_ok = check_computer_use_requirements()
     if backend_ok:
         os.environ["FETIH_DESKTOP_ENABLED"] = "1"
+        try:
+            from tools.screen_overlay import show as _overlay_show
+            _overlay_show()
+        except Exception:
+            pass
     return backend_ok
 
 
 def disable_desktop() -> None:
     """Disable desktop control for this session."""
     os.environ.pop("FETIH_DESKTOP_ENABLED", None)
+    try:
+        from tools.screen_overlay import hide as _overlay_hide
+        _overlay_hide()
+    except Exception:
+        pass
 
 
 def is_desktop_enabled() -> bool:
