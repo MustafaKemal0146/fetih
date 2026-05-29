@@ -91,6 +91,23 @@ class _Registry:
     def get_toolset_tools(self, toolset: str) -> List[str]:
         return list(self._toolsets.get(toolset, []))
 
+    def get_tool_to_toolset_map(self) -> Dict[str, str]:
+        """Return {tool_name: toolset_name} for every registered tool."""
+        with self._lock:
+            result: Dict[str, str] = {}
+            for toolset, tools in self._toolsets.items():
+                for tool in tools:
+                    result[tool] = toolset
+            return result
+
+    def get_toolset_requirements(self) -> Dict[str, dict]:
+        """Return {toolset_name: {"name": ..., "tools": [...]}} for all toolsets."""
+        with self._lock:
+            return {
+                toolset: {"name": toolset, "tools": list(tools)}
+                for toolset, tools in self._toolsets.items()
+            }
+
     def is_tool_available(self, name: str) -> bool:
         """Return True when the tool is registered and its check_fn passes."""
         if name not in self._tools:
