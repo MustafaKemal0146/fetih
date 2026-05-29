@@ -2032,10 +2032,10 @@ class AIAgent:
                     # Fall back to full close on children; they're per-turn.
                     try:
                         child.close()
-                    except Exception:
-                        pass
-        except Exception:
-            pass
+                    except Exception as e:
+                        logger.debug("child.close() during release failed: %s", e)
+        except Exception as e:
+            logger.debug("child release_clients sweep failed: %s", e)
 
         # Close the OpenAI/httpx client to release sockets immediately.
         try:
@@ -2043,8 +2043,8 @@ class AIAgent:
             if client is not None:
                 self._close_openai_client(client, reason="cache_evict", shared=True)
                 self.client = None
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("openai client close during evict failed: %s", e)
 
     def close(self) -> None:
         """Release all resources held by this agent instance.
@@ -2065,20 +2065,20 @@ class AIAgent:
         try:
             from tools.process_registry import process_registry
             process_registry.kill_all(task_id=task_id)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("close(): process_registry.kill_all failed: %s", e)
 
         # 2. Clean terminal sandbox environments
         try:
             cleanup_vm(task_id)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("close(): cleanup_vm failed: %s", e)
 
         # 3. Clean browser daemon sessions
         try:
             cleanup_browser(task_id)
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("close(): cleanup_browser failed: %s", e)
 
         # 4. Close active child agents
         try:
@@ -2088,10 +2088,10 @@ class AIAgent:
             for child in children:
                 try:
                     child.close()
-                except Exception:
-                    pass
-        except Exception:
-            pass
+                except Exception as e:
+                    logger.debug("close(): child.close() failed: %s", e)
+        except Exception as e:
+            logger.debug("close(): child agent sweep failed: %s", e)
 
         # 5. Close the OpenAI/httpx client
         try:
@@ -2099,8 +2099,8 @@ class AIAgent:
             if client is not None:
                 self._close_openai_client(client, reason="agent_close", shared=True)
                 self.client = None
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug("close(): openai client close failed: %s", e)
 
     def _hydrate_todo_store(self, history: List[Dict[str, Any]]) -> None:
         """
