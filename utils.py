@@ -93,14 +93,40 @@ def safe_json_loads(text: str, default: Any = None) -> Any:
 
 
 def atomic_json_write(path: str | Path, data: Any, *, indent: int = 2) -> None:
-    """Write JSON data atomically (write to tmp, then rename)."""
+    """Write JSON data atomically (write to tmp, then rename).
+
+    If *path* is a symlink the real target is updated so the link is preserved.
+    """
     path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_path = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
+    real = path.resolve() if path.is_symlink() else path
+    real.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_path = tempfile.mkstemp(dir=real.parent, suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=indent, ensure_ascii=False)
-        os.replace(tmp_path, path)
+        os.replace(tmp_path, real)
+    except Exception:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+        raise
+
+
+def atomic_yaml_write(path: str | Path, data: Any, *, sort_keys: bool = True) -> None:
+    """Write YAML data atomically (write to tmp, then rename).
+
+    If *path* is a symlink the real target is updated so the link is preserved.
+    """
+    import yaml  # pyyaml — listed in core deps
+    path = Path(path)
+    real = path.resolve() if path.is_symlink() else path
+    real.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_path = tempfile.mkstemp(dir=real.parent, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            yaml.dump(data, f, allow_unicode=True, sort_keys=sort_keys)
+        os.replace(tmp_path, real)
     except Exception:
         try:
             os.unlink(tmp_path)
@@ -110,14 +136,18 @@ def atomic_json_write(path: str | Path, data: Any, *, indent: int = 2) -> None:
 
 
 def atomic_replace(path: str | Path, content: str, *, encoding: str = "utf-8") -> None:
-    """Write *content* to *path* atomically."""
+    """Write *content* to *path* atomically.
+
+    If *path* is a symlink the real target is updated so the link is preserved.
+    """
     path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_path = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
+    real = path.resolve() if path.is_symlink() else path
+    real.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp_path = tempfile.mkstemp(dir=real.parent, suffix=".tmp")
     try:
         with os.fdopen(fd, "w", encoding=encoding) as f:
             f.write(content)
-        os.replace(tmp_path, path)
+        os.replace(tmp_path, real)
     except Exception:
         try:
             os.unlink(tmp_path)
