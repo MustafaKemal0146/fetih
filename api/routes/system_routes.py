@@ -8,14 +8,26 @@ router = APIRouter()
 _start_time = time.time()
 
 
+def _task_counts() -> tuple[int, int]:
+    """(çalışan, kuyrukta) arkaplan görev sayıları."""
+    try:
+        from api.routes.deps import _active_tasks
+        running = sum(1 for t in _active_tasks.values() if t.get("status") == "running")
+        queued = sum(1 for t in _active_tasks.values() if t.get("status") == "queued")
+        return running, queued
+    except Exception:
+        return 0, 0
+
+
 @router.get("/health", response_model=HealthResponse)
 async def health():
     """Health check."""
     py_ver = f"{sys.version_info.major}.{sys.version_info.minor}"
+    running, _queued = _task_counts()
     return HealthResponse(
         status="ok", uptime=round(time.time() - _start_time, 1),
         version="5.1.0", python=py_ver,
-        agent_status="idle", active_sessions=0,
+        agent_status="busy" if running else "idle", active_sessions=running,
     )
 
 
@@ -31,10 +43,11 @@ async def status():
     except ImportError:
         cpu, mem, open_files, threads = 0, 0, 0, 0
 
+    running, queued = _task_counts()
     return StatusResponse(
         cpu_percent=cpu, memory_mb=round(mem, 1),
         open_files=open_files, threads=threads,
-        active_tasks=0, queued_tasks=0,
+        active_tasks=running, queued_tasks=queued,
     )
 
 

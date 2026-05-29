@@ -13,7 +13,7 @@ Env:
     FETIH_API_KEY   — API key (tanımlı değilse auth'suz)
 """
 from __future__ import annotations
-import os, sys, time, logging, signal, argparse
+import os, sys, time, logging, argparse
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -30,12 +30,36 @@ import uvicorn
 logger = logging.getLogger("fetih.api")
 START_TIME = time.time()
 
+
+def _cors_origins() -> list[str]:
+    """CORS origin'lerini env'den oku.
+
+    FETIH_API_CORS_ORIGINS tanımlı değilse mevcut davranış korunur (tüm
+    origin'lere açık). Virgülle ayrılmış liste verilebilir, örn:
+        FETIH_API_CORS_ORIGINS="https://app.example.com,http://localhost:3000"
+    """
+    raw = os.environ.get("FETIH_API_CORS_ORIGINS", "").strip()
+    if not raw or raw == "*":
+        return ["*"]
+    return [o.strip() for o in raw.split(",") if o.strip()]
+
 # ── FastAPI App ─────────────────────────────────────────────────────────────
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("FETIH API v1 başlatıldı")
     yield
+    # Graceful shutdown: çalışan arkaplan görevlerini işaretle ve sayımı logla.
+    try:
+        from api.routes.deps import _active_tasks
+        running = [tid for tid, t in _active_tasks.items()
+                   if t.get("status") in ("queued", "running")]
+        if running:
+            logger.warning("Shutdown: %d arkaplan görevi iptal ediliyor", len(running))
+            for tid in running:
+                _active_tasks[tid]["status"] = "cancelled"
+    except Exception as e:
+        logger.debug("Shutdown task cleanup atlandı: %s", e)
     logger.info("FETIH API kapatılıyor...")
 
 app = FastAPI(
@@ -49,14 +73,27 @@ app = FastAPI(
     license_info={"name": "MIT"},
 )
 
-# CORS — tüm origin'lere açık
+# CORS — varsayılan tüm origin'lere açık; FETIH_API_CORS_ORIGINS ile kısıtlanabilir.
+# Not: tarayıcılar credentials ile "*" origin'i reddeder, bu yüzden açık modda
+# allow_credentials=False; açık origin listesi verilince credentials açılır.
+_origins = _cors_origins()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=_origins,
+    allow_credentials=_origins != ["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Güvenlik header'ları — clickjacking/MIME-sniffing/referrer sızıntısına karşı.
+@app.middleware("http")
+async def _security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("Referrer-Policy", "no-referrer")
+    return response
 
 # Global exception handler
 @app.exception_handler(Exception)
@@ -129,13 +166,9 @@ def main():
 
     print(BANNER.format(port=args.port, host=args.host))
 
-    # Graceful shutdown
-    def _shutdown(sig, frame):
-        print("\n⚔ FETIH API kapatılıyor...")
-        sys.exit(0)
-    signal.signal(signal.SIGINT, _shutdown)
-    signal.signal(signal.SIGTERM, _shutdown)
-
+    # Graceful shutdown: uvicorn kendi SIGINT/SIGTERM handler'larını kurar ve
+    # lifespan shutdown'ını (arkaplan görev temizliği) tetikler. Manuel
+    # sys.exit(0) handler'ı bu temizliği atladığı için kaldırıldı.
     uvicorn.run(
         app,
         host=args.host,
