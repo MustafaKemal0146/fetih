@@ -1008,6 +1008,18 @@ def skill_view(
                 if found_md.name != "SKILL.md":
                     _record(None, found_md)
 
+            # Strategy 4: "category-name" (dash) → "category/name" (slash)
+            # LLMs often construct "ctf-osint" from "CTF OSINT" but the
+            # on-disk path is "ctf/osint".  Normalize dash-to-slash as a
+            # fallback so these lookups succeed without user intervention.
+            if "-" in name and "/" not in name:
+                slash_name = name.replace("-", "/", 1)  # first dash only
+                slash_path = search_dir / slash_name
+                if slash_path.is_dir() and (slash_path / "SKILL.md").exists():
+                    _record(slash_path, slash_path / "SKILL.md")
+                elif slash_path.with_suffix(".md").exists():
+                    _record(None, slash_path.with_suffix(".md"))
+
         if len(candidates) > 1:
             paths = [str(smd) for _, smd in candidates]
             logging.getLogger(__name__).warning(

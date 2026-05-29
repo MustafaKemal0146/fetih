@@ -7207,6 +7207,30 @@ class FETIHCLI:
         except Exception:
             return False
 
+    def _cprint_slash_echo(self, text: str) -> None:
+        """Echo a slash command with the gear icon, inline-safe."""
+        _cprint(f"\n⚙️  {text}")
+
+    def _should_handle_slash_inline(self, text: str, has_images: bool = False) -> bool:
+        """Return True when ANY slash command should be handled on the UI thread.
+
+        When the agent is idle, ALL slash commands should be dispatched inline
+        on the main thread so their _cprint output renders immediately (not
+        deferred through run_in_terminal from a background thread, which can
+        drop/overlap output when commands are typed quickly).
+        """
+        if not text or has_images or not _looks_like_slash_command(text):
+            return False
+        if getattr(self, "_agent_running", False):
+            return False  # Only inline when idle (agent running = use queue)
+        try:
+            from fetih_cli.commands import resolve_command
+            base = text.split(None, 1)[0].lower().lstrip('/')
+            cmd = resolve_command(base)
+            return bool(cmd and cmd.name not in ("model", "steer"))
+        except Exception:
+            return False
+
     def _should_handle_steer_command_inline(self, text: str, has_images: bool = False) -> bool:
         """Return True when /steer should be dispatched immediately while the agent is running.
 
@@ -12271,6 +12295,20 @@ class FETIHCLI:
                 # agent.steer() is thread-safe (holds _pending_steer_lock).
                 if self._should_handle_steer_command_inline(text, has_images=has_images):
                     self.process_command(text)
+                    event.app.current_buffer.reset(append_to_history=True)
+                    return
+
+                # Handle ALL slash commands on the UI thread when idle.
+                # Background-thread _cprint output (via run_in_terminal) can
+                # overlap/be dropped when commands are typed quickly, making
+                # handler output invisible.  Dispatched inline, _cprint uses
+                # direct _pt_print and renders immediately.
+                if self._should_handle_slash_inline(text, has_images=has_images):
+                    self._cprint_slash_echo(text)
+                    if not self.process_command(text):
+                        self._should_exit = True
+                        if event.app.is_running:
+                            event.app.exit()
                     event.app.current_buffer.reset(append_to_history=True)
                     return
 

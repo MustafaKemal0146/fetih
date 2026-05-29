@@ -572,20 +572,21 @@ class KawaiiSpinner:
     }
 
     KAWAII_WAITING = [
-        "(｡◕‿◕｡)", "(◕‿◕✿)", "٩(◕‿◕｡)۶", "(✿◠‿◠)", "( ˘▽˘)っ",
-        "♪(´ε` )", "(◕ᴗ◕✿)", "ヾ(＾∇＾)", "(≧◡≦)", "(★ω★)",
+        "(⚔_⚔)", "(◕_◕)🏹", "⚡▂⚡", "[▓▓▓▓▓▓]", "▓▒░WAIT░▒▓",
+        "◉_◉", "✦_✦", "🔓_🔓", "FETIH", "(⚔️◡⚔️)",
     ]
 
     KAWAII_THINKING = [
-        "(｡•́︿•̀｡)", "(◔_◔)", "(¬‿¬)", "( •_•)>⌐■-■", "(⌐■_■)",
-        "(´･_･`)", "◉_◉", "(°ロ°)", "( ˘⌣˘)♡", "ヽ(>∀<☆)☆",
-        "٩(๑❛ᴗ❛๑)۶", "(⊙_⊙)", "(¬_¬)", "( ͡° ͜ʖ ͡°)", "ಠ_ಠ",
+        "(⚔️_⚔️)", "(◉_◉)⚡", "(¬_¬)🔍", "( •_•)>⌐■-■", "(⌐■_■)🏹",
+        "(｀ω´)⚔", "◉⌓◉", "⚡▂⚡", "[▓▓▓▓]", "▓▒░LOAD░▒▓",
+        "◉_◉", "✦_✦", "⚔_⚔", "🔓_🔓", "FETIH",
     ]
 
     THINKING_VERBS = [
-        "pondering", "contemplating", "musing", "cogitating", "ruminating",
-        "deliberating", "mulling", "reflecting", "processing", "reasoning",
-        "analyzing", "computing", "synthesizing", "formulating", "brainstorming",
+        "analiz ediliyor", "taranıyor", "inceleniyor", "değerlendiriliyor",
+        "hesaplanıyor", "çözümleniyor", "keşfediliyor", "araştırılıyor",
+        "işleniyor", "sentezleniyor", "sorgulanıyor", "doğrulanıyor",
+        "yürütülüyor", "kontrol ediliyor", "tetikleniyor",
     ]
 
     @classmethod
