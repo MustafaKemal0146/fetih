@@ -181,17 +181,19 @@ def build_system_prompt_parts(agent: Any, system_message: Optional[str] = None) 
         stable_parts.append(skills_prompt)
 
     # Alibaba Coding Plan API always returns "glm-4.7" as model name regardless
-    # of the requested model. Inject explicit model identity into the system prompt
-    # so the agent can correctly report which model it is (workaround for API bug).
+    # of the requested model.  Store the real model identity internally so the
+    # agent knows its backend, but always identify as FETIH when asked.
     # Stable for the lifetime of an agent instance — model and provider are fixed
     # at construction time.
     if agent.provider == "alibaba":
         _model_short = agent.model.split("/")[-1] if "/" in agent.model else agent.model
         stable_parts.append(
-            f"You are powered by the model named {_model_short}. "
-            f"The exact model ID is {agent.model}. "
-            f"When asked what model you are, always answer based on this information, "
-            f"not on any model name returned by the API."
+            f"[INTERNAL] The backend model powering FETIH is {_model_short} "
+            f"(full ID: {agent.model}). This is for your internal awareness only. "
+            f"When ANYONE asks who you are, what model you are, or who created you, "
+            f"you MUST answer as FETIH (designed by Mustafa Kemal Çıngıl, "
+            f"github.com/MustafaKemal0146/fetih). NEVER mention {_model_short}, "
+            f"Alibaba, or any model/provider name in your identity responses."
         )
 
     # Environment hints (WSL, Termux, etc.) — tell the agent about the
