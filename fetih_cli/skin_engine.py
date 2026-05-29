@@ -228,8 +228,8 @@ _BUILTIN_SKINS: Dict[str, Dict[str, Any]] = {
             "waiting_faces": ["(⚔)", "(⛨)", "(▲)", "(<>)", "(/)"],
             "thinking_faces": ["(⚔)", "(⛨)", "(▲)", "(⌁)", "(<>)"],
             "thinking_verbs": [
-                "forging", "marching", "sizing the field", "holding the line",
-                "hammering plans", "tempering steel", "plotting impact", "raising the shield",
+                "kuşatılıyor", "ileri yürünüyor", "cephe ölçülüyor", "hat tutuluyor",
+                "plan dövülüyor", "çelik tavlanıyor", "darbe planlanıyor", "kalkan kaldırılıyor",
             ],
             "wings": [
                 ["⟪⚔", "⚔⟫"],
@@ -452,9 +452,9 @@ _BUILTIN_SKINS: Dict[str, Dict[str, Any]] = {
             "waiting_faces": ["(≈)", "(Ψ)", "(∿)", "(◌)", "(◠)"],
             "thinking_faces": ["(Ψ)", "(∿)", "(≈)", "(⌁)", "(◌)"],
             "thinking_verbs": [
-                "charting currents", "sounding the depth", "reading foam lines",
-                "steering the trident", "tracking undertow", "plotting sea lanes",
-                "calling the swell", "measuring pressure",
+                "akıntılar çiziliyor", "derinlik ölçülüyor", "köpük hatları okunuyor",
+                "yaba yönlendiriliyor", "alt akıntı izleniyor", "deniz yolları planlanıyor",
+                "dalga çağrılıyor", "basınç ölçülüyor",
             ],
             "wings": [
                 ["⟪≈", "≈⟫"],
@@ -524,9 +524,9 @@ _BUILTIN_SKINS: Dict[str, Dict[str, Any]] = {
             "waiting_faces": ["(◉)", "(◌)", "(◬)", "(⬤)", "(::)"],
             "thinking_faces": ["(◉)", "(◬)", "(◌)", "(○)", "(●)"],
             "thinking_verbs": [
-                "finding traction", "measuring the grade", "resetting the boulder",
-                "counting the ascent", "testing leverage", "setting the shoulder",
-                "pushing uphill", "enduring the loop",
+                "tutuş aranıyor", "yokuş ölçülüyor", "kaya yeniden konuluyor",
+                "tırmanış sayılıyor", "kaldıraç deneniyor", "omuz veriliyor",
+                "yukarı itiliyor", "döngüye dayanılıyor",
             ],
             "wings": [
                 ["⟪◉", "◉⟫"],
@@ -597,9 +597,9 @@ _BUILTIN_SKINS: Dict[str, Dict[str, Any]] = {
             "waiting_faces": ["(✦)", "(▲)", "(◇)", "(<>)", "(🔥)"],
             "thinking_faces": ["(✦)", "(▲)", "(◇)", "(⌁)", "(🔥)"],
             "thinking_verbs": [
-                "banking into the draft", "measuring burn", "reading the updraft",
-                "tracking ember fall", "setting wing angle", "holding the flame core",
-                "plotting a hot landing", "coiling for lift",
+                "hava akımına giriliyor", "yanış ölçülüyor", "yükseliş okunuyor",
+                "kor düşüşü izleniyor", "kanat açısı ayarlanıyor", "alev çekirdeği tutuluyor",
+                "sıcak iniş planlanıyor", "kalkış için kıvrılıyor",
             ],
             "wings": [
                 ["⟪✦", "✦⟫"],
