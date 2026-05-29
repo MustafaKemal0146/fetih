@@ -102,11 +102,17 @@ honcho = ["honcho-ai==2.0.1"]
 mcp = ["mcp==1.26.0"]
 homeassistant = ["aiohttp==3.13.3"]
 sms = ["aiohttp==3.13.3"]
-# Computer use — macOS background desktop control via cua-driver (MCP stdio).
-# The cua-driver binary itself is installed via `fetih tools` post-setup
-# (curl install script); this extra just pins the MCP client used to talk
-# to it, which is already provided by the `mcp` extra.
-computer-use = ["mcp==1.26.0"]
+# Computer use — cross-platform desktop control (pyautogui) + macOS cua-driver.
+# pyautogui: Windows/macOS/Linux mouse, keyboard, screenshot.
+# pillow: required by pyautogui for screenshot capture.
+# pywin32: Windows-only; pyautogui uses it for reliable key/mouse injection.
+# mcp: MCP client for cua-driver (macOS background control, optional binary).
+computer-use = [
+  "mcp==1.26.0",
+  "pyautogui==0.9.54",
+  "pillow==12.1.1",
+  "pywin32==311; sys_platform == 'win32'",
+]
 acp = ["agent-client-protocol==0.9.0"]
 # mistral: extra REMOVED 2026-05-12 — `mistralai` PyPI project quarantined
 # after malicious 2.4.6 release (Mini Shai-Hulud worm). Every version of

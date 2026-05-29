@@ -390,6 +390,53 @@ fetih              # başlat
 irm https://raw.githubusercontent.com/MustafaKemal0146/fetih/main/scripts/install.ps1 | iex
 ```
 
+#### Windows — Manuel / Geliştirici Kurulumu
+
+Eğer yukarıdaki tek satırlık installer çalışmazsa ya da geliştirme modunda kurmak istiyorsan:
+
+```powershell
+# 1. Repoyu klonla
+git clone https://github.com/MustafaKemal0146/fetih.git
+cd fetih\fetih
+
+# 2. Bağımlılıkları kur (computer-use dahil)
+py -m pip install -e .[computer-use]
+
+# 3. Komutu test et
+fetih --version
+```
+
+`fetih` komutu tanınmıyorsa Scripts klasörü PATH'te olmayabilir:
+
+```powershell
+# Scripts klasörünün tam yolunu öğren
+py -c "import sysconfig; print(sysconfig.get_path('scripts'))"
+
+# Örnek çıktı: C:\Users\kullanici\AppData\Local\Programs\Python\Python313\Scripts
+# Bu yolu kalıcı olarak PATH'e ekle:
+$scriptsPath = py -c "import sysconfig; print(sysconfig.get_path('scripts'))"
+[Environment]::SetEnvironmentVariable("PATH", "$env:PATH;$scriptsPath", "User")
+
+# Terminali kapat/aç, sonra test et:
+fetih --version
+```
+
+#### Windows — Computer-Use (Masaüstü Kontrol)
+
+Computer-use özelliği `pip install -e .[computer-use]` ile otomatik kurulur.
+Kurulum doğrulaması:
+
+```powershell
+# Bağımlılıkları kontrol et
+py -c "import pyautogui, PIL; print('pyautogui:', pyautogui.__version__); print('pillow OK')"
+
+# FETIH içinde computer-use'u etkinleştir:
+fetih
+> /computer-use on
+```
+
+Etkinleştirildiğinde TUI durum çubuğu kırmızıya döner. Fareyi ekranın sol üst köşesine (0, 0) götürünce kontrol durur (FAILSAFE).
+
 ### Docker
 
 ```bash
@@ -413,8 +460,13 @@ docker run -it --rm \
 git clone https://github.com/MustafaKemal0146/fetih.git
 cd fetih
 uv sync --extra all
-source .venv/bin/activate
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 fetih --version
+
+# Computer-use özelliğiyle:
+uv sync --extra all --extra computer-use
+fetih
+# > /computer-use on
 ```
 
 ### Termux (Android)
