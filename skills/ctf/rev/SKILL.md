@@ -1,4 +1,5 @@
 ---
+category: ctf
 name: rev-category-tools
 description: Rev kategorisi SKILL.md — Binary analysis, disassembly, symbolic execution araçları kurma rehberi
 tags: [ctf, reverse-engineering, tools, setup, radare2, ghidra, angr]

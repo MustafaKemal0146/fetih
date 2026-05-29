@@ -240,7 +240,9 @@ def _validate_skill(skill_path: Path) -> ValidationResult:
         ))
 
     # MITRE ATT&CK ID validation
-    mitre_ids = frontmatter.get("mitre_ids", [])
+    mitre_ids = frontmatter.get("mitre_ids")
+    if mitre_ids is None:
+        mitre_ids = []
     if isinstance(mitre_ids, str):
         mitre_ids = [mitre_ids]
     for mid in mitre_ids:
@@ -251,7 +253,9 @@ def _validate_skill(skill_path: Path) -> ValidationResult:
             ))
 
     # NIST CSF ID validation
-    nist_ids = frontmatter.get("nist_ids", [])
+    nist_ids = frontmatter.get("nist_ids")
+    if nist_ids is None:
+        nist_ids = []
     if isinstance(nist_ids, str):
         nist_ids = [nist_ids]
     for nid in nist_ids:
@@ -262,7 +266,9 @@ def _validate_skill(skill_path: Path) -> ValidationResult:
             ))
 
     # Trigger validation
-    triggers = frontmatter.get("triggers", [])
+    triggers = frontmatter.get("triggers")
+    if triggers is None:
+        triggers = []
     if isinstance(triggers, str):
         triggers = [triggers]
     if not triggers:
@@ -280,7 +286,9 @@ def _validate_skill(skill_path: Path) -> ValidationResult:
                 ))
 
     # Tags validation
-    tags = frontmatter.get("tags", [])
+    tags = frontmatter.get("tags")
+    if tags is None:
+        tags = []
     if isinstance(tags, str):
         tags = [t.strip() for t in tags.split(",")]
     for tag in tags:
@@ -334,7 +342,9 @@ def _cross_validate(results: List[ValidationResult]) -> List[SkillIssue]:
     # Duplicate triggers
     trigger_map: Dict[str, List[str]] = defaultdict(list)
     for r in results:
-        triggers = r.frontmatter.get("triggers", [])
+        triggers = r.frontmatter.get("triggers")
+        if triggers is None:
+            triggers = []
         if isinstance(triggers, str):
             triggers = [triggers]
         for t in triggers:

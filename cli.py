@@ -9134,6 +9134,8 @@ class FETIHCLI:
 
     def _handle_computer_use_command(self, cmd: str):
         """Handle /computer-use — toggle desktop control on/off/status."""
+        import sys as _sys
+        import os as _os
         parts = cmd.strip().split()
         sub = parts[1] if len(parts) > 1 else "status"
 
@@ -9141,57 +9143,76 @@ class FETIHCLI:
         from tools.computer_use.pyautogui_backend import pyautogui_backend_available
         from tools.computer_use.cua_backend import cua_driver_binary_available
 
+        _BOLD_RED = "\033[1;31m"
+        _BOLD_GREEN = "\033[1;32m"
+        _BOLD_YELLOW = "\033[1;33m"
+
         if sub == "on":
-            # Check backends
-            on_macos = __import__('sys').platform == "darwin"
+            on_macos = _sys.platform == "darwin"
             cua_ok = cua_driver_binary_available()
             pya_ok = pyautogui_backend_available()
 
             if on_macos and not cua_ok:
-                _cprint(f"  {_DIM}⚠️  cua-driver bulunamadi. Yuklemek icin:{_RST}")
-                _cprint(f"  {_DIM}    fetih computer-use install{_RST}")
-                _cprint(f"  {_DIM}  veya:{_RST}")
-                _cprint(f"  {_DIM}    /bin/bash -c \"$(curl -fsSL https://raw.githubusercontent.com/trycua/cua/main/libs/cua-driver/scripts/install.sh)\"{_RST}")
+                _cprint(f"\n  {_BOLD_RED}╔══ MASAUSTU KONTROLU BASLATILAMADI ══╗{_RST}")
+                _cprint(f"  {_BOLD_RED}║{_RST}  cua-driver bulunamadi.")
+                _cprint(f"  {_BOLD_RED}║{_RST}  Yuklemek icin: fetih computer-use install")
+                _cprint(f"  {_BOLD_RED}╚{'═' * 36}╝{_RST}\n")
                 return
             elif not on_macos and not pya_ok:
-                _cprint(f"  {_DIM}⚠️  Masaustu kontrolu kullanilamaz.{_RST}")
-                _cprint(f"  {_DIM}  GUI oturumu gerekli (headless sunucuda calismaz).{_RST}")
-                _cprint(f"  {_DIM}  DISPLAY={__import__('os').environ.get('DISPLAY', 'YOK')}{_RST}")
+                _cprint(f"\n  {_BOLD_RED}╔══ MASAUSTU KONTROLU BASLATILAMADI ══╗{_RST}")
+                _cprint(f"  {_BOLD_RED}║{_RST}  GUI oturumu gerekli (headless sunucuda calismaz).")
+                _cprint(f"  {_BOLD_RED}║{_RST}  DISPLAY={_os.environ.get('DISPLAY', 'YOK')}")
+                _cprint(f"  {_BOLD_RED}╚{'═' * 36}╝{_RST}\n")
                 return
 
             result = enable_desktop()
             if result:
-                _cprint(f"  {_ACCENT}🖥️  Masaustu kontrolu AKTIF{_RST}")
-                backend = "cua-driver (arka planda)" if (on_macos and cua_ok) else "pyautogui"
-                _cprint(f"  {_DIM}  Backend: {backend}{_RST}")
-                _cprint(f"  {_DIM}  FAILSAFE: fareyi sol ust koseye cekerseniz durur{_RST}")
-                _cprint(f"  {_DIM}  Kapatmak icin: /computer-use off{_RST}")
-                # Invalidate tool cache so the model picks up the new tool
+                # Bright red box — impossible to miss
+                _cprint(f"\n  {_BOLD_RED}╔══ MASAUSTU KONTROLU AKTIF ══╗{_RST}")
+                _cprint(f"  {_BOLD_RED}║{_RST}  🖥️  FETIH artık ekranınızı, farenizi ve")
+                _cprint(f"  {_BOLD_RED}║{_RST}  klavyenizi kontrol edebilir.")
+                backend = "cua-driver (arka planda)" if (on_macos and cua_ok) else f"pyautogui ({_sys.platform})"
+                _cprint(f"  {_BOLD_RED}║{_RST}  Backend: {backend}")
+                _cprint(f"  {_BOLD_RED}║{_RST}")
+                _cprint(f"  {_BOLD_RED}║{_RST}  🛑 FAILSAFE: Fareyi SOL UST KOSEYE")
+                _cprint(f"  {_BOLD_RED}║{_RST}     cekerseniz kontrol ANINDA durur!")
+                _cprint(f"  {_BOLD_RED}║{_RST}")
+                _cprint(f"  {_BOLD_RED}║{_RST}  Kapatmak icin: /computer-use off")
+                _cprint(f"  {_BOLD_RED}╚{'═' * 36}╝{_RST}\n")
+                # Also print directly as fallback
+                print(f"\n  🖥️  FETIH DESKTOP CONTROL: ON (FAILSAFE: upper-left corner to abort)\n")
                 from tools.registry import invalidate_check_fn_cache
                 invalidate_check_fn_cache()
             else:
-                _cprint(f"  {_DIM}⚠️  Masaustu kontrolu baslatilamadi.{_RST}")
+                _cprint(f"\n  {_BOLD_RED}⚠️  Masaustu kontrolu baslatilamadi.{_RST}\n")
 
         elif sub == "off":
             disable_desktop()
             from tools.registry import invalidate_check_fn_cache
             invalidate_check_fn_cache()
-            _cprint(f"  {_DIM}🖥️  Masaustu kontrolu KAPATILDI{_RST}")
+            _cprint(f"\n  {_BOLD_GREEN}╔══ MASAUSTU KONTROLU KAPATILDI ══╗{_RST}")
+            _cprint(f"  {_BOLD_GREEN}║{_RST}  🖥️  FETIH artık ekranınızı kontrol edemez.")
+            _cprint(f"  {_BOLD_GREEN}║{_RST}  Tekrar acmak icin: /computer-use on")
+            _cprint(f"  {_BOLD_GREEN}╚{'═' * 36}╝{_RST}\n")
+            print(f"\n  ✅  FETIH DESKTOP CONTROL: OFF\n")
 
         else:  # status
             is_on = is_desktop_enabled()
-            on_macos = __import__('sys').platform == "darwin"
+            on_macos = _sys.platform == "darwin"
             cua_ok = cua_driver_binary_available()
             pya_ok = pyautogui_backend_available()
 
-            _cprint(f"  🖥️  {_ACCENT}Masaustu Kontrolu Durumu{_RST}")
-            status_text = f"{_ACCENT}AKTIF{_RST}" if is_on else f"{_DIM}KAPALI{_RST}"
-            _cprint(f"  Durum: {status_text}")
-            _cprint(f"  Platform: {__import__('sys').platform}")
-            _cprint(f"  cua-driver: {'✅ yuklu' if cua_ok else '❌ yok'}")
-            _cprint(f"  pyautogui: {'✅ hazir' if pya_ok else '❌ yok (GUI oturumu gerekli)'}")
-            if not is_on:
-                _cprint(f"  {_DIM}  Acmak icin: /computer-use on{_RST}")
+            if is_on:
+                _cprint(f"\n  {_BOLD_RED}🖥️  Masaustu Kontrolu: AKTIF{_RST}")
+                _cprint(f"  {_DIM}Platform: {_sys.platform}{_RST}")
+                _cprint(f"  {_DIM}FAILSAFE: fareyi sol ust koseye cek = DURDUR{_RST}")
+                _cprint(f"  {_DIM}Kapatmak icin: /computer-use off{_RST}\n")
+            else:
+                _cprint(f"\n  {_DIM}🖥️  Masaustu Kontrolu: KAPALI{_RST}")
+                _cprint(f"  {_DIM}Platform: {_sys.platform}{_RST}")
+                _cprint(f"  {_DIM}cua-driver: {'✅ yuklu' if cua_ok else '❌ yok'}{_RST}")
+                _cprint(f"  {_DIM}pyautogui: {'✅ hazir' if pya_ok else '❌ yok (GUI oturumu gerekli)'}{_RST}")
+                _cprint(f"  {_DIM}Acmak icin: /computer-use on{_RST}\n")
 
     def _handle_hint_command(self, cmd: str):
         """Handle /hint — CTF progressive hint system."""

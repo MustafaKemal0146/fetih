@@ -1,4 +1,5 @@
 ---
+category: ctf
 name: crypto-category-tools
 description: Crypto kategori SKILL.md — RSA, ECC, AES, hash, encoding saldırıları için gerekli araçları kurma rehberi
 tags: [ctf, crypto, tools, setup, pycryptodome, gmpy2, sympy]

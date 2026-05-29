@@ -1,4 +1,5 @@
 ---
+category: ctf
 name: pwn-category-tools
 description: Pwn/Binary kategorisi SKILL.md — BOF, ROP, kernel exploit araçları kurma rehberi
 tags: [ctf, pwn, binary, tools, setup, pwntools, gdb, radare2, ghidra]

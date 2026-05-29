@@ -1,4 +1,5 @@
 ---
+category: ctf
 name: forensics-category-tools
 description: Forensics kategorisi SKILL.md — Memory, disk, PCAP, steganography araçları kurma rehberi
 tags: [ctf, forensics, tools, setup, volatility3, binwalk, exiftool]

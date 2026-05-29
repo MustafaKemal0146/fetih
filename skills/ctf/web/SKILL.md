@@ -1,4 +1,5 @@
 ---
+category: ctf
 name: web-category-tools
 description: Web kategorisi SKILL.md — SQLi, XSS, SSRF tarayıcı ve exploit araçları kurma rehberi
 tags: [ctf, web, tools, setup, sqlmap, ffuf, nuclei, nikto]

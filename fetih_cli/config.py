@@ -4316,6 +4316,41 @@ def read_raw_config() -> Dict[str, Any]:
         return data
 
 
+def _apply_session_model_override(expanded: Dict[str, Any]) -> None:
+    """Apply the last-session model choice (~/.fetih/.last_model) to config.
+
+    When the user runs /model <name> without --global, the choice is
+    saved to ~/.fetih/.last_model so it survives restarts.  Apply that
+    override here so it takes effect in ALL code paths (CLI chat,
+    gateway, profiles, etc.) without each caller having to opt in.
+
+    This is applied on BOTH cache-hit and cache-miss paths because
+    .last_model changes independently of config.yaml mtime.
+    """
+    try:
+        from fetih_cli.model_switch import load_last_session_model
+        session = load_last_session_model()
+        if session:
+            session_model = session.get("model", "").strip()
+            session_provider = session.get("provider", "").strip()
+            if session_model:
+                model_cfg = expanded.get("model")
+                if isinstance(model_cfg, str):
+                    expanded["model"] = session_model
+                elif isinstance(model_cfg, dict):
+                    if session_model:
+                        expanded["model"]["default"] = session_model
+                    if session_provider:
+                        expanded["model"]["provider"] = session_provider
+                elif model_cfg is None:
+                    expanded["model"] = {
+                        "default": session_model,
+                        "provider": session_provider,
+                    } if session_provider else session_model
+    except Exception:
+        pass  # Never break config loading over session-model lookup
+
+
 def load_config() -> Dict[str, Any]:
     """Load configuration from ~/.fetih/config.yaml.
 
@@ -4339,7 +4374,9 @@ def load_config() -> Dict[str, Any]:
 
         cached = _LOAD_CONFIG_CACHE.get(path_key)
         if cached is not None and cache_key is not None and cached[:2] == cache_key:
-            return copy.deepcopy(cached[2])
+            result = copy.deepcopy(cached[2])
+            _apply_session_model_override(result)
+            return result
 
         config = copy.deepcopy(DEFAULT_CONFIG)
 
@@ -4363,32 +4400,7 @@ def load_config() -> Dict[str, Any]:
         expanded = _expand_env_vars(normalized)
 
         # ── Session-model override ──
-        # When the user runs /model <name> without --global, the choice is
-        # saved to ~/.fetih/.last_model so it survives restarts.  Apply that
-        # override here so it takes effect in ALL code paths (CLI chat,
-        # gateway, profiles, etc.) without each caller having to opt in.
-        try:
-            from fetih_cli.model_switch import load_last_session_model
-            session = load_last_session_model()
-            if session:
-                session_model = session.get("model", "").strip()
-                session_provider = session.get("provider", "").strip()
-                if session_model:
-                    model_cfg = expanded.get("model")
-                    if isinstance(model_cfg, str):
-                        expanded["model"] = session_model
-                    elif isinstance(model_cfg, dict):
-                        if session_model:
-                            expanded["model"]["default"] = session_model
-                        if session_provider:
-                            expanded["model"]["provider"] = session_provider
-                    elif model_cfg is None:
-                        expanded["model"] = {
-                            "default": session_model,
-                            "provider": session_provider,
-                        } if session_provider else session_model
-        except Exception:
-            pass  # Never break config loading over session-model lookup
+        _apply_session_model_override(expanded)
 
         _LAST_EXPANDED_CONFIG_BY_PATH[path_key] = copy.deepcopy(expanded)
         if cache_key is not None:

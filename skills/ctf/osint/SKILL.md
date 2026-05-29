@@ -1,4 +1,5 @@
 ---
+category: ctf
 name: osint-category-tools
 description: OSINT kategorisi SKILL.md — Kullanıcı araştırması, sosyal medya, subdomain keşfi araçları kurma rehberi
 tags: [ctf, osint, tools, setup, sherlock, maigret]
