@@ -117,12 +117,6 @@ def build_system_prompt_parts(agent: Any, system_message: Optional[str] = None) 
     if tool_guidance:
         stable_parts.append(" ".join(tool_guidance))
 
-    # Computer-use (macOS) — goes in as its own block rather than being
-    # merged into tool_guidance because the content is multi-paragraph.
-    if "computer_use" in agent.valid_tool_names:
-        from agent.prompt_builder import COMPUTER_USE_GUIDANCE
-        stable_parts.append(COMPUTER_USE_GUIDANCE)
-
     nous_subscription_prompt = _r.build_nous_subscription_prompt(agent.valid_tool_names)
     if nous_subscription_prompt:
         stable_parts.append(nous_subscription_prompt)

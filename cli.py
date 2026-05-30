@@ -3404,25 +3404,10 @@ class FETIHCLI:
         except Exception:
             return f"⚕ {self.model if getattr(self, 'model', None) else 'FETIH'}"
 
-    def _is_computer_use_active(self) -> bool:
-        """Return True when desktop control is currently enabled."""
-        try:
-            from tools.computer_use_tool import is_desktop_enabled
-            return is_desktop_enabled()
-        except Exception:
-            return False
-
     def _get_status_bar_fragments(self):
         if not self._status_bar_visible or getattr(self, '_model_picker_state', None):
             return []
         try:
-            # ── Computer-use mode: full red status bar ─────────────────────
-            if self._is_computer_use_active():
-                width = self._get_tui_terminal_width()
-                text = " 🖥️ MASAÜSTÜ KONTROLÜ AKTİF  │  fareyi en sol üst köşeye çek = DURDUR "
-                trimmed = self._trim_status_bar_text(text, width - 2)
-                return [("class:status-bar-computer-use", f" {trimmed} ")]
-
             snapshot = self._get_status_bar_snapshot()
             # Use prompt_toolkit's own terminal width when running inside the
             # TUI — shutil.get_terminal_size() can return stale or fallback
@@ -8099,8 +8084,6 @@ class FETIHCLI:
             self._handle_report_command(cmd_original)
         elif canonical == "auto-solve":
             self._handle_auto_solve_command(cmd_original)
-        elif canonical == "computer-use":
-            self._handle_computer_use_command(cmd_original)
         elif canonical == "hint":
             self._handle_hint_command(cmd_original)
         elif canonical == "learnings":
@@ -9180,94 +9163,6 @@ class FETIHCLI:
             self._pending_input.put(msg)
         else:
             _cprint(f"  {_DIM}Solver talebi alindi.{_RST}")
-
-    def _handle_computer_use_command(self, cmd: str):
-        """Handle /computer-use — toggle desktop control on/off/status."""
-        import sys as _sys
-        import os as _os
-        parts = cmd.strip().split()
-        sub = parts[1] if len(parts) > 1 else "status"
-
-        from tools.computer_use_tool import enable_desktop, disable_desktop, is_desktop_enabled
-        from tools.computer_use.pyautogui_backend import pyautogui_backend_available
-        from tools.computer_use.cua_backend import cua_driver_binary_available
-
-        _BOLD_RED = "\033[1;31m"
-        _BOLD_GREEN = "\033[1;32m"
-        _BOLD_YELLOW = "\033[1;33m"
-
-        if sub == "on":
-            on_macos = _sys.platform == "darwin"
-            cua_ok = cua_driver_binary_available()
-            pya_ok = pyautogui_backend_available()
-
-            if on_macos and not cua_ok:
-                _cprint(f"\n  {_BOLD_RED}╔══ MASAUSTU KONTROLU BASLATILAMADI ══╗{_RST}")
-                _cprint(f"  {_BOLD_RED}║{_RST}  cua-driver bulunamadi.")
-                _cprint(f"  {_BOLD_RED}║{_RST}  Yuklemek icin: fetih computer-use install")
-                _cprint(f"  {_BOLD_RED}╚{'═' * 36}╝{_RST}\n")
-                return
-            elif not on_macos and not pya_ok:
-                _cprint(f"\n  {_BOLD_RED}╔══ MASAUSTU KONTROLU BASLATILAMADI ══╗{_RST}")
-                _cprint(f"  {_BOLD_RED}║{_RST}  GUI oturumu gerekli (headless sunucuda calismaz).")
-                _cprint(f"  {_BOLD_RED}║{_RST}  DISPLAY={_os.environ.get('DISPLAY', 'YOK')}")
-                _cprint(f"  {_BOLD_RED}╚{'═' * 36}╝{_RST}\n")
-                return
-
-            result = enable_desktop()
-            if result:
-                # Bright red box — impossible to miss
-                _cprint(f"\n  {_BOLD_RED}╔══ MASAUSTU KONTROLU AKTIF ══╗{_RST}")
-                _cprint(f"  {_BOLD_RED}║{_RST}  🖥️  FETIH artık ekranınızı, farenizi ve")
-                _cprint(f"  {_BOLD_RED}║{_RST}  klavyenizi kontrol edebilir.")
-                backend = "cua-driver (arka planda)" if (on_macos and cua_ok) else f"pyautogui ({_sys.platform})"
-                _cprint(f"  {_BOLD_RED}║{_RST}  Backend: {backend}")
-                _cprint(f"  {_BOLD_RED}║{_RST}")
-                _cprint(f"  {_BOLD_RED}║{_RST}  🛑 GÜVENLİK: Fareyi EN SOL ÜST KÖŞEYE")
-                _cprint(f"  {_BOLD_RED}║{_RST}     çekerseniz kontrol ANINDA durur!")
-                _cprint(f"  {_BOLD_RED}║{_RST}")
-                _cprint(f"  {_BOLD_RED}║{_RST}  Kapatmak icin: /computer-use off")
-                _cprint(f"  {_BOLD_RED}╚{'═' * 36}╝{_RST}\n")
-                # Also print directly as fallback
-                print(f"\n  🖥️  FETIH MASAÜSTÜ KONTROLÜ: AÇIK (GÜVENLİK: en sol üst köşe = durdur)\n")
-                from tools.registry import invalidate_check_fn_cache
-                invalidate_check_fn_cache()
-                # Trigger TUI style refresh so status bar turns red immediately
-                self._apply_tui_skin_style()
-                self._invalidate(min_interval=0.0)
-            else:
-                _cprint(f"\n  {_BOLD_RED}⚠️  Masaustu kontrolu baslatilamadi.{_RST}\n")
-
-        elif sub == "off":
-            disable_desktop()
-            from tools.registry import invalidate_check_fn_cache
-            invalidate_check_fn_cache()
-            # Trigger TUI style refresh so status bar returns to normal
-            self._apply_tui_skin_style()
-            self._invalidate(min_interval=0.0)
-            _cprint(f"\n  {_BOLD_GREEN}╔══ MASAUSTU KONTROLU KAPATILDI ══╗{_RST}")
-            _cprint(f"  {_BOLD_GREEN}║{_RST}  🖥️  FETIH artık ekranınızı kontrol edemez.")
-            _cprint(f"  {_BOLD_GREEN}║{_RST}  Tekrar acmak icin: /computer-use on")
-            _cprint(f"  {_BOLD_GREEN}╚{'═' * 36}╝{_RST}\n")
-            print(f"\n  ✅  FETIH MASAÜSTÜ KONTROLÜ: KAPALI\n")
-
-        else:  # status
-            is_on = is_desktop_enabled()
-            on_macos = _sys.platform == "darwin"
-            cua_ok = cua_driver_binary_available()
-            pya_ok = pyautogui_backend_available()
-
-            if is_on:
-                _cprint(f"\n  {_BOLD_RED}🖥️  Masaustu Kontrolu: AKTIF{_RST}")
-                _cprint(f"  {_DIM}Platform: {_sys.platform}{_RST}")
-                _cprint(f"  {_DIM}FAILSAFE: fareyi sol ust koseye cek = DURDUR{_RST}")
-                _cprint(f"  {_DIM}Kapatmak icin: /computer-use off{_RST}\n")
-            else:
-                _cprint(f"\n  {_DIM}🖥️  Masaustu Kontrolu: KAPALI{_RST}")
-                _cprint(f"  {_DIM}Platform: {_sys.platform}{_RST}")
-                _cprint(f"  {_DIM}cua-driver: {'✅ yuklu' if cua_ok else '❌ yok'}{_RST}")
-                _cprint(f"  {_DIM}pyautogui: {'✅ hazir' if pya_ok else '❌ yok (GUI oturumu gerekli)'}{_RST}")
-                _cprint(f"  {_DIM}Acmak icin: /computer-use on{_RST}\n")
 
     def _handle_hint_command(self, cmd: str):
         """Handle /hint — CTF progressive hint system."""
@@ -10875,27 +10770,6 @@ class FETIHCLI:
             choices.append("view")
         return choices
 
-    def _computer_use_approval_callback(self, action: str, args: dict, summary: str) -> str:
-        """Adapt the generic approval UI for the computer_use tool.
-
-        The computer_use handler expects verdicts of the form
-        `approve_once` | `approve_session` | `always_approve` | `deny`.
-        The CLI's built-in approval UI returns `once` | `session` | `always`
-        | `deny`. Translate between the two.
-        """
-        # Build a command-ish string so the existing UI renders something
-        # meaningful. `summary` is already a one-line human description.
-        verdict = self._approval_callback(
-            command=f"computer_use: {summary}",
-            description=f"Allow computer_use to perform `{action}`?",
-        )
-        return {
-            "once": "approve_once",
-            "session": "approve_session",
-            "always": "always_approve",
-            "deny": "deny",
-        }.get(verdict, "deny")
-
     def _handle_approval_selection(self) -> None:
         """Process the currently selected dangerous-command approval choice."""
         state = self._approval_state
@@ -12186,16 +12060,6 @@ class FETIHCLI:
         set_sudo_password_callback(self._sudo_password_callback)
         set_approval_callback(self._approval_callback)
         set_secret_capture_callback(self._secret_capture_callback)
-
-        # Computer-use shares the same approval UI (prompt_toolkit dialog).
-        # The tool handler expects a 3-arg callback (action, args, summary)
-        # and returns "approve_once" | "approve_session" | "always_approve"
-        # | "deny". Adapt our existing generic callback.
-        try:
-            from tools.computer_use_tool import set_approval_callback as _set_cu_cb
-            _set_cu_cb(self._computer_use_approval_callback)
-        except ImportError:
-            pass  # computer_use extras not installed
 
         # Ensure tirith security scanner is available (downloads if needed).
         # Warn the user if tirith is enabled in config but not available,
@@ -13807,8 +13671,6 @@ class FETIHCLI:
             'status-bar-bad': 'bg:#1a1a2e #FF8C00 bold',
             'status-bar-critical': 'bg:#1a1a2e #FF6B6B bold',
             'status-bar-yolo': 'bg:#1a1a2e #FF4444 bold',
-            # Computer-use mode: full crimson red background
-            'status-bar-computer-use': 'bg:#8B0000 #FFFFFF bold',
             # Bronze horizontal rules around the input area
             'input-rule': '#CD7F32',
             # Clipboard image attachment badges

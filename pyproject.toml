@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fetih"
-version = "1.0.1"
+version = "1.0.2"
 description = "FETIH — CTF/OSINT siber operasyon ajanlık sistemi. HİÇBİR SİSTEM GÜVENLİ DEĞİLDİR."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -102,17 +102,6 @@ honcho = ["honcho-ai==2.0.1"]
 mcp = ["mcp==1.26.0"]
 homeassistant = ["aiohttp==3.13.3"]
 sms = ["aiohttp==3.13.3"]
-# Computer use — cross-platform desktop control (pyautogui) + macOS cua-driver.
-# pyautogui: Windows/macOS/Linux mouse, keyboard, screenshot.
-# pillow: required by pyautogui for screenshot capture.
-# pywin32: Windows-only; pyautogui uses it for reliable key/mouse injection.
-# mcp: MCP client for cua-driver (macOS background control, optional binary).
-computer-use = [
-  "mcp==1.26.0",
-  "pyautogui==0.9.54",
-  "pillow==12.1.1",
-  "pywin32==311; sys_platform == 'win32'",
-]
 acp = ["agent-client-protocol==0.9.0"]
 # mistral: extra REMOVED 2026-05-12 — `mistralai` PyPI project quarantined
 # after malicious 2.4.6 release (Mini Shai-Hulud worm). Every version of
