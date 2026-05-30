@@ -1412,9 +1412,39 @@ def cmd_chat(args):
 
     # Sync bundled skills on every CLI launch (fast -- skips unchanged skills)
     try:
-        from tools.skills_sync import sync_skills
+        import sys as _sys
+        import threading as _threading
+        from tools.skills_sync import sync_skills, _fast_bundled_hash, _get_bundled_dir, _discover_bundled_skills, _read_manifest, _MTIME_KEY
 
-        sync_skills(quiet=True)
+        _bundled_dir = _get_bundled_dir()
+        _manifest = _read_manifest()
+        _bundled_skills = _discover_bundled_skills(_bundled_dir) if _bundled_dir.exists() else []
+        _needs_full_sync = _bundled_skills and _manifest.get(_MTIME_KEY) != _fast_bundled_hash(_bundled_skills)
+
+        if _needs_full_sync:
+            # Show spinner only when a real sync is needed (first run or after git pull)
+            _stop_spinner = _threading.Event()
+            _frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+
+            def _spinner_thread():
+                i = 0
+                while not _stop_spinner.is_set():
+                    _sys.stderr.write(f"\r{_frames[i % len(_frames)]}  Dosyalar kontrol ediliyor...  ")
+                    _sys.stderr.flush()
+                    _stop_spinner.wait(0.08)
+                    i += 1
+                _sys.stderr.write("\r" + " " * 46 + "\r")
+                _sys.stderr.flush()
+
+            _t = _threading.Thread(target=_spinner_thread, daemon=True)
+            _t.start()
+            try:
+                sync_skills(quiet=True)
+            finally:
+                _stop_spinner.set()
+                _t.join(timeout=0.5)
+        else:
+            sync_skills(quiet=True)
     except Exception:
         pass
 

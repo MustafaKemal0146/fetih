@@ -160,6 +160,12 @@ def _compute_relative_dest(skill_dir: Path, bundled_dir: Path) -> Path:
     return SKILLS_DIR / rel
 
 
+_MTIME_KEY = "__bundled_mtime__"
+
+
+_MTIME_KEY = "__bundled_mtime__"
+
+
 def _dir_hash(directory: Path) -> str:
     """Compute a hash of all file contents in a directory for change detection."""
     hasher = hashlib.md5()
@@ -171,6 +177,50 @@ def _dir_hash(directory: Path) -> str:
                 hasher.update(fpath.read_bytes())
     except (OSError, IOError):
         pass
+    return hasher.hexdigest()
+
+
+def _fast_bundled_hash(bundled_skills: List[Tuple[str, Path]]) -> str:
+    """Stat-only hash (mtime_ns + size) — no file content reads.
+
+    Used as a fast pre-check: if bundled skills haven't changed since the last
+    sync (identical mtimes and sizes), skip all per-skill MD5 computation.
+    The result is stored in the manifest under _MTIME_KEY.
+    """
+    hasher = hashlib.md5()
+    for name, skill_dir in sorted(bundled_skills, key=lambda x: x[0]):
+        try:
+            for fpath in sorted(skill_dir.rglob("*")):
+                if fpath.is_file():
+                    st = fpath.stat()
+                    rel = fpath.relative_to(skill_dir)
+                    hasher.update(
+                        f"{name}/{rel}:{st.st_mtime_ns}:{st.st_size}\n".encode("utf-8")
+                    )
+        except OSError:
+            pass
+    return hasher.hexdigest()
+
+
+def _fast_bundled_hash(bundled_skills: List[Tuple[str, Path]]) -> str:
+    """Fast hash using only file stat (mtime_ns + size) — no file content reads.
+
+    Used as a quick-exit check: if the bundled skills haven't changed since the
+    last sync (same mtimes/sizes), skip all per-skill MD5 computation entirely.
+    Saved in the manifest under _MTIME_KEY.
+    """
+    hasher = hashlib.md5()
+    for name, skill_dir in sorted(bundled_skills, key=lambda x: x[0]):
+        try:
+            for fpath in sorted(skill_dir.rglob("*")):
+                if fpath.is_file():
+                    st = fpath.stat()
+                    rel = fpath.relative_to(skill_dir)
+                    hasher.update(
+                        f"{name}/{rel}:{st.st_mtime_ns}:{st.st_size}\n".encode("utf-8")
+                    )
+        except OSError:
+            pass
     return hasher.hexdigest()
 
 
@@ -192,6 +242,24 @@ def sync_skills(quiet: bool = False) -> dict:
     SKILLS_DIR.mkdir(parents=True, exist_ok=True)
     manifest = _read_manifest()
     bundled_skills = _discover_bundled_skills(bundled_dir)
+
+    # Fast path: stat-only hash (no file reads). If bundled skills haven't
+    # changed since last sync, skip all expensive MD5 computation entirely.
+    fast_hash = _fast_bundled_hash(bundled_skills)
+    if manifest.get(_MTIME_KEY) == fast_hash:
+        return {
+            "copied": [], "updated": [], "skipped": len(bundled_skills),
+            "user_modified": [], "cleaned": [], "total_bundled": len(bundled_skills),
+        }
+
+    # Fast path: if the bundled skills haven't changed since the last sync
+    # (same file mtimes/sizes), skip all expensive per-skill MD5 computation.
+    fast_hash = _fast_bundled_hash(bundled_skills)
+    if manifest.get(_MTIME_KEY) == fast_hash:
+        return {
+            "copied": [], "updated": [], "skipped": len(bundled_skills),
+            "user_modified": [], "cleaned": [], "total_bundled": len(bundled_skills),
+        }
     bundled_names = {name for name, _ in bundled_skills}
 
     copied = []
@@ -306,6 +374,10 @@ def sync_skills(quiet: bool = False) -> dict:
             except (OSError, IOError) as e:
                 logger.debug("Could not copy %s: %s", desc_md, e)
 
+    # Store fast hash so subsequent startups can skip all MD5 computation.
+    manifest[_MTIME_KEY] = fast_hash
+    # Store fast hash so subsequent startups can skip all MD5 computation.
+    manifest[_MTIME_KEY] = fast_hash
     _write_manifest(manifest)
 
     return {
