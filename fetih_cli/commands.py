@@ -147,7 +147,7 @@ COMMAND_REGISTRY: list[CommandDef] = [
                args_hint="[normal|fast|status]",
                subcommands=("normal", "fast", "status", "on", "off")),
     CommandDef("skin", "Görünüm temasını göster/değiştir", "Yapılandırma",
-               cli_only=True, args_hint="[isim]"),
+               cli_only=True, args_hint="[isim]", aliases=("theme",)),
     CommandDef("indicator", "TUI meşgul göstergesi stilini seç", "Yapılandırma",
                cli_only=True, args_hint="[kaomoji|emoji|unicode|ascii]",
                subcommands=("kaomoji", "emoji", "unicode", "ascii")),
