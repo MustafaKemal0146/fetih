@@ -547,13 +547,13 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
     if len(model_short) > 28:
         model_short = model_short[:25] + "..."
     ctx_str = f" [dim {dim}]·[/] [dim {dim}]{_format_context_length(context_length)} context[/]" if context_length else ""
-    left_lines.append(f"[{accent}]{model_short}[/]{ctx_str}")
+    left_lines.append(f"[{dim}]{model_short}[/]{ctx_str}")
 
     if os.getenv("FETIH_YOLO_MODE"):
         left_lines.append(f"[bold red]⚠ YOLO mode[/] [dim {dim}]— all approval prompts bypassed[/]")
-    left_lines.append(f"[dim {dim}]{cwd}[/]")
+    left_lines.append(f"[{dim}]{cwd}[/]")
     if session_id:
-        left_lines.append(f"[dim {session_color}]Oturum: {session_id}[/]")
+        left_lines.append(f"[{dim}]Oturum: {session_id}[/]")
     left_content = "\n".join(left_lines)
 
     right_lines = [f"[bold {accent}]Araçlar[/]"]
@@ -610,10 +610,10 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
                     colored_names.append(f"[{text}]{name}[/]")
             tools_str = ", ".join(colored_names)
 
-        right_lines.append(f"[dim {dim}]{toolset}:[/] {tools_str}")
+        right_lines.append(f"[{dim}]{toolset}:[/] {tools_str}")
 
     if remaining_toolsets > 0:
-        right_lines.append(f"[dim {dim}](and {remaining_toolsets} more toolsets...)[/]")
+        right_lines.append(f"[{dim}](and {remaining_toolsets} more toolsets...)[/]")
 
     # MCP Servers section (only if configured)
     try:
@@ -652,7 +652,7 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
                 skills_str = ", ".join(skill_names)
             if len(skills_str) > 50:
                 skills_str = skills_str[:47] + "..."
-            right_lines.append(f"[dim {dim}]{category}:[/] [{text}]{skills_str}[/]")
+            right_lines.append(f"[{dim}]{category}:[/] [{text}]{skills_str}[/]")
     else:
         right_lines.append(f"[dim {dim}]No skills installed[/]")
 
@@ -684,7 +684,7 @@ def build_welcome_banner(console: Console, model: str, cwd: str,
     except Exception:
         pass  # Never break the banner over a profiles.py bug
 
-    right_lines.append(f"[dim {dim}]{' · '.join(summary_parts)}[/]")
+    right_lines.append(f"[{dim}]{' · '.join(summary_parts)}[/]")
 
     # Update check — use prefetched result if available
     try:
