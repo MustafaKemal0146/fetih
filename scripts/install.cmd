@@ -1,6 +1,6 @@
 @echo off
 REM ============================================================================
-REM Hermes Agent Installer for Windows (CMD wrapper)
+REM Fetih Agent Installer for Windows (CMD wrapper)
 REM ============================================================================
 REM This batch file launches the PowerShell installer for users running CMD.
 REM
@@ -12,7 +12,7 @@ REM   irm https://raw.githubusercontent.com/MustafaKemal0146/fetih/main/scripts/
 REM ============================================================================
 
 echo.
-echo  Hermes Agent Installer
+echo  Fetih Agent Installer
 echo  Launching PowerShell installer...
 echo.
 
