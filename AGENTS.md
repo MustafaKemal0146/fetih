@@ -579,7 +579,7 @@ plug into `agent/context_engine.py`; image-gen providers into
 `agent/image_gen_provider.py`. Reference / docs-companion plugins
 (`example-dashboard`, `strike-freedom-cockpit`, `plugin-llm-example`,
 `plugin-llm-async-example`) live in the
-[`hermes-example-plugins`](https://github.com/FETIH/hermes-example-plugins)
+[`fetih-example-plugins`](https://github.com/FETIH/fetih-example-plugins)
 companion repo, not in this tree.
 
 ---

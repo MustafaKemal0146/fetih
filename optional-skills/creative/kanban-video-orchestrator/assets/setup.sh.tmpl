@@ -21,10 +21,10 @@ echo "═══ Checking required API keys ═══"
 
 check_key() {
     local var="$1"
-    local kc_account="${2:-hermes}"
+    local kc_account="${2:-fetih}"
     local kc_service="${3:-$1}"
-    if grep -q "^${var}=" "$HOME/.hermes/.env" 2>/dev/null && \
-       [ -n "$(grep "^${var}=" "$HOME/.hermes/.env" | cut -d= -f2-)" ]; then
+    if grep -q "^${var}=" "$HOME/.fetih/.env" 2>/dev/null && \
+       [ -n "$(grep "^${var}=" "$HOME/.fetih/.env" | cut -d= -f2-)" ]; then
         echo "  ✓ ${var} (env)"
         return 0
     fi
@@ -33,7 +33,7 @@ check_key() {
         echo "  ✓ ${var} (Keychain ${kc_account}/${kc_service})"
         return 0
     fi
-    echo "  ✗ ${var} not set in ~/.hermes/.env or Keychain (${kc_account}/${kc_service})"
+    echo "  ✗ ${var} not set in ~/.fetih/.env or Keychain (${kc_account}/${kc_service})"
     return 1
 }
 
@@ -49,9 +49,9 @@ mkdir -p "$WORKSPACE"/{taste,audio/{voiceover,sfx},assets,scenes,checkpoints,too
 echo "  ✓ $WORKSPACE"
 
 # ─────────────────────────────────────────────────────────────────────
-# 3. Create Hermes profiles
+# 3. Create Fetih profiles
 # ─────────────────────────────────────────────────────────────────────
-echo "═══ Creating Hermes profiles ═══"
+echo "═══ Creating Fetih profiles ═══"
 
 {{PROFILE_CREATE_COMMANDS}}
 
@@ -65,7 +65,7 @@ configure_profile() {
     local toolsets_json="$2"     # JSON array string, e.g. '["kanban","terminal","file"]'
     local skills_json="$3"       # JSON array string, e.g. '["kanban-worker","ascii-video"]'
     python3 - "$profile" "$toolsets_json" "$skills_json" "$WORKSPACE" <<'PY'
-"""Patch a Hermes profile config.yaml using PyYAML so we don't depend on the
+"""Patch a Fetih profile config.yaml using PyYAML so we don't depend on the
 exact default-config string format. Validates the patch took effect and exits
 non-zero if anything's off."""
 import json
@@ -82,7 +82,7 @@ profile, toolsets_json, skills_json, workspace = sys.argv[1:5]
 toolsets = json.loads(toolsets_json)
 skills = json.loads(skills_json)
 
-p = os.path.expanduser(f"~/.hermes/profiles/{profile}/config.yaml")
+p = os.path.expanduser(f"~/.fetih/profiles/{profile}/config.yaml")
 if not os.path.exists(p):
     print(f"  ✗ profile config not found: {p}", file=sys.stderr)
     sys.exit(1)
@@ -97,7 +97,7 @@ cfg["skills"]["always_load"] = skills
 
 # Note: we do NOT touch cfg["approvals"] — that's a security-sensitive
 # setting (manual confirmation of tool calls). Workspace cwd is overridden
-# per-task by `--workspace dir:<path>` on `hermes kanban create`, so we
+# per-task by `--workspace dir:<path>` on `fetih kanban create`, so we
 # don't need to mutate cfg["terminal"]["cwd"] either.
 
 with open(p, "w") as f:
@@ -153,7 +153,7 @@ TEAM_EOF
 # ─────────────────────────────────────────────────────────────────────
 echo "═══ Firing initial kanban task ═══"
 
-hermes kanban create "Direct production of {{TITLE}}" \
+fetih kanban create "Direct production of {{TITLE}}" \
     --assignee director \
     --workspace dir:"$WORKSPACE" \
     --tenant "$TENANT" \
@@ -178,8 +178,8 @@ echo ""
 echo "═══ Setup complete ═══"
 echo ""
 echo "Monitor with:"
-echo "  hermes kanban watch --tenant $TENANT"
-echo "  hermes kanban list  --tenant $TENANT"
-echo "  hermes dashboard"
+echo "  fetih kanban watch --tenant $TENANT"
+echo "  fetih kanban list  --tenant $TENANT"
+echo "  fetih dashboard"
 echo ""
 echo "Workspace: $WORKSPACE"

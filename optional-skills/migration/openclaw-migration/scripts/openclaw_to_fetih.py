@@ -2611,10 +2611,10 @@ class Migrator:
             discord_fetih = fetih_cfg.get("discord") or {}
             changed = False
             if "requireMention" in discord_cfg:
-                discord_hermes["require_mention"] = discord_cfg["requireMention"]
+                discord_fetih["require_mention"] = discord_cfg["requireMention"]
                 changed = True
             if discord_cfg.get("autoThread") is not None:
-                discord_hermes["auto_thread"] = discord_cfg["autoThread"]
+                discord_fetih["auto_thread"] = discord_cfg["autoThread"]
                 changed = True
             if changed and self.execute:
                 fetih_cfg["discord"] = discord_fetih
@@ -2655,10 +2655,10 @@ class Migrator:
 
         # Map fields that have FETIH equivalents
         if browser.get("cdpUrl"):
-            browser_hermes["cdp_url"] = browser["cdpUrl"]
+            browser_fetih["cdp_url"] = browser["cdpUrl"]
             changed = True
         if browser.get("headless") is not None:
-            browser_hermes["headless"] = browser["headless"]
+            browser_fetih["headless"] = browser["headless"]
             changed = True
 
         if changed:

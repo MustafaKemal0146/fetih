@@ -66,7 +66,7 @@ Watch a GitHub repo (set `GITHUB_TOKEN` in `~/.fetih/.env` to avoid the 60 req/h
 
 ```bash
 python $FETIH_HOME/skills/devops/watchers/scripts/watch_github.py \
-  --name hermes-issues --repo MustafaKemal0146/fetih --scope issues
+  --name fetih-issues --repo MustafaKemal0146/fetih --scope issues
 ```
 
 Poll an arbitrary JSON API:

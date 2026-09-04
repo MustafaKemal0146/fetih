@@ -1,6 +1,6 @@
-/* hermes-achievements dashboard styles
+/* fetih-achievements dashboard styles
  * Originally authored by @PCinkusz — https://github.com/PCinkusz/hermes-achievements (MIT).
- * Bundled into hermes-agent. The in-progress scan banner rules at the bottom
+ * Bundled into fetih. The in-progress scan banner rules at the bottom
  * (.ha-scan-banner*) are a small addition layered on top of the original bundle.
  */
 .ha-page { display: flex; flex-direction: column; gap: 1rem; }
