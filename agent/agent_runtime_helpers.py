@@ -1788,6 +1788,15 @@ def copy_reasoning_content_for_api(agent, source_msg: dict, api_msg: dict) -> No
     if source_msg.get("role") != "assistant":
         return
 
+    # 0. Strict OpenAI-compatible endpoints (Groq) reject the field outright.
+    # Must run before every promotion branch below, otherwise reasoning-emitting
+    # models served there (openai/gpt-oss-*, qwen/qwen3.*) 400 on the second
+    # request of any tool-calling turn. Refs _rejects_reasoning_content_echo().
+    if getattr(agent, "_rejects_reasoning_content_echo", None) and agent._rejects_reasoning_content_echo():
+        api_msg.pop("reasoning_content", None)
+        api_msg.pop("reasoning", None)
+        return
+
     # 1. Explicit reasoning_content already set — preserve it verbatim
     # (includes DeepSeek/Kimi's own space-placeholder written at creation
     # time, and any valid reasoning content from the same provider).

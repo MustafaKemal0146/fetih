@@ -3646,6 +3646,26 @@ class AIAgent:
             or base_url_host_matches(self.base_url, "xiaomimimo.com")
         )
 
+    def _rejects_reasoning_content_echo(self) -> bool:
+        """Return True when the active endpoint REJECTS ``reasoning_content`` echo-back.
+
+        The inverse of ``_needs_thinking_reasoning_pad()``.  Groq's
+        OpenAI-compatible API validates the Chat Completions schema strictly:
+        reasoning-emitting models served there (``openai/gpt-oss-*``,
+        ``qwen/qwen3.*``) stream a ``reasoning`` field, but replaying it back
+        as ``reasoning_content`` on the assistant tool-call message fails with
+
+            HTTP 400 — 'messages.N' : for 'role:assistant' the following must
+            be satisfied[('messages.N' : property 'reasoning_content' is
+            unsupported)]
+
+        which breaks every multi-turn tool-calling conversation on Groq.
+        Detection is host-driven (not model-name-driven) for the same reason
+        ``_needs_kimi_tool_reasoning`` is: aggregators re-exporting the same
+        models speak their own protocol.
+        """
+        return base_url_host_matches(self.base_url, "api.groq.com")
+
     def _copy_reasoning_content_for_api(self, source_msg: dict, api_msg: dict) -> None:
         """Forwarder — see ``agent.agent_runtime_helpers.copy_reasoning_content_for_api``."""
         from agent.agent_runtime_helpers import copy_reasoning_content_for_api
