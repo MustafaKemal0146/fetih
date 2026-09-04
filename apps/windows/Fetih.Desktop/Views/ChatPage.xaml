@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Fetih.Desktop.Views.ChatPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:Fetih.Desktop.Models"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Padding="20,12,20,16" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Bağlantı durumu rozeti -->
+        <Border Grid.Row="0"
+                Padding="12,8"
+                CornerRadius="6"
+                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                BorderThickness="1"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+            <Grid ColumnSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Ellipse x:Name="StatusDot"
+                         Grid.Column="0"
+                         Width="10"
+                         Height="10"
+                         VerticalAlignment="Center"
+                         Fill="{ThemeResource SystemFillColorCautionBrush}" />
+
+                <TextBlock Grid.Column="1"
+                           VerticalAlignment="Center"
+                           FontWeight="SemiBold"
+                           Text="{x:Bind Status.StateLabel, Mode=OneWay}" />
+
+                <TextBlock Grid.Column="2"
+                           VerticalAlignment="Center"
+                           Opacity="0.65"
+                           TextTrimming="CharacterEllipsis"
+                           Text="{x:Bind Status.Detail, Mode=OneWay}" />
+
+                <ProgressRing Grid.Column="3"
+                              Width="16"
+                              Height="16"
+                              IsActive="{x:Bind Status.IsBusy, Mode=OneWay}" />
+            </Grid>
+        </Border>
+
+        <!-- Mesaj listesi -->
+        <ListView x:Name="MessageList"
+                  Grid.Row="1"
+                  AutomationProperties.AutomationId="chat_messages"
+                  ItemsSource="{x:Bind Messages}"
+                  SelectionMode="None"
+                  IsItemClickEnabled="False"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    <Setter Property="Padding" Value="0,4" />
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="models:ChatMessage">
+                    <Grid>
+                        <!-- Normal mesaj baloncuğu -->
+                        <Border Padding="12,10"
+                                CornerRadius="8"
+                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                Visibility="{x:Bind IsBubble, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <StackPanel Spacing="4">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{x:Bind RoleLabel}"
+                                               FontWeight="SemiBold"
+                                               FontSize="12" />
+                                    <TextBlock Text="{x:Bind TimeLabel}"
+                                               FontSize="12"
+                                               Opacity="0.5" />
+                                </StackPanel>
+                                <TextBlock Text="{x:Bind Text, Mode=OneWay}"
+                                           TextWrapping="Wrap"
+                                           IsTextSelectionEnabled="True" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Araç-kullanım kartı (session.tool_call / tool_result) -->
+                        <Border Padding="12,10"
+                                CornerRadius="8"
+                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderThickness="1"
+                                BorderBrush="{ThemeResource SystemFillColorAttentionBackgroundBrush}"
+                                Visibility="{x:Bind IsTool, Converter={StaticResource BoolToVisibilityConverter}}">
+                            <StackPanel Spacing="6">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <ProgressRing Width="14" Height="14"
+                                                  IsActive="{x:Bind IsRunning, Mode=OneWay}" />
+                                    <TextBlock Text="{x:Bind ToolHeader, Mode=OneWay}"
+                                               FontWeight="SemiBold"
+                                               FontSize="13" />
+                                    <TextBlock Text="{x:Bind TimeLabel}"
+                                               FontSize="12"
+                                               Opacity="0.5"
+                                               VerticalAlignment="Center" />
+                                </StackPanel>
+                                <TextBlock Text="{x:Bind ToolArguments}"
+                                           FontFamily="Consolas"
+                                           FontSize="11"
+                                           Opacity="0.7"
+                                           TextWrapping="Wrap"
+                                           IsTextSelectionEnabled="True" />
+                                <TextBlock Text="{x:Bind ToolResult, Mode=OneWay}"
+                                           FontFamily="Consolas"
+                                           FontSize="11"
+                                           Opacity="0.85"
+                                           TextWrapping="Wrap"
+                                           IsTextSelectionEnabled="True"
+                                           Visibility="{x:Bind HasToolResult, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <!-- Giriş kutusu: Enter gönderir, Shift+Enter satır atlar -->
+        <Grid Grid.Row="2" ColumnSpacing="8" RowSpacing="4">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="PromptBox"
+                     Grid.Row="0"
+                     Grid.Column="0"
+                     AutomationProperties.AutomationId="chat_input"
+                     PlaceholderText="Bir görev yaz… (ör. hedef alan adı için OSINT toplama)"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     MinHeight="60"
+                     MaxHeight="160"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     TextChanged="PromptBox_TextChanged"
+                     KeyDown="PromptBox_KeyDown" />
+
+            <Button x:Name="SendButton"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Content="Gönder"
+                    MinWidth="96"
+                    VerticalAlignment="Bottom"
+                    IsEnabled="False"
+                    AutomationProperties.AutomationId="chat_send"
+                    Style="{StaticResource AccentButtonStyle}"
+                    Click="SendButton_Click" />
+
+            <TextBlock Grid.Row="1"
+                       Grid.Column="0"
+                       Grid.ColumnSpan="2"
+                       FontSize="11"
+                       Opacity="0.5"
+                       Text="Enter gönderir · Shift+Enter yeni satır" />
+        </Grid>
+    </Grid>
+</Page>

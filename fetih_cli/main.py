@@ -38,6 +38,8 @@ Usage:
     fetih update              Update to latest version
     fetih uninstall            Uninstall FETIH
     fetih acp                 Run as an ACP server for editor integration
+    fetih desktop-bridge      Run the Masaüstü Köprüsü for the native Windows app
+    fetih desktop-bridge --stdio          NDJSON over stdin/stdout
     fetih sessions browse     Interactive session picker with search
 
     fetih claw migrate --dry-run  # Preview migration without changes
@@ -9433,6 +9435,7 @@ def _build_provider_choices() -> list[str]:
 _BUILTIN_SUBCOMMANDS = frozenset(
     {
         "acp", "auth", "backup", "checkpoints", "claw", "completion",
+        "desktop-bridge",
         "dump", "fallback", "gateway", "hooks", "import", "insights",
         "kanban", "login", "logout", "logs", "lsp", "mcp", "memory",
         "model", "pairing", "plugins", "postinstall", "profile", "proxy",
@@ -11942,6 +11945,80 @@ Examples:
     # =========================================================================
     # completion command
     # =========================================================================
+    # =========================================================================
+    # desktop-bridge command  (Masaüstü Köprüsü)
+    # =========================================================================
+    # NAMING: this is NOT a "gateway".  In this repo "gateway" means the
+    # messaging-platform bridge (gateway/: Telegram, Discord, Slack ...).
+    # The desktop transport is the Masaüstü Köprüsü / desktop_bridge, and its
+    # env vars are FETIH_BRIDGE_*.  See docs/windows-app-plani.md §b.
+    desktop_bridge_parser = subparsers.add_parser(
+        "desktop-bridge",
+        help="Masaüstü Köprüsü'nü çalıştır — native Windows kabuğu için JSON-RPC sunucusu",
+        description=(
+            "Yalnızca 127.0.0.1'e bağlanan, token doğrulamalı JSON-RPC 2.0 (NDJSON) "
+            "sunucusu.  Native masaüstü uygulaması gerçek FETIH ajanını bu köprü "
+            "üzerinden sürer."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""\
+Examples:
+    fetih desktop-bridge                 WebSocket, rastgele boş port, üretilen token
+    fetih desktop-bridge --port 18790    Sabit port
+    fetih desktop-bridge --stdio         NDJSON, stdin/stdout üzerinden
+    python -m fetih_desktop_bridge --stdio
+""",
+    )
+    desktop_bridge_parser.add_argument(
+        "--stdio",
+        action="store_true",
+        help="WebSocket yerine stdin/stdout üzerinde NDJSON konuş",
+    )
+    desktop_bridge_parser.add_argument(
+        "--port",
+        type=int,
+        default=0,
+        help="WebSocket portu (0 = boş bir port seç)",
+    )
+    desktop_bridge_parser.add_argument(
+        "--token",
+        default="",
+        help="Paylaşılan token (varsayılan: $FETIH_BRIDGE_TOKEN ya da üretilir)",
+    )
+    desktop_bridge_parser.add_argument(
+        "--no-auth",
+        action="store_true",
+        help="Token kontrolünü kapat — sadece --stdio ile hata ayıklama için",
+    )
+    desktop_bridge_parser.add_argument(
+        "--bridge-version",
+        action="store_true",
+        help="Köprü protokol sürümünü yazdır ve çık",
+    )
+
+    def cmd_desktop_bridge(args):
+        """Run the Masaüstü Köprüsü server."""
+        try:
+            from fetih_desktop_bridge.entry import main as bridge_main
+        except ImportError as exc:
+            print(f"Masaüstü Köprüsü yüklenemedi: {exc}", file=sys.stderr)
+            sys.exit(1)
+
+        bridge_argv = []
+        if getattr(args, "bridge_version", False):
+            bridge_argv.append("--version")
+        if getattr(args, "stdio", False):
+            bridge_argv.append("--stdio")
+        if getattr(args, "port", 0):
+            bridge_argv.extend(["--port", str(args.port)])
+        if getattr(args, "token", ""):
+            bridge_argv.extend(["--token", args.token])
+        if getattr(args, "no_auth", False):
+            bridge_argv.append("--no-auth")
+        sys.exit(bridge_main(bridge_argv))
+
+    desktop_bridge_parser.set_defaults(func=cmd_desktop_bridge)
+
     completion_parser = subparsers.add_parser(
         "completion",
         help="Print shell completion script (bash, zsh, or fish)",

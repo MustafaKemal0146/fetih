@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Fetih.Desktop.Views.Settings.BridgePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Padding="24,16,24,32" Spacing="16" MaxWidth="920" HorizontalAlignment="Left">
+
+            <TextBlock Text="Masaüstü Köprüsü" Style="{StaticResource PageTitleTextStyle}" />
+            <TextBlock Style="{StaticResource MutedTextStyle}"
+                       Text="Masaüstü uygulaması ile Python ajanı arasındaki taşıma katmanı. Mesajlaşma köprüsünden (Telegram/Discord/WhatsApp) tamamen ayrıdır — o katman yönetimi bu sayfada yer almaz." />
+
+            <!-- Canlı durum -->
+            <Border Style="{StaticResource CardBorderStyle}">
+                <Grid ColumnSpacing="14">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <Ellipse Grid.Column="0"
+                             Width="12"
+                             Height="12"
+                             VerticalAlignment="Center"
+                             Fill="{ThemeResource SystemFillColorCautionBrush}" />
+
+                    <StackPanel Grid.Column="1" Spacing="2">
+                        <TextBlock FontWeight="SemiBold"
+                                   FontSize="15"
+                                   Text="{x:Bind Status.StateLabel, Mode=OneWay}" />
+                        <TextBlock Opacity="0.7"
+                                   TextWrapping="Wrap"
+                                   Text="{x:Bind Status.Detail, Mode=OneWay}" />
+                    </StackPanel>
+
+                    <ProgressRing Grid.Column="2"
+                                  Width="20"
+                                  Height="20"
+                                  IsActive="{x:Bind Status.IsBusy, Mode=OneWay}" />
+                </Grid>
+            </Border>
+
+            <!-- Taşıma yapılandırması -->
+            <Border Style="{StaticResource CardBorderStyle}">
+                <StackPanel>
+                    <TextBlock Text="Taşıma yapılandırması" Style="{StaticResource SectionHeaderTextStyle}" />
+                    <ItemsControl x:Name="TransportRows" ItemTemplate="{StaticResource SettingRowTemplate}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Çözümlenen yollar -->
+            <Border Style="{StaticResource CardBorderStyle}">
+                <StackPanel>
+                    <TextBlock Text="Çözümlenen yollar" Style="{StaticResource SectionHeaderTextStyle}" />
+                    <TextBlock Style="{StaticResource MutedTextStyle}"
+                               Margin="0,0,0,6"
+                               Text="Uygulama kullanıcının PATH'ine güvenmez; Python süreci mutlak yollarla başlatılacaktır." />
+                    <ItemsControl x:Name="PathRows" ItemTemplate="{StaticResource SettingRowTemplate}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Faz notu -->
+            <InfoBar x:Name="PhaseInfo"
+                     IsOpen="True"
+                     IsClosable="False"
+                     Severity="Informational"
+                     Title="Faz 1"
+                     Message="Bu sürümde köprüye bağlanılmaz; ayarlar diskteki yapılandırma dosyalarından salt okunur biçimde gösterilir." />
+
+            <Button x:Name="RefreshButton"
+                    Content="Yeniden oku"
+                    AutomationProperties.AutomationId="bridge_refresh"
+                    Click="RefreshButton_Click" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

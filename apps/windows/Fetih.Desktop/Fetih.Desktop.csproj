@@ -1,0 +1,67 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+
+    <RootNamespace>Fetih.Desktop</RootNamespace>
+    <AssemblyName>Fetih.Desktop</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <Platforms>x64;x86;ARM64</Platforms>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <RuntimeIdentifiers>win-x64;win-x86;win-arm64</RuntimeIdentifiers>
+
+    <UseWinUI>true</UseWinUI>
+
+    <!--
+      Faz 1 "unpackaged" (MSIX'siz) geliştirme derlemesi.
+      Visual Studio olmadan, yalnizca `dotnet build` / `dotnet run` ile derlenebilir olmasi icin
+      MSIX kimligi kapatilir ve Windows App SDK calisma zamani uygulamayla birlikte tasinir.
+      Faz 4'te MSIX paketleme ayri bir yapilandirma olarak eklenecek (bkz. docs/windows-app-plani.md).
+    -->
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <!--
+      .NET calisma zamani cerceve-bagimli (framework-dependent) kalir: makinede .NET 10
+      Desktop runtime kurulu, ancak self-contained icin gereken runtime pack NuGet
+      paketleri (Microsoft.NETCore.App.Runtime.win-x64 10.0.11) yayinlanmis degil.
+      Yalnizca Windows App SDK self-contained tasinir; boylece MSIX'e gerek kalmaz.
+    -->
+    <SelfContained>false</SelfContained>
+    <EnableMsixTooling>false</EnableMsixTooling>
+
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <DefaultLanguage>tr-TR</DefaultLanguage>
+
+    <!--
+      Hakkinda / Tanilama sayfalari bu degerleri calisma zamaninda okur
+      (bkz. Services/AppInfo.cs). Tek kaynak burasi olsun diye elle
+      kopyalanmis sabit yerine AssemblyMetadata olarak gomulurler.
+    -->
+    <Version>0.1.0</Version>
+    <Product>FETIH Masaustu</Product>
+    <Company>FETIH</Company>
+    <WindowsAppSdkPackageVersion>2.4.0</WindowsAppSdkPackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="$(WindowsAppSdkPackageVersion)" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.26100.7705" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="WindowsAppSdkVersion" Value="$(WindowsAppSdkPackageVersion)" />
+    <AssemblyMetadata Include="TargetFramework" Value="$(TargetFramework)" />
+  </ItemGroup>
+
+  <!--
+    App.xaml / *.xaml ogeleri WindowsAppSDK hedefleri tarafindan otomatik toplanir;
+    elle ApplicationDefinition/Page eklemek WMC1012 (birden fazla ApplicationXaml) hatasi verir.
+  -->
+
+</Project>

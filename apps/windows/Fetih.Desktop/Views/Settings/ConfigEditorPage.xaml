@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Fetih.Desktop.Views.Settings.ConfigEditorPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <ScrollViewer Padding="24,20,24,24" VerticalScrollBarVisibility="Auto">
+        <StackPanel Spacing="14" MaxWidth="880" HorizontalAlignment="Left">
+
+            <TextBlock x:Name="TitleText"
+                       Style="{StaticResource PageTitleTextStyle}"
+                       Text="Ayarlar" />
+
+            <TextBlock x:Name="SubtitleText"
+                       Style="{StaticResource MutedTextStyle}"
+                       Text="Değişiklikler ~/.fetih/config.yaml dosyasına config.set RPC'siyle yazılır." />
+
+            <!-- Durum / uyarı şeridi -->
+            <InfoBar x:Name="StatusBar"
+                     IsOpen="False"
+                     IsClosable="True"
+                     Severity="Informational" />
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button x:Name="ReloadButton"
+                        Content="Yeniden yükle"
+                        AutomationProperties.AutomationId="config_reload"
+                        Click="ReloadButton_Click" />
+                <ProgressRing x:Name="BusyRing"
+                              Width="18" Height="18"
+                              IsActive="False"
+                              VerticalAlignment="Center" />
+            </StackPanel>
+
+            <!-- Alanlar burada kod arkasında oluşturulur -->
+            <StackPanel x:Name="FieldsHost"
+                        AutomationProperties.AutomationId="config_fields"
+                        Spacing="6" />
+
+            <TextBlock x:Name="EmptyText"
+                       Style="{StaticResource MutedTextStyle}"
+                       Visibility="Collapsed"
+                       Text="Bu bölüm için düzenlenebilir alan bulunamadı." />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

@@ -75,3 +75,13 @@ fetih_cli/scripts/
 docs/superpowers/*
 # Local Claude Code settings (contains personal tool permissions)
 .claude/settings.local.json
+
+# Windows masaüstü uygulaması (.NET / WinUI 3) derleme çıktıları
+apps/windows/**/bin/
+apps/windows/**/obj/
+apps/windows/**/AppPackages/
+apps/windows/**/BundleArtifacts/
+apps/windows/**/Generated Files/
+apps/windows/**/.vs/
+*.user
+*.suo

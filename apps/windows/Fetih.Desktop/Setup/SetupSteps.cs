@@ -1,0 +1,233 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+using Fetih.Desktop.Bridge;
+using Fetih.Desktop.Services;
+
+namespace Fetih.Desktop.Setup;
+
+/// <summary>
+/// FETİH'in gerçek ön koşullarına uyarlanmış kurulum adımları (OpenClaw'ın
+/// 36 adımlık listesinin *iskeleti*, bkz. docs/openclaw-inceleme-notlari.md
+/// §5.3 sonundaki uyarlama önerisi). Bizim ön koşulumuz yalnızca Python +
+/// bir sağlayıcı anahtarı olduğu için liste kısadır ama aynı soyutlamayı
+/// kullanır: <c>CanSkip</c> ikinci çalıştırmayı onarım moduna çevirir.
+/// </summary>
+public static class SetupStepFactory
+{
+    public static IReadOnlyList<SetupStep> BuildDefaultSteps() => new SetupStep[]
+    {
+        new PreflightOsStep(),
+        new DetectPythonStep(),
+        new EnsureFetihHomeStep(),
+        new WriteEnvKeyStep(),
+        new WriteConfigStep(),
+        new StartDesktopBridgeStep(),
+        new VerifyEndToEndStep(),
+    };
+}
+
+/// <summary>İşletim sistemi Windows mu?</summary>
+public sealed class PreflightOsStep : SetupStep
+{
+    public override string Id => "preflight_os";
+    public override string DisplayName => "İşletim sistemi denetimi";
+
+    public override Task<StepResult> ExecuteAsync(SetupContext ctx, CancellationToken ct)
+        => Task.FromResult(OperatingSystem.IsWindows()
+            ? StepResult.Ok("Windows algılandı.")
+            : StepResult.Fail("Bu masaüstü kabuğu yalnızca Windows'ta çalışır."));
+}
+
+/// <summary>Köprüyü başlatabilecek bir Python var mı?</summary>
+public sealed class DetectPythonStep : SetupStep
+{
+    public override string Id => "detect_python";
+    public override string DisplayName => "Python bulunuyor";
+
+    public override Task<StepResult> ExecuteAsync(SetupContext ctx, CancellationToken ct)
+    {
+        if (BridgeLauncherProbe.HasUsablePython(out var where))
+        {
+            ctx.Notes.Add("Python: " + where);
+            return Task.FromResult(StepResult.Ok("Python bulundu: " + where));
+        }
+        return Task.FromResult(StepResult.Fail(
+            "Python bulunamadı. FETİH'i çalıştırmak için Python 3.11+ kurun " +
+            "veya FETIH_PYTHON ortam değişkenini ayarlayın."));
+    }
+}
+
+/// <summary><c>~/.fetih</c> durum dizinini oluşturur.</summary>
+public sealed class EnsureFetihHomeStep : SetupStep
+{
+    public override string Id => "ensure_fetih_home";
+    public override string DisplayName => "Durum dizini hazırlanıyor";
+
+    private bool _created;
+
+    public override Task<bool> CanSkipAsync(SetupContext ctx)
+        => Task.FromResult(Directory.Exists(FetihPaths.FetihHome));
+
+    public override Task<StepResult> ExecuteAsync(SetupContext ctx, CancellationToken ct)
+    {
+        Directory.CreateDirectory(FetihPaths.FetihHome);
+        _created = true;
+        return Task.FromResult(StepResult.Ok(FetihPaths.FetihHome + " oluşturuldu."));
+    }
+
+    public override Task RollbackAsync(SetupContext ctx, CancellationToken ct)
+    {
+        // Yalnızca BU adımın oluşturduğu boş dizini geri al; dolu dizine dokunma.
+        try
+        {
+            if (_created && Directory.Exists(FetihPaths.FetihHome) &&
+                Directory.GetFileSystemEntries(FetihPaths.FetihHome).Length == 0)
+            {
+                Directory.Delete(FetihPaths.FetihHome);
+            }
+        }
+        catch
+        {
+            // Silinemezse bırak; boş dizin zararsız.
+        }
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>
+/// API anahtarını <c>~/.fetih/.env</c> dosyasına YAZAR. Anahtar değeri köprü
+/// üzerinden GEÇMEZ (config.set gizli anahtarları reddeder); doğrudan yerel
+/// dosyaya yazılır ve <b>hiçbir yerde loglanmaz</b>.
+/// </summary>
+public sealed class WriteEnvKeyStep : SetupStep
+{
+    public override string Id => "write_env_key";
+    public override string DisplayName => "API anahtarı kaydediliyor";
+
+    private bool _wrote;
+
+    public override Task<bool> CanSkipAsync(SetupContext ctx)
+    {
+        // OAuth/yerel gibi anahtarsız sağlayıcılarda bu adım atlanır.
+        var skip = string.IsNullOrWhiteSpace(ctx.KeyEnvVar) || string.IsNullOrWhiteSpace(ctx.ApiKey);
+        return Task.FromResult(skip);
+    }
+
+    public override Task<StepResult> ExecuteAsync(SetupContext ctx, CancellationToken ct)
+    {
+        try
+        {
+            EnvFileWriter.SetValue(FetihPaths.EnvFilePath, ctx.KeyEnvVar, ctx.ApiKey);
+            _wrote = true;
+            // Yalnızca anahtar ADI bildirilir, DEĞERİ değil.
+            return Task.FromResult(StepResult.Ok(ctx.KeyEnvVar + " .env dosyasına yazıldı."));
+        }
+        catch (Exception ex)
+        {
+            return Task.FromResult(StepResult.Fail("API anahtarı yazılamadı: " + ex.Message));
+        }
+    }
+
+    public override Task RollbackAsync(SetupContext ctx, CancellationToken ct)
+    {
+        try
+        {
+            if (_wrote)
+            {
+                EnvFileWriter.RemoveValue(FetihPaths.EnvFilePath, ctx.KeyEnvVar);
+            }
+        }
+        catch
+        {
+            // Geri alma başarısızsa .env'de kalan satır zararsız.
+        }
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>
+/// Sağlayıcıyı ve varsayılan modeli köprünün <c>config.set</c> RPC'siyle
+/// diske yazar (elle YAML düzenlemesi yok).
+/// </summary>
+public sealed class WriteConfigStep : SetupStep
+{
+    public override string Id => "write_config";
+    public override string DisplayName => "Yapılandırma yazılıyor";
+
+    public override async Task<StepResult> ExecuteAsync(SetupContext ctx, CancellationToken ct)
+    {
+        try
+        {
+            await BridgeClient.Shared.EnsureConnectedAsync(ct).ConfigureAwait(false);
+            if (!string.IsNullOrWhiteSpace(ctx.ProviderId))
+            {
+                await BridgeClient.Shared.ConfigSetAsync("model.provider", ctx.ProviderId, ct).ConfigureAwait(false);
+            }
+            if (!string.IsNullOrWhiteSpace(ctx.Model))
+            {
+                await BridgeClient.Shared.ConfigSetAsync("model.default", ctx.Model, ct).ConfigureAwait(false);
+            }
+            return StepResult.Ok("model.provider / model.default kaydedildi.");
+        }
+        catch (BridgeRpcException rpc) when (rpc.Code == -32004)
+        {
+            return StepResult.Fail("Yapılandırma yazılamadı (yönetilen kurulum): " + rpc.Message);
+        }
+        catch (Exception ex)
+        {
+            return StepResult.Fail("Yapılandırma yazılamadı: " + ex.Message);
+        }
+    }
+}
+
+/// <summary>Masaüstü Köprüsü sürecini başlatıp bağlanır.</summary>
+public sealed class StartDesktopBridgeStep : SetupStep
+{
+    public override string Id => "start_bridge";
+    public override string DisplayName => "Masaüstü Köprüsü başlatılıyor";
+
+    public override async Task<StepResult> ExecuteAsync(SetupContext ctx, CancellationToken ct)
+    {
+        await BridgeClient.Shared.EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return StepResult.Ok("Köprü bağlı (protokol v" + BridgeClient.Shared.ProtocolVersion + ").");
+    }
+}
+
+/// <summary>Uçtan uca doğrulama: ping + sağlayıcı anahtarının görünürlüğü.</summary>
+public sealed class VerifyEndToEndStep : SetupStep
+{
+    public override string Id => "verify_end_to_end";
+    public override string DisplayName => "Uçtan uca doğrulama";
+
+    public override async Task<StepResult> ExecuteAsync(SetupContext ctx, CancellationToken ct)
+    {
+        await BridgeClient.Shared.PingAsync(ct).ConfigureAwait(false);
+
+        // Anahtarsız (OAuth/yerel) sağlayıcılarda anahtar denetimi atlanır.
+        if (string.IsNullOrWhiteSpace(ctx.KeyEnvVar))
+        {
+            return StepResult.Ok("Köprü yanıt veriyor.");
+        }
+
+        var providers = await BridgeClient.Shared.ProvidersListAsync(ct).ConfigureAwait(false);
+        if (providers.ValueKind == System.Text.Json.JsonValueKind.Object &&
+            providers.TryGetProperty("providers", out var list) &&
+            list.ValueKind == System.Text.Json.JsonValueKind.Array)
+        {
+            foreach (var p in list.EnumerateArray())
+            {
+                if (p.TryGetProperty("id", out var idEl) && idEl.GetString() == ctx.ProviderId)
+                {
+                    var present = p.TryGetProperty("key_present", out var kp) && kp.GetBoolean();
+                    return present
+                        ? StepResult.Ok("Sağlayıcı anahtarı görünüyor; kurulum doğrulandı.")
+                        : StepResult.Ok("Kurulum tamam ancak anahtar henüz görünmüyor (yeni oturum gerekebilir).");
+                }
+            }
+        }
+        return StepResult.Ok("Köprü yanıt veriyor.");
+    }
+}
