@@ -217,6 +217,8 @@ class BridgeServer:
                 "providers.list": self._m_providers_list,
                 "skills.list": self._m_skills_list,
                 "diagnostics.info": self._m_diagnostics_info,
+                "shell.status": self._m_shell_status,
+                "shell.ensure_user": self._m_shell_ensure_user,
             }
         )
 
@@ -535,6 +537,74 @@ class BridgeServer:
             "categories": dict(sorted(categories.items(), key=lambda kv: -kv[1])),
             "skills": skills[offset : offset + limit],
         }
+
+    # ── shell.* (Windows: Git Bash / WSL kabuk seçimi) ──────────────────
+
+    def _m_shell_status(self, conn, params):
+        """Windows kabuk backend'inin durumunu döndür.
+
+        Ayarlar UI'ı bu bilgiyle Git Bash / WSL seçicisini, kurulu WSL
+        dağıtımlarını ve seçili dağıtımdaki ``fetih`` kullanıcısının var olup
+        olmadığını gösterir.  Windows dışında ``available: False`` döner.
+        """
+        try:
+            from tools.environments import windows_shell as ws
+        except Exception as exc:  # pragma: no cover - defensive
+            return {"platform": platform.system(), "available": False,
+                    "detail": f"kabuk modülü yüklenemedi: {exc}"}
+
+        if platform.system() != "Windows":
+            return {
+                "platform": platform.system(),
+                "available": False,
+                "detail": "Kabuk seçimi yalnızca Windows'ta geçerlidir.",
+            }
+
+        pref = ws.read_shell_preference()
+        wsl = ws.wsl_status()
+        selected_distro = pref.get("distro") or wsl.get("default") or ""
+        user = pref.get("user") or ""
+        user_exists = None
+        if wsl.get("available") and user:
+            try:
+                user_exists = ws.wsl_user_exists(selected_distro or None, user)
+            except Exception:
+                user_exists = None
+
+        return {
+            "platform": "Windows",
+            "available": True,
+            "selected": pref.get("shell") or ws.SHELL_GIT_BASH,
+            "effective": ws.effective_shell(),
+            "valid_shells": list(ws.VALID_SHELLS),
+            "git_bash_path": ws.find_git_bash() or "",
+            "wsl": {
+                "available": bool(wsl.get("available")),
+                "distros": wsl.get("distros") or [],
+                "default": wsl.get("default") or "",
+                "detail": wsl.get("detail") or "",
+            },
+            "selected_distro": selected_distro,
+            "wsl_user": user,
+            "wsl_user_exists": user_exists,
+            "default_wsl_user": ws.DEFAULT_WSL_USER,
+        }
+
+    def _m_shell_ensure_user(self, conn, params):
+        """WSL dağıtımında ayrılmış FETİH kullanıcısını (yoksa) oluştur."""
+        if platform.system() != "Windows":
+            raise BridgeError(INVALID_PARAMS, "shell.ensure_user yalnızca Windows'ta çalışır")
+        try:
+            from tools.environments import windows_shell as ws
+        except Exception as exc:  # pragma: no cover - defensive
+            raise BridgeError(CONFIG_ERROR, f"kabuk modülü yüklenemedi: {exc}")
+
+        distro = (params.get("distro") or "").strip() or None
+        user = (params.get("user") or ws.DEFAULT_WSL_USER).strip() or ws.DEFAULT_WSL_USER
+        result = ws.ensure_wsl_user(distro=distro, user=user)
+        if not result.get("ok"):
+            raise BridgeError(CONFIG_ERROR, result.get("detail") or "kullanıcı oluşturulamadı")
+        return result
 
     # ── diagnostics.* ───────────────────────────────────────────────────
 

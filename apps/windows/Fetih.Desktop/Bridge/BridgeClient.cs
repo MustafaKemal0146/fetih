@@ -441,6 +441,24 @@ public sealed class BridgeClient : IDisposable
         return await CallAsync("diagnostics.info", null, ct).ConfigureAwait(false);
     }
 
+    /// <summary><c>shell.status</c> — Windows kabuk backend'inin (Git Bash / WSL) durumu.</summary>
+    public async Task<JsonElement> ShellStatusAsync(CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("shell.status", null, ct).ConfigureAwait(false);
+    }
+
+    /// <summary><c>shell.ensure_user</c> — WSL içinde ayrılmış FETİH kullanıcısını oluşturur.</summary>
+    public async Task<JsonElement> ShellEnsureUserAsync(
+        string? distro = null, string? user = null, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        var p = new Dictionary<string, object?>();
+        if (!string.IsNullOrEmpty(distro)) p["distro"] = distro;
+        if (!string.IsNullOrEmpty(user)) p["user"] = user;
+        return await CallAsync("shell.ensure_user", p, ct).ConfigureAwait(false);
+    }
+
     public async Task<JsonElement> PingAsync(CancellationToken ct = default)
     {
         return await CallAsync("bridge.ping", null, ct).ConfigureAwait(false);
