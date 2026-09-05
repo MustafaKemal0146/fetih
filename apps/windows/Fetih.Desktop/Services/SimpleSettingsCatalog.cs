@@ -1127,6 +1127,8 @@ public static class SimpleSettingsCatalog
         Intro = new(
             "Kayıtlar, eski sohbetler, yedekler ve güncellemeler. Bir sorunu araştırmadıkça bu sayfaya nadiren dokunursun.",
             "Logs, old conversations, backups and updates. Unless you are chasing a problem you rarely touch this page."),
+        // Sayfanın en altındaki iki yıkıcı işlem (bkz. SimpleSettingsPage).
+        HasDangerZone = true,
         Sections = new[]
         {
             new SimpleSection

@@ -327,5 +327,50 @@ public static class Loc
         ["simple.open_advanced"] = new(
             "Bu ayarların ham hâlini Detaylı Mod'da aç",
             "Open the raw form of these settings in Advanced Mode"),
+
+        // ── Tehlikeli Bölge (Sistem sayfasının en altı) ──────────────────
+        ["danger.title"] = new("Tehlikeli Bölge", "Danger Zone"),
+        ["danger.intro"] = new(
+            "Bu iki işlem geri alınamaz. İkisi arasındaki fark önemlidir: biri yalnızca ayarlarını sıfırlar, diğeri her şeyi siler.",
+            "These two actions cannot be undone. The difference between them matters: one only resets your settings, the other deletes everything."),
+
+        ["danger.reset.title"] = new("Sıfırla (Yeni Kurulum)", "Reset (fresh install)"),
+        ["danger.reset.desc"] = new(
+            "YALNIZCA yapılandırmanı siler: sağlayıcı/model seçimin ve API anahtarların. Sohbet geçmişin, hafızan ve günlüklerin KORUNUR. Uygulamayı bir sonraki açışında ilk kurulum sihirbazı yeniden çalışır.",
+            "Deletes ONLY your configuration: your provider/model choice and your API keys. Your conversation history, memory and logs are KEPT. The first-run setup wizard runs again the next time you open the app."),
+        ["danger.reset.button"] = new("Sıfırla (Yeni Kurulum)", "Reset (fresh install)"),
+        ["danger.reset.confirm_title"] = new(
+            "Yapılandırma sıfırlansın mı?", "Reset the configuration?"),
+        ["danger.reset.confirm_body"] = new(
+            "Sadece sağlayıcı/model ayarların ve API anahtarların (config.yaml ve .env) silinecek. Sohbet geçmişin, hafızan ve günlüklerin korunacak. Uygulamayı yeniden açtığında ilk kurulum sihirbazı çalışacak.\n\nEmin misin?",
+            "Only your provider/model settings and API keys (config.yaml and .env) will be deleted. Your conversation history, memory and logs will be kept. The setup wizard will run when you reopen the app.\n\nAre you sure?"),
+        ["danger.reset.done"] = new(
+            "Yapılandırma sıfırlandı. Sohbet geçmişin duruyor. Uygulamayı yeniden başlatman gerekiyor.",
+            "The configuration has been reset. Your conversation history is intact. You need to restart the app."),
+
+        ["danger.wipe.title"] = new("Tüm verileri sil", "Delete all data"),
+        ["danger.wipe.desc"] = new(
+            "FETİH'in senin hakkında sakladığı HER ŞEYİ siler: sohbet geçmişi, hafıza, günlükler, çalışma alanları VE yapılandırman (API anahtarların dahil). Geri alınamaz.",
+            "Deletes EVERYTHING FETİH keeps about you: conversation history, memory, logs, sandboxes AND your configuration (API keys included). It cannot be undone."),
+        ["danger.wipe.button"] = new("Tüm verileri sil", "Delete all data"),
+        ["danger.wipe.confirm_title"] = new("Emin misiniz?", "Are you sure?"),
+        ["danger.wipe.confirm_body"] = new(
+            "Bu işlem tüm sohbet geçmişini, hafızayı, günlükleri VE yapılandırmanızı (API anahtarları dahil) kalıcı olarak siler. Geri alınamaz.\n\nDevam edilsin mi?",
+            "This permanently deletes all conversation history, memory, logs AND your configuration (API keys included). It cannot be undone.\n\nShall we continue?"),
+        ["danger.wipe.done"] = new(
+            "Tüm veriler silindi. Uygulamayı yeniden başlatmanız gerekiyor.",
+            "All data has been deleted. You need to restart the app."),
+
+        ["danger.yes"] = new("Evet, sil", "Yes, delete"),
+        ["danger.yes_reset"] = new("Evet, sıfırla", "Yes, reset"),
+        ["danger.cancel"] = new("Vazgeç", "Cancel"),
+        ["danger.restart_title"] = new("Yeniden başlatma gerekiyor", "Restart required"),
+        ["danger.restart_now"] = new("Şimdi yeniden başlat", "Restart now"),
+        ["danger.restart_later"] = new("Sonra", "Later"),
+        ["danger.working"] = new("siliniyor…", "deleting…"),
+        ["danger.partial"] = new(
+            "Bazı dosyalar kullanımda olduğu için silinemedi: ",
+            "Some files could not be deleted because they are in use: "),
+        ["danger.failed"] = new("İşlem başarısız: ", "The action failed: "),
     };
 }

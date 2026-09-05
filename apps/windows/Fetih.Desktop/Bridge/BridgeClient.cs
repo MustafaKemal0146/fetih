@@ -459,6 +459,30 @@ public sealed class BridgeClient : IDisposable
         return await CallAsync("shell.ensure_user", p, ct).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// <c>system.reset_configuration</c> — SADECE <c>config.yaml</c> ve
+    /// <c>.env</c> silinir. Sohbet geçmişi, hafıza ve günlükler korunur; bir
+    /// sonraki açılışta ilk kurulum sihirbazı çalışır.
+    /// </summary>
+    public async Task<JsonElement> SystemResetConfigurationAsync(CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("system.reset_configuration",
+            new Dictionary<string, object?> { ["confirm"] = true }, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// <c>system.wipe_all_data</c> — FETIH_HOME altındaki HER ŞEY silinir
+    /// (yapılandırma, anahtarlar, sohbetler, hafıza, günlükler, çalışma
+    /// alanları). Geri alınamaz.
+    /// </summary>
+    public async Task<JsonElement> SystemWipeAllDataAsync(CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("system.wipe_all_data",
+            new Dictionary<string, object?> { ["confirm"] = true }, ct).ConfigureAwait(false);
+    }
+
     public async Task<JsonElement> PingAsync(CancellationToken ct = default)
     {
         return await CallAsync("bridge.ping", null, ct).ConfigureAwait(false);

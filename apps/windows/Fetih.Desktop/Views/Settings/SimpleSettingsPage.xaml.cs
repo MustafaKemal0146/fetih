@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -84,13 +85,18 @@ public sealed partial class SimpleSettingsPage : Page
                 return;
             }
 
-            foreach (var section in _spec.Sections)
+            for (var i = 0; i < _spec.Sections.Count; i++)
             {
-                var card = BuildSection(section, config);
+                var card = BuildSection(_spec.Sections[i], config, i);
                 if (card is not null)
                 {
                     SectionsHost.Children.Add(card);
                 }
+            }
+
+            if (_spec.HasDangerZone)
+            {
+                SectionsHost.Children.Add(BuildDangerZone());
             }
 
             HideStatus();
@@ -110,8 +116,11 @@ public sealed partial class SimpleSettingsPage : Page
         }
     }
 
+    /// <summary>Bölüm başlığının satır kutusu yüksekliği (17 pt başlık için).</summary>
+    private const double SectionTitleLine = 24;
+
     /// <summary>Bir kartı kurar. Kartta hiç görünür içerik yoksa <c>null</c> döner.</summary>
-    private Border? BuildSection(SimpleSection section, JsonElement config)
+    private Border? BuildSection(SimpleSection section, JsonElement config, int index)
     {
         var rows = new List<FrameworkElement>();
         foreach (var control in section.Controls)
@@ -141,27 +150,35 @@ public sealed partial class SimpleSettingsPage : Page
         var stroke = (Brush)Application.Current.Resources["CardStrokeColorDefaultBrush"];
         var body = new StackPanel();
 
-        // Kart başlığı
+        // Kart başlığı — ikon, başlığın İLK SATIRIYLA hizalı (başlık sarsa da).
         var headerPanel = new StackPanel { Spacing = 3 };
-        var titleRow = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };
+        var titleRow = new Grid { ColumnSpacing = 10 };
+        titleRow.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        titleRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
         if (!string.IsNullOrEmpty(section.Glyph))
         {
-            titleRow.Children.Add(new FontIcon
-            {
-                Glyph = section.Glyph,
-                FontSize = 16,
-                VerticalAlignment = VerticalAlignment.Center,
-                Foreground = (Brush)Application.Current.Resources["AccentTextFillColorPrimaryBrush"],
-            });
+            var sectionIcon = GlyphBlock(section.Glyph, 16, SectionTitleLine);
+            sectionIcon.Foreground =
+                (Brush)Application.Current.Resources["AccentTextFillColorPrimaryBrush"];
+            AutomationProperties.SetAutomationId(sectionIcon, $"sect_icon_{index}");
+            Grid.SetColumn(sectionIcon, 0);
+            titleRow.Children.Add(sectionIcon);
         }
-        titleRow.Children.Add(new TextBlock
+
+        var sectionTitle = new TextBlock
         {
             Text = section.Title.Value,
             FontSize = 17,
             FontWeight = FontWeights.SemiBold,
-            VerticalAlignment = VerticalAlignment.Center,
+            LineHeight = SectionTitleLine,
+            LineStackingStrategy = LineStackingStrategy.BlockLineHeight,
+            VerticalAlignment = VerticalAlignment.Top,
             TextWrapping = TextWrapping.Wrap,
-        });
+        };
+        AutomationProperties.SetAutomationId(sectionTitle, $"sect_title_{index}");
+        Grid.SetColumn(sectionTitle, 1);
+        titleRow.Children.Add(sectionTitle);
         headerPanel.Children.Add(titleRow);
 
         if (!section.Description.IsEmpty)
@@ -239,23 +256,24 @@ public sealed partial class SimpleSettingsPage : Page
             content.Children.Add(rows[i]);
         }
 
+        // Genişletici başlığı da aynı kurala uyar: ikon ile metin ortak bir
+        // satır kutusunu paylaşır.
+        const double expanderLine = 19;
         var headerPanel = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 10 };
         if (!string.IsNullOrEmpty(glyph))
         {
-            headerPanel.Children.Add(new FontIcon
-            {
-                Glyph = glyph,
-                FontSize = 14,
-                Opacity = 0.75,
-                VerticalAlignment = VerticalAlignment.Center,
-            });
+            var expanderIcon = GlyphBlock(glyph, 14, expanderLine);
+            expanderIcon.Opacity = 0.75;
+            headerPanel.Children.Add(expanderIcon);
         }
         headerPanel.Children.Add(new TextBlock
         {
             Text = header,
             FontSize = 13.5,
             FontWeight = FontWeights.SemiBold,
-            VerticalAlignment = VerticalAlignment.Center,
+            LineHeight = expanderLine,
+            LineStackingStrategy = LineStackingStrategy.BlockLineHeight,
+            VerticalAlignment = VerticalAlignment.Top,
         });
 
         var expander = new Expander
@@ -674,6 +692,342 @@ public sealed partial class SimpleSettingsPage : Page
         return panel;
     }
 
+    // ── Tehlikeli Bölge ──────────────────────────────────────────────────────
+    //
+    // İKİ AYRI işlem, bilerek ayrı butonlar ve ayrı onay diyaloglarıyla:
+    //
+    //   "Sıfırla (Yeni Kurulum)"  → SADECE config.yaml + .env silinir. Sohbet
+    //                               geçmişi, hafıza ve günlükler durur; bir
+    //                               sonraki açılışta SetupDetector.NeedsSetup()
+    //                               true döner ve sihirbaz yeniden çalışır.
+    //   "Tüm verileri sil"        → FETIH_HOME altındaki HER ŞEY gider.
+    //
+    // Silme işini C# YAPMAZ: her ikisi de Masaüstü Köprüsü'ndeki gerçek FETİH
+    // koduna (fetih_cli.uninstall) giden bir RPC çağrısıdır.
+
+    private Border BuildDangerZone()
+    {
+        var critical = ThemeBrush("SystemFillColorCriticalBrush", Microsoft.UI.Colors.Firebrick);
+        var body = new StackPanel();
+
+        var header = new StackPanel { Spacing = 3 };
+        var titleRow = new Grid { ColumnSpacing = 10 };
+        titleRow.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        titleRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+        var warnIcon = GlyphBlock("", 16, SectionTitleLine);
+        warnIcon.Foreground = critical;
+        Grid.SetColumn(warnIcon, 0);
+        titleRow.Children.Add(warnIcon);
+
+        var warnTitle = new TextBlock
+        {
+            Text = Loc.T("danger.title"),
+            FontSize = 17,
+            FontWeight = FontWeights.SemiBold,
+            LineHeight = SectionTitleLine,
+            LineStackingStrategy = LineStackingStrategy.BlockLineHeight,
+            VerticalAlignment = VerticalAlignment.Top,
+            Foreground = critical,
+            TextWrapping = TextWrapping.Wrap,
+        };
+        AutomationProperties.SetAutomationId(warnTitle, "danger_zone_title");
+        Grid.SetColumn(warnTitle, 1);
+        titleRow.Children.Add(warnTitle);
+        header.Children.Add(titleRow);
+
+        header.Children.Add(new TextBlock
+        {
+            Text = Loc.T("danger.intro"),
+            FontSize = 12.5,
+            Opacity = 0.75,
+            TextWrapping = TextWrapping.Wrap,
+            MaxWidth = 640,
+        });
+
+        body.Children.Add(new Border
+        {
+            Padding = new Thickness(16, 14, 16, 6),
+            Child = header,
+        });
+
+        body.Children.Add(DangerRow(
+            "danger.reset.title", "danger.reset.desc", "danger.reset.button",
+            "danger_reset", destructive: false, OnResetConfigurationAsync));
+
+        body.Children.Add(Divider(critical));
+
+        body.Children.Add(DangerRow(
+            "danger.wipe.title", "danger.wipe.desc", "danger.wipe.button",
+            "danger_wipe", destructive: true, OnWipeAllDataAsync));
+
+        var card = new Border
+        {
+            CornerRadius = new CornerRadius(8),
+            Background = ThemeBrush(
+                "SystemFillColorCriticalBackgroundBrush", Microsoft.UI.Colors.Transparent),
+            BorderThickness = new Thickness(1),
+            BorderBrush = critical,
+            Margin = new Thickness(0, 10, 0, 0),
+            Child = body,
+        };
+        AutomationProperties.SetAutomationId(card, "danger_zone");
+        return card;
+    }
+
+    private Border DangerRow(
+        string titleKey,
+        string descKey,
+        string buttonKey,
+        string automationId,
+        bool destructive,
+        Func<TextBlock, Task> action)
+    {
+        var critical = ThemeBrush("SystemFillColorCriticalBrush", Microsoft.UI.Colors.Firebrick);
+
+        var grid = new Grid { ColumnSpacing = 14 };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+        var label = new StackPanel { Spacing = 3, VerticalAlignment = VerticalAlignment.Center };
+        var title = new TextBlock
+        {
+            Text = Loc.T(titleKey),
+            FontWeight = FontWeights.SemiBold,
+            FontSize = 14,
+            LineHeight = RowTitleLine,
+            LineStackingStrategy = LineStackingStrategy.BlockLineHeight,
+            TextWrapping = TextWrapping.Wrap,
+        };
+        AutomationProperties.SetAutomationId(title, automationId + "_title");
+        label.Children.Add(title);
+        label.Children.Add(new TextBlock
+        {
+            Text = Loc.T(descKey),
+            FontSize = 12.5,
+            Opacity = 0.72,
+            LineHeight = 18,
+            TextWrapping = TextWrapping.Wrap,
+            MaxWidth = 560,
+        });
+        Grid.SetColumn(label, 0);
+        grid.Children.Add(label);
+
+        var status = StatusText();
+        var button = new Button
+        {
+            Content = Loc.T(buttonKey),
+            HorizontalAlignment = HorizontalAlignment.Right,
+        };
+        if (destructive)
+        {
+            button.Foreground = critical;
+            button.BorderBrush = critical;
+        }
+        AutomationProperties.SetAutomationId(button, automationId);
+        AutomationProperties.SetName(button, Loc.T(buttonKey));
+
+        button.Click += async (_, _) =>
+        {
+            button.IsEnabled = false;
+            try
+            {
+                await action(status);
+            }
+            catch (Exception ex)
+            {
+                status.Text = "✗ " + ex.Message;
+                App.LogCrash("SimpleSettingsPage." + automationId, ex, ex.Message);
+            }
+            finally
+            {
+                button.IsEnabled = true;
+            }
+        };
+
+        var right = new StackPanel
+        {
+            Spacing = 4,
+            VerticalAlignment = VerticalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Right,
+        };
+        right.Children.Add(button);
+        right.Children.Add(status);
+        Grid.SetColumn(right, 1);
+        grid.Children.Add(right);
+
+        return new Border { Padding = new Thickness(16, 13, 16, 13), Child = grid };
+    }
+
+    private async Task OnResetConfigurationAsync(TextBlock status)
+    {
+        var ok = await ConfirmAsync(
+            Loc.T("danger.reset.confirm_title"),
+            Loc.T("danger.reset.confirm_body"),
+            Loc.T("danger.yes_reset"),
+            "danger_reset_dialog").ConfigureAwait(true);
+        if (!ok)
+        {
+            status.Text = string.Empty;
+            return;
+        }
+
+        status.Text = Loc.T("danger.working");
+        try
+        {
+            var res = await _bridge.SystemResetConfigurationAsync().ConfigureAwait(true);
+            status.Text = Loc.T("config.saved");
+            await AfterDestructiveAsync(res, Loc.T("danger.reset.done")).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            status.Text = "✗ " + ex.Message;
+            ShowStatus(Loc.T("danger.failed") + ex.Message, InfoBarSeverity.Error);
+        }
+    }
+
+    private async Task OnWipeAllDataAsync(TextBlock status)
+    {
+        var ok = await ConfirmAsync(
+            Loc.T("danger.wipe.confirm_title"),
+            Loc.T("danger.wipe.confirm_body"),
+            Loc.T("danger.yes"),
+            "danger_wipe_dialog").ConfigureAwait(true);
+        if (!ok)
+        {
+            status.Text = string.Empty;
+            return;
+        }
+
+        status.Text = Loc.T("danger.working");
+        try
+        {
+            var res = await _bridge.SystemWipeAllDataAsync().ConfigureAwait(true);
+            status.Text = Loc.T("config.saved");
+            await AfterDestructiveAsync(res, Loc.T("danger.wipe.done")).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            status.Text = "✗ " + ex.Message;
+            ShowStatus(Loc.T("danger.failed") + ex.Message, InfoBarSeverity.Error);
+        }
+    }
+
+    /// <summary>Evet/Vazgeç onayı. "Vazgeç" varsayılan düğmedir.</summary>
+    private async Task<bool> ConfirmAsync(
+        string title, string body, string primaryText, string automationId)
+    {
+        if (XamlRoot is null)
+        {
+            return false;
+        }
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = title,
+            Content = new TextBlock { Text = body, TextWrapping = TextWrapping.Wrap },
+            PrimaryButtonText = primaryText,
+            CloseButtonText = Loc.T("danger.cancel"),
+            // Kaza eseri Enter'a basmak veri silmesin: odak "Vazgeç"tedir.
+            DefaultButton = ContentDialogButton.Close,
+        };
+        AutomationProperties.SetAutomationId(dialog, automationId);
+        var result = await dialog.ShowAsync();
+        return result == ContentDialogResult.Primary;
+    }
+
+    /// <summary>
+    /// Yıkıcı işlemden sonra: kısmi başarısızlıkları bildir, yeniden başlatmayı
+    /// öner ve kullanıcı kabul ederse uygulamayı yeni bir süreçle değiştir.
+    /// </summary>
+    private async Task AfterDestructiveAsync(JsonElement result, string message)
+    {
+        var note = message;
+        if (result.ValueKind == JsonValueKind.Object &&
+            result.TryGetProperty("failed", out var failed) &&
+            failed.ValueKind == JsonValueKind.Array &&
+            failed.GetArrayLength() > 0)
+        {
+            var paths = new List<string>();
+            foreach (var item in failed.EnumerateArray())
+            {
+                if (item.TryGetProperty("path", out var p) && p.ValueKind == JsonValueKind.String)
+                {
+                    paths.Add(p.GetString() ?? "");
+                }
+            }
+            note += "\n\n" + Loc.T("danger.partial") + string.Join(", ", paths);
+        }
+
+        ShowStatus(message, InfoBarSeverity.Success);
+        await LoadAsync().ConfigureAwait(true);
+
+        if (XamlRoot is null)
+        {
+            return;
+        }
+
+        var dialog = new ContentDialog
+        {
+            XamlRoot = XamlRoot,
+            Title = Loc.T("danger.restart_title"),
+            Content = new TextBlock { Text = note, TextWrapping = TextWrapping.Wrap },
+            PrimaryButtonText = Loc.T("danger.restart_now"),
+            CloseButtonText = Loc.T("danger.restart_later"),
+            DefaultButton = ContentDialogButton.Primary,
+        };
+        AutomationProperties.SetAutomationId(dialog, "danger_restart_dialog");
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            RestartApplication();
+        }
+    }
+
+    /// <summary>Yeni bir örnek başlatır ve mevcut süreci kapatır.</summary>
+    private static void RestartApplication()
+    {
+        try
+        {
+            var exe = Environment.ProcessPath;
+            if (!string.IsNullOrEmpty(exe))
+            {
+                Process.Start(new ProcessStartInfo(exe) { UseShellExecute = true });
+            }
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("SimpleSettingsPage.RestartApplication", ex, ex.Message);
+        }
+
+        try
+        {
+            Application.Current.Exit();
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("SimpleSettingsPage.RestartApplication.Exit", ex, ex.Message);
+        }
+    }
+
+    /// <summary>Tema fırçası; kaynak yoksa verilen renge düşer.</summary>
+    private static Brush ThemeBrush(string key, Windows.UI.Color fallback)
+    {
+        try
+        {
+            if (Application.Current.Resources.TryGetValue(key, out var value) && value is Brush brush)
+            {
+                return brush;
+            }
+        }
+        catch
+        {
+            // Kaynak sözlüğü okunamazsa yedek renge düşülür.
+        }
+        return new SolidColorBrush(fallback);
+    }
+
     // ── Kaydetme ─────────────────────────────────────────────────────────────
 
     /// <summary>
@@ -711,16 +1065,16 @@ public sealed partial class SimpleSettingsPage : Page
     private static Border RowShell(SimpleControl spec, FrameworkElement control, TextBlock? status)
     {
         var grid = new Grid { ColumnSpacing = 14 };
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
 
-        var icon = LabelIcon(spec);
-        Grid.SetColumn(icon, 0);
-        grid.Children.Add(icon);
-
-        var label = LabelPanel(spec);
-        Grid.SetColumn(label, 1);
+        // İkon ve başlık TEK bir iç ızgaradadır ve ikisi de o ızgaranın ÜSTÜNE
+        // yaslanır; ızgaranın kendisi satırda dikey ortalanır. Böylece sağdaki
+        // kontrol satırı ne kadar yükseltirse yükseltsin ikon başlıktan
+        // kopmaz — eskiden ikon satırın tepesine çivilenmiş, başlık ise
+        // ortalanmıştı ve ikisi görünür biçimde kayıyordu.
+        var label = IconLabel(spec, VerticalAlignment.Center);
+        Grid.SetColumn(label, 0);
         grid.Children.Add(label);
 
         var right = new StackPanel
@@ -734,7 +1088,7 @@ public sealed partial class SimpleSettingsPage : Page
         {
             right.Children.Add(status);
         }
-        Grid.SetColumn(right, 2);
+        Grid.SetColumn(right, 1);
         grid.Children.Add(right);
 
         return new Border { Padding = new Thickness(16, 13, 16, 13), Child = grid };
@@ -751,7 +1105,7 @@ public sealed partial class SimpleSettingsPage : Page
         Grid.SetColumn(icon, 0);
         grid.Children.Add(icon);
 
-        var stack = new StackPanel();
+        var stack = new StackPanel { VerticalAlignment = VerticalAlignment.Top };
         stack.Children.Add(LabelPanel(spec));
         stack.Children.Add(control);
         Grid.SetColumn(stack, 1);
@@ -760,25 +1114,88 @@ public sealed partial class SimpleSettingsPage : Page
         return new Border { Padding = new Thickness(16, 13, 16, 13), Child = grid };
     }
 
-    private static FontIcon LabelIcon(SimpleControl spec) => new()
+    /// <summary>
+    /// İkon + (başlık, açıklama) ikilisi. İkon, başlığın <b>ilk satırıyla</b>
+    /// dikey olarak ortalanır; başlık sarıp iki satıra düşse bile ikon ilk
+    /// satırın hizasında kalır.
+    /// </summary>
+    private static Grid IconLabel(SimpleControl spec, VerticalAlignment align)
     {
-        Glyph = string.IsNullOrEmpty(spec.Glyph) ? SettingDescriptions.GlyphFor(spec.Key) : spec.Glyph,
-        FontSize = 16,
-        Opacity = 0.75,
+        var grid = new Grid { ColumnSpacing = 14, VerticalAlignment = align };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+
+        var icon = LabelIcon(spec);
+        Grid.SetColumn(icon, 0);
+        grid.Children.Add(icon);
+
+        var panel = LabelPanel(spec);
+        Grid.SetColumn(panel, 1);
+        grid.Children.Add(panel);
+        return grid;
+    }
+
+    /// <summary>Satır başlığının satır kutusu yüksekliği (ikon da bu kutuya sığar).</summary>
+    private const double RowTitleLine = 20;
+
+    /// <summary>
+    /// Satır ikonu. <see cref="FontIcon"/> yerine bilinçli olarak
+    /// <see cref="TextBlock"/> kullanılır: satır yüksekliği (LineHeight) ile
+    /// başlığınkine birebir eşitlenebilir — ikinin ilk satır kutusu çakışınca
+    /// dikey hizalama serbest bırakılmış bir Margin tahminine değil, tipografiye
+    /// dayanır. Ayrıca UI Automation ağacında görünür, böylece hizalama
+    /// otomatik olarak doğrulanabilir.
+    /// </summary>
+    private static TextBlock LabelIcon(SimpleControl spec)
+    {
+        var icon = GlyphBlock(
+            string.IsNullOrEmpty(spec.Glyph) ? SettingDescriptions.GlyphFor(spec.Key) : spec.Glyph,
+            16,
+            RowTitleLine);
+        icon.Opacity = 0.75;
+        AutomationProperties.SetAutomationId(icon, "icon_" + IdBase(spec));
+        return icon;
+    }
+
+    /// <summary>Otomasyon kimliklerinin gövdesi: anahtar, yoksa kontrol türü.</summary>
+    private static string IdBase(SimpleControl spec)
+        => string.IsNullOrEmpty(spec.Key)
+            ? spec.Kind.ToString().ToLowerInvariant()
+            : spec.Key.Replace('.', '_');
+
+    /// <summary>
+    /// Bir Segoe Fluent Icons kod noktasını, ilk satır kutusu tam
+    /// <paramref name="lineHeight"/> yüksekliğinde olacak biçimde çizer.
+    /// </summary>
+    private static TextBlock GlyphBlock(string glyph, double fontSize, double lineHeight) => new()
+    {
+        Text = glyph,
+        FontFamily = new FontFamily("Segoe Fluent Icons"),
+        FontSize = fontSize,
+        LineHeight = lineHeight,
+        LineStackingStrategy = LineStackingStrategy.BlockLineHeight,
+        TextAlignment = TextAlignment.Center,
         VerticalAlignment = VerticalAlignment.Top,
-        Margin = new Thickness(0, 3, 0, 0),
+        // Süsleme; ekran okuyucu başlığı zaten okuyor.
+        Name = string.Empty,
     };
 
     private static StackPanel LabelPanel(SimpleControl spec)
     {
-        var panel = new StackPanel { Spacing = 3, VerticalAlignment = VerticalAlignment.Center };
-        panel.Children.Add(new TextBlock
+        var panel = new StackPanel { Spacing = 3, VerticalAlignment = VerticalAlignment.Top };
+        var title = new TextBlock
         {
             Text = spec.Title.Value,
             FontWeight = FontWeights.SemiBold,
             FontSize = 14,
+            // İkonla aynı satır kutusu: ikisinin ilk satırı aynı yükseklikte
+            // başlar ve aynı noktada biter.
+            LineHeight = RowTitleLine,
+            LineStackingStrategy = LineStackingStrategy.BlockLineHeight,
             TextWrapping = TextWrapping.Wrap,
-        });
+        };
+        AutomationProperties.SetAutomationId(title, "title_" + IdBase(spec));
+        panel.Children.Add(title);
         if (!spec.Description.IsEmpty)
         {
             panel.Children.Add(new TextBlock

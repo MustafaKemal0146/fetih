@@ -142,4 +142,12 @@ public sealed class SimplePage
 
     /// <summary>Kartlar.</summary>
     public IReadOnlyList<SimpleSection> Sections { get; init; } = Array.Empty<SimpleSection>();
+
+    /// <summary>
+    /// Sayfanın en altına "Tehlikeli Bölge" kartı eklensin mi? Buradaki iki
+    /// işlem (tüm verileri sil / yapılandırmayı sıfırla) bir config anahtarına
+    /// değil, Masaüstü Köprüsü'ndeki <c>system.*</c> RPC'lerine bağlıdır; bu
+    /// yüzden katalogda kontrol olarak değil, sayfa bayrağı olarak durur.
+    /// </summary>
+    public bool HasDangerZone { get; init; }
 }
