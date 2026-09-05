@@ -8,12 +8,22 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Padding="24,16,24,16" RowSpacing="12">
+    <!--
+        SORUN 1: sayfanın kökü bir ScrollViewer. "Etkin yapılandırma" kartı
+        yüksek olduğundan, küçük pencerede sağlayıcı listesi eskiden ekranın
+        dışında kalıyordu. Liste kendi kaydırmasını devre dışı bırakır
+        (aşağıdaki VerticalScrollMode="Disabled") ve tüm yüksekliğiyle
+        çizilir; kaydırmayı tek bir dış ScrollViewer yönetir.
+    -->
+    <ScrollViewer AutomationProperties.AutomationId="provider_scroll"
+                  VerticalScrollBarVisibility="Auto"
+                  VerticalScrollMode="Enabled">
+    <Grid Padding="24,16,24,32" RowSpacing="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Spacing="4">
@@ -104,7 +114,8 @@
                   x:Name="ProviderList"
                   AutomationProperties.AutomationId="provider_list"
                   SelectionMode="None"
-                  ScrollViewer.VerticalScrollBarVisibility="Auto">
+                  ScrollViewer.VerticalScrollMode="Disabled"
+                  ScrollViewer.VerticalScrollBarVisibility="Disabled">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -187,4 +198,5 @@
             </ListView.ItemTemplate>
         </ListView>
     </Grid>
+    </ScrollViewer>
 </Page>

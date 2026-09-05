@@ -7,7 +7,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <ScrollViewer Padding="24,16,24,24">
+    <ScrollViewer Padding="24,16,24,32"
+                  AutomationProperties.AutomationId="shell_scroll"
+                  VerticalScrollBarVisibility="Auto"
+                  VerticalScrollMode="Enabled">
         <StackPanel Spacing="16" MaxWidth="720" HorizontalAlignment="Left">
             <StackPanel Spacing="4">
                 <TextBlock x:Name="TitleText" Text="Kabuk (Windows)" Style="{StaticResource PageTitleTextStyle}" />
@@ -96,6 +99,7 @@
                     </StackPanel>
 
                     <TextBlock x:Name="EffectiveText"
+                               AutomationProperties.AutomationId="shell_effective"
                                FontSize="12"
                                Opacity="0.6"
                                TextWrapping="Wrap" />

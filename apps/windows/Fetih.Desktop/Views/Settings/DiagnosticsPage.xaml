@@ -7,98 +7,111 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Padding="24,16,24,16" RowSpacing="12">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+    <!--
+        SORUN 1: sayfa daha önce kök bir Grid'di ve "Çökme günlüğü" kartı
+        yıldız (*) satırdaydı; pencere varsayılan boyuttayken kart ekranın
+        altında kalıyor, kullanıcı pencereyi büyütmek zorunda kalıyordu.
+        Artık kök bir ScrollViewer var, tüm satırlar Auto yükseklikte ve
+        günlük kutusunun sabit bir yüksekliği var — pencere ne kadar küçük
+        olursa olsun en alttaki "Günlüğü temizle" düğmesine kaydırarak
+        erişilebilir.
+    -->
+    <ScrollViewer AutomationProperties.AutomationId="diagnostics_scroll"
+                  VerticalScrollBarVisibility="Auto"
+                  VerticalScrollMode="Enabled">
+        <Grid Padding="24,16,24,32" RowSpacing="12" MaxWidth="1000" HorizontalAlignment="Left">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Spacing="4">
-            <TextBlock Text="Tanılama" Style="{StaticResource PageTitleTextStyle}" />
-            <TextBlock Style="{StaticResource MutedTextStyle}"
-                       Text="Destek istenirken ilk bakılacak yer: çalışma zamanı bilgisi, çözümlenen yollar ve çökme günlüğü." />
-        </StackPanel>
+            <StackPanel Grid.Row="0" Spacing="4">
+                <TextBlock Text="Tanılama" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock Style="{StaticResource MutedTextStyle}"
+                           Text="Destek istenirken ilk bakılacak yer: çalışma zamanı bilgisi, çözümlenen yollar ve çökme günlüğü." />
+            </StackPanel>
 
-        <!-- Üst blok: sistem bilgisi + yollar yan yana -->
-        <Grid Grid.Row="1" ColumnSpacing="12">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+            <!--
+                Üst blok: sistem bilgisi ve çözümlenen yollar. Eskiden yan yana
+                iki sütundaydı; satır şablonunun 240 px sabit etiket sütunu
+                yüzünden değer sütunu ~100 px'e düşüyor ve uzun Windows yolları
+                harf harf sarılıyordu. Artık alt alta, tam genişlikte.
+            -->
+            <StackPanel Grid.Row="1" Spacing="12">
+                <Border Style="{StaticResource CardBorderStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Sistem bilgisi" Style="{StaticResource SectionHeaderTextStyle}" />
+                        <ItemsControl x:Name="SystemRows" ItemTemplate="{StaticResource SettingRowTemplate}" />
+                    </StackPanel>
+                </Border>
 
-            <Border Grid.Column="0" Style="{StaticResource CardBorderStyle}" VerticalAlignment="Top">
-                <StackPanel>
-                    <TextBlock Text="Sistem bilgisi" Style="{StaticResource SectionHeaderTextStyle}" />
-                    <ItemsControl x:Name="SystemRows" ItemTemplate="{StaticResource SettingRowTemplate}" />
-                </StackPanel>
-            </Border>
+                <Border Style="{StaticResource CardBorderStyle}">
+                    <StackPanel>
+                        <TextBlock Text="Çözümlenen yollar" Style="{StaticResource SectionHeaderTextStyle}" />
+                        <ItemsControl x:Name="PathRows" ItemTemplate="{StaticResource SettingRowTemplate}" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
 
-            <Border Grid.Column="1" Style="{StaticResource CardBorderStyle}" VerticalAlignment="Top">
-                <StackPanel>
-                    <TextBlock Text="Çözümlenen yollar" Style="{StaticResource SectionHeaderTextStyle}" />
-                    <ItemsControl x:Name="PathRows" ItemTemplate="{StaticResource SettingRowTemplate}" />
+            <!-- Çökme günlüğü -->
+            <Border Grid.Row="2" Style="{StaticResource CardBorderStyle}">
+                <StackPanel Spacing="8">
+
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="2">
+                            <TextBlock Text="Çökme günlüğü" Style="{StaticResource SectionHeaderTextStyle}" />
+                            <TextBlock x:Name="CrashLogMeta"
+                                       FontSize="12"
+                                       Opacity="0.6"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <Button Grid.Column="1"
+                                Content="Yenile"
+                                VerticalAlignment="Center"
+                                AutomationProperties.AutomationId="diagnostics_refresh"
+                                Click="RefreshButton_Click" />
+                        <Button Grid.Column="2"
+                                Content="Panoya kopyala"
+                                VerticalAlignment="Center"
+                                AutomationProperties.AutomationId="diagnostics_copy"
+                                Click="CopyButton_Click" />
+                        <Button Grid.Column="3"
+                                Content="Günlüğü temizle"
+                                VerticalAlignment="Center"
+                                AutomationProperties.AutomationId="diagnostics_clear"
+                                Click="ClearButton_Click" />
+                    </Grid>
+
+                    <InfoBar x:Name="ActionInfo"
+                             IsOpen="False"
+                             IsClosable="True"
+                             Severity="Success" />
+
+                    <!--
+                        Sabit yükseklik: ScrollViewer içindeki bir TextBox
+                        "*" yükseklik alamaz, aksi hâlde sonsuz büyür.
+                    -->
+                    <TextBox x:Name="CrashLogText"
+                             AutomationProperties.AutomationId="diagnostics_log"
+                             IsReadOnly="True"
+                             AcceptsReturn="True"
+                             TextWrapping="NoWrap"
+                             FontFamily="Consolas"
+                             FontSize="12"
+                             Height="300"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             ScrollViewer.HorizontalScrollBarVisibility="Auto" />
                 </StackPanel>
             </Border>
         </Grid>
-
-        <!-- Çökme günlüğü -->
-        <Border Grid.Row="2" Style="{StaticResource CardBorderStyle}">
-            <Grid RowSpacing="8">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-
-                <Grid Grid.Row="0" ColumnSpacing="8">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0" Spacing="2">
-                        <TextBlock Text="Çökme günlüğü" Style="{StaticResource SectionHeaderTextStyle}" />
-                        <TextBlock x:Name="CrashLogMeta"
-                                   FontSize="12"
-                                   Opacity="0.6"
-                                   TextWrapping="Wrap" />
-                    </StackPanel>
-
-                    <Button Grid.Column="1"
-                            Content="Yenile"
-                            AutomationProperties.AutomationId="diagnostics_refresh"
-                            Click="RefreshButton_Click" />
-                    <Button Grid.Column="2"
-                            Content="Panoya kopyala"
-                            AutomationProperties.AutomationId="diagnostics_copy"
-                            Click="CopyButton_Click" />
-                    <Button Grid.Column="3"
-                            Content="Günlüğü temizle"
-                            AutomationProperties.AutomationId="diagnostics_clear"
-                            Click="ClearButton_Click" />
-                </Grid>
-
-                <InfoBar x:Name="ActionInfo"
-                         Grid.Row="1"
-                         IsOpen="False"
-                         IsClosable="True"
-                         Severity="Success" />
-
-                <TextBox x:Name="CrashLogText"
-                         Grid.Row="2"
-                         AutomationProperties.AutomationId="diagnostics_log"
-                         IsReadOnly="True"
-                         AcceptsReturn="True"
-                         TextWrapping="NoWrap"
-                         FontFamily="Consolas"
-                         FontSize="12"
-                         MinHeight="180"
-                         ScrollViewer.VerticalScrollBarVisibility="Auto"
-                         ScrollViewer.HorizontalScrollBarVisibility="Auto" />
-            </Grid>
-        </Border>
-    </Grid>
+    </ScrollViewer>
 </Page>

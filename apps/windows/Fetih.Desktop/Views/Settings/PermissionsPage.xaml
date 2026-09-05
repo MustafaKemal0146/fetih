@@ -8,7 +8,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <ScrollViewer AutomationProperties.AutomationId="permissions_scroll"
+                  VerticalScrollBarVisibility="Auto"
+                  VerticalScrollMode="Enabled">
         <StackPanel Padding="24,16,24,32" Spacing="16" MaxWidth="980" HorizontalAlignment="Left">
 
             <TextBlock Text="İzinler" Style="{StaticResource PageTitleTextStyle}" />
