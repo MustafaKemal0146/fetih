@@ -88,14 +88,23 @@ public sealed class BridgeStatus : INotifyPropertyChanged
     public bool IsBusy =>
         State is BridgeConnectionState.Connecting or BridgeConnectionState.Reconnecting;
 
+    /// <summary>
+    /// Bağlantı rozetinin metni. Arayüzün geri kalanıyla aynı dilde olsun diye
+    /// sabit Türkçe metin yerine yerelleştirme tablosundan okunur.
+    /// </summary>
     public string StateLabel => State switch
     {
-        BridgeConnectionState.Idle => "Bağlantı bekleniyor…",
-        BridgeConnectionState.Connecting => "Bağlanılıyor…",
-        BridgeConnectionState.Ready => "Bağlı",
-        BridgeConnectionState.Reconnecting => "Yeniden bağlanılıyor…",
-        _ => "Bağlantı hatası",
+        BridgeConnectionState.Idle => Services.Loc.T("bridge.state.idle"),
+        BridgeConnectionState.Connecting => Services.Loc.T("bridge.state.connecting"),
+        BridgeConnectionState.Ready => Services.Loc.T("bridge.state.ready"),
+        BridgeConnectionState.Reconnecting => Services.Loc.T("bridge.state.reconnecting"),
+        _ => Services.Loc.T("bridge.state.error"),
     };
+
+    /// <summary>
+    /// Arayüz dili değiştiğinde rozet metnini yeniden okutur (durum aynı kalır).
+    /// </summary>
+    public void RefreshLabels() => Notify(nameof(StateLabel));
 
     public void Update(BridgeConnectionState state, string detail)
     {

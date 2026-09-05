@@ -1,168 +1,1014 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Fetih.Desktop.Services;
 
 /// <summary>
-/// Ayar satırları için insan-okur açıklamalar (Görev F). Kaynak:
-/// <c>docs/fetih-ozellik-envanteri.md</c>. Her giriş, ayarın ne işe yaradığını,
-/// değiştirilirse ne olacağını ve varsayılanının neden öyle olduğunu 2-4 cümleyle
-/// anlatır. Anahtar, noktalı config yolu (<c>agent.max_turns</c>) veya bir kök
-/// bölüm adıdır (<c>agent</c>).
+/// Ayar satırları için <b>anahtar-seviyesi</b> katalog: her config anahtarı için
+/// insan-dostu etiket (TR/EN), o anahtara özgü açıklama (TR/EN) ve bir ikon.
+/// Kaynak: <c>docs/fetih-ozellik-envanteri.md</c>, <c>fetih_cli/config.py</c>
+/// varsayılanları ve ilgili Python modülleri.
 ///
-/// <para>Tam config yüzeyi çok geniş olduğundan burada en sık dokunulan/kritik
-/// anahtarlar küratörlenir; bilinmeyen bir anahtar için açıklama gösterilmez
-/// (satır yine düzenlenebilir kalır). Hem jenerik <c>ConfigEditorPage</c> hem
-/// küratörlü sayfalar bu tabloyu kullanır.</para>
+/// <para><b>Önemli tasarım kuralı:</b> açıklama çözümlemesi <i>yalnızca birebir
+/// anahtar eşleşmesiyle</i> yapılır. Eskiden <c>security.tirith_path</c> gibi bir
+/// anahtar için tabloda giriş bulunamayınca önce son segmente, sonra kök bölüme
+/// (<c>security</c>) düşülüyordu; sonuç olarak bir bölümdeki BÜTÜN satırların
+/// altında aynı kategori-seviyesi metin tekrarlanıyordu. Artık kök girişleri
+/// yalnızca bölüm başlığında (<see cref="SectionDescription"/>) kullanılır;
+/// tabloda karşılığı olmayan bir yaprak anahtar için açıklama hiç gösterilmez.</para>
 /// </summary>
 public static class SettingDescriptions
 {
+    /// <summary>Katalog girdisi: etiket, açıklama ve ikon (tümü isteğe bağlı).</summary>
+    private readonly record struct Entry(
+        string LabelTr,
+        string LabelEn,
+        string DescTr = "",
+        string DescEn = "",
+        string Glyph = "");
+
+    // ── Genel API ────────────────────────────────────────────────────────────
+
     /// <summary>
-    /// Bir config yolu için açıklama döndürür; yoksa son segmenti, o da yoksa
-    /// kök bölümü dener. Hiçbiri yoksa <c>null</c>.
+    /// Bir config yolu için o yola <b>özgü</b> açıklama. Birebir eşleşme yoksa
+    /// <c>null</c> döner — kategori metnine ASLA düşülmez.
     /// </summary>
     public static string? For(string keyPath)
     {
-        if (string.IsNullOrWhiteSpace(keyPath))
+        if (string.IsNullOrWhiteSpace(keyPath) || !Table.TryGetValue(keyPath, out var e))
         {
             return null;
         }
 
-        if (Table.TryGetValue(keyPath, out var exact))
+        var text = Loc.Current == UiLanguage.Turkish ? e.DescTr : e.DescEn;
+        return string.IsNullOrWhiteSpace(text) ? null : text;
+    }
+
+    /// <summary>
+    /// Bir config yolu için etkin arayüz dilinde insan-dostu etiket. Katalogda
+    /// yoksa son segment okunabilir hale getirilir (<c>allow_private_urls</c> →
+    /// "Allow private urls").
+    /// </summary>
+    public static string LabelFor(string keyPath)
+    {
+        if (string.IsNullOrWhiteSpace(keyPath))
         {
-            return Localize(exact);
+            return string.Empty;
         }
 
-        // Son segment (ör. "agent.retry.max_attempts" → "max_attempts").
-        var lastDot = keyPath.LastIndexOf('.');
-        if (lastDot >= 0)
+        if (Table.TryGetValue(keyPath, out var e))
         {
-            var leaf = keyPath[(lastDot + 1)..];
-            if (Table.TryGetValue(leaf, out var byLeaf))
+            var label = Loc.Current == UiLanguage.Turkish ? e.LabelTr : e.LabelEn;
+            if (!string.IsNullOrWhiteSpace(label))
             {
-                return Localize(byLeaf);
+                return label;
             }
         }
 
-        // Kök bölüm (ör. "security.xxx" → "security").
-        var firstDot = keyPath.IndexOf('.');
-        var root = firstDot >= 0 ? keyPath[..firstDot] : keyPath;
-        if (Table.TryGetValue(root, out var byRoot))
-        {
-            return Localize(byRoot);
-        }
-
-        return null;
+        var idx = keyPath.LastIndexOf('.');
+        return Humanize(idx >= 0 ? keyPath[(idx + 1)..] : keyPath);
     }
 
-    private static string Localize((string Tr, string En) pair)
-        => Loc.Current == UiLanguage.Turkish ? pair.Tr : pair.En;
-
-    private static readonly Dictionary<string, (string Tr, string En)> Table =
-        new(StringComparer.Ordinal)
+    /// <summary>Bir kök bölüm için başlık (ör. <c>security</c> → "Güvenlik").</summary>
+    public static string SectionTitle(string root)
     {
-        // ── model / sağlayıcı ────────────────────────────────────────────
-        ["model"] = (
-            "Etkin model ve sağlayıcı seçimi. FETİH model-agnostiktir; buradaki değerler bir sonraki oturumda kullanılacak varsayılan modeli belirler.",
-            "Active model and provider selection. FETİH is model-agnostic; these values set the default model used for the next session."),
-        ["model.provider"] = (
-            "Kullanılacak sağlayıcının kimliği (ör. groq, anthropic, openrouter). Değiştirirsen sonraki mesajlar o sağlayıcının API'sine gider; ilgili API anahtarı ~/.fetih/.env içinde tanımlı olmalıdır.",
-            "The provider id to use (e.g. groq, anthropic, openrouter). Changing it routes the next messages to that provider's API; its API key must be defined in ~/.fetih/.env."),
-        ["model.default"] = (
-            "Sağlayıcı içindeki varsayılan model kimliği (ör. llama-3.3-70b-versatile). Sağlayıcının desteklediği bir model olmalıdır; yanlış bir kimlik ilk çağrıda hata verir.",
-            "The default model id within the provider (e.g. llama-3.3-70b-versatile). It must be a model the provider supports; an invalid id fails on the first call."),
-        ["fallback_model"] = (
-            "Birincil sağlayıcı 429/529/503 gibi geçici hatalar döndürdüğünde otomatik devreye giren yedek model. Boşsa yedek yoktur ve hata doğrudan sana yansır.",
-            "A backup model that kicks in automatically when the primary provider returns transient errors like 429/529/503. If empty there is no fallback and the error surfaces directly."),
-        ["fallback_providers"] = (
-            "Birincil sağlayıcı başarısız olduğunda sırayla denenecek sağlayıcı listesi. Kesinti dayanıklılığı sağlar; boş bırakılırsa yalnızca birincil sağlayıcı kullanılır.",
-            "An ordered list of providers tried in turn when the primary fails. Adds resilience to outages; if empty only the primary provider is used."),
+        if (Table.TryGetValue(root, out var e))
+        {
+            var label = Loc.Current == UiLanguage.Turkish ? e.LabelTr : e.LabelEn;
+            if (!string.IsNullOrWhiteSpace(label))
+            {
+                return label;
+            }
+        }
+        return Humanize(root);
+    }
 
-        // ── toolsets / araçlar ───────────────────────────────────────────
-        ["toolsets"] = (
-            "Ajanın erişebildiği araç kümeleri (file, terminal, web, search, vision …). Daha az küme = daha küçük istem tabanı ve daha hızlı/ucuz çağrı; daha fazla küme = daha yetenekli ama daha büyük bağlam.",
-            "The tool groups the agent can access (file, terminal, web, search, vision …). Fewer groups = smaller prompt base and faster/cheaper calls; more groups = more capable but larger context."),
-        ["disabled_toolsets"] = (
-            "Açıkça devre dışı bırakılan araç kümeleri. Belirli bir aracın hiç yüklenmemesini istiyorsan buraya ekle; güvenlik veya token tasarrufu için kullanılır.",
-            "Tool groups that are explicitly disabled. Add a group here to prevent a tool from ever loading; used for safety or to save tokens."),
+    /// <summary>Bir kök bölümün kategori-seviyesi açıklaması (yalnızca başlıkta).</summary>
+    public static string? SectionDescription(string root)
+    {
+        if (!Table.TryGetValue(root, out var e))
+        {
+            return null;
+        }
+        var text = Loc.Current == UiLanguage.Turkish ? e.DescTr : e.DescEn;
+        return string.IsNullOrWhiteSpace(text) ? null : text;
+    }
 
-        // ── agent ────────────────────────────────────────────────────────
-        ["agent"] = (
-            "Ajan çalışma zamanı davranışı: tur sınırı, zaman aşımı, yeniden deneme ve araç kullanım zorlaması. Bu değerler bir turun ne kadar sürebileceğini ve ne kadar dayanıklı olacağını belirler.",
-            "Agent runtime behaviour: turn limit, timeout, retry and tool-use enforcement. These values decide how long a turn may run and how resilient it is."),
-        ["max_turns"] = (
-            "Bir kullanıcı mesajına yanıt verirken ajanın yapabileceği en fazla model-araç döngüsü sayısı. Yüksek değer karmaşık görevleri bitirmeye izin verir ama maliyeti ve süreyi artırır; düşük değer erken durdurur.",
-            "The maximum number of model-tool loops the agent may run while answering one user message. Higher lets it finish complex tasks but raises cost and time; lower stops it early."),
-        ["timeout"] = (
-            "Tek bir işlemin (model çağrısı veya araç yürütmesi) saniye cinsinden üst sınırı. Aşılırsa işlem iptal edilir; ağ yavaşsa artır, hızlı başarısızlık istiyorsan azalt.",
-            "The upper bound in seconds for a single operation (model call or tool execution). Exceeding it cancels the operation; raise it on slow networks, lower it for fast failure."),
+    /// <summary>Satır ikonu (Segoe Fluent Icons kod noktası).</summary>
+    public static string GlyphFor(string keyPath)
+    {
+        if (!string.IsNullOrWhiteSpace(keyPath) &&
+            Table.TryGetValue(keyPath, out var e) &&
+            !string.IsNullOrEmpty(e.Glyph))
+        {
+            return e.Glyph;
+        }
 
-        // ── terminal / sandbox ───────────────────────────────────────────
-        ["terminal"] = (
-            "Terminal aracının yürütme ortamı: yerel makine mi yoksa bir sandbox/konteyner mı, ve kabuk/kaynak sınırları. Yanlış ayar terminal aracını çalışmaz hale getirebilir.",
-            "The terminal tool's execution environment: local machine or a sandbox/container, plus shell and resource limits. A wrong setting can make the terminal tool unusable."),
-        ["backend"] = (
-            "Komutların çalıştığı arka uç: local (doğrudan makine), docker, wsl vb. Sandbox arka uçları izolasyon sağlar ama kurulum gerektirir; local en hızlısıdır ama izolasyon yoktur.",
-            "The backend commands run on: local (the machine directly), docker, wsl, etc. Sandbox backends provide isolation but require setup; local is fastest but has no isolation."),
-        ["windows_shell"] = (
-            "Windows'ta terminal komutlarını çalıştıran POSIX kabuğu: git-bash (varsayılan, Windows dosya sistemine doğrudan erişir) veya wsl (gerçek Linux dağıtımı). PowerShell bilinçli olarak sunulmaz çünkü araç katmanı POSIX semantiğine dayanır.",
-            "The POSIX shell that runs terminal commands on Windows: git-bash (default, direct access to the Windows filesystem) or wsl (a real Linux distro). PowerShell is deliberately not offered because the tool layer relies on POSIX semantics."),
-        ["wsl_distro"] = (
-            "windows_shell=wsl iken kullanılacak WSL dağıtımı. Boş bırakılırsa wsl.exe'nin varsayılan dağıtımı kullanılır; birden çok dağıtımın varsa belirli birini seçmek için doldur.",
-            "Which WSL distribution to use when windows_shell=wsl. If empty, wsl.exe's default distribution is used; set it to pick a specific one when you have several."),
-        ["wsl_user"] = (
-            "WSL kabuğunun hangi kullanıcı olarak çalışacağı. 'fetih' ayrılmış kullanıcısını seçmek, ajanın yazdığı dosyaları kendi ev dizininden ayrı tutar; boşsa dağıtımın varsayılan kullanıcısı kullanılır.",
-            "Which user the WSL shell runs as. Choosing the dedicated 'fetih' user keeps agent-written files separate from your own home directory; if empty the distro's default user is used."),
-        ["container_memory"] = (
-            "Sandbox konteynerine ayrılan bellek (MB). Ağır araçlar (derleyiciler, tersine mühendislik) için artır; çok düşükse süreçler OOM ile ölür. Yalnızca konteyner arka uçlarında geçerlidir.",
-            "Memory allotted to the sandbox container (MB). Raise it for heavy tools (compilers, reverse-engineering); too low and processes die with OOM. Only applies to container backends."),
+        var firstDot = keyPath?.IndexOf('.') ?? -1;
+        var root = firstDot >= 0 ? keyPath![..firstDot] : keyPath ?? string.Empty;
+        return RootGlyphs.TryGetValue(root, out var g) ? g : GlyphSetting;
+    }
 
-        // ── security ─────────────────────────────────────────────────────
-        ["security"] = (
-            "Güvenlik korumaları: gizli-veri redaksiyonu, site kara listesi ve danışma uyarıları. Bunları gevşetmek FETİH'i daha esnek ama daha riskli yapar; sıkı varsayılanlar bilinçli tercihtir.",
-            "Security guardrails: secret redaction, site blocklists and advisory warnings. Loosening these makes FETİH more flexible but riskier; the strict defaults are intentional."),
+    /// <summary>Katalogda birebir girişi var mı? (Test/tanılama için.)</summary>
+    public static bool HasEntry(string keyPath)
+        => !string.IsNullOrWhiteSpace(keyPath) && Table.ContainsKey(keyPath);
 
-        // ── approvals / izinler ──────────────────────────────────────────
-        ["approvals"] = (
-            "Hangi eylemlerin çalışmadan önce senin onayını gerektirdiği. Daha fazla onay = daha güvenli ama daha yavaş akış; otomasyonda güveniyorsan bazı eylemleri otomatik kabule alabilirsin.",
-            "Which actions require your approval before running. More approvals = safer but slower flow; if you trust automation you can auto-accept some actions."),
-        ["command_allowlist"] = (
-            "Onay istemeden çalışmasına izin verilen komutlar. Sık kullanılan güvenli komutları buraya ekleyerek akışı hızlandırırsın; dikkatli tut, çünkü buradaki her şey sorgusuz çalışır.",
-            "Commands allowed to run without asking for approval. Add frequently-used safe commands here to speed up the flow; keep it tight because everything listed runs unquestioned."),
+    private static string Humanize(string key)
+    {
+        if (string.IsNullOrEmpty(key))
+        {
+            return key;
+        }
+        var words = key.Replace('_', ' ').Replace('-', ' ');
+        return char.ToUpper(words[0], CultureInfo.InvariantCulture) + words[1..];
+    }
 
-        // ── voice / ses ──────────────────────────────────────────────────
-        ["tts"] = (
-            "Metin-konuşma (seslendirme) ayarları: motor, ses ve dil. Kapalıysa yanıtlar yalnızca metin olarak gelir; açmak bir TTS sağlayıcısı/anahtarı gerektirebilir.",
-            "Text-to-speech settings: engine, voice and language. If off, responses are text only; enabling it may require a TTS provider/key."),
-        ["stt"] = (
-            "Konuşma-metin (dikte) ayarları: motor ve dil. Sesli mod için mikrofon girişini metne çevirir; kapalıysa sesli komut kullanılamaz.",
-            "Speech-to-text (dictation) settings: engine and language. Converts microphone input to text for voice mode; if off, voice commands are unavailable."),
+    // ── İkonlar ──────────────────────────────────────────────────────────────
 
-        // ── memory / bağlam ──────────────────────────────────────────────
-        ["memory"] = (
-            "Kalıcı hafıza: FETİH'in oturumlar arası hatırladığı bilgiler. Açık tutmak süreklilik sağlar; kapatmak her oturumu sıfırdan başlatır ve gizliliği artırır.",
-            "Persistent memory: what FETİH remembers across sessions. Keeping it on provides continuity; turning it off starts each session fresh and improves privacy."),
-        ["compression"] = (
-            "Bağlam sıkıştırma: konuşma uzadığında eski mesajların özetlenmesi. Token tavanına takılmayı önler ama çok agresifse ayrıntı kaybına yol açabilir.",
-            "Context compression: summarising older messages as the conversation grows. Prevents hitting the token ceiling but, if too aggressive, can lose detail."),
-        ["prompt_caching"] = (
-            "İstem önbellekleme: sabit istem önekinin sağlayıcıda önbelleğe alınması. Desteklendiğinde maliyeti ve gecikmeyi düşürür; desteklenmeyen sağlayıcılarda etkisizdir.",
-            "Prompt caching: caching the stable prompt prefix at the provider. Lowers cost and latency where supported; a no-op on providers that don't support it."),
+    private const string GlyphSetting = "\uE713";
+    private const string GlyphLock = "\uE72E";
+    private const string GlyphUnlock = "\uE785";
+    private const string GlyphWarning = "\uE7BA";
+    private const string GlyphInfo = "\uE946";
+    private const string GlyphGlobe = "\uE774";
+    private const string GlyphFolder = "\uE8B7";
+    private const string GlyphMic = "\uE720";
+    private const string GlyphVolume = "\uE767";
+    private const string GlyphClock = "\uE916";
+    private const string GlyphHistory = "\uE81C";
+    private const string GlyphLibrary = "\uE8F1";
+    private const string GlyphBolt = "\uE945";
+    private const string GlyphSync = "\uE895";
+    private const string GlyphView = "\uE890";
+    private const string GlyphPage = "\uE7C3";
+    private const string GlyphSave = "\uE74E";
+    private const string GlyphApps = "\uE71D";
+    private const string GlyphCode = "\uE943";
+    private const string GlyphContact = "\uE77B";
+    private const string GlyphList = "\uE8FD";
+    private const string GlyphCheck = "\uE73E";
+    private const string GlyphNetwork = "\uE839";
+    private const string GlyphSearch = "\uE721";
+    private const string GlyphTarget = "\uE7C1";
 
-        // ── display / görünüm ────────────────────────────────────────────
-        ["display"] = (
-            "Arayüz görünümü: tema, renkler ve dil gibi sunum tercihleri. İşlevi değil yalnızca görünümü etkiler.",
-            "Interface appearance: presentation preferences like theme, colours and language. Affects only look, not behaviour."),
-        ["privacy"] = (
-            "Gizlilik tercihleri: telemetri, veri paylaşımı ve yerel-öncelik. Sıkılaştırmak dışarı giden veriyi azaltır; bazı bulut özellikleri kısıtlanabilir.",
-            "Privacy preferences: telemetry, data sharing and local-first behaviour. Tightening reduces outbound data; some cloud features may be limited."),
+    private static readonly Dictionary<string, string> RootGlyphs = new(StringComparer.Ordinal)
+    {
+        ["model"] = GlyphTarget,
+        ["providers"] = GlyphTarget,
+        ["fallback_model"] = GlyphTarget,
+        ["fallback_providers"] = GlyphTarget,
+        ["toolsets"] = GlyphApps,
+        ["disabled_toolsets"] = GlyphApps,
+        ["agent"] = GlyphBolt,
+        ["terminal"] = GlyphCode,
+        ["code_execution"] = GlyphCode,
+        ["lsp"] = GlyphCode,
+        ["web"] = GlyphGlobe,
+        ["browser"] = GlyphGlobe,
+        ["network"] = GlyphNetwork,
+        ["security"] = GlyphLock,
+        ["privacy"] = GlyphLock,
+        ["approvals"] = GlyphCheck,
+        ["command_allowlist"] = GlyphCheck,
+        ["memory"] = GlyphLibrary,
+        ["curator"] = GlyphLibrary,
+        ["context"] = GlyphLibrary,
+        ["compression"] = GlyphLibrary,
+        ["prompt_caching"] = GlyphLibrary,
+        ["cron"] = GlyphClock,
+        ["kanban"] = GlyphList,
+        ["goals"] = GlyphTarget,
+        ["delegation"] = GlyphContact,
+        ["display"] = GlyphView,
+        ["dashboard"] = GlyphView,
+        ["logging"] = GlyphPage,
+        ["sessions"] = GlyphHistory,
+        ["checkpoints"] = GlyphSave,
+        ["updates"] = GlyphSync,
+        ["tts"] = GlyphVolume,
+        ["stt"] = GlyphMic,
+        ["voice"] = GlyphMic,
+        ["tool_output"] = GlyphPage,
+        ["tool_loop_guardrails"] = GlyphWarning,
+        ["file_read_max_chars"] = GlyphPage,
+    };
 
-        // ── system / logging ─────────────────────────────────────────────
-        ["logging"] = (
-            "Günlük kaydı düzeyi ve hedefi. Ayrıntılı düzey hata ayıklamaya yardımcı olur ama disk kullanımını ve gürültüyü artırır; üretimde daha sessiz bir düzey önerilir.",
-            "Log verbosity and destination. A verbose level helps debugging but increases disk use and noise; a quieter level is recommended in production."),
-        ["updates"] = (
-            "Otomatik güncelleme kontrolü ve kanalı. Açık tutmak seni güvenlik düzeltmeleriyle güncel tutar; kapatmak sürüm sabitliği isteyen ortamlar içindir.",
-            "Automatic update checks and channel. Keeping it on keeps you current with security fixes; turning it off is for environments that need version stability."),
+    // ── Katalog ──────────────────────────────────────────────────────────────
+
+    private static readonly Dictionary<string, Entry> Table = new(StringComparer.Ordinal)
+    {
+        // ═══ MODEL / SAĞLAYICI ═══════════════════════════════════════════════
+        ["model"] = new("Model", "Model",
+            "Etkin model ve sağlayıcı seçimi. FETİH model-agnostiktir; buradaki değerler bir sonraki oturumda kullanılacak varsayılanı belirler.",
+            "Active model and provider selection. FETİH is model-agnostic; these values set the default used for the next session."),
+        ["model.provider"] = new("Etkin sağlayıcı", "Active provider",
+            "Sohbet isteklerinin gideceği sağlayıcının kimliği (ör. groq, anthropic, openrouter). Değiştirdiğinde sonraki mesaj o sağlayıcının API'sine gider; ilgili API anahtarı ~/.fetih/.env içinde tanımlı olmalıdır.",
+            "The id of the provider chat requests go to (e.g. groq, anthropic, openrouter). Changing it routes the next message to that provider's API; its API key must be defined in ~/.fetih/.env."),
+        ["model.default"] = new("Varsayılan model", "Default model",
+            "Seçili sağlayıcı içindeki model kimliği (ör. openai/gpt-oss-120b). Sağlayıcının gerçekten sunduğu bir kimlik olmalıdır; yanlış yazılırsa ilk çağrıda 404/400 alırsın.",
+            "The model id inside the selected provider (e.g. openai/gpt-oss-120b). It must be an id the provider actually serves; a wrong one fails with 404/400 on the first call."),
+        ["fallback_model"] = new("Yedek model", "Fallback model",
+            "Birincil sağlayıcı 429 (kota), 529/503 (aşırı yük) veya bağlantı hatası döndürdüğünde otomatik devreye giren model. Boşsa yedek yoktur ve hata doğrudan sohbete yansır.",
+            "The model that automatically takes over when the primary returns 429 (rate limit), 529/503 (overload) or a connection failure. If empty there is no fallback and the error surfaces in the chat."),
+        ["fallback_providers"] = new("Yedek sağlayıcılar", "Fallback providers",
+            "Birincil sağlayıcı başarısız olduğunda sırayla denenecek sağlayıcı listesi. Uzun taramalarda kesinti dayanıklılığı sağlar; boş bırakılırsa yalnızca birincil sağlayıcı kullanılır.",
+            "An ordered list of providers tried in turn when the primary fails. Adds outage resilience during long scans; if empty only the primary is used."),
+        ["credential_pool_strategies"] = new("Kimlik havuzu stratejileri", "Credential pool strategies",
+            "Aynı sağlayıcı için birden çok API anahtarı tanımlıysa hangi anahtarın seçileceğini belirler (sırayla, en az kullanılan vb.). Tek anahtarlı kurulumlarda etkisizdir.",
+            "Decides which key is picked when several API keys are defined for the same provider (round-robin, least-used, …). A no-op in single-key setups."),
+        ["providers"] = new("Sağlayıcı tanımları", "Provider definitions",
+            "Her sağlayıcının taban adresi, anahtar ortam değişkeni, API kipi ve bağlam uzunluğu. Yeni bir OpenAI-uyumlu uç eklemek için buraya bir blok eklenir.",
+            "Each provider's base URL, key environment variable, API mode and context length. Add a block here to register a new OpenAI-compatible endpoint."),
+
+        // ═══ ARAÇ KÜMELERİ ═══════════════════════════════════════════════════
+        ["toolsets"] = new("Etkin araç kümeleri", "Enabled toolsets",
+            "Ajanın yükleyeceği araç grupları (dosya, terminal, web, arama, görüntü …). Az küme daha küçük bir istem tabanı ve daha ucuz/hızlı çağrı demektir; çok küme daha yetenekli ama daha büyük bağlam demektir.",
+            "The tool groups the agent loads (file, terminal, web, search, vision …). Fewer groups mean a smaller prompt base and cheaper/faster calls; more groups mean more capability but a larger context."),
+        ["disabled_toolsets"] = new("Kapatılan araç kümeleri", "Disabled toolsets",
+            "Açıkça devre dışı bırakılan gruplar; etkin listede olsalar bile yüklenmezler. Belirli bir aracın hiçbir koşulda çalışmamasını istediğinde (güvenlik veya token tasarrufu) buraya yaz.",
+            "Groups explicitly switched off; they are not loaded even if present in the enabled list. Use it when a tool must never run (for safety or token savings)."),
+
+        // ═══ AJAN ÇALIŞMA ZAMANI ═════════════════════════════════════════════
+        ["agent"] = new("Ajan", "Agent",
+            "Ajan çalışma zamanı: tur sınırı, zaman aşımları, yeniden deneme ve araç kullanım zorlaması.",
+            "Agent runtime: turn limit, timeouts, retries and tool-use enforcement."),
+        ["agent.max_turns"] = new("Azami tur sayısı", "Maximum turns",
+            "Tek bir kullanıcı mesajına yanıt verirken ajanın yapabileceği en fazla model-araç döngüsü. Yüksek değer çok adımlı bir taramayı sonuna kadar götürür ama maliyeti ve süreyi artırır; düşük değer işi yarıda keser.",
+            "The most model-tool loops the agent may run while answering one user message. A high value lets a multi-step scan finish but raises cost and duration; a low value cuts work short."),
+        ["agent.gateway_timeout"] = new("Uzun oturum zaman aşımı (sn)", "Long-session timeout (s)",
+            "Arka planda çalışan uzun bir ajan oturumunun toplam süre üst sınırı. Aşılırsa oturum sonlandırılır; saatler süren taramalarda bu değeri yükselt.",
+            "The overall time budget for a long-running background agent session. When exceeded the session is terminated; raise it for scans that run for hours."),
+        ["agent.gateway_timeout_warning"] = new("Zaman aşımı uyarı eşiği (sn)", "Timeout warning threshold (s)",
+            "Uzun oturum zaman aşımına yaklaşırken uyarı üretilecek an. Üst sınırdan küçük olmalıdır; işi kaybetmeden önce müdahale etme fırsatı verir.",
+            "When to emit a warning as the long-session timeout approaches. It must be smaller than the limit and gives you a chance to intervene before work is lost."),
+        ["agent.gateway_notify_interval"] = new("İlerleme bildirim aralığı (sn)", "Progress notification interval (s)",
+            "Arka plan oturumu çalışırken kaç saniyede bir ilerleme bildirimi gönderileceği. Küçük değer daha sık haber verir ama gürültüyü artırır.",
+            "How often a running background session reports progress. A small value keeps you informed more often but adds noise."),
+        ["agent.gateway_auto_continue_freshness"] = new("Otomatik devam tazelik penceresi (sn)", "Auto-continue freshness window (s)",
+            "Kesintiye uğramış bir oturumun otomatik olarak kaldığı yerden devam edebileceği en uzun süre. Bu pencere aşıldıysa oturum bayat sayılır ve elle başlatılması gerekir.",
+            "How long an interrupted session may still auto-resume where it left off. Past this window the session is considered stale and must be restarted manually."),
+        ["agent.restart_drain_timeout"] = new("Yeniden başlatma boşaltma süresi (sn)", "Restart drain timeout (s)",
+            "Yeniden başlatma sırasında süren araç çağrılarının temiz biçimde bitmesi için tanınan süre. Süre dolunca çağrılar zorla kesilir; uzun süren tarama araçları için artır.",
+            "How long in-flight tool calls are given to finish cleanly during a restart. After that they are force-cancelled; raise it for long-running scanners."),
+        ["agent.api_max_retries"] = new("API yeniden deneme sayısı", "API retry count",
+            "Geçici bir sağlayıcı hatasında (429/5xx, bağlantı kopması) aynı isteğin kaç kez yeniden deneneceği. Sıfır yaparsan ilk hatada durur; çok yüksek değer bir kota hatasını uzun bir beklemeye dönüştürür.",
+            "How many times the same request is retried on a transient provider error (429/5xx, dropped connection). Zero stops at the first failure; a very high value turns a quota error into a long wait."),
+        ["agent.service_tier"] = new("Servis katmanı", "Service tier",
+            "Sağlayıcı destekliyorsa istenen hizmet sınıfı (ör. öncelikli/esnek kuyruk). Boş bırakmak sağlayıcının varsayılanını kullanır; desteklenmeyen sağlayıcılarda yok sayılır.",
+            "The requested service class when the provider supports one (e.g. priority or flex queue). Empty uses the provider default; ignored where unsupported."),
+        ["agent.tool_use_enforcement"] = new("Araç kullanım zorlaması", "Tool-use enforcement",
+            "Modelin araç çağırmaya ne kadar zorlanacağı: auto (model karar verir), required (her turda en az bir araç) veya none. auto günlük kullanımda en dengelisidir.",
+            "How strongly the model is pushed to call tools: auto (the model decides), required (at least one tool per turn) or none. auto is the balanced choice for daily use."),
+        ["agent.clarify_timeout"] = new("Netleştirme bekleme süresi (sn)", "Clarification timeout (s)",
+            "Ajan sana bir soru sorduğunda yanıtını ne kadar bekleyeceği. Süre dolarsa soru düşer ve ajan elindeki bilgiyle devam eder.",
+            "How long the agent waits for your answer after asking a clarifying question. On timeout the question is dropped and it continues with what it has."),
+        ["agent.image_input_mode"] = new("Görüntü girişi kipi", "Image input mode",
+            "Ekran görüntüsü ve dosya görüntülerinin modele nasıl iletileceği. auto, modelin görüntü desteğine göre otomatik seçim yapar; kapatmak görüntü tabanlı analizleri devre dışı bırakır.",
+            "How screenshots and image files are handed to the model. auto picks based on the model's vision support; disabling it turns off image-based analysis."),
+        ["agent.disabled_toolsets"] = new("Kapatılan araç kümeleri (ajan)", "Disabled toolsets (agent)",
+            "Yalnızca ajan çalışma zamanı için devre dışı bırakılan araç grupları. Kök seviyesindeki listeye ek olarak uygulanır.",
+            "Tool groups disabled for the agent runtime specifically. Applied in addition to the root-level list."),
+
+        // ═══ GÜVENLİK ════════════════════════════════════════════════════════
+        ["security"] = new("Güvenlik", "Security",
+            "Gizli-veri redaksiyonu, komut öncesi tarama (tirith), site kara listesi ve danışma uyarıları.",
+            "Secret redaction, pre-execution scanning (tirith), site blocklists and advisory acknowledgements."),
+        ["security.allow_private_urls"] = new("Özel ağ adreslerine izin ver", "Allow private network URLs",
+            "Kapalıyken ajanın 127.0.0.1, 10.x, 192.168.x, .local gibi özel/iç ağ adreslerine istek atması engellenir — bu, klasik SSRF korumasıdır. Yalnızca kendi laboratuvar ağını taratırken aç ve iş bitince kapat.",
+            "While off, the agent is blocked from requesting private/internal addresses such as 127.0.0.1, 10.x, 192.168.x or .local — the classic SSRF guard. Turn it on only to scan your own lab network, then turn it back off.",
+            GlyphNetwork),
+        ["security.redact_secrets"] = new("Gizli verileri maskele", "Redact secrets",
+            "Araç çıktısı, günlükler ve sohbet yanıtları modele veya ekrana ulaşmadan önce API anahtarı, token ve parola görünümlü diziler maskelenir. Kapatmak yakalanan bir anahtarın oturum geçmişine ve günlük dosyalarına düz metin yazılmasına yol açar; yalnızca redaksiyon motorunu geliştirirken kapat.",
+            "Strings that look like API keys, tokens and passwords are masked in tool output, logs and chat responses before the model or the screen ever sees them. Turning it off writes a captured key in plain text into session history and log files; only disable it while developing the redactor itself.",
+            GlyphLock),
+        ["security.tirith_enabled"] = new("Komut öncesi tarama (tirith)", "Pre-execution scanning (tirith)",
+            "Her komut çalıştırılmadan önce harici tirith ikilisine gönderilir; homograf URL, yorumlayıcıya boru (curl | sh) ve terminal enjeksiyonu gibi içerik-seviyesi tehditler aranır. Çıkış kodu karar kaynağıdır: 0 izin, 1 engel, 2 uyarı.",
+            "Every command is passed to the external tirith binary before it runs, looking for content-level threats such as homograph URLs, pipe-to-interpreter (curl | sh) and terminal injection. The exit code is the verdict: 0 allow, 1 block, 2 warn.",
+            GlyphSearch),
+        ["security.tirith_path"] = new("tirith ikilisinin yolu", "tirith binary path",
+            "Çalıştırılacak tirith ikilisinin adı veya tam yolu. Sade bir ad (tirith) PATH üzerinde aranır; bulunamazsa sürüm GitHub sürümlerinden SHA-256 doğrulamasıyla $FETIH_HOME/bin altına indirilir. Kendi derlemeni kullanmak istiyorsan buraya tam yolu yaz.",
+            "The name or full path of the tirith binary to execute. A bare name (tirith) is looked up on PATH; if missing, a release is downloaded to $FETIH_HOME/bin with SHA-256 verification. Point it at a full path to use your own build.",
+            GlyphFolder),
+        ["security.tirith_timeout"] = new("tirith zaman aşımı (sn)", "tirith timeout (s)",
+            "Tarayıcının karar vermesi için tanınan saniye. Her komuttan önce çalıştığı için küçük tutulur (varsayılan 5); büyütmek her komuta gecikme ekler, küçültmek ise yavaş makinelerde zaman aşımına ve fail-open/fail-closed davranışına düşürür.",
+            "The seconds the scanner gets to reach a verdict. It runs before every command so it is kept small (default 5); raising it adds latency to each command, lowering it causes timeouts on slow machines and hands the decision to the fail-open setting.",
+            GlyphClock),
+        ["security.tirith_fail_open"] = new("Tarayıcı hata verirse izin ver", "Allow when the scanner fails",
+            "tirith başlatılamaz, zaman aşımına uğrar veya bilinmeyen bir çıkış kodu döndürürse ne yapılacağı. Açıkken komut çalıştırılır (kullanılabilirlik önceliği), kapalıyken engellenir (güvenlik önceliği). Bilinmeyen hedeflere karşı çalışırken kapatmak daha doğrudur.",
+            "What happens when tirith cannot start, times out or returns an unknown exit code. On, the command still runs (availability first); off, it is blocked (safety first). Turning it off is the right call when working against untrusted targets.",
+            GlyphWarning),
+        ["security.website_blocklist.enabled"] = new("Site kara listesi etkin", "Website blocklist enabled",
+            "Açıkken web ve tarayıcı araçları, aşağıdaki alan adı listesine ve paylaşılan liste dosyalarına takılan adresleri reddeder. Kapalıyken listeler hiç okunmaz.",
+            "While on, the web and browser tools refuse addresses that match the domain list and shared list files below. While off the lists are not consulted at all.",
+            GlyphGlobe),
+        ["security.website_blocklist.domains"] = new("Engellenen alan adları", "Blocked domains",
+            "Elle yazılmış alan adı desenleri; kara liste etkinken bunlara hiçbir araç erişemez. Kapsam dışı hedeflere yanlışlıkla istek gitmesini önlemek için sızma testi kapsam listenin tersini buraya koyabilirsin.",
+            "Hand-written domain patterns; no tool may reach them while the blocklist is on. Use it to keep requests from accidentally leaving an authorised pentest scope.",
+            GlyphGlobe),
+        ["security.website_blocklist.shared_files"] = new("Paylaşılan liste dosyaları", "Shared list files",
+            "Ekip veya kurum tarafından bakımı yapılan, alan adı listesi içeren dosya yolları. Merkezî bir kapsam dosyasını birden çok makinede paylaşmak için kullanılır; dosya okunamıyorsa yalnızca elle girilen alan adları uygulanır.",
+            "Paths to files holding domain lists maintained by your team or organisation. Use it to share one central scope file across machines; if a file cannot be read only the hand-entered domains apply.",
+            GlyphFolder),
+        ["security.acked_advisories"] = new("Onaylanmış güvenlik duyuruları", "Acknowledged advisories",
+            "Bir kez okunup kapatılan güvenlik danışma uyarılarının kimlikleri; burada yazan uyarı bir daha gösterilmez. Listeyi boşaltırsan tüm uyarılar yeniden görünür.",
+            "Ids of advisory warnings you have already read and dismissed; anything listed here is not shown again. Empty the list to see all advisories once more.",
+            GlyphInfo),
+        ["security.allow_lazy_installs"] = new("Eksik araçları otomatik kur", "Auto-install missing tools",
+            "Bir yetenek (skill) çalışırken eksik bir Python paketi veya CLI aracı bulduğunda bunu kendiliğinden kurmasına izin verir. Kapalıyken kurulum yapılmaz ve araç hata verir; kapalı tutmak makineye ne indirildiği üzerinde tam denetim sağlar.",
+            "Lets a skill install a missing Python package or CLI tool on its own while it runs. While off nothing is installed and the tool fails; keeping it off gives you full control over what lands on the machine.",
+            GlyphUnlock),
+
+        // ═══ ONAY / İZİNLER ══════════════════════════════════════════════════
+        ["approvals"] = new("Onaylar", "Approvals",
+            "Hangi araç çağrısının çalışmadan önce senin onayını istediğini belirleyen politika.",
+            "The policy deciding which tool call asks for your approval before it runs."),
+        ["approvals.mode"] = new("Onay kipi", "Approval mode",
+            "Tehlikeli komutların nasıl ele alınacağı: manual her seferinde sorar, auto onaylanmış desenleri otomatik geçirir, deny hiç çalıştırmaz. Bir siber güvenlik aracında manual bilinçli varsayılandır — yıkıcı ve ağa çıkan komutlar sorulmadan çalışmaz.",
+            "How dangerous commands are handled: manual asks every time, auto passes approved patterns, deny never runs them. In a security tool manual is the deliberate default — destructive and outbound commands never run unasked.",
+            GlyphCheck),
+        ["approvals.timeout"] = new("Onay bekleme süresi (sn)", "Approval timeout (s)",
+            "Bir onay istemi yanıtsız kalırsa kaç saniye sonra düşeceği. Süre dolan istem reddedilmiş sayılır ve komut çalışmaz; uzun tutmak masanın başında olmadığın anlarda işi askıda bırakır.",
+            "How many seconds an approval prompt waits before it lapses. A lapsed prompt counts as refused and the command does not run; a long value leaves work hanging while you are away from the desk.",
+            GlyphClock),
+        ["approvals.cron_mode"] = new("Zamanlanmış işlerde onay", "Approval in scheduled jobs",
+            "Kimsenin başında olmadığı zamanlanmış (cron) işlerde tehlikeli komutlara ne yapılacağı. deny varsayılandır: gece yarısı çalışan bir işin sessizce yıkıcı bir komut yürütmesi engellenir.",
+            "What happens to dangerous commands inside unattended scheduled (cron) jobs. deny is the default: a job running at midnight cannot silently execute a destructive command.",
+            GlyphClock),
+        ["approvals.mcp_reload_confirm"] = new("MCP yeniden yüklemede onay iste", "Confirm MCP reload",
+            "Bir MCP sunucusu yeniden yüklenmeden veya yapılandırması değiştirilmeden önce onay istenir. Yeni bir MCP sunucusu ajanın araç yüzeyini genişlettiği için bu adım bilinçli olarak sürtünmelidir.",
+            "Asks for confirmation before an MCP server is reloaded or reconfigured. A new MCP server widens the agent's tool surface, so this step is deliberately made to add friction.",
+            GlyphApps),
+        ["approvals.destructive_slash_confirm"] = new("Yıkıcı komutlarda onay iste", "Confirm destructive commands",
+            "Oturumu, hafızayı veya dosyaları silen yerleşik komutlar (ör. /clear, /reset) çalışmadan önce onay ister. Kapatmak tek bir yanlış tuşla geri alınamaz veri kaybına yol açabilir.",
+            "Built-in commands that wipe the session, memory or files (e.g. /clear, /reset) ask before they run. Turning it off makes a single mistyped key enough to lose data irreversibly.",
+            GlyphWarning),
+        ["command_allowlist"] = new("Kalıcı komut izin listesi", "Persistent command allowlist",
+            "Bir onay isteminde \"her zaman izin ver\" dediğinde tehlikeli komut deseninin anahtarı buraya yazılır ve bir daha sorulmaz. Listeyi dar tut: buradaki her desen sorgusuz çalışır.",
+            "When you answer an approval prompt with \"always allow\", the dangerous command pattern's key is written here and never asked again. Keep the list tight: everything listed runs unquestioned.",
+            GlyphCheck),
+        ["quick_commands"] = new("Hızlı komutlar", "Quick commands",
+            "Kendi tanımladığın kısayol adı → komut eşlemeleri. Sık tekrarlanan tarama komutlarını tek kelimeye indirir; izin listesinden bağımsızdır, onay politikası yine uygulanır.",
+            "Your own shortcut name → command mappings. They shrink frequently repeated scan commands to one word; independent of the allowlist, the approval policy still applies."),
+        ["hooks"] = new("Kullanıcı hook'ları", "User hooks",
+            "~/.fetih/hooks/ altındaki, belirli olaylarda (araç öncesi/sonrası, oturum başı) çalışan kendi betiklerin. Ajanın davranışını dışarıdan genişletmenin yoludur; kötü yazılmış bir hook her turu yavaşlatabilir.",
+            "Your own scripts under ~/.fetih/hooks/ that run on specific events (before/after a tool, at session start). They are the way to extend agent behaviour from outside; a badly written hook slows down every turn."),
+        ["hooks_auto_accept"] = new("Hook'ları otomatik kabul et", "Auto-accept hooks",
+            "Yeni veya değişmiş bir hook betiği bulunduğunda sormadan çalıştırılmasına izin verir. Kapalı tutmak, ~/.fetih/hooks/ dizinine sızan bir betiğin sessizce çalışmasını önler.",
+            "Lets a new or changed hook script run without asking. Keeping it off stops a script that sneaks into ~/.fetih/hooks/ from running silently.",
+            GlyphWarning),
+        ["personalities"] = new("Kişilik profilleri", "Personality profiles",
+            "Farklı görev tipleri için hazırlanmış sistem istemi varyantları. Yanıt üslubunu ve önceliklerini değiştirir; araç izinlerini veya güvenlik politikasını etkilemez.",
+            "System-prompt variants prepared for different kinds of work. They change tone and priorities of answers; they do not affect tool permissions or the security policy."),
+
+        // ═══ TERMİNAL / SANDBOX ══════════════════════════════════════════════
+        ["terminal"] = new("Terminal", "Terminal",
+            "Terminal aracının yürütme ortamı: yerel makine mi yoksa izole bir konteyner mı, hangi kabuk ve hangi kaynak sınırları.",
+            "The terminal tool's execution environment: the local machine or an isolated container, which shell and which resource limits."),
+        ["terminal.backend"] = new("Yürütme arka ucu", "Execution backend",
+            "Komutların nerede çalıştığı: local doğrudan bu makinede (izolasyon yok, en hızlı), docker/singularity konteyner içinde, ssh uzak makinede, modal/daytona/vercel_sandbox bulutta. Bilinmeyen hedeflere karşı test yaparken local dışında bir seçenek tercih edilmelidir.",
+            "Where commands run: local means directly on this machine (no isolation, fastest), docker/singularity inside a container, ssh on a remote host, modal/daytona/vercel_sandbox in the cloud. Prefer anything but local when working against untrusted targets.",
+            GlyphCode),
+        ["terminal.modal_mode"] = new("Modal çalışma kipi", "Modal execution mode",
+            "modal arka ucunda sandbox'ın nasıl ayağa kaldırılacağı. auto, iş yüküne göre kalıcı veya tek seferlik konteyner seçer; yalnızca modal kullanıldığında geçerlidir.",
+            "How the sandbox is brought up on the modal backend. auto picks a persistent or one-shot container based on the workload; only relevant when modal is in use."),
+        ["terminal.cwd"] = new("Çalışma dizini", "Working directory",
+            "Terminal aracının komutları başlattığı dizin. Nokta (.) FETİH'in başlatıldığı dizini kullanır; sabit bir yol yazmak her oturumun aynı proje kökünden başlamasını sağlar.",
+            "The directory the terminal tool starts commands in. A dot (.) uses the directory FETİH was launched from; a fixed path makes every session start from the same project root.",
+            GlyphFolder),
+        ["terminal.timeout"] = new("Komut zaman aşımı (sn)", "Command timeout (s)",
+            "Tek bir komuta tanınan azami süre; aşılırsa süreç sonlandırılır. Uzun süren taramalar (nmap -p-, gobuster) için artır, hızlı başarısızlık istiyorsan azalt.",
+            "The maximum time one command may take before its process is killed. Raise it for long scans (nmap -p-, gobuster), lower it if you want fast failure.",
+            GlyphClock),
+        ["terminal.persistent_shell"] = new("Kalıcı kabuk oturumu", "Persistent shell session",
+            "Açıkken tüm komutlar tek bir kabuk oturumunda çalışır: cd, export ve ortam değişkenleri komutlar arasında korunur. Kapalıyken her komut temiz bir kabukta başlar; bu daha yalıtılmıştır ama çok adımlı iş akışlarını zorlaştırır.",
+            "While on, all commands share one shell session: cd, export and environment variables survive between commands. While off each command starts in a clean shell, which is more isolated but makes multi-step workflows harder."),
+        ["terminal.windows_shell"] = new("Windows kabuğu", "Windows shell",
+            "Windows'ta komutları çalıştıran POSIX kabuğu: git-bash (varsayılan, Windows dosya sistemine C:\\ ↔ /c/ olarak doğrudan erişir) veya wsl (gerçek bir Linux dağıtımı, sürücüler /mnt/c altında). PowerShell bilinçli olarak sunulmaz çünkü araç katmanı export -p, pwd -P ve POSIX tırnaklamaya dayanır.",
+            "The POSIX shell that runs commands on Windows: git-bash (default, direct access to the Windows filesystem as C:\\ ↔ /c/) or wsl (a real Linux distro with drives under /mnt/c). PowerShell is deliberately not offered because the tool layer relies on export -p, pwd -P and POSIX quoting.",
+            GlyphCode),
+        ["terminal.wsl_distro"] = new("WSL dağıtımı", "WSL distribution",
+            "windows_shell=wsl iken kullanılacak dağıtım adı. Boş bırakılırsa wsl.exe'nin varsayılanı kullanılır; birden çok dağıtım kuruluysa hangisinin araç ortamı olacağını burada sabitle.",
+            "The distribution used when windows_shell=wsl. Empty falls back to wsl.exe's default; pin it here when several distros are installed so the tool environment is predictable."),
+        ["terminal.wsl_user"] = new("WSL kullanıcısı", "WSL user",
+            "WSL kabuğunun hangi kullanıcı olarak çalışacağı. Ayrılmış 'fetih' kullanıcısını seçmek, ajanın yazdığı dosyaları senin ev dizininden ayrı tutar; boşsa dağıtımın varsayılan kullanıcısı kullanılır.",
+            "Which user the WSL shell runs as. Choosing the dedicated 'fetih' user keeps agent-written files out of your own home directory; empty uses the distro's default user.",
+            GlyphContact),
+        ["terminal.env_passthrough"] = new("Aktarılan ortam değişkenleri", "Passed-through environment variables",
+            "Sandbox içine geçirilecek değişken adları. Yetenek (skill) tanımlarında belirtilenler zaten otomatik aktarılır; buraya elle eklenen her ad izolasyon sınırında bir delik açar, bu yüzden kısa tut.",
+            "Names of variables handed into the sandbox. Ones declared by skills are passed automatically; every name you add by hand punches a hole in the isolation boundary, so keep the list short.",
+            GlyphWarning),
+        ["terminal.shell_init_files"] = new("Kabuk başlangıç dosyaları", "Shell init files",
+            "Kabuk açılışında yüklenecek ek rc dosyaları. Boş bırakmak otomatik davranışa bırakır; kendi araç yollarını (PATH) ve takma adlarını her komutta hazır etmek için kullanılır.",
+            "Extra rc files sourced when the shell opens. Empty leaves it to automatic behaviour; use it to have your own tool PATH and aliases ready in every command.",
+            GlyphFolder),
+        ["terminal.auto_source_bashrc"] = new("bashrc'yi otomatik yükle", "Auto-source bashrc",
+            "Açıkken kullanıcının .bashrc/.profile dosyası her kabukta yüklenir, böylece kişisel araç yolları çalışır. Kapatmak daha öngörülebilir ve temiz bir ortam verir ama elle kurduğun araçlar PATH'te bulunmayabilir.",
+            "While on, your .bashrc/.profile is sourced in every shell so personal tool paths work. Turning it off gives a cleaner, more predictable environment but hand-installed tools may fall off PATH."),
+        ["terminal.docker_image"] = new("Docker imajı", "Docker image",
+            "docker arka ucunda kullanılacak konteyner imajı. Kendi tarama araçlarını içeren bir imaja geçmek her oturumda paket kurma ihtiyacını ortadan kaldırır.",
+            "The container image used by the docker backend. Switching to an image that already contains your scanning tools removes the need to install packages every session."),
+        ["terminal.singularity_image"] = new("Singularity imajı", "Singularity image",
+            "singularity arka ucunda kullanılacak imaj (docker:// öneki desteklenir). Kök yetkisi gerektirmeyen izolasyon isteyen ortamlar içindir.",
+            "The image used by the singularity backend (a docker:// prefix is supported). Intended for environments that need rootless isolation."),
+        ["terminal.modal_image"] = new("Modal imajı", "Modal image",
+            "modal bulut sandbox'ında kullanılacak konteyner imajı.",
+            "The container image used in the modal cloud sandbox."),
+        ["terminal.daytona_image"] = new("Daytona imajı", "Daytona image",
+            "daytona geliştirme ortamında kullanılacak konteyner imajı.",
+            "The container image used in the daytona development environment."),
+        ["terminal.vercel_runtime"] = new("Vercel çalışma zamanı", "Vercel runtime",
+            "vercel_sandbox arka ucunda kullanılacak çalışma zamanı sürümü (ör. node24).",
+            "The runtime version used by the vercel_sandbox backend (e.g. node24)."),
+        ["terminal.container_cpu"] = new("Konteyner CPU", "Container CPU",
+            "Sandbox konteynerine ayrılan çekirdek sayısı. Paralel tarama araçları için artır; çok düşük değer araçları yavaşlatır ama host makineyi rahat bırakır.",
+            "The number of cores allotted to the sandbox container. Raise it for parallel scanners; a low value slows tools down but leaves the host machine responsive."),
+        ["terminal.container_memory"] = new("Konteyner belleği (MB)", "Container memory (MB)",
+            "Sandbox konteynerine ayrılan bellek. Derleyiciler, tersine mühendislik ve büyük sözlük saldırıları için artır; çok düşükse süreçler OOM ile ölür ve araç çıktısı yarıda kesilir.",
+            "Memory allotted to the sandbox container. Raise it for compilers, reverse engineering and large dictionary attacks; too low and processes die with OOM, truncating tool output."),
+        ["terminal.container_disk"] = new("Konteyner diski (MB)", "Container disk (MB)",
+            "Sandbox'a ayrılan disk alanı. Wordlist, pcap dosyası ve indirilen örnekler burada birikir; küçük bir değer uzun taramalarda \"no space left\" hatalarına yol açar.",
+            "Disk space allotted to the sandbox. Wordlists, pcap files and downloaded samples accumulate here; a small value causes \"no space left\" errors during long scans."),
+        ["terminal.container_persistent"] = new("Kalıcı konteyner dosya sistemi", "Persistent container filesystem",
+            "Açıkken konteynerin dosya sistemi oturumlar arasında korunur, kurulan araçlar ve indirilen veriler kaybolmaz. Kapatmak her oturumu temiz bir kutuyla başlatır — kanıt bulaşmasını önlemek istediğinde tercih edilir.",
+            "While on, the container filesystem survives between sessions so installed tools and downloaded data persist. Turning it off starts every session in a clean box — preferable when you must avoid evidence contamination."),
+        ["terminal.docker_volumes"] = new("Host klasör bağlamaları", "Host folder mounts",
+            "Konteynere bağlanan host klasörleri. Her bağlama izolasyonu zayıflatır: bağlanan dizin içindeki her şey sandbox'tan okunabilir, yazılabilir bağlandıysa değiştirilebilir hale gelir. Yalnızca gerçekten paylaşılması gereken dizinleri ekle.",
+            "Host folders mounted into the container. Every mount weakens isolation: everything in the mounted directory becomes readable from the sandbox, and writable if mounted read-write. Add only directories that genuinely need sharing.",
+            GlyphWarning),
+        ["terminal.docker_mount_cwd_to_workspace"] = new("Çalışma dizinini sandbox'a bağla", "Mount working directory into sandbox",
+            "Açıkken host'taki çalışma dizini konteynerin çalışma alanına bağlanır. Varsayılan kapalıdır: proje dizinini sandbox'a vermek, sandbox'ın var olma sebebi olan izolasyonu büyük ölçüde ortadan kaldırır.",
+            "While on, the host working directory is mounted into the container workspace. It defaults to off: handing the project directory to the sandbox removes most of the isolation the sandbox exists to provide.",
+            GlyphWarning),
+        ["terminal.docker_run_as_host_user"] = new("Host kullanıcısı olarak çalıştır", "Run as host user",
+            "Konteyner süreçlerinin senin kullanıcı kimliğinle çalışmasını sağlar; böylece bağlanan klasörlerde oluşan dosyalar root'a ait olmaz. Aynı zamanda konteynerden yazılan dosyaların host'ta senin yetkilerinle oluşması demektir.",
+            "Runs container processes under your user id so files created in mounted folders are not owned by root. It also means files written from the container land on the host with your privileges."),
+        ["terminal.docker_forward_env"] = new("İletilen ortam değişkenleri (docker)", "Forwarded environment variables (docker)",
+            "docker arka ucuna aktarılacak host ortam değişkeni adları. API anahtarı içeren değişkenleri buraya eklemek anahtarı konteyner içindeki her sürece açar.",
+            "Names of host environment variables forwarded to the docker backend. Adding a variable that holds an API key exposes that key to every process inside the container.",
+            GlyphWarning),
+        ["terminal.docker_env"] = new("Sabit ortam değişkenleri (docker)", "Fixed environment variables (docker)",
+            "Konteyner içinde her zaman tanımlı olacak ad → değer çiftleri. Host'tan bağımsızdır; proxy adresi veya araç ayarları gibi sabit değerler için uygundur.",
+            "Name → value pairs always defined inside the container. Independent of the host; suitable for fixed values such as a proxy address or tool settings."),
+        ["terminal.docker_extra_args"] = new("Ek docker bayrakları", "Extra docker flags",
+            "docker run çağrısına eklenecek ham bayraklar. Güçlü ama tehlikeli: --privileged veya --network host gibi bir bayrak sandbox izolasyonunu tamamen kaldırır.",
+            "Raw flags appended to the docker run invocation. Powerful but dangerous: a flag such as --privileged or --network host removes sandbox isolation entirely.",
+            GlyphWarning),
+
+        // ═══ KOD YÜRÜTME / ÇIKTI SINIRLARI ═══════════════════════════════════
+        ["code_execution"] = new("Kod çalıştırma", "Code execution",
+            "Kod yürütme aracının kapsamı ve çalışma kipi.",
+            "The scope and mode of the code execution tool."),
+        ["code_execution.mode"] = new("Kod çalıştırma kipi", "Code execution mode",
+            "Üretilen kodun nerede çalıştırılacağı: project geçerli proje bağlamında, sandbox izole ortamda, off ise kod yürütme aracı hiç yüklenmez.",
+            "Where generated code runs: project in the current project context, sandbox in an isolated environment, off does not load the code execution tool at all."),
+        ["file_read_max_chars"] = new("Azami dosya okuma (karakter)", "Maximum file read (characters)",
+            "Dosya okuma aracının tek seferde modele verebileceği karakter sayısı. Büyük bir log veya ikili dosyanın tüm bağlamı doldurmasını önler; küçültmek token tasarrufu sağlar ama uzun dosyaları parça parça okumayı gerektirir.",
+            "How many characters the file-read tool may hand the model at once. It keeps a large log or binary from filling the whole context; lowering it saves tokens but forces long files to be read in pieces."),
+        ["tool_output"] = new("Araç çıktısı sınırları", "Tool output limits",
+            "Araç çıktısının modele iletilirken kırpıldığı sınırlar.",
+            "The limits at which tool output is truncated before reaching the model."),
+        ["tool_output.max_bytes"] = new("Azami çıktı (bayt)", "Maximum output (bytes)",
+            "Tek bir araç çağrısından modele geçirilecek en fazla bayt. Uzun taramaların bağlam penceresini bir seferde tüketmesini engeller; aşan kısım kırpılır ve bu durum çıktıda belirtilir.",
+            "The most bytes a single tool call may hand the model. It prevents a long scan from consuming the context window in one go; the excess is truncated and flagged in the output."),
+        ["tool_output.max_lines"] = new("Azami çıktı satırı", "Maximum output lines",
+            "Araç çıktısından tutulacak en fazla satır sayısı. Bayt sınırıyla birlikte uygulanır; hangisi önce dolarsa kırpma orada başlar.",
+            "The most lines kept from tool output. Applied together with the byte limit; truncation starts at whichever fills first."),
+        ["tool_output.max_line_length"] = new("Azami satır uzunluğu", "Maximum line length",
+            "Tek bir satırın kırpılmadan önceki uzunluğu. Base64 gömülü veya minify edilmiş tek satırlık çıktıların bağlamı doldurmasını önler.",
+            "How long a single line may be before it is trimmed. It keeps base64 blobs and minified one-line output from filling the context."),
+        ["tool_loop_guardrails"] = new("Araç döngüsü korumaları", "Tool loop guardrails",
+            "Ajan aynı başarısız aracı tekrar tekrar çağırdığında devreye giren uyarı ve durdurma eşikleri. İlerleme kaydetmeyen bir döngünün maliyeti şişirmesini önler.",
+            "Warning and hard-stop thresholds that trigger when the agent keeps calling the same failing tool. They stop a no-progress loop from inflating cost."),
+
+        // ═══ WEB / TARAYICI ══════════════════════════════════════════════════
+        ["web"] = new("Web", "Web",
+            "Web getirme, arama ve içerik çıkarma arka uçları.",
+            "The web fetch, search and content extraction backends."),
+        ["web.backend"] = new("Web getirme arka ucu", "Web fetch backend",
+            "Sayfa indirme işini yapan bileşen. Boş bırakmak yerleşik varsayılanı kullanır; belirli bir arka uç seçmek proxy veya oran sınırı davranışını değiştirir.",
+            "The component that downloads pages. Empty uses the built-in default; picking a specific backend changes proxy and rate-limit behaviour."),
+        ["web.search_backend"] = new("Arama arka ucu", "Search backend",
+            "Web araması için kullanılacak sağlayıcı. Kendi API anahtarını gerektiren bir arka uç seçtiğinde anahtarı ~/.fetih/.env içine eklemelisin.",
+            "The provider used for web search. If the backend you choose needs its own API key, add it to ~/.fetih/.env."),
+        ["web.extract_backend"] = new("İçerik çıkarma arka ucu", "Content extraction backend",
+            "İndirilen HTML'den okunabilir metin çıkaran bileşen. Farklı arka uçlar JavaScript ağırlıklı sayfalarda belirgin biçimde farklı sonuç verir.",
+            "The component that turns downloaded HTML into readable text. Different backends give noticeably different results on JavaScript-heavy pages."),
+        ["browser"] = new("Tarayıcı", "Browser",
+            "Gerçek tarayıcı otomasyonunun zaman aşımları, motoru ve diyalog politikası.",
+            "Timeouts, engine and dialog policy for real browser automation."),
+        ["browser.engine"] = new("Tarayıcı motoru", "Browser engine",
+            "Otomasyonu sürecek motor. auto, ortamda kurulu olanı seçer; belirli bir motoru sabitlemek parmak izi ve uyumluluk davranışını öngörülebilir kılar.",
+            "The engine driving automation. auto picks whatever is installed; pinning one makes fingerprint and compatibility behaviour predictable."),
+        ["browser.inactivity_timeout"] = new("Hareketsizlik zaman aşımı (sn)", "Inactivity timeout (s)",
+            "Tarayıcı oturumu bu süre boyunca kullanılmazsa kapatılır ve belleği serbest bırakılır. Uzun tutmak sonraki adımda oturumun hazır olmasını sağlar ama RAM tüketir.",
+            "The browser session is closed and its memory released after this long without use. A longer value keeps the session ready for the next step but costs RAM."),
+        ["browser.command_timeout"] = new("Tarayıcı komut zaman aşımı (sn)", "Browser command timeout (s)",
+            "Tek bir tarayıcı eyleminin (tıklama, gezinme, betik çalıştırma) süre sınırı. Ağır JavaScript içeren hedeflerde artırman gerekebilir.",
+            "The time limit for one browser action (click, navigation, script evaluation). You may need to raise it on JavaScript-heavy targets."),
+        ["browser.record_sessions"] = new("Oturumları kaydet", "Record sessions",
+            "Açıkken tarayıcı oturumu izlenebilirlik için kaydedilir; bir bulgunun nasıl doğrulandığını rapora eklemek kolaylaşır. Kayıtlar disk yer kaplar ve hedef sayfadaki hassas verileri de içerebilir.",
+            "While on, the browser session is recorded for traceability, making it easy to show how a finding was verified. Recordings take disk space and may capture sensitive data from the target page.",
+            GlyphWarning),
+        ["browser.allow_private_urls"] = new("Tarayıcıda özel adreslere izin ver", "Allow private URLs in the browser",
+            "Tarayıcı aracının iç ağ adreslerine (127.0.0.1, 10.x, .local) gitmesine izin verir. security.allow_private_urls'ten bağımsızdır ve yalnızca tarayıcıyı kapsar; kendi laboratuvar arayüzünü test ederken aç.",
+            "Lets the browser tool navigate to internal addresses (127.0.0.1, 10.x, .local). It is independent of security.allow_private_urls and covers the browser only; enable it when testing your own lab interface.",
+            GlyphNetwork),
+        ["browser.auto_local_for_private_urls"] = new("Özel adreslerde yerel motora geç", "Use the local engine for private URLs",
+            "Bir iç ağ adresi istendiğinde uzak/bulut tarayıcı yerine otomatik olarak yerel motoru kullanır. İç ağ trafiğinin makine dışına çıkmamasını sağlar.",
+            "Automatically switches to the local engine instead of a remote/cloud browser when an internal address is requested. It keeps internal traffic from leaving the machine."),
+        ["browser.cdp_url"] = new("CDP bağlantı adresi", "CDP endpoint",
+            "Var olan bir tarayıcıya Chrome DevTools Protocol üzerinden bağlanmak için adres. Doluysa yeni tarayıcı başlatılmaz; oturum açmış kendi profilini kullanmak istediğinde işe yarar.",
+            "The address used to attach to an already running browser over the Chrome DevTools Protocol. When set, no new browser is launched; useful to reuse your own logged-in profile."),
+        ["browser.dialog_policy"] = new("Diyalog politikası", "Dialog policy",
+            "Sayfa bir alert/confirm/prompt açtığında ne yapılacağı. must_respond, diyalog yanıtlanana kadar akışı bekletir; sessizce kapatmak bazı hedeflerde doğrulama adımlarını atlamana yol açabilir.",
+            "What happens when a page opens an alert/confirm/prompt. must_respond blocks the flow until the dialog is answered; dismissing silently can make you skip verification steps on some targets."),
+        ["browser.dialog_timeout_s"] = new("Diyalog bekleme süresi (sn)", "Dialog timeout (s)",
+            "Bir diyalog yanıtsız kaldığında kaç saniye sonra varsayılan davranışa dönüleceği. Süre dolunca akış kilitlenmez, diyalog politikasına göre işlenir.",
+            "How long an unanswered dialog waits before the default behaviour applies. On timeout the flow does not deadlock; the dialog policy decides."),
+        ["browser.camofox.managed_persistence"] = new("Camoufox yönetilen kalıcılık", "Camoufox managed persistence",
+            "Tarayıcı profilinin (çerezler, oturumlar) FETİH tarafından saklanıp saklanmayacağı. Açıkken oturum açtığın hedefe her seferinde yeniden giriş yapmazsın; profil dosyaları hassas oturum verisi içerir.",
+            "Whether the browser profile (cookies, sessions) is stored by FETİH. While on you do not re-authenticate to a target every time; the profile files hold sensitive session data.",
+            GlyphWarning),
+        ["browser.camofox.user_id"] = new("Camoufox kullanıcı kimliği", "Camoufox user id",
+            "Yönetilen kalıcılıkta hangi profilin kullanılacağını belirleyen kimlik. Farklı hedefler için farklı kimlik kullanmak oturumların birbirine karışmasını önler.",
+            "The id selecting which profile managed persistence uses. Using a different id per target keeps sessions from bleeding into each other."),
+        ["browser.camofox.session_key"] = new("Camoufox oturum anahtarı", "Camoufox session key",
+            "Saklanan profili çözmek için kullanılan anahtar. Gizli bir değerdir; ~/.fetih/.env içinde tutulmalı ve arayüzde asla gösterilmemelidir.",
+            "The key used to unlock the stored profile. It is a secret: keep it in ~/.fetih/.env and never display it in the interface.",
+            GlyphLock),
+        ["browser.camofox.adopt_existing_tab"] = new("Açık sekmeyi devral", "Adopt an existing tab",
+            "Yeni sekme açmak yerine zaten açık olan bir sekmeyi kullanır. Elle hazırladığın bir sayfadan devam etmek için pratiktir; ajanın senin açık sekmene erişebilmesi demektir.",
+            "Reuses an already open tab instead of opening a new one. Handy to continue from a page you prepared by hand; it also means the agent can reach your open tab.",
+            GlyphWarning),
+
+        // ═══ HAFIZA / BAĞLAM ═════════════════════════════════════════════════
+        ["memory"] = new("Hafıza", "Memory",
+            "Oturumlar arasında hatırlanan bilgiler ve kullanıcı profili.",
+            "What is remembered across sessions plus the user profile."),
+        ["memory.memory_enabled"] = new("Kalıcı hafıza", "Persistent memory",
+            "Açıkken FETİH önceki oturumlardan öğrendiklerini hatırlar ve tekrar anlatmana gerek kalmaz. Kapatmak her oturumu sıfırdan başlatır; gizlilik açısından en temiz seçenektir.",
+            "While on, FETİH remembers what it learned in earlier sessions so you do not repeat yourself. Turning it off starts every session from scratch — the cleanest option for privacy."),
+        ["memory.user_profile_enabled"] = new("Kullanıcı profili", "User profile",
+            "Senin tercihlerin, araç alışkanlıkların ve çalışma biçimin hakkında bir profil tutulup tutulmayacağı. Yanıtların sana uyarlanmasını sağlar; kişisel veri saklamak istemiyorsan kapat.",
+            "Whether a profile of your preferences, tool habits and working style is kept. It tailors answers to you; turn it off if you would rather not store personal data."),
+        ["memory.memory_char_limit"] = new("Hafıza karakter sınırı", "Memory character limit",
+            "Hafızadan her isteme eklenecek en fazla karakter. Yüksek değer daha fazla süreklilik ama her turda daha fazla token demektir.",
+            "The most characters injected into each prompt from memory. A higher value gives more continuity but costs tokens on every turn."),
+        ["memory.user_char_limit"] = new("Profil karakter sınırı", "Profile character limit",
+            "Kullanıcı profilinden isteme eklenecek en fazla karakter. Hafıza sınırından ayrı tutulur, böylece profil uzun bir hafızayı bastırmaz.",
+            "The most characters injected from the user profile. Kept separate from the memory limit so the profile cannot crowd out a long memory."),
+        ["memory.provider"] = new("Hafıza sağlayıcısı", "Memory provider",
+            "Hafızanın nerede saklandığı (yerel veritabanı veya harici bir servis). Yerel seçenek veriyi makineden çıkarmaz.",
+            "Where memory is stored (a local database or an external service). The local option keeps data on the machine."),
+        ["curator"] = new("Hafıza küratörü", "Memory curator",
+            "Hafızayı arka planda temizleyen, özetleyen ve arşivleyen bakım işi.",
+            "The background maintenance job that cleans, summarises and archives memory."),
+        ["curator.enabled"] = new("Küratör etkin", "Curator enabled",
+            "Açıkken hafıza arka planda düzenli olarak derlenir: yinelenen kayıtlar birleştirilir, eskiyenler arşivlenir. Kapatmak hafızayı olduğu gibi bırakır ve zamanla şişmesine yol açar.",
+            "While on, memory is periodically consolidated in the background: duplicates merged, stale entries archived. Turning it off leaves memory untouched and lets it bloat over time."),
+        ["curator.interval_hours"] = new("Çalışma aralığı (saat)", "Run interval (hours)",
+            "Küratörün kaç saatte bir çalışacağı. Sık çalışmak hafızayı derli toplu tutar ama arka planda model çağrısı maliyeti üretir.",
+            "How many hours between curator runs. Running often keeps memory tidy but incurs background model-call cost."),
+        ["curator.min_idle_hours"] = new("Asgari boşta kalma (saat)", "Minimum idle (hours)",
+            "Küratörün çalışmadan önce beklemesi gereken boşta kalma süresi. Sen çalışırken arka plan işinin kaynak çalmasını önler.",
+            "How long the system must be idle before the curator runs. It stops the background job from stealing resources while you work."),
+        ["curator.stale_after_days"] = new("Bayatlama süresi (gün)", "Stale after (days)",
+            "Bir hafıza kaydının bayat sayılacağı gün sayısı. Bayat kayıtlar özetlenmeye ve arşive alınmaya aday olur.",
+            "After how many days a memory entry counts as stale. Stale entries become candidates for summarising and archiving."),
+        ["curator.archive_after_days"] = new("Arşivleme süresi (gün)", "Archive after (days)",
+            "Bir kaydın etkin hafızadan arşive taşınacağı gün sayısı. Arşivlenen kayıt silinmez ama artık her isteme eklenmez.",
+            "After how many days an entry moves from active memory to the archive. Archived entries are not deleted but stop being injected into prompts."),
+        ["curator.backup.enabled"] = new("Hafıza yedeği", "Memory backup",
+            "Küratör hafızayı değiştirmeden önce yedek alır. Hatalı bir birleştirmeden sonra geri dönebilmenin tek yolu budur; açık tutulması önerilir.",
+            "The curator takes a backup before it changes memory. This is the only way back after a bad merge, so keeping it on is recommended."),
+        ["curator.backup.keep"] = new("Saklanacak yedek sayısı", "Backups to keep",
+            "Diskte tutulacak hafıza yedeği sayısı; eskiler silinir. Az sayı disk tasarrufu, çok sayı daha uzun bir geri dönüş penceresi demektir.",
+            "How many memory backups are kept on disk; older ones are deleted. Fewer saves disk, more gives a longer window to roll back."),
+        ["context"] = new("Bağlam", "Context",
+            "Bağlam penceresini yöneten motor.",
+            "The engine managing the context window."),
+        ["context.engine"] = new("Bağlam motoru", "Context engine",
+            "Geçmiş mesajların bağlam penceresine nasıl yerleştirileceğini yöneten bileşen. Farklı motorlar sıkıştırma ve önceliklendirme stratejilerinde ayrışır.",
+            "The component deciding how past messages are packed into the context window. Engines differ in their compression and prioritisation strategies."),
+        ["compression"] = new("Bağlam sıkıştırma", "Context compression",
+            "Konuşma uzadıkça eski mesajların özetlenmesi.",
+            "Summarising older messages as the conversation grows."),
+        ["compression.enabled"] = new("Sıkıştırma etkin", "Compression enabled",
+            "Açıkken konuşma uzadığında eski mesajlar özetlenir ve token tavanına takılmadan devam edilir. Kapatmak hiçbir ayrıntıyı kaybettirmez ama uzun bir taramada bağlam dolduğunda oturum durur.",
+            "While on, older messages are summarised as the conversation grows so you never hit the token ceiling. Turning it off loses no detail but stalls a long scan once the context fills."),
+        ["compression.threshold"] = new("Sıkıştırma eşiği", "Compression threshold",
+            "Bağlam penceresinin hangi doluluk oranında sıkıştırmanın tetikleneceği (0-1). Düşük değer erken ve sık sıkıştırır; yüksek değer ayrıntıyı uzun süre korur ama tavana yaklaşma riskini artırır.",
+            "At what fill ratio of the context window compression triggers (0-1). A low value compresses early and often; a high value preserves detail longer but flirts with the ceiling."),
+        ["compression.target_ratio"] = new("Hedef sıkıştırma oranı", "Target compression ratio",
+            "Sıkıştırma sonrası bağlamın kaplaması hedeflenen oran. Küçük değer daha agresif özetleme, dolayısıyla daha fazla ayrıntı kaybı demektir.",
+            "The share of the context the result should occupy after compression. A small value means more aggressive summarising and therefore more lost detail."),
+        ["compression.protect_last_n"] = new("Korunan son mesaj sayısı", "Protected recent messages",
+            "Sıkıştırmanın asla dokunmayacağı en son mesaj sayısı. Güncel araç çıktısının ve son talimatın özetlenip bozulmasını önler.",
+            "How many of the most recent messages compression never touches. It keeps fresh tool output and your latest instruction from being summarised away."),
+        ["compression.protect_first_n"] = new("Korunan ilk mesaj sayısı", "Protected initial messages",
+            "Konuşmanın başındaki, hedef ve kapsam tanımını içeren mesajların korunma sayısı. Bunlar özetlenirse ajan görevi neden yaptığını unutur.",
+            "How many messages at the start of the conversation — the ones defining target and scope — are protected. If they are summarised the agent forgets why it is working."),
+        ["compression.hygiene_hard_message_limit"] = new("Katı mesaj üst sınırı", "Hard message limit",
+            "Sıkıştırmaya rağmen aşılamayacak toplam mesaj sayısı; aşılırsa en eskiler doğrudan düşürülür. Kontrolden çıkmış bir döngünün oturumu şişirmesine karşı son emniyettir.",
+            "The total message count that cannot be exceeded even with compression; beyond it the oldest are dropped outright. It is the last safety net against a runaway loop bloating the session."),
+        ["compression.abort_on_summary_failure"] = new("Özet başarısızsa durdur", "Abort on summary failure",
+            "Özetleme çağrısı başarısız olduğunda turu iptal eder. Kapalıyken sıkıştırılmamış bağlamla devam edilir; bu, sağlayıcıdan bağlam-aşımı hatası almana yol açabilir.",
+            "Cancels the turn when the summarisation call fails. While off it continues with uncompressed context, which can trigger a context-overflow error from the provider."),
+        ["prompt_caching"] = new("İstem önbellekleme", "Prompt caching",
+            "Sabit istem önekinin sağlayıcı tarafında önbelleğe alınması.",
+            "Caching the stable prompt prefix on the provider side."),
+        ["prompt_caching.cache_ttl"] = new("Önbellek ömrü", "Cache lifetime",
+            "Sağlayıcıdaki istem önbelleğinin ne kadar taze kalacağı (ör. 5m). Uzun süre maliyeti ve gecikmeyi düşürür; desteklemeyen sağlayıcılarda değerin bir etkisi olmaz.",
+            "How long the prompt cache stays warm on the provider (e.g. 5m). A longer lifetime lowers cost and latency; the value has no effect on providers without cache support."),
+
+        // ═══ OTOMASYON ═══════════════════════════════════════════════════════
+        ["cron"] = new("Zamanlanmış işler", "Scheduled jobs",
+            "Belirli saatlerde kendiliğinden çalışan görevler.",
+            "Tasks that run on their own at set times."),
+        ["cron.wrap_response"] = new("Yanıtı sarmala", "Wrap the response",
+            "Zamanlanmış bir işin çıktısının, hangi işten geldiğini gösteren bir başlıkla sarmalanıp sarmalanmayacağı. Birden çok iş aynı kanala yazdığında kaynağı ayırt etmeyi sağlar.",
+            "Whether a scheduled job's output is wrapped in a header naming the job. It keeps sources apart when several jobs write to the same channel."),
+        ["cron.max_parallel_jobs"] = new("Azami paralel iş", "Maximum parallel jobs",
+            "Aynı anda çalışabilecek zamanlanmış iş sayısı. Boş bırakmak sınırsız demektir; ağır tarama işleri varsa sınırlamak makineyi ve hedefi korur.",
+            "How many scheduled jobs may run at once. Empty means unlimited; capping it protects both your machine and the target when jobs run heavy scans."),
+        ["kanban"] = new("Görev panosu", "Task board",
+            "Uzun işlerin karta bölünüp arka planda yürütüldüğü pano.",
+            "The board where long work is split into cards and executed in the background."),
+        ["kanban.dispatch_in_gateway"] = new("Arka planda dağıt", "Dispatch in the background",
+            "Kartların, ön yüz açık olmasa bile arka plan sürecinde çalıştırılıp çalıştırılmayacağı. Kapatmak kartların yalnızca sen ekrandayken ilerlemesi demektir.",
+            "Whether cards are executed by the background process even when no front-end is open. Turning it off means cards only progress while you are at the screen."),
+        ["kanban.dispatch_interval_seconds"] = new("Dağıtım aralığı (sn)", "Dispatch interval (s)",
+            "Yeni kart olup olmadığının kaç saniyede bir kontrol edileceği. Kısa aralık daha hızlı tepki, daha fazla boşta çalışma demektir.",
+            "How often the board is polled for new cards. A short interval reacts faster but idles more."),
+        ["kanban.failure_limit"] = new("Başarısızlık sınırı", "Failure limit",
+            "Bir kart kaç kez başarısız olduktan sonra durdurulacağı. Sonsuz yeniden denemenin maliyet üretmesini önler.",
+            "How many times a card may fail before it is stopped. It prevents endless retries from generating cost."),
+        ["kanban.worker_log_rotate_bytes"] = new("İşçi günlüğü döndürme (bayt)", "Worker log rotation (bytes)",
+            "Bir işçi günlüğü bu boyuta ulaştığında yenisine geçilir. Uzun süren işlerin tek bir dev günlük dosyası üretmesini önler.",
+            "A worker log rolls over once it reaches this size. It keeps long jobs from producing one giant log file."),
+        ["kanban.worker_log_backup_count"] = new("Saklanacak günlük sayısı", "Log backups to keep",
+            "Döndürülmüş işçi günlüklerinden kaç tanesinin saklanacağı. Fazlası silinir; hata ayıklama için birkaç tane yeterlidir.",
+            "How many rotated worker logs are kept; the rest are deleted. A few are usually enough for debugging."),
+        ["kanban.orchestrator_profile"] = new("Orkestratör profili", "Orchestrator profile",
+            "Kartları planlayan orkestratörün kullanacağı kişilik/model profili. Boş bırakmak genel varsayılanı kullanır.",
+            "The personality/model profile used by the orchestrator that plans cards. Empty uses the general default."),
+        ["kanban.default_assignee"] = new("Varsayılan atanan", "Default assignee",
+            "Açıkça bir sahip belirtilmemiş kartların hangi çalışana gideceği. Boş bırakmak kartları sırayla dağıtır.",
+            "Which worker picks up cards with no explicit owner. Empty distributes cards in turn."),
+        ["kanban.auto_decompose"] = new("Otomatik parçalama", "Automatic decomposition",
+            "Büyük bir kartın alt kartlara otomatik bölünmesine izin verir. Karmaşık bir taramayı adımlara indirir; kapatmak parçalamayı tamamen sana bırakır.",
+            "Lets a large card be split into sub-cards automatically. It breaks a complex scan into steps; turning it off leaves all decomposition to you."),
+        ["kanban.auto_decompose_per_tick"] = new("Tur başına parçalama", "Decompositions per tick",
+            "Her dağıtım turunda en fazla kaç kartın parçalanacağı. Düşük tutmak parçalama maliyetini zamana yayar.",
+            "How many cards may be decomposed in one dispatch tick. Keeping it low spreads decomposition cost over time."),
+        ["goals"] = new("Hedefler", "Goals",
+            "Uzun soluklu hedeflerin takibi.",
+            "Tracking of long-running goals."),
+        ["goals.max_turns"] = new("Hedef başına azami tur", "Maximum turns per goal",
+            "Tek bir hedef üzerinde çalışırken harcanabilecek en fazla tur. Bitmeyen bir hedefin bütçeyi tüketmesini engeller.",
+            "The most turns that may be spent on a single goal. It stops a never-ending goal from consuming the budget."),
+        ["delegation"] = new("Alt ajanlar", "Sub-agents",
+            "Bir işi devralan alt ajanların modeli, sınırları ve izinleri.",
+            "The model, limits and permissions of sub-agents that take over a task."),
+        ["delegation.model"] = new("Alt ajan modeli", "Sub-agent model",
+            "Devredilen işleri çalıştıracak model. Ana modelden daha ucuz/hızlı bir model seçmek çok sayıda alt görevde toplam maliyeti belirgin biçimde düşürür.",
+            "The model running delegated work. Picking something cheaper/faster than the main model markedly lowers total cost across many sub-tasks."),
+        ["delegation.provider"] = new("Alt ajan sağlayıcısı", "Sub-agent provider",
+            "Alt ajanların kullanacağı sağlayıcı. Boş bırakmak ana sağlayıcıyı kullanır; ayrı bir sağlayıcı seçmek ana modelin kota sınırını korur.",
+            "The provider used by sub-agents. Empty reuses the main provider; a separate one protects the main model's quota."),
+        ["delegation.base_url"] = new("Alt ajan taban adresi", "Sub-agent base URL",
+            "Alt ajanlar için OpenAI-uyumlu özel bir uç noktası. Yerel bir model sunucusuna yönlendirmek için kullanılır.",
+            "A custom OpenAI-compatible endpoint for sub-agents. Use it to point them at a local model server."),
+        ["delegation.api_key"] = new("Alt ajan API anahtarı", "Sub-agent API key",
+            "Alt ajan uç noktası için anahtar. Gizli bir değerdir: ~/.fetih/.env içinde ${DEĞİŞKEN} referansı olarak tutulmalı, düz metin yazılmamalıdır.",
+            "The key for the sub-agent endpoint. It is a secret: keep it in ~/.fetih/.env as a ${VARIABLE} reference rather than in plain text.",
+            GlyphLock),
+        ["delegation.api_mode"] = new("Alt ajan API kipi", "Sub-agent API mode",
+            "Alt ajan uç noktasının konuştuğu protokol (ör. chat_completions). Yanlış kip ilk çağrıda biçim hatası verir.",
+            "The protocol the sub-agent endpoint speaks (e.g. chat_completions). A wrong mode fails with a format error on the first call."),
+        ["delegation.inherit_mcp_toolsets"] = new("MCP araçlarını devret", "Inherit MCP toolsets",
+            "Alt ajanların ana oturumun MCP araçlarına erişip erişemeyeceği. Kapatmak alt ajanları daha dar bir araç yüzeyiyle sınırlar; bu, güvenlik açısından tercih edilendir.",
+            "Whether sub-agents may reach the main session's MCP tools. Turning it off confines sub-agents to a narrower tool surface, which is the safer choice."),
+        ["delegation.max_iterations"] = new("Alt ajan azami turu", "Sub-agent maximum turns",
+            "Bir alt ajanın kendi içinde yapabileceği en fazla tur. Ana turdan bağımsızdır ve bir alt görevin sınırsız uzamasını engeller.",
+            "The most turns one sub-agent may run internally. It is independent of the main turn budget and keeps a sub-task from running forever."),
+        ["delegation.child_timeout_seconds"] = new("Alt ajan zaman aşımı (sn)", "Sub-agent timeout (s)",
+            "Bir alt ajanın toplam süre sınırı. Süre dolarsa alt görev iptal edilir ve ana ajan elindeki kısmi sonuçla devam eder.",
+            "The overall time limit for one sub-agent. On timeout the sub-task is cancelled and the main agent continues with partial results."),
+        ["delegation.reasoning_effort"] = new("Akıl yürütme düzeyi", "Reasoning effort",
+            "Destekleyen modellerde alt ajanların ne kadar derin düşüneceği. Yüksek düzey daha iyi planlama ama daha fazla token ve süre demektir.",
+            "How deeply sub-agents think on models that support it. A higher level plans better but costs more tokens and time."),
+        ["delegation.max_concurrent_children"] = new("Azami eşzamanlı alt ajan", "Maximum concurrent sub-agents",
+            "Aynı anda çalışabilecek alt ajan sayısı. Yüksek değer paralel taramayı hızlandırır ama kota sınırına ve hedefte oran sınırlamasına çarpma riskini artırır.",
+            "How many sub-agents may run at once. A high value speeds up parallel scanning but raises the risk of hitting quota and target-side rate limits."),
+        ["delegation.max_spawn_depth"] = new("Azami devretme derinliği", "Maximum spawn depth",
+            "Bir alt ajanın kendi alt ajanını doğurabileceği en fazla seviye. Küçük tutmak, kontrolsüz bir ajan ağacının oluşmasını engeller.",
+            "How many levels deep a sub-agent may spawn its own sub-agents. Keeping it small prevents an uncontrolled agent tree."),
+        ["delegation.orchestrator_enabled"] = new("Orkestratör etkin", "Orchestrator enabled",
+            "İşi alt ajanlara bölen orkestratörün açık olup olmadığı. Kapalıyken devretme yapılmaz ve her şey tek ajanda yürür.",
+            "Whether the orchestrator that splits work across sub-agents is on. While off nothing is delegated and everything runs in a single agent."),
+        ["delegation.subagent_auto_approve"] = new("Alt ajan onaylarını otomatik geç", "Auto-approve for sub-agents",
+            "Alt ajanların tehlikeli komutlar için onay istemeden çalışmasına izin verir. Açmak, onay politikasını arka planda çalışan ajanlar için etkisiz kılar — bilinçli bir risktir ve kapalı tutulması önerilir.",
+            "Lets sub-agents run dangerous commands without asking. Enabling it makes the approval policy toothless for background agents — a deliberate risk, best left off.",
+            GlyphWarning),
+
+        // ═══ GÖRÜNÜM ═════════════════════════════════════════════════════════
+        ["display"] = new("Görünüm", "Display",
+            "Arayüz sunumu: yoğunluk, akış, renk ve gösterilen ayrıntılar.",
+            "Interface presentation: density, streaming, colour and how much detail is shown."),
+        ["display.compact"] = new("Sıkışık görünüm", "Compact view",
+            "Satır aralıklarını ve boşlukları azaltarak ekrana daha fazla içerik sığdırır. Küçük ekranlarda yararlı, uzun oturumlarda okunabilirliği düşürebilir.",
+            "Fits more on screen by tightening line spacing and padding. Handy on small screens, harder to read in long sessions."),
+        ["display.personality"] = new("Kişilik", "Personality",
+            "Yanıtların üslubunu belirleyen profil. Yalnızca sunumu etkiler; araç izinlerini veya güvenlik politikasını değiştirmez.",
+            "The profile shaping the tone of answers. It affects presentation only, not tool permissions or the security policy."),
+        ["display.resume_display"] = new("Devam ekranı", "Resume display",
+            "Yarım kalmış bir oturuma dönerken önceki bağlamın nasıl gösterileceği.",
+            "How earlier context is shown when you return to an unfinished session."),
+        ["display.busy_input_mode"] = new("Meşgulken giriş kipi", "Input mode while busy",
+            "Ajan çalışırken yazdıklarının kuyruğa alınıp alınmayacağı. Kuyruğa almak sıradaki talimatı önceden yazmanı sağlar.",
+            "Whether what you type while the agent works is queued. Queuing lets you write the next instruction ahead of time."),
+        ["display.tui_auto_resume_recent"] = new("Son oturumu otomatik aç", "Auto-resume the last session",
+            "Açılışta en son oturumun kendiliğinden yüklenmesi. Kapatmak her açılışta temiz bir başlangıç verir.",
+            "Loads the most recent session automatically at startup. Turning it off gives a clean start every time."),
+        ["display.bell_on_complete"] = new("Bitince sesli uyar", "Bell on completion",
+            "Uzun bir iş bittiğinde terminal zili çalar. Arka planda çalışan taramaları beklerken faydalıdır.",
+            "Rings the terminal bell when a long task finishes. Useful while waiting on background scans."),
+        ["display.show_reasoning"] = new("Akıl yürütmeyi göster", "Show reasoning",
+            "Destekleyen modellerde düşünme adımlarının görünüp görünmeyeceği. Ajanın neden o komutu seçtiğini anlamak için değerlidir, ekranı belirgin biçimde uzatır.",
+            "Whether thinking steps are displayed on models that expose them. Valuable for understanding why the agent chose a command, but it lengthens the screen a lot."),
+        ["display.streaming"] = new("Akış kipi", "Streaming",
+            "Yanıtın kelime kelime akıp akmayacağı. Kapatmak yanıtı tek parça gösterir; yavaş bağlantılarda daha az titreşim üretir.",
+            "Whether the answer streams token by token. Turning it off shows the answer in one piece and flickers less on slow links."),
+        ["display.timestamps"] = new("Zaman damgaları", "Timestamps",
+            "Her mesajın yanında saat gösterilir. Bir bulgunun ne zaman doğrulandığını rapora yazarken işe yarar.",
+            "Shows a clock next to each message. Useful when writing down when a finding was verified."),
+        ["display.final_response_markdown"] = new("Yanıtı Markdown olarak biçimlendir", "Render the answer as Markdown",
+            "Son yanıtın başlık, liste ve kod bloklarıyla biçimlendirilmesi. Kapatmak ham metin verir; çıktıyı başka bir araca yapıştıracaksan tercih edilir.",
+            "Formats the final answer with headings, lists and code blocks. Turning it off yields raw text, preferable when pasting output into another tool."),
+        ["display.persistent_output"] = new("Kalıcı çıktı", "Persistent output",
+            "Araç çıktısının ekranda kalıcı olarak tutulup tutulmayacağı. Kapalıyken çıktı iş bitince toplanır ve ekran sadeleşir.",
+            "Whether tool output stays on screen. While off it is folded away once the work finishes, keeping the screen tidy."),
+        ["display.persistent_output_max_lines"] = new("Kalıcı çıktı satır sınırı", "Persistent output line limit",
+            "Ekranda tutulacak en fazla çıktı satırı. Büyük tarama çıktılarının kaydırma geçmişini boğmasını önler.",
+            "The most output lines kept on screen. It stops huge scan output from drowning the scrollback."),
+        ["display.inline_diffs"] = new("Satır içi değişiklik gösterimi", "Inline diffs",
+            "Dosya değişikliklerinin renkli fark (diff) olarak gösterilmesi. Ajanın bir dosyada tam olarak neyi değiştirdiğini görmenin en hızlı yoludur.",
+            "Shows file changes as a coloured diff. It is the fastest way to see exactly what the agent changed in a file."),
+        ["display.file_mutation_verifier"] = new("Dosya değişikliği doğrulayıcı", "File mutation verifier",
+            "Ajanın bildirdiği dosya değişikliğinin diskte gerçekten oluşup oluşmadığını denetler. Sessiz bir yazma hatasının fark edilmeden geçmesini engeller.",
+            "Checks that a file change the agent reports actually landed on disk. It keeps a silent write failure from going unnoticed."),
+        ["display.show_cost"] = new("Maliyeti göster", "Show cost",
+            "Her turun token ve para maliyetini gösterir. Uzun taramalarda bütçeyi izlemenin en pratik yoludur.",
+            "Displays the token and money cost of each turn. The most practical way to watch budget during long scans."),
+        ["display.skin"] = new("Tema", "Skin",
+            "Arayüzün renk şeması. Yalnızca görünümü etkiler.",
+            "The interface colour scheme. Appearance only."),
+        ["display.language"] = new("Çıktı dili", "Output language",
+            "Ajanın yanıtlarını yazacağı dil. Bu, masaüstü arayüzünün dilinden ayrıdır: arayüz dilini yukarıdaki \"Arayüz dili\" seçicisinden değiştir.",
+            "The language the agent writes its answers in. This is separate from the desktop interface language, which you change in the \"Interface language\" picker above."),
+        ["display.tui_status_indicator"] = new("Durum göstergesi", "Status indicator",
+            "Ajanın o an ne yaptığını gösteren canlı satır. Kapatmak ekranı sadeleştirir ama uzun beklemelerde ne olduğunu görmeni zorlaştırır.",
+            "The live line showing what the agent is doing right now. Turning it off declutters the screen but makes long waits opaque."),
+        ["display.user_message_preview.first_lines"] = new("Önizlemede ilk satırlar", "Preview: first lines",
+            "Uzun bir kullanıcı mesajının özetinde gösterilecek baştaki satır sayısı.",
+            "How many leading lines of a long user message are shown in its summary."),
+        ["display.user_message_preview.last_lines"] = new("Önizlemede son satırlar", "Preview: last lines",
+            "Uzun bir kullanıcı mesajının özetinde gösterilecek sondaki satır sayısı.",
+            "How many trailing lines of a long user message are shown in its summary."),
+        ["display.interim_assistant_messages"] = new("Ara yanıtları göster", "Show interim answers",
+            "Ajanın araçlar arasında ürettiği ara açıklamaların gösterilmesi. Ne yapmaya çalıştığını takip etmeyi kolaylaştırır, ekranı uzatır.",
+            "Shows the interim commentary the agent produces between tools. Easier to follow its intent, but a longer screen."),
+        ["display.tool_progress"] = new("Araç ilerlemesi", "Tool progress",
+            "Çalışan araçların ilerleme bilgisinin gösterilmesi. Uzun süren bir taramanın takılıp takılmadığını anlamanı sağlar.",
+            "Shows progress for running tools. It tells you whether a long scan is stuck or still working."),
+        ["display.tool_progress_command"] = new("İlerlemede komutu göster", "Show the command in progress",
+            "İlerleme satırında çalıştırılan komutun kendisinin görünmesi. Hangi hedefe ne gönderildiğini denetlemek için değerlidir.",
+            "Shows the actual command in the progress line. Valuable for auditing exactly what is being sent to which target."),
+        ["display.tool_preview_length"] = new("Araç önizleme uzunluğu", "Tool preview length",
+            "Araç çağrısı özetinde gösterilecek karakter sayısı. Kısa tutmak ekranı derli toplu tutar ama uzun komutları keser.",
+            "How many characters of a tool call summary are shown. Short keeps the screen tidy but clips long commands."),
+        ["display.ephemeral_system_ttl"] = new("Geçici sistem mesajı ömrü", "Ephemeral system message lifetime",
+            "Geçici sistem bildirimlerinin ekranda kalma süresi. Sıfır, mesajları hemen kaldırır.",
+            "How long transient system notices stay on screen. Zero removes them immediately."),
+        ["display.runtime_footer.enabled"] = new("Alt bilgi çubuğu", "Runtime footer",
+            "Ekranın altında model, maliyet ve bağlam doluluğu gibi canlı bilgileri gösteren çubuk.",
+            "The bar at the bottom showing live information such as model, cost and context usage."),
+        ["display.runtime_footer.fields"] = new("Alt bilgi alanları", "Footer fields",
+            "Alt bilgi çubuğunda hangi alanların görüneceği. Kısa bir liste çubuğu okunabilir tutar.",
+            "Which fields appear in the footer bar. A short list keeps the bar readable."),
+        ["display.copy_shortcut"] = new("Kopyalama kısayolu", "Copy shortcut",
+            "Son yanıtı panoya almak için kullanılan tuş bileşimi.",
+            "The key combination that copies the last answer to the clipboard."),
+        ["dashboard"] = new("Pano", "Dashboard",
+            "Web panosunun görünümü.",
+            "The appearance of the web dashboard."),
+        ["dashboard.theme"] = new("Pano teması", "Dashboard theme",
+            "Web panosunun renk teması. Masaüstü uygulamasının temasından bağımsızdır.",
+            "The web dashboard's colour theme. Independent of the desktop application's theme."),
+        ["dashboard.show_token_analytics"] = new("Token analizini göster", "Show token analytics",
+            "Panoda token kullanımı ve maliyet grafiklerinin görünmesi. Uzun taramaların bütçesini izlemek için kullanışlıdır.",
+            "Shows token usage and cost charts on the dashboard. Useful for tracking the budget of long scans."),
+        ["privacy"] = new("Gizlilik", "Privacy",
+            "Dışarı çıkan veri ve kişisel bilgi maskeleme tercihleri.",
+            "Preferences for outbound data and masking of personal information."),
+        ["privacy.redact_pii"] = new("Kişisel verileri maskele", "Redact personal data",
+            "E-posta, telefon ve kimlik numarası gibi kişisel veriler modele veya günlüklere gitmeden önce maskelenir. Bir sızma testinde toplanan gerçek kişi verilerinin oturum geçmişinde birikmesini önler.",
+            "Personal data such as e-mail addresses, phone numbers and identity numbers is masked before it reaches the model or the logs. It stops real personal data gathered during a test from accumulating in session history.",
+            GlyphLock),
+
+        // ═══ SİSTEM ══════════════════════════════════════════════════════════
+        ["logging"] = new("Günlük kaydı", "Logging",
+            "Günlük ayrıntı düzeyi, dosya boyutu ve bellek izleme.",
+            "Log verbosity, file size and memory monitoring."),
+        ["logging.level"] = new("Günlük düzeyi", "Log level",
+            "Kaydedilecek en düşük önem düzeyi (DEBUG, INFO, WARNING, ERROR). DEBUG hata ayıklamada her şeyi yazar ama disk kullanımını ve gürültüyü belirgin biçimde artırır; günlük kullanımda INFO yeterlidir.",
+            "The lowest severity written to the log (DEBUG, INFO, WARNING, ERROR). DEBUG records everything while troubleshooting but markedly raises disk use and noise; INFO is enough day to day."),
+        ["logging.max_size_mb"] = new("Azami günlük boyutu (MB)", "Maximum log size (MB)",
+            "Bir günlük dosyası bu boyuta ulaştığında döndürülür. Küçük tutmak diski korur ama geçmişe daha az geriye bakabilirsin.",
+            "A log file is rotated once it reaches this size. Keeping it small protects the disk but shortens how far back you can look."),
+        ["logging.backup_count"] = new("Saklanacak günlük dosyası", "Log files to keep",
+            "Döndürülmüş günlüklerden kaç tanesinin saklanacağı; eskiler silinir.",
+            "How many rotated log files are kept; older ones are deleted."),
+        ["logging.memory_monitor.enabled"] = new("Bellek izleyici", "Memory monitor",
+            "Sürecin bellek kullanımının düzenli olarak günlüğe yazılması. Uzun süren oturumlarda bellek sızıntısını fark etmenin yoludur.",
+            "Periodically writes the process's memory use to the log. It is how you notice a leak during long sessions."),
+        ["logging.memory_monitor.interval_seconds"] = new("Bellek örnekleme aralığı (sn)", "Memory sampling interval (s)",
+            "Bellek kullanımının kaç saniyede bir örnekleneceği. Sık örnekleme daha ayrıntılı bir eğri, daha büyük bir günlük demektir.",
+            "How often memory use is sampled. Sampling often gives a finer curve and a bigger log."),
+        ["sessions"] = new("Oturumlar", "Sessions",
+            "Konuşma geçmişinin saklanması ve budanması.",
+            "How conversation history is stored and pruned."),
+        ["sessions.auto_prune"] = new("Otomatik budama", "Automatic pruning",
+            "Eski oturumların kendiliğinden silinmesi. Kapatmak tüm geçmişi süresiz saklar; bu, disk kullanımını ve eski hedeflere ait verinin makinede kalma süresini artırır.",
+            "Deletes old sessions on its own. Turning it off keeps all history indefinitely, growing disk use and how long data about past targets stays on the machine."),
+        ["sessions.retention_days"] = new("Saklama süresi (gün)", "Retention (days)",
+            "Bir oturumun budanmadan önce saklanacağı gün sayısı. Kısa tutmak veri kalıntısını azaltır; uzun tutmak eski bir işe geri dönebilmeni sağlar.",
+            "How many days a session is kept before pruning. Short reduces data residue; long lets you return to older work."),
+        ["sessions.vacuum_after_prune"] = new("Budamadan sonra sıkıştır", "Vacuum after pruning",
+            "Budama sonrası veritabanının fiziksel olarak küçültülmesi. Silinen oturumların diskte iz bırakmasını azaltır.",
+            "Physically shrinks the database after pruning. It reduces the traces deleted sessions leave on disk."),
+        ["sessions.min_interval_hours"] = new("Asgari budama aralığı (saat)", "Minimum pruning interval (hours)",
+            "İki budama arasında beklenecek en kısa süre. Her açılışta veritabanı bakımı yapılmasını önler.",
+            "The shortest time between two prunes. It avoids running database maintenance at every startup."),
+        ["checkpoints"] = new("Kontrol noktaları", "Checkpoints",
+            "Dosya değişikliklerinin geri alınabilmesi için alınan anlık görüntüler.",
+            "Snapshots taken so file changes can be rolled back."),
+        ["checkpoints.enabled"] = new("Kontrol noktaları etkin", "Checkpoints enabled",
+            "Ajan dosyaları değiştirmeden önce anlık görüntü alınır; hatalı bir değişiklikten sonra geri dönebilirsin. Disk kullanımı karşılığında ciddi bir emniyet ağı sağlar.",
+            "A snapshot is taken before the agent changes files so you can roll back a bad edit. It buys a real safety net at the cost of disk space."),
+        ["checkpoints.max_snapshots"] = new("Azami anlık görüntü", "Maximum snapshots",
+            "Saklanacak en fazla kontrol noktası sayısı; eskiler budanır.",
+            "The most checkpoints kept; older ones are pruned."),
+        ["checkpoints.max_total_size_mb"] = new("Azami toplam boyut (MB)", "Maximum total size (MB)",
+            "Tüm kontrol noktalarının kaplayabileceği toplam disk alanı. Sınır aşılınca en eski görüntüler silinir.",
+            "The total disk space all checkpoints may occupy. Once exceeded, the oldest snapshots are removed."),
+        ["checkpoints.max_file_size_mb"] = new("Azami dosya boyutu (MB)", "Maximum file size (MB)",
+            "Anlık görüntüye alınacak tek bir dosyanın üst sınırı. Büyük pcap veya bellek dökümü dosyalarının kontrol noktalarını şişirmesini önler.",
+            "The upper bound for a single file included in a snapshot. It keeps large pcap or memory-dump files from bloating checkpoints."),
+        ["checkpoints.auto_prune"] = new("Otomatik budama", "Automatic pruning",
+            "Sınırlar aşıldığında eski kontrol noktalarının kendiliğinden silinmesi.",
+            "Deletes old checkpoints automatically once the limits are exceeded."),
+        ["checkpoints.retention_days"] = new("Saklama süresi (gün)", "Retention (days)",
+            "Bir kontrol noktasının silinmeden önce saklanacağı gün sayısı.",
+            "How many days a checkpoint is kept before deletion."),
+        ["checkpoints.delete_orphans"] = new("Sahipsizleri sil", "Delete orphans",
+            "Artık hiçbir oturuma bağlı olmayan kontrol noktalarının temizlenmesi. Silinen oturumlardan arta kalan verinin diskte kalmasını önler.",
+            "Cleans up checkpoints no longer tied to any session. It stops leftovers from deleted sessions lingering on disk."),
+        ["checkpoints.min_interval_hours"] = new("Asgari budama aralığı (saat)", "Minimum pruning interval (hours)",
+            "Kontrol noktası bakımının iki çalışması arasındaki en kısa süre.",
+            "The shortest time between two checkpoint maintenance runs."),
+        ["updates"] = new("Güncellemeler", "Updates",
+            "Güncelleme öncesi yedekleme davranışı.",
+            "Backup behaviour around updates."),
+        ["updates.pre_update_backup"] = new("Güncelleme öncesi yedek", "Pre-update backup",
+            "Güncellemeden önce yapılandırma ve durumun yedeklenmesi. Bozuk bir sürümden sonra geri dönebilmenin yoludur; açık tutulması önerilir.",
+            "Backs up configuration and state before updating. It is how you get back after a broken release, so keeping it on is recommended."),
+        ["updates.backup_keep"] = new("Saklanacak yedek sayısı", "Backups to keep",
+            "Güncelleme yedeklerinden kaç tanesinin saklanacağı; eskiler silinir.",
+            "How many update backups are kept; older ones are deleted."),
+        ["network"] = new("Ağ", "Network",
+            "Giden bağlantıların taşıma davranışı.",
+            "Transport behaviour of outbound connections."),
+        ["network.force_ipv4"] = new("IPv4'ü zorla", "Force IPv4",
+            "Tüm giden bağlantıların IPv4 üzerinden kurulmasını zorlar. IPv6'nın yanlış yapılandırıldığı ağlarda uzun zaman aşımlarını ve sessiz bağlantı hatalarını çözer.",
+            "Forces every outbound connection over IPv4. It fixes long timeouts and silent connection failures on networks where IPv6 is misconfigured."),
+        ["lsp"] = new("Dil sunucuları (LSP)", "Language servers (LSP)",
+            "Kod analizinde kullanılan dil sunucusu entegrasyonu.",
+            "The language-server integration used for code analysis."),
+        ["lsp.enabled"] = new("LSP etkin", "LSP enabled",
+            "Kod okurken dil sunucusundan tip, tanım ve referans bilgisi alınması. Kaynak kodu incelerken doğruluğu belirgin biçimde artırır, karşılığında bellek ve başlangıç süresi tüketir.",
+            "Pulls type, definition and reference information from a language server while reading code. It markedly improves accuracy on source review at the cost of memory and startup time."),
+        ["lsp.wait_mode"] = new("Bekleme kipi", "Wait mode",
+            "Dil sunucusunun indeksleme işini bitirmesinin beklenip beklenmeyeceği. Beklemek ilk yanıtı geciktirir ama eksik indeksten kaynaklanan yanlış sonuçları önler.",
+            "Whether to wait for the language server to finish indexing. Waiting delays the first answer but avoids wrong results from a partial index."),
+        ["lsp.wait_timeout"] = new("Bekleme zaman aşımı (sn)", "Wait timeout (s)",
+            "İndeksleme için beklenecek en uzun süre. Süre dolarsa elde olan kısmi indeksle devam edilir.",
+            "The longest time indexing is waited for. On timeout it continues with whatever index exists."),
+        ["lsp.install_strategy"] = new("Sunucu kurulum stratejisi", "Server install strategy",
+            "Eksik bir dil sunucusunun otomatik kurulup kurulmayacağı. Otomatik kurulum makineye yeni ikililer indirir; kısıtlı ortamlarda elle kurulum tercih edilir.",
+            "Whether a missing language server is installed automatically. Auto-install downloads new binaries onto the machine; manual is preferable in restricted environments."),
+
+        // ═══ SES ═════════════════════════════════════════════════════════════
+        ["tts"] = new("Metin okuma (TTS)", "Text-to-speech (TTS)",
+            "Yanıtların sesli okunması: motor, ses ve dil.",
+            "Reading answers aloud: engine, voice and language."),
+        ["tts.provider"] = new("TTS sağlayıcısı", "TTS provider",
+            "Seslendirmeyi yapacak motor (edge, elevenlabs, openai, xai, mistral, neutts, piper). edge ve piper yerel/ücretsiz çalışır; diğerleri API anahtarı gerektirir ve metni sağlayıcıya gönderir.",
+            "The engine producing speech (edge, elevenlabs, openai, xai, mistral, neutts, piper). edge and piper run locally/free; the others need an API key and send the text to the provider."),
+        ["tts.edge.voice"] = new("Edge sesi", "Edge voice",
+            "Edge motorunda kullanılacak ses kimliği (ör. tr-TR-AhmetNeural). Türkçe yanıtlar için Türkçe bir ses seçmek telaffuzu belirgin biçimde düzeltir.",
+            "The voice id used by the Edge engine (e.g. tr-TR-AhmetNeural). Picking a voice matching the answer language markedly improves pronunciation."),
+        ["tts.elevenlabs.voice_id"] = new("ElevenLabs ses kimliği", "ElevenLabs voice id",
+            "ElevenLabs hesabındaki ses kimliği. Anahtar ~/.fetih/.env içinde tanımlı olmalıdır.",
+            "The voice id in your ElevenLabs account. The key must be defined in ~/.fetih/.env."),
+        ["tts.elevenlabs.model_id"] = new("ElevenLabs modeli", "ElevenLabs model",
+            "Seslendirmede kullanılacak ElevenLabs modeli. Çok dilli modeller Türkçe metinde daha doğru sonuç verir.",
+            "The ElevenLabs model used for synthesis. Multilingual models handle non-English text more accurately."),
+        ["tts.openai.model"] = new("OpenAI TTS modeli", "OpenAI TTS model",
+            "OpenAI seslendirme modeli. Metin OpenAI'ye gönderilir; hassas içerik okunacaksa yerel bir motoru tercih et.",
+            "The OpenAI speech model. The text is sent to OpenAI; prefer a local engine if sensitive content will be spoken.",
+            GlyphWarning),
+        ["tts.openai.voice"] = new("OpenAI sesi", "OpenAI voice",
+            "OpenAI motorunda kullanılacak ses adı (ör. alloy).",
+            "The voice name used by the OpenAI engine (e.g. alloy)."),
+        ["tts.xai.voice_id"] = new("xAI ses kimliği", "xAI voice id",
+            "xAI seslendirme motorunda kullanılacak ses.",
+            "The voice used by the xAI speech engine."),
+        ["tts.xai.language"] = new("xAI dili", "xAI language",
+            "xAI motorunda seslendirme dili. Yanıt diliyle eşleşmezse telaffuz bozulur.",
+            "The synthesis language for the xAI engine. A mismatch with the answer language distorts pronunciation."),
+        ["tts.xai.sample_rate"] = new("xAI örnekleme hızı", "xAI sample rate",
+            "Üretilen sesin örnekleme hızı (Hz). Yüksek değer daha net ses, daha büyük veri demektir.",
+            "The sample rate (Hz) of the produced audio. Higher is clearer and larger."),
+        ["tts.xai.bit_rate"] = new("xAI bit hızı", "xAI bit rate",
+            "Üretilen sesin bit hızı. Yüksek değer kaliteyi artırır ve bant genişliği tüketir.",
+            "The bit rate of the produced audio. Higher raises quality and consumes bandwidth."),
+        ["tts.mistral.model"] = new("Mistral TTS modeli", "Mistral TTS model",
+            "Mistral seslendirme modeli.",
+            "The Mistral speech model."),
+        ["tts.mistral.voice_id"] = new("Mistral ses kimliği", "Mistral voice id",
+            "Mistral motorunda kullanılacak ses.",
+            "The voice used by the Mistral engine."),
+        ["tts.neutts.model"] = new("NeuTTS modeli", "NeuTTS model",
+            "Yerel çalışan NeuTTS modelinin adı. Ses makineden dışarı çıkmaz.",
+            "The name of the locally running NeuTTS model. Audio never leaves the machine."),
+        ["tts.neutts.device"] = new("NeuTTS aygıtı", "NeuTTS device",
+            "Modelin çalışacağı donanım: cpu, cuda veya mps. GPU seçmek seslendirmeyi belirgin biçimde hızlandırır.",
+            "The hardware the model runs on: cpu, cuda or mps. Choosing a GPU speeds synthesis up markedly."),
+        ["tts.neutts.ref_audio"] = new("NeuTTS referans sesi", "NeuTTS reference audio",
+            "Ses klonlaması için örnek ses dosyasının yolu. Boş bırakmak modelin varsayılan sesini kullanır.",
+            "Path to the sample audio file used for voice cloning. Empty uses the model's default voice."),
+        ["tts.neutts.ref_text"] = new("NeuTTS referans metni", "NeuTTS reference text",
+            "Referans ses dosyasında söylenen metin. Doğru yazılması klonlama kalitesini artırır.",
+            "The text spoken in the reference audio. Writing it accurately improves cloning quality."),
+        ["tts.piper.voice"] = new("Piper sesi", "Piper voice",
+            "Yerel Piper motorunda kullanılacak ses modeli. Tamamen çevrimdışı çalışır.",
+            "The voice model used by the local Piper engine. It runs fully offline."),
+        ["stt"] = new("Konuşma tanıma (STT)", "Speech-to-text (STT)",
+            "Mikrofon girişinin metne çevrilmesi.",
+            "Turning microphone input into text."),
+        ["stt.enabled"] = new("Konuşma tanıma etkin", "Speech-to-text enabled",
+            "Sesli komut girişinin açık olup olmadığı. Kapalıyken bas-konuş çalışmaz ve mikrofona hiç erişilmez.",
+            "Whether voice input is on. While off push-to-talk does nothing and the microphone is never accessed."),
+        ["stt.provider"] = new("STT sağlayıcısı", "STT provider",
+            "Konuşmayı metne çeviren motor. local seçeneği ses kaydını makineden çıkarmaz; bulut sağlayıcıları sesi kendi sunucularına gönderir.",
+            "The engine transcribing speech. The local option keeps recordings on the machine; cloud providers upload the audio to their servers.",
+            GlyphWarning),
+        ["stt.local.model"] = new("Yerel model", "Local model",
+            "Yerel çalışan tanıma modelinin boyutu (tiny, base, small, medium, large). Büyük model daha doğru ama daha yavaştır ve daha çok bellek ister.",
+            "The size of the locally running recognition model (tiny, base, small, medium, large). Larger is more accurate but slower and hungrier for memory."),
+        ["stt.local.language"] = new("Yerel model dili", "Local model language",
+            "Tanımada varsayılacak dil. Boş bırakmak otomatik algılama yapar; dili sabitlemek Türkçe konuşmada doğruluğu artırır.",
+            "The language assumed during recognition. Empty auto-detects; pinning the language improves accuracy for a known speaker."),
+        ["stt.openai.model"] = new("OpenAI STT modeli", "OpenAI STT model",
+            "OpenAI tarafında kullanılacak tanıma modeli (ör. whisper-1). Ses kaydı OpenAI'ye yüklenir.",
+            "The recognition model used on OpenAI's side (e.g. whisper-1). The recording is uploaded to OpenAI.",
+            GlyphWarning),
+        ["stt.mistral.model"] = new("Mistral STT modeli", "Mistral STT model",
+            "Mistral tarafında kullanılacak tanıma modeli.",
+            "The recognition model used on Mistral's side."),
+        ["voice"] = new("Ses kaydı", "Voice recording",
+            "Bas-konuş tuşu, kayıt sınırları ve geri bildirim sesleri.",
+            "The push-to-talk key, recording limits and feedback sounds."),
+        ["voice.record_key"] = new("Bas-konuş tuşu", "Push-to-talk key",
+            "Kaydı başlatan tuş bileşimi (ör. ctrl+b). Sık kullandığın başka bir kısayolla çakışmayan bir bileşim seç.",
+            "The key combination that starts recording (e.g. ctrl+b). Pick something that does not clash with a shortcut you use often."),
+        ["voice.max_recording_seconds"] = new("Azami kayıt süresi (sn)", "Maximum recording (s)",
+            "Tek bir kaydın süre sınırı; aşılırsa kayıt otomatik durur. Tuşun basılı kaldığı durumlarda dev ses dosyaları oluşmasını engeller.",
+            "The time limit for one recording; it stops automatically when exceeded. It prevents huge audio files when the key stays pressed."),
+        ["voice.auto_tts"] = new("Yanıtları otomatik seslendir", "Speak answers automatically",
+            "Her yanıtın gelir gelmez sesli okunması. Eller serbest çalışmak için pratiktir; uzun teknik çıktılarda rahatsız edici olabilir.",
+            "Reads every answer aloud as it arrives. Handy for hands-free work, tiring on long technical output."),
+        ["voice.beep_enabled"] = new("Kayıt bip sesi", "Recording beep",
+            "Kayıt başlarken ve biterken kısa bir bip çalınması. Kaydın gerçekten başladığını duymak, sessizce kaydeden bir mikrofona göre daha güvenlidir.",
+            "Plays a short beep when recording starts and stops. Hearing that recording really started is safer than a silently listening microphone."),
+        ["voice.silence_threshold"] = new("Sessizlik eşiği", "Silence threshold",
+            "Sessizlik sayılacak ses düzeyi. Gürültülü ortamda yükseltmek gerekir; çok düşükse arka plan gürültüsü konuşma sanılır.",
+            "The level below which audio counts as silence. Raise it in noisy rooms; too low and background noise is mistaken for speech."),
+        ["voice.silence_duration"] = new("Sessizlik süresi (sn)", "Silence duration (s)",
+            "Kaydın kendiliğinden bitmesi için gereken kesintisiz sessizlik süresi. Kısa değer cümle aralarında kaydı erken keser.",
+            "How long uninterrupted silence must last for recording to end by itself. A short value cuts recording off between sentences."),
     };
 }

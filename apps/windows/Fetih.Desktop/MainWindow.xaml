@@ -44,7 +44,7 @@
                        FontSize="14" />
 
             <TextBlock Grid.Column="1"
-                       Text="Siber Güvenlik Operasyon Konsolu"
+                       x:Name="TaglineText"
                        VerticalAlignment="Center"
                        FontSize="12"
                        Opacity="0.6" />

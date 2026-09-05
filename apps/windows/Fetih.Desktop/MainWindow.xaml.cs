@@ -46,6 +46,10 @@ public sealed partial class MainWindow : Window
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
 
+        // Başlık çubuğundaki alt başlık da yerelleştirilir; aksi hâlde arayüz
+        // İngilizceyken burada Türkçe bir metin kalıyordu.
+        TaglineText.Text = Loc.T("app.tagline");
+
         // Köprü durumu güncellemeleri arka plandan gelir ama x:Bind'e bağlıdır;
         // UI iş parçacığına yönlendirebilmesi için kuyruğu ver.
         Bridge.BridgeStatus.Shared.Dispatcher = DispatcherQueue;
@@ -83,6 +87,8 @@ public sealed partial class MainWindow : Window
     {
         EnqueueSafe(() =>
         {
+            TaglineText.Text = Loc.T("app.tagline");
+            Bridge.BridgeStatus.Shared.RefreshLabels();
             if (_mode == ShellMode.Settings)
             {
                 BuildSettingsMenu();
@@ -357,25 +363,27 @@ public sealed partial class MainWindow : Window
         NavTags.SettingsShell => (typeof(ShellPage), null),
         NavTags.SettingsAbout => (typeof(AboutPage), null),
 
-        // Jenerik, düzenlenebilir config editörü bölümleri.
+        // Jenerik, düzenlenebilir config editörü bölümleri. Başlık, sol menüdeki
+        // öge adıyla aynı kalsın diye yerelleştirme tablosundan okunur — sayfa
+        // başlığının İngilizce, menünün Türkçe kalması gibi bir tutarsızlık olmaz.
         NavTags.SettingsTools => (typeof(ConfigEditorPage),
-            (object)"Araçlar|toolsets,agent"),
+            (object)(Loc.T("settings.tools") + "|toolsets,agent")),
         NavTags.SettingsAgent => (typeof(ConfigEditorPage),
-            (object)"Ajan|agent,browser,web"),
+            (object)(Loc.T("settings.agent") + "|agent,browser,web")),
         NavTags.SettingsSecurity => (typeof(ConfigEditorPage),
-            (object)"Güvenlik|security"),
+            (object)(Loc.T("settings.security") + "|security")),
         NavTags.SettingsChannels => (typeof(ConfigEditorPage),
-            (object)"Kanallar|slack,discord,telegram,whatsapp,mattermost,matrix"),
+            (object)(Loc.T("settings.channels") + "|slack,discord,telegram,whatsapp,mattermost,matrix")),
         NavTags.SettingsMemory => (typeof(ConfigEditorPage),
-            (object)"Hafıza ve Bağlam|memory,curator,honcho,context,compression,prompt_caching"),
+            (object)(Loc.T("settings.memory") + "|memory,curator,honcho,context,compression,prompt_caching")),
         NavTags.SettingsAutomation => (typeof(ConfigEditorPage),
-            (object)"Otomasyon|cron,kanban,goals,delegation"),
+            (object)(Loc.T("settings.automation") + "|cron,kanban,goals,delegation")),
         NavTags.SettingsAppearance => (typeof(ConfigEditorPage),
-            (object)"Görünüm|display,dashboard,privacy"),
+            (object)(Loc.T("settings.appearance") + "|display,dashboard,privacy")),
         NavTags.SettingsSystem => (typeof(ConfigEditorPage),
-            (object)"Sistem|logging,sessions,checkpoints,updates,network,lsp"),
+            (object)(Loc.T("settings.system") + "|logging,sessions,checkpoints,updates,network,lsp")),
         NavTags.SettingsAll => (typeof(ConfigEditorPage),
-            (object)"Tüm Ayarlar|"),
+            (object)(Loc.T("settings.all") + "|")),
 
         _ => (null, null),
     };

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Text.Json;
 
@@ -112,20 +111,16 @@ public static class Loc
         _ => DetectFromSystem(),
     };
 
-    private static UiLanguage DetectFromSystem()
-    {
-        try
-        {
-            var ui = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
-            return string.Equals(ui, "tr", StringComparison.OrdinalIgnoreCase)
-                ? UiLanguage.Turkish
-                : UiLanguage.English;
-        }
-        catch
-        {
-            return UiLanguage.Turkish;
-        }
-    }
+    /// <summary>
+    /// "auto" tercihinin çözümü. FETİH Türkçe-öncelikli bir üründür: küratörlü
+    /// sayfaların (Tanılama, Sandbox, Ses, İzinler, Sağlayıcı) sabit metinleri
+    /// Türkçe yazılmıştır. Sistem dili İngilizceyken "auto"yu İngilizceye
+    /// çözmek, gezinme ve ayar açıklamaları İngilizce, sayfa gövdeleri Türkçe
+    /// olan KARIŞIK bir arayüz üretiyordu (kullanıcının bildirdiği sorun).
+    /// Bu yüzden "auto" her zaman Türkçedir; İngilizce açık bir tercihtir ve
+    /// Görünüm sayfasındaki dil seçicisinden seçilir.
+    /// </summary>
+    private static UiLanguage DetectFromSystem() => UiLanguage.Turkish;
 
     private static void EnsureLoaded()
     {
@@ -259,7 +254,49 @@ public static class Loc
             "Değişiklik anında uygulanır; kalıcı olarak kaydedilir.",
             "Applied immediately and saved persistently."),
 
+        // ── Kabuk / başlık çubuğu ────────────────────────────────────────
+        ["app.tagline"] = new(
+            "Siber Güvenlik Operasyon Konsolu",
+            "Cyber Security Operations Console"),
+
+        // ── Masaüstü Köprüsü bağlantı durumu ─────────────────────────────
+        ["bridge.state.idle"] = new("Bağlantı bekleniyor…", "Waiting to connect…"),
+        ["bridge.state.connecting"] = new("Bağlanılıyor…", "Connecting…"),
+        ["bridge.state.ready"] = new("Bağlı", "Connected"),
+        ["bridge.state.reconnecting"] = new("Yeniden bağlanılıyor…", "Reconnecting…"),
+        ["bridge.state.error"] = new("Bağlantı hatası", "Connection error"),
+
         // ── Genel ────────────────────────────────────────────────────────
         ["common.reload"] = new("Yenile", "Reload"),
+        ["common.on"] = new("açık", "on"),
+        ["common.off"] = new("kapalı", "off"),
+
+        // ── Jenerik yapılandırma düzenleyici ─────────────────────────────
+        ["config.subtitle"] = new(
+            "Bir değeri değiştirdiğinde ~/.fetih/config.yaml dosyasına anında yazılır. Her satırın altındaki açıklama o ayarın ne yaptığını ve değiştirilirse ne olacağını anlatır.",
+            "Changing a value writes it to ~/.fetih/config.yaml immediately. The note under each row explains what that setting does and what changes if you touch it."),
+        ["config.reload"] = new("Yeniden yükle", "Reload"),
+        ["config.saving"] = new("kaydediliyor…", "saving…"),
+        ["config.saved"] = new("✓ kaydedildi", "✓ saved"),
+        ["config.revert"] = new("Yüklenen değere dön", "Revert to the loaded value"),
+        ["config.rejected"] = new(
+            "reddedildi (gizli anahtar veya yönetilen kurulum)",
+            "refused (secret key or managed installation)"),
+        ["config.empty"] = new(
+            "Bu bölüm için düzenlenebilir alan bulunamadı.",
+            "No editable field was found for this section."),
+        ["config.read_failed"] = new("Yapılandırma okunamadı.", "Could not read the configuration."),
+        ["config.load_failed"] = new("Yapılandırma yüklenemedi: ", "Could not load the configuration: "),
+        ["config.bridge_error"] = new("Köprü hatası", "Bridge error"),
+        ["config.secret"] = new(
+            "•••••• (gizli — ~/.fetih/.env içinde)",
+            "•••••• (secret — kept in ~/.fetih/.env)"),
+        ["config.env_ref"] = new(
+            "  (ortam değişkeni referansı)",
+            "  (environment variable reference)"),
+        ["config.complex_list"] = new(
+            "  (karmaşık liste — burada düzenlenmez)",
+            "  (complex list — not editable here)"),
+        ["config.list_placeholder"] = new("virgülle ayrılmış liste", "comma-separated list"),
     };
 }

@@ -7,8 +7,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <ScrollViewer Padding="24,20,24,24" VerticalScrollBarVisibility="Auto">
-        <StackPanel Spacing="14" MaxWidth="880" HorizontalAlignment="Left">
+    <!--
+        SORUN 1: sayfanın kökü her zaman bir ScrollViewer'dır; pencere küçük
+        olsa bile en alttaki satıra kaydırarak erişilebilir.
+    -->
+    <ScrollViewer Padding="24,20,24,32"
+                  AutomationProperties.AutomationId="config_scroll"
+                  VerticalScrollBarVisibility="Auto"
+                  VerticalScrollMode="Enabled">
+        <StackPanel Spacing="12" MaxWidth="1000" HorizontalAlignment="Left">
 
             <TextBlock x:Name="TitleText"
                        Style="{StaticResource PageTitleTextStyle}"
@@ -16,7 +23,8 @@
 
             <TextBlock x:Name="SubtitleText"
                        Style="{StaticResource MutedTextStyle}"
-                       Text="Değişiklikler ~/.fetih/config.yaml dosyasına config.set RPC'siyle yazılır." />
+                       MaxWidth="820"
+                       HorizontalAlignment="Left" />
 
             <!-- Durum / uyarı şeridi -->
             <InfoBar x:Name="StatusBar"
@@ -26,7 +34,6 @@
 
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <Button x:Name="ReloadButton"
-                        Content="Yeniden yükle"
                         AutomationProperties.AutomationId="config_reload"
                         Click="ReloadButton_Click" />
                 <ProgressRing x:Name="BusyRing"
@@ -42,8 +49,7 @@
 
             <TextBlock x:Name="EmptyText"
                        Style="{StaticResource MutedTextStyle}"
-                       Visibility="Collapsed"
-                       Text="Bu bölüm için düzenlenebilir alan bulunamadı." />
+                       Visibility="Collapsed" />
         </StackPanel>
     </ScrollViewer>
 </Page>
