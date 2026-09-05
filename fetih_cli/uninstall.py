@@ -433,6 +433,170 @@ def _uninstall_profile(profile) -> None:
         log_warn(f"  Could not remove {profile_home}: {e}")
 
 
+# ============================================================================
+# Non-interactive maintenance operations (used by the Masaüstü Köprüsü)
+# ============================================================================
+#
+# The desktop app exposes two clearly different "danger zone" actions and both
+# must run through FETİH's own code — the C# side never touches the file
+# system directly:
+#
+#   * ``reset_configuration()``  — deletes ONLY config.yaml + .env, so the
+#     next launch behaves like a fresh install (the setup wizard runs again).
+#     Conversations, memory and logs survive.
+#   * ``wipe_all_data()``        — deletes EVERYTHING under FETIH_HOME:
+#     configuration, credentials, sessions, logs, memory, sandboxes.
+#
+# Both refuse to run against a directory that does not look like a FETİH home,
+# so a mis-set FETIH_HOME can never turn into "delete the user's profile".
+
+#: The two files that together make up "the configuration".
+CONFIG_ONLY_NAMES = ("config.yaml", ".env")
+
+
+class WipeRefused(Exception):
+    """The target directory does not look like a FETİH home — nothing deleted."""
+
+
+def _resolve_home(fetih_home=None) -> Path:
+    """Resolve the directory to operate on (explicit argument wins)."""
+    if fetih_home:
+        return Path(str(fetih_home)).expanduser()
+    return Path(str(get_fetih_home())).expanduser()
+
+
+def _guard_home(home: Path) -> Path:
+    """Refuse obviously-wrong deletion targets.
+
+    A wrong ``FETIH_HOME`` must never escalate into wiping a user profile or a
+    drive root, so anything with fewer than three path components (``C:\\``,
+    ``C:\\Users``, ``/``, ``/home``) and the user's home directory itself are
+    rejected outright.
+    """
+    try:
+        resolved = home.resolve()
+    except OSError as e:
+        raise WipeRefused(f"path could not be resolved: {e}")
+
+    if len(resolved.parts) < 3:
+        raise WipeRefused(f"refusing to operate on a root-level path: {resolved}")
+
+    try:
+        if resolved == Path.home().resolve():
+            raise WipeRefused(f"refusing to operate on the user home directory: {resolved}")
+    except OSError:
+        pass
+
+    return resolved
+
+
+def _release_log_handlers(home: Path) -> None:
+    """Close logging handlers writing inside ``home``.
+
+    Windows refuses to unlink a file another handle still owns; the bridge
+    process itself keeps ``FETIH_HOME/logs/*.log`` open, so without this the
+    wipe would always leave the log directory behind.
+    """
+    import logging
+
+    names = list(logging.root.manager.loggerDict)
+    loggers = [logging.getLogger()] + [logging.getLogger(n) for n in names]
+    for logger in loggers:
+        for handler in list(getattr(logger, "handlers", []) or []):
+            filename = getattr(handler, "baseFilename", None)
+            if not filename:
+                continue
+            try:
+                inside = Path(filename).resolve().is_relative_to(home)
+            except (OSError, ValueError):
+                inside = False
+            if not inside:
+                continue
+            try:
+                handler.close()
+            except Exception:
+                pass
+            try:
+                logger.removeHandler(handler)
+            except Exception:
+                pass
+
+
+def _delete_entry(entry: Path) -> None:
+    """Delete one file / directory / symlink."""
+    if entry.is_dir() and not entry.is_symlink():
+        shutil.rmtree(entry)
+    else:
+        entry.unlink()
+
+
+def reset_configuration(fetih_home=None) -> dict:
+    """Delete only the configuration files, keeping every other artefact.
+
+    After this the next launch finds no ``config.yaml`` and no ``.env``, which
+    is exactly the state a brand-new installation is in — the desktop app's
+    setup wizard runs again.  Sessions, memory, logs and sandboxes are left
+    untouched on purpose.
+    """
+    home = _guard_home(_resolve_home(fetih_home))
+
+    removed: list[str] = []
+    failed: list[dict] = []
+    for name in CONFIG_ONLY_NAMES:
+        target = home / name
+        if not target.exists() and not target.is_symlink():
+            continue
+        try:
+            _delete_entry(target)
+            removed.append(name)
+        except Exception as e:
+            failed.append({"path": str(target), "error": f"{type(e).__name__}: {e}"})
+
+    return {
+        "reset": not failed,
+        "fetih_home": str(home),
+        "removed": removed,
+        "failed": failed,
+        "kept": "sessions, memory, logs, sandboxes",
+    }
+
+
+def wipe_all_data(fetih_home=None) -> dict:
+    """Delete every entry under FETIH_HOME (the directory itself is kept).
+
+    Configuration, credentials, conversation history, memory, logs and
+    sandboxes all go.  The directory itself stays so the next launch writes a
+    fresh config into a place that already exists with the right permissions.
+    """
+    home = _guard_home(_resolve_home(fetih_home))
+    if not home.is_dir():
+        return {
+            "wiped": True,
+            "fetih_home": str(home),
+            "removed": [],
+            "failed": [],
+            "note": "directory did not exist",
+        }
+
+    _release_log_handlers(home)
+
+    removed: list[str] = []
+    failed: list[dict] = []
+    for entry in sorted(home.iterdir()):
+        try:
+            _delete_entry(entry)
+            removed.append(entry.name)
+        except Exception as e:
+            failed.append({"path": str(entry), "error": f"{type(e).__name__}: {e}"})
+
+    return {
+        "wiped": not failed,
+        "fetih_home": str(home),
+        "removed": removed,
+        "failed": failed,
+    }
+
+
 def run_uninstall(args):
     """
     Run the uninstall process.

@@ -219,6 +219,8 @@ class BridgeServer:
                 "diagnostics.info": self._m_diagnostics_info,
                 "shell.status": self._m_shell_status,
                 "shell.ensure_user": self._m_shell_ensure_user,
+                "system.reset_configuration": self._m_system_reset_configuration,
+                "system.wipe_all_data": self._m_system_wipe_all_data,
             }
         )
 
@@ -612,6 +614,67 @@ class BridgeServer:
             raise BridgeError(CONFIG_ERROR, result.get("detail") or "kullanıcı oluşturulamadı")
         return result
 
+    # ── system.* (tehlikeli bölge) ──────────────────────────────────────
+    #
+    # İki AYRI yıkıcı işlem; ikisi de FETİH'in kendi kodunu (fetih_cli.
+    # uninstall) çağırır — masaüstü uygulaması dosya sistemine hiç dokunmaz.
+    #
+    #   system.reset_configuration → SADECE config.yaml + .env silinir; sohbet
+    #                                geçmişi, hafıza ve günlükler KORUNUR.
+    #   system.wipe_all_data       → FETIH_HOME altındaki HER ŞEY silinir.
+    #
+    # Her ikisi de ``confirm: true`` ister: bir yazım hatası ya da eski bir
+    # istemci kazayla veri silemesin.
+
+    def _require_confirm(self, params: Dict[str, Any], method: str) -> None:
+        if params.get("confirm") is not True:
+            raise BridgeError(
+                INVALID_PARAMS,
+                f"{method} requires 'confirm': true — refusing to delete anything",
+            )
+        from fetih_cli.config import is_managed
+
+        if is_managed():
+            raise BridgeError(
+                CONFIG_ERROR,
+                "this FETİH installation is managed and cannot be modified",
+            )
+
+    def _m_system_reset_configuration(self, conn, params):
+        self._require_confirm(params, "system.reset_configuration")
+        from fetih_cli.uninstall import WipeRefused, reset_configuration
+
+        try:
+            result = reset_configuration()
+        except WipeRefused as exc:
+            raise BridgeError(CONFIG_ERROR, str(exc))
+        except Exception as exc:
+            raise BridgeError(INTERNAL_ERROR, f"{type(exc).__name__}: {exc}")
+
+        # Bir sonraki turun diskten silinmiş ayarları yeniden okumaması için
+        # yapılandırma önbelleğini boşalt.
+        _invalidate_config_cache()
+        return result
+
+    def _m_system_wipe_all_data(self, conn, params):
+        self._require_confirm(params, "system.wipe_all_data")
+        from fetih_cli.uninstall import WipeRefused, wipe_all_data
+
+        # Açık oturumlar silinmiş bir hafıza/oturum deposuna yazmaya devam
+        # etmesin: hepsi kapatılır.
+        self.sessions.clear()
+
+        try:
+            result = wipe_all_data()
+        except WipeRefused as exc:
+            raise BridgeError(CONFIG_ERROR, str(exc))
+        except Exception as exc:
+            raise BridgeError(INTERNAL_ERROR, f"{type(exc).__name__}: {exc}")
+
+        _invalidate_config_cache()
+        result["restart_required"] = True
+        return result
+
     # ── diagnostics.* ───────────────────────────────────────────────────
 
     def _m_diagnostics_info(self, conn, params):
@@ -805,6 +868,28 @@ def _bridge_clarify_callback(question: str, choices=None) -> str:
         "[desktop bridge: no interactive prompt available. Make the most "
         "reasonable assumption and continue.]"
     )
+
+
+def _invalidate_config_cache() -> None:
+    """Drop FETİH's in-process config/env caches.
+
+    ``load_config()`` memoises on (mtime, size), and ``load_env()`` keeps its
+    own cache; after a wipe or reset both would otherwise keep serving values
+    that no longer exist on disk.
+    """
+    try:
+        from fetih_cli import config as _config
+
+        _config._LOAD_CONFIG_CACHE.clear()
+        _config._RAW_CONFIG_CACHE.clear()
+    except Exception:
+        pass
+    try:
+        from fetih_cli.config import invalidate_env_cache
+
+        invalidate_env_cache()
+    except Exception:
+        pass
 
 
 def _shrink(value: Any, limit: int = 2000) -> Any:
