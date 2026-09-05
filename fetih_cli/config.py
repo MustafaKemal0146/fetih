@@ -623,6 +623,28 @@ DEFAULT_CONFIG = {
         # this off if your rc files misbehave when sourced
         # non-interactively (e.g. one that hard-exits on TTY checks).
         "auto_source_bashrc": True,
+        # --- Windows-only: which POSIX shell backend runs terminal commands ---
+        # "git-bash" (default) — Git for Windows' MSYS2 bash.  Sees the
+        #   Windows filesystem directly (C:\Users\x ↔ /c/Users/x) and can run
+        #   Windows binaries (python.exe, nmap.exe) without a bridge.
+        # "wsl" — a real Linux distro through wsl.exe.  Windows drives appear
+        #   under /mnt/c/..., and the Linux toolchain (apt, gcc, binwalk,
+        #   radare2 …) becomes available.  Falls back to Git Bash automatically
+        #   when WSL isn't installed or has no distro.
+        # PowerShell is deliberately NOT an option: FETIH's tool layer is built
+        # on POSIX shell semantics (`export -p`, `pwd -P`, shlex quoting), none
+        # of which exist in PowerShell.  Call `powershell.exe -c "…"` from
+        # either backend when you need it.
+        # Ignored entirely on Linux/macOS.
+        "windows_shell": "git-bash",
+        # Which WSL distribution to use when windows_shell is "wsl".
+        # Empty = wsl.exe's own default distro.
+        "wsl_distro": "",
+        # Which WSL user to run as when windows_shell is "wsl".  Empty = the
+        # distro's default user.  Set this to "fetih" after creating the
+        # dedicated account so agent-written files stay out of your own home
+        # directory.
+        "wsl_user": "",
         "docker_image": "nikolaik/python-nodejs:python3.11-nodejs20",
         "docker_forward_env": [],
         # Explicit environment variables to set inside Docker containers.

@@ -73,6 +73,10 @@ models-dev-upstream/
 fetih_cli/tui_dist/*
 fetih_cli/scripts/
 docs/superpowers/*
+# Ajan tarafından üretilen çalışma zamanı bilgi tabanı (kanonik konumu
+# ~/.fetih/learnings/'tir; repo köküne düşen kopya sürüm kontrolüne girmemeli).
+learnings/
+
 # Local Claude Code settings (contains personal tool permissions)
 .claude/settings.local.json
 

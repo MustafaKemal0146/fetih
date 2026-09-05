@@ -11,6 +11,7 @@ import tempfile
 import time
 from pathlib import Path
 
+from tools.environments import windows_shell
 from tools.environments.base import BaseEnvironment, _pipe_stdin
 
 _IS_WINDOWS = platform.system() == "Windows"
@@ -27,18 +28,28 @@ logger = logging.getLogger(__name__)
 
 
 def _msys_to_windows_path(cwd: str) -> str:
-    """Translate a Git Bash / MSYS-style POSIX path (``/c/Users/x``) to the
-    native Windows form (``C:\\Users\\x``) so ``os.path.isdir`` and
+    """Translate a POSIX shell path emitted by the Windows shell backend to
+    the native Windows form so ``os.path.isdir`` and
     ``subprocess.Popen(..., cwd=...)`` can find it.
 
-    No-ops on non-Windows hosts or for paths that aren't in MSYS form.
-    Returns the input unchanged when no translation applies. This is
-    idempotent — calling it on an already-Windows path returns it as-is.
+    Two forms are recognised, matching the two supported backends:
+
+    * Git Bash / MSYS  — ``/c/Users/x``      → ``C:\\Users\\x``
+    * WSL              — ``/mnt/c/Users/x``  → ``C:\\Users\\x``
+
+    No-ops on non-Windows hosts or for paths that aren't in either form
+    (``/home/fetih``, ``/tmp/x`` stay as they are). Returns the input
+    unchanged when no translation applies. This is idempotent — calling it
+    on an already-Windows path returns it as-is.
     """
     if not _IS_WINDOWS or not cwd:
         return cwd
-    # Match leading "/<single letter>/" or exactly "/<letter>" (bare drive root).
-    m = re.match(r'^/([a-zA-Z])(/.*)?$', cwd)
+    # WSL form first: "/mnt/<letter>[/...]" — checked before the MSYS pattern
+    # because "/mnt/c" would otherwise fall through as a plain POSIX path.
+    m = re.match(r'^/mnt/([a-zA-Z])(/.*)?$', cwd)
+    if not m:
+        # Match leading "/<single letter>/" or exactly "/<letter>" (bare drive root).
+        m = re.match(r'^/([a-zA-Z])(/.*)?$', cwd)
     if not m:
         return cwd
     drive = m.group(1).upper()
@@ -46,11 +57,34 @@ def _msys_to_windows_path(cwd: str) -> str:
     return f"{drive}:{tail or chr(92)}"  # chr(92) = backslash, avoid raw-string escape
 
 
-def _resolve_safe_cwd(cwd: str) -> str:
+def _active_windows_shell() -> str:
+    """Which Windows shell backend is in force right now.
+
+    Returns ``""`` off Windows, otherwise ``"git-bash"`` or ``"wsl"``.  Never
+    raises: a broken config must not make the terminal tool unusable, so any
+    failure degrades to the Git Bash default.
+    """
+    if not _IS_WINDOWS:
+        return ""
+    try:
+        return windows_shell.effective_shell()
+    except Exception:  # pragma: no cover - defensive
+        return windows_shell.SHELL_GIT_BASH
+
+
+def _resolve_safe_cwd(cwd: str, wsl_mode: bool = False) -> str:
     """Return ``cwd`` if it exists as a directory, else the nearest existing
     ancestor.  Falls back to ``tempfile.gettempdir()`` only if walking up the
     path can't find any existing directory (effectively never on a healthy
     filesystem, but cheap belt-and-braces).
+
+    ``wsl_mode`` marks the WSL backend, where the shell's filesystem is *not*
+    the Windows filesystem.  Paths under ``/mnt/<drive>`` still map onto
+    Windows and are validated normally, but Linux-only paths (``/home/fetih``,
+    ``/etc``, ``/opt``) have no Windows equivalent — ``os.path.isdir`` would
+    reject every one of them and wrongly bounce the session into ``%TEMP%``.
+    In that case the path is returned untouched and WSL itself decides whether
+    the ``cd`` succeeds.
 
     On Windows, also normalizes Git Bash / MSYS-style POSIX paths
     (``/c/Users/x``) to native Windows form before the isdir check so a
@@ -63,7 +97,13 @@ def _resolve_safe_cwd(cwd: str) -> str:
     raises ``FileNotFoundError`` before bash starts, wedging every subsequent
     terminal call until the gateway restarts.
     """
-    cwd = _msys_to_windows_path(cwd) if _IS_WINDOWS else cwd
+    if _IS_WINDOWS:
+        translated = _msys_to_windows_path(cwd)
+        if wsl_mode and translated == cwd and cwd.startswith("/"):
+            # Linux-only path inside WSL — nothing on the Windows side to
+            # check it against, so hand it back verbatim.
+            return cwd
+        cwd = translated
     if cwd and os.path.isdir(cwd):
         return cwd
     parent = os.path.dirname(cwd) if cwd else ""
@@ -224,7 +264,21 @@ def _sanitize_subprocess_env(base_env: dict | None, extra_env: dict | None = Non
 
 
 def _find_bash() -> str:
-    """Find bash for command execution."""
+    """Find the POSIX shell binary used for command execution.
+
+    On Windows the lookup is delegated to
+    :func:`tools.environments.windows_shell.find_git_bash`, which walks the
+    known Git for Windows install locations *before* falling back to ``PATH``
+    and — critically — refuses ``C:\\Windows\\System32\\bash.exe``.  That
+    System32 binary is the WSL launcher shim, not Git Bash: picking it up made
+    every terminal command fail with ``No such file or directory`` because the
+    ``/c/Users/...`` paths FETIH emits don't exist inside WSL (which mounts
+    Windows drives at ``/mnt/c/...``).
+
+    The WSL *backend* never reaches this function — ``_run_bash`` builds a
+    ``wsl.exe`` argv directly.  This stays the Git Bash path, and is also what
+    the background-process registry uses for its ``bash -lic`` spawns.
+    """
     if not _IS_WINDOWS:
         return (
             shutil.which("bash")
@@ -234,45 +288,22 @@ def _find_bash() -> str:
             or "/bin/sh"
         )
 
-    custom = os.environ.get("FETIH_GIT_BASH_PATH")
-    if custom and os.path.isfile(custom):
-        return custom
-
-    # Prefer our own portable Git install first — this way a broken or
-    # partially-uninstalled system Git can't hijack the bash lookup.  The
-    # install.ps1 installer always drops portable Git here when the user
-    # didn't already have a working system Git.
-    #
-    # Layouts (both checked so upgrades between MinGit and PortableGit
-    # installs work transparently):
-    #   PortableGit: %LOCALAPPDATA%\fetih\git\bin\bash.exe   (primary)
-    #   MinGit:      %LOCALAPPDATA%\fetih\git\usr\bin\bash.exe (legacy/32-bit fallback)
-    _local_appdata = os.environ.get("LOCALAPPDATA", "")
-    _fetih_portable_git = os.path.join(_local_appdata, "fetih", "git") if _local_appdata else ""
-    if _fetih_portable_git:
-        for candidate in (
-            os.path.join(_fetih_portable_git, "bin", "bash.exe"),        # PortableGit (primary)
-            os.path.join(_fetih_portable_git, "usr", "bin", "bash.exe"), # MinGit fallback
-        ):
-            if os.path.isfile(candidate):
-                return candidate
-
-    found = shutil.which("bash")
+    found = windows_shell.find_git_bash()
     if found:
         return found
 
-    for candidate in (
-        os.path.join(os.environ.get("ProgramFiles", r"C:\Program Files"), "Git", "bin", "bash.exe"),
-        os.path.join(os.environ.get("ProgramFiles(x86)", r"C:\Program Files (x86)"), "Git", "bin", "bash.exe"),
-        os.path.join(_local_appdata, "Programs", "Git", "bin", "bash.exe"),
-    ):
-        if candidate and os.path.isfile(candidate):
-            return candidate
-
+    hint = ""
+    if windows_shell.find_wsl_exe():
+        hint = (
+            "\nNot: sistemde WSL var ama C:\\Windows\\System32\\bash.exe bir "
+            "WSL kısayoludur, Git Bash değildir — bu yüzden kullanılmadı. "
+            "WSL'i kabuk olarak kullanmak istiyorsan Ayarlar'dan "
+            "terminal.windows_shell='wsl' seç."
+        )
     raise RuntimeError(
         "Git Bash not found. FETIH requires Git for Windows on Windows.\n"
         "Install it from: https://git-scm.com/download/win\n"
-        "Or set FETIH_GIT_BASH_PATH to your bash.exe location."
+        "Or set FETIH_GIT_BASH_PATH to your bash.exe location." + hint
     )
 
 
@@ -432,8 +463,62 @@ class LocalEnvironment(BaseEnvironment):
     def __init__(self, cwd: str = "", timeout: int = 60, env: dict = None):
         if cwd:
             cwd = os.path.expanduser(cwd)
+        # Resolve the Windows shell backend BEFORE super().__init__(), which
+        # calls get_temp_dir() to place the snapshot / cwd marker files — and
+        # those land in a different filesystem namespace under WSL.
+        self._shell_backend = _active_windows_shell()
+        pref = (
+            windows_shell.read_shell_preference()
+            if self._shell_backend == windows_shell.SHELL_WSL
+            else {"distro": "", "user": ""}
+        )
+        self._wsl_distro = pref.get("distro") or ""
+        self._wsl_user = pref.get("user") or ""
         super().__init__(cwd=cwd or os.getcwd(), timeout=timeout, env=env)
         self.init_session()
+
+    # ------------------------------------------------------------------
+    # Windows shell backend helpers
+    # ------------------------------------------------------------------
+
+    @property
+    def _is_wsl(self) -> bool:
+        """True when commands run through ``wsl.exe`` instead of Git Bash."""
+        return self._shell_backend == windows_shell.SHELL_WSL
+
+    def _host_path(self, shell_path: str) -> str:
+        """Translate a path the *shell* understands into one Python can open.
+
+        The snapshot and cwd-marker files are written by the shell but read
+        back by this (native Windows) process.  Under Git Bash both sides
+        already agree on ``C:/Users/...``; under WSL the shell sees
+        ``/mnt/c/Users/...`` and Python needs the drive-letter form.
+        """
+        return _msys_to_windows_path(shell_path) if _IS_WINDOWS else shell_path
+
+    def _shell_cwd(self, cwd: str) -> str:
+        """Translate a stored cwd into the form the active shell can ``cd`` to."""
+        if self._is_wsl:
+            return windows_shell.windows_to_wsl_path(cwd)
+        return cwd
+
+    def _accept_shell_cwd(self, raw: str) -> str | None:
+        """Normalise + validate a ``pwd -P`` result, or ``None`` to reject it.
+
+        Git Bash reports ``/c/Users/x`` and WSL reports ``/mnt/c/Users/x``;
+        both translate to a real Windows directory that can be verified.  A
+        Linux-only path under WSL (``/home/fetih``) has no Windows counterpart,
+        so it's accepted as-is rather than rejected — WSL just told us that's
+        where it is.
+        """
+        if not raw:
+            return None
+        if not _IS_WINDOWS:
+            return raw if os.path.isdir(raw) else None
+        translated = _msys_to_windows_path(raw)
+        if translated == raw and self._is_wsl and raw.startswith("/"):
+            return raw
+        return translated if os.path.isdir(translated) else None
 
     # ------------------------------------------------------------------
     # Override execute() to intercept Windows GUI-launch commands
@@ -544,7 +629,14 @@ class LocalEnvironment(BaseEnvironment):
                 cache_dir = Path(tempfile.gettempdir()) / "fetih_terminal"
             cache_dir.mkdir(parents=True, exist_ok=True)
             # Force forward slashes so the same string serves both contexts.
-            return str(cache_dir).replace("\\", "/")
+            as_posix = str(cache_dir).replace("\\", "/")
+            if self._is_wsl:
+                # The directory is created on the Windows side but the shell
+                # that reads/writes it lives in WSL, where the same bytes are
+                # reachable as /mnt/<drive>/...  ``_host_path`` maps it back
+                # whenever Python itself needs to touch the file.
+                return windows_shell.windows_to_wsl_path(as_posix)
+            return as_posix
 
         for env_var in ("TMPDIR", "TMP", "TEMP"):
             candidate = self.env.get(env_var) or os.environ.get(env_var)
@@ -560,10 +652,41 @@ class LocalEnvironment(BaseEnvironment):
 
         return "/tmp"
 
+    def init_session(self):
+        """Capture the login-shell snapshot, translating cwd for WSL first.
+
+        ``BaseEnvironment.init_session`` interpolates ``self.cwd`` straight
+        into a ``builtin cd`` — a native ``C:\\Users\\x`` path that WSL can't
+        resolve.  Swap in the ``/mnt/c/...`` form for the duration of the
+        bootstrap; the snapshot's own ``pwd -P`` result then flows back through
+        ``_update_cwd`` in whatever form the shell reports.
+        """
+        if not self._is_wsl:
+            super().init_session()
+            return
+        original = self.cwd
+        self.cwd = self._shell_cwd(original)
+        try:
+            super().init_session()
+        finally:
+            if self.cwd == self._shell_cwd(original):
+                # init_session didn't learn a new cwd (e.g. it failed) —
+                # restore what the caller asked for rather than leaking the
+                # translated form.
+                self.cwd = original
+
+    def _wrap_command(self, command: str, cwd: str) -> str:
+        """Same wrapper as the base class, with a shell-resolvable cwd.
+
+        Under WSL the stored cwd may still be in Windows form (it round-trips
+        through ``_resolve_safe_cwd``); ``windows_to_wsl_path`` is idempotent,
+        so translating unconditionally here is safe for both shapes.
+        """
+        return super()._wrap_command(command, self._shell_cwd(cwd))
+
     def _run_bash(self, cmd_string: str, *, login: bool = False,
                   timeout: int = 120,
                   stdin_data: str | None = None) -> subprocess.Popen:
-        bash = _find_bash()
         # For login-shell invocations (used by init_session to build the
         # environment snapshot), prepend sources for the user's bashrc /
         # custom init files so tools registered outside bash_profile
@@ -574,7 +697,6 @@ class LocalEnvironment(BaseEnvironment):
             init_files = _resolve_shell_init_files()
             if init_files:
                 cmd_string = _prepend_shell_init(cmd_string, init_files)
-        args = [bash, "-l", "-c", cmd_string] if login else [bash, "-c", cmd_string]
         run_env = _make_run_env(self.env)
 
         # Recover when the cwd has been deleted out from under us — usually by
@@ -587,7 +709,7 @@ class LocalEnvironment(BaseEnvironment):
         # POSIX paths (``/c/Users/...``) to native form so a perfectly valid
         # ``pwd -P`` result from bash isn't mistakenly treated as "missing"
         # and spammed as a warning on every command.
-        safe_cwd = _resolve_safe_cwd(self.cwd)
+        safe_cwd = _resolve_safe_cwd(self.cwd, wsl_mode=self._is_wsl)
         if safe_cwd != self.cwd:
             # MSYS → Windows translation alone shouldn't surface as a warning
             # (it's a benign normalization, not a recovery). Only warn when
@@ -602,7 +724,29 @@ class LocalEnvironment(BaseEnvironment):
                 )
             self.cwd = safe_cwd
 
-        _popen_cwd = self.cwd
+        if self._is_wsl:
+            # The real working directory is set by ``wsl.exe --cd`` (which
+            # accepts both ``C:\\x`` and ``/home/x``) and re-asserted by the
+            # ``builtin cd`` inside the wrapper.  Popen's own cwd only decides
+            # where the *launcher* starts, so it must be an existing Windows
+            # directory — a Linux-only cwd would raise FileNotFoundError
+            # before wsl.exe ever runs.
+            args = windows_shell.build_wsl_argv(
+                cmd_string,
+                login=login,
+                cwd=self.cwd,
+                distro=self._wsl_distro,
+                user=self._wsl_user,
+            )
+            _popen_cwd = _msys_to_windows_path(self.cwd)
+            if not os.path.isdir(_popen_cwd):
+                _popen_cwd = tempfile.gettempdir()
+        else:
+            bash = _find_bash()
+            args = (
+                [bash, "-l", "-c", cmd_string] if login else [bash, "-c", cmd_string]
+            )
+            _popen_cwd = self.cwd
 
         proc = subprocess.Popen(
             args,
@@ -714,12 +858,11 @@ class LocalEnvironment(BaseEnvironment):
         missing" warning on every command.
         """
         try:
-            with open(self._cwd_file, encoding="utf-8") as f:
+            with open(self._host_path(self._cwd_file), encoding="utf-8") as f:
                 cwd_path = f.read().strip()
-            if _IS_WINDOWS:
-                cwd_path = _msys_to_windows_path(cwd_path)
-            if cwd_path and os.path.isdir(cwd_path):
-                self.cwd = cwd_path
+            accepted = self._accept_shell_cwd(cwd_path)
+            if accepted:
+                self.cwd = accepted
         except (OSError, FileNotFoundError):
             pass
 
@@ -742,18 +885,17 @@ class LocalEnvironment(BaseEnvironment):
         prev_cwd = self.cwd
         super()._extract_cwd_from_output(result)
         if self.cwd != prev_cwd:
-            normalized = _msys_to_windows_path(self.cwd) if _IS_WINDOWS else self.cwd
-            if normalized and os.path.isdir(normalized):
-                self.cwd = normalized
-            else:
-                # Stale / non-existent path — keep previous cwd; _run_bash
-                # will resolve a safe fallback on the next call if needed.
-                self.cwd = prev_cwd
+            accepted = self._accept_shell_cwd(self.cwd)
+            # Stale / non-existent path — keep previous cwd; _run_bash
+            # will resolve a safe fallback on the next call if needed.
+            self.cwd = accepted or prev_cwd
 
     def cleanup(self):
         """Clean up temp files."""
         for f in (self._snapshot_path, self._cwd_file):
             try:
-                os.unlink(f)
+                # Under WSL these are ``/mnt/c/...`` strings the shell wrote;
+                # Python needs the drive-letter form to unlink them.
+                os.unlink(self._host_path(f))
             except OSError:
                 pass
