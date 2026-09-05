@@ -24,6 +24,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Spacing="4">
@@ -94,7 +95,27 @@
             </StackPanel>
         </Border>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
+        <!--
+            FETİH'in TEK bir modeli yoktur: birincil model hata verdiğinde
+            devreye giren bir yedek model ve yan görevler (görüntü çözümleme,
+            bağlam sıkıştırma, onay kararı…) için 11 ayrı "yardımcı model
+            yuvası" vardır. Bu kart o yuvaları — ve YALNIZCA gerçekten var olan
+            config anahtarlarını — düzenlenebilir hâle getirir.
+        -->
+        <Border Grid.Row="2" Style="{StaticResource CardBorderStyle}">
+            <StackPanel Spacing="4">
+                <TextBlock x:Name="SlotsTitle"
+                           Text="Diğer model yuvaları"
+                           Style="{StaticResource SectionHeaderTextStyle}" />
+                <TextBlock x:Name="SlotsIntro"
+                           Style="{StaticResource MutedTextStyle}"
+                           FontSize="12"
+                           Text="Etkin model dışındaki model seçimleri. Sağlayıcı listesi köprüden (providers.list) gelir; her kayıt config.set ile ~/.fetih/config.yaml'a yazılır. Boş bırakılan model kutusu 'sağlayıcının varsayılanı' demektir." />
+                <StackPanel x:Name="SlotsHost" Spacing="4" Margin="0,8,0,0" />
+            </StackPanel>
+        </Border>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="8">
             <TextBox x:Name="SearchBox"
                      MinWidth="280"
                      AutomationProperties.AutomationId="provider_search"
@@ -110,7 +131,7 @@
                        Style="{StaticResource MutedTextStyle}" />
         </StackPanel>
 
-        <ListView Grid.Row="3"
+        <ListView Grid.Row="4"
                   x:Name="ProviderList"
                   AutomationProperties.AutomationId="provider_list"
                   SelectionMode="None"

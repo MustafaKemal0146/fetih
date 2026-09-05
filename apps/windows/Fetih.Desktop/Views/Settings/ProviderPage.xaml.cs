@@ -91,6 +91,324 @@ public sealed partial class ProviderPage : Page
         {
             App.LogCrash("ProviderPage.SeedSelector", ex, ex.Message);
         }
+
+        // Yuva satırları sağlayıcı adaylarını kullanır; bu yüzden ADAYLAR
+        // hazırlandıktan SONRA kurulur.
+        try
+        {
+            await BuildModelSlotsAsync().ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("ProviderPage.BuildModelSlots", ex, ex.Message);
+        }
+    }
+
+    // ── Diğer model yuvaları ────────────────────────────────────────────────
+    //
+    // Envanterdeki (docs/fetih-ozellik-envanteri.md §1) gerçek anahtarlar:
+    //   * fallback_model            → birincil sağlayıcı 429/5xx verdiğinde
+    //   * auxiliary.<görev>.provider / .model → 11 yan görev için ayrı model
+    // Buraya UYDURMA yuva EKLENMEZ: her satırın karşılığı config.yaml'da
+    // gerçekten bulunan bir anahtardır (fetih_cli/config.py DEFAULT_CONFIG).
+
+    /// <summary>Bir yardımcı model yuvasının tanımı.</summary>
+    private sealed record AuxSlot(string Task, string Title, string Description);
+
+    private static readonly AuxSlot[] AuxSlots =
+    {
+        new("vision", "Görüntü çözümleme",
+            "Ekran görüntüsü ve resim analizi (vision_analyze, tarayıcı görüntüleri). Çok kipli (multimodal) bir model gerekir."),
+        new("web_extract", "Web sayfası özetleme",
+            "Bir sayfayı okuyup özetleyen yan görev."),
+        new("compression", "Bağlam sıkıştırma",
+            "Sohbet uzayınca eski turları özetleyip yer açar."),
+        new("skills_hub", "Yetenek merkezi",
+            "Yetenek (skill) arama ve eşleştirme çağrıları."),
+        new("approval", "Onay kararı",
+            "Tehlikeli bir komutun otomatik onaylanıp onaylanmayacağına karar verir. Ucuz ve hızlı bir model önerilir."),
+        new("mcp", "MCP yardımcısı",
+            "MCP sunucularıyla ilgili kısa çağrılar."),
+        new("title_generation", "Sohbet başlığı üretme",
+            "Bir oturuma kısa bir başlık yazar."),
+        new("triage_specifier", "Görev ayrıntılandırma",
+            "Kanban 'triage' sütunundaki tek satırlık bir işi somut bir tarife dönüştürür."),
+        new("kanban_decomposer", "Görev parçalama",
+            "Bir işi alt görev grafiğine böler; diğerlerinden daha çok token harcar."),
+        new("profile_describer", "Profil açıklaması",
+            "Bir profilin ne işe yaradığını bir iki cümleyle yazar."),
+        new("curator", "Küratör (yetenek incelemesi)",
+            "Yetenek kullanımını gözden geçiren fork. Uzun sürebilir."),
+    };
+
+    /// <summary>
+    /// Yuva kartını kurar: yedek model + 11 yardımcı model. Değerler
+    /// <c>config.get</c>'ten okunur, kayıt <c>config.set</c> ile yapılır.
+    /// </summary>
+    private async Task BuildModelSlotsAsync()
+    {
+        SlotsHost.Children.Clear();
+
+        JsonElement config;
+        try
+        {
+            var res = await _bridge.ConfigGetAsync().ConfigureAwait(true);
+            if (res.ValueKind != JsonValueKind.Object ||
+                !res.TryGetProperty("config", out config) ||
+                config.ValueKind != JsonValueKind.Object)
+            {
+                SlotsHost.Children.Add(new TextBlock
+                {
+                    Text = "Yapılandırma okunamadı; köprü bağlı değil.",
+                    Opacity = 0.7,
+                    FontSize = 12,
+                });
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            SlotsHost.Children.Add(new TextBlock
+            {
+                Text = "Yapılandırma okunamadı: " + ex.Message,
+                Opacity = 0.7,
+                FontSize = 12,
+                TextWrapping = TextWrapping.Wrap,
+            });
+            return;
+        }
+
+        // ── Yedek model ─────────────────────────────────────────────────────
+        var (fbProvider, fbModel, fbChainLength) = ReadFallback(config);
+        var fallbackNote = fbChainLength > 1
+            ? $"Şu anda {fbChainLength} basamaklı bir yedek zinciri tanımlı; buradan kaydetmek zinciri tek bir yedeğe indirir."
+            : "Birincil sağlayıcı 429/503/529 döndüğünde bu model devreye girer. Boş bırakılırsa yedek yoktur.";
+
+        SlotsHost.Children.Add(SlotRow(
+            "slot_fallback",
+            "Yedek model",
+            fallbackNote,
+            fbProvider,
+            fbModel,
+            includeAuto: false,
+            async (provider, model, status) =>
+            {
+                if (string.IsNullOrEmpty(provider) && string.IsNullOrEmpty(model))
+                {
+                    await _bridge.ConfigSetAsync("fallback_model", null).ConfigureAwait(true);
+                    return;
+                }
+                await _bridge.ConfigSetAsync("fallback_model", new Dictionary<string, object?>
+                {
+                    ["provider"] = provider,
+                    ["model"] = model,
+                }).ConfigureAwait(true);
+            }));
+
+        // ── Yardımcı modeller ───────────────────────────────────────────────
+        var auxHost = new StackPanel { Spacing = 4 };
+        foreach (var slot in AuxSlots)
+        {
+            var provider = ReadString(config, "auxiliary", slot.Task, "provider");
+            var model = ReadString(config, "auxiliary", slot.Task, "model");
+            var task = slot.Task;
+            auxHost.Children.Add(SlotRow(
+                "slot_aux_" + task,
+                slot.Title,
+                slot.Description,
+                string.IsNullOrEmpty(provider) ? "auto" : provider,
+                model,
+                includeAuto: true,
+                async (p, m, status) =>
+                {
+                    await _bridge.ConfigSetAsync($"auxiliary.{task}.provider",
+                        string.IsNullOrEmpty(p) ? "auto" : p).ConfigureAwait(true);
+                    await _bridge.ConfigSetAsync($"auxiliary.{task}.model", m).ConfigureAwait(true);
+                }));
+        }
+
+        var expander = new Expander
+        {
+            Header = new TextBlock
+            {
+                Text = $"Yardımcı modeller — yan görev başına ayrı model ({AuxSlots.Length} yuva)",
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                FontSize = 13,
+            },
+            Content = auxHost,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            HorizontalContentAlignment = HorizontalAlignment.Stretch,
+            Margin = new Thickness(0, 8, 0, 0),
+        };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(expander, "slot_aux_group");
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(expander, "Yardımcı modeller");
+        SlotsHost.Children.Add(expander);
+    }
+
+    /// <summary>Tek bir yuva satırı: sağlayıcı seçici + model kutusu + Kaydet.</summary>
+    private FrameworkElement SlotRow(
+        string id,
+        string title,
+        string description,
+        string currentProvider,
+        string currentModel,
+        bool includeAuto,
+        Func<string, string, TextBlock, Task> save)
+    {
+        var panel = new StackPanel { Spacing = 4, Margin = new Thickness(0, 6, 0, 6) };
+        panel.Children.Add(new TextBlock
+        {
+            Text = title,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            FontSize = 13.5,
+            TextWrapping = TextWrapping.Wrap,
+        });
+        panel.Children.Add(new TextBlock
+        {
+            Text = description,
+            FontSize = 12,
+            Opacity = 0.65,
+            TextWrapping = TextWrapping.Wrap,
+            MaxWidth = 620,
+        });
+
+        var combo = new ComboBox { MinWidth = 220, IsEditable = false };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(combo, id + "_provider");
+        if (includeAuto)
+        {
+            combo.Items.Add(new ComboBoxItem { Content = "Otomatik (auto)", Tag = "auto" });
+        }
+        else
+        {
+            combo.Items.Add(new ComboBoxItem { Content = "(yok)", Tag = "" });
+        }
+        foreach (var choice in _providerChoices)
+        {
+            combo.Items.Add(new ComboBoxItem { Content = choice.Label, Tag = choice.Id });
+        }
+
+        var selected = -1;
+        for (var i = 0; i < combo.Items.Count; i++)
+        {
+            if (combo.Items[i] is ComboBoxItem { Tag: string tag } &&
+                string.Equals(tag, currentProvider, StringComparison.OrdinalIgnoreCase))
+            {
+                selected = i;
+                break;
+            }
+        }
+        // Katalogda olmayan bir sağlayıcı config'de yazıyorsa kaybolmasın.
+        if (selected < 0 && !string.IsNullOrEmpty(currentProvider))
+        {
+            combo.Items.Add(new ComboBoxItem { Content = currentProvider, Tag = currentProvider });
+            selected = combo.Items.Count - 1;
+        }
+        combo.SelectedIndex = selected < 0 ? 0 : selected;
+
+        var modelBox = new TextBox
+        {
+            Text = currentModel,
+            MinWidth = 240,
+            PlaceholderText = "Model kimliği (boş = sağlayıcının varsayılanı)",
+        };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(modelBox, id + "_model");
+
+        var status = new TextBlock { FontSize = 12, Opacity = 0.8, VerticalAlignment = VerticalAlignment.Center };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(status, id + "_status");
+
+        var saveButton = new Button { Content = "Kaydet" };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(saveButton, id + "_save");
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(saveButton, title + " kaydet");
+        saveButton.Click += async (_, _) =>
+        {
+            saveButton.IsEnabled = false;
+            status.Text = "kaydediliyor…";
+            try
+            {
+                var provider = combo.SelectedItem is ComboBoxItem { Tag: string t } ? t : "";
+                await save(provider, modelBox.Text?.Trim() ?? "", status);
+                status.Text = "✓ kaydedildi";
+            }
+            catch (BridgeRpcException rpc)
+            {
+                status.Text = "✗ " + (rpc.Code == -32004 ? "reddedildi (yönetilen kurulum)" : rpc.Message);
+            }
+            catch (Exception ex)
+            {
+                status.Text = "✗ " + ex.Message;
+                App.LogCrash("ProviderPage.SlotSave(" + id + ")", ex, ex.Message);
+            }
+            finally
+            {
+                saveButton.IsEnabled = true;
+            }
+        };
+
+        var row = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 8,
+            Margin = new Thickness(0, 4, 0, 0),
+        };
+        row.Children.Add(combo);
+        row.Children.Add(modelBox);
+        row.Children.Add(saveButton);
+        row.Children.Add(status);
+        panel.Children.Add(row);
+
+        return panel;
+    }
+
+    /// <summary>
+    /// <c>fallback_model</c> hem tek bir sözlük hem de bir zincir (liste)
+    /// olabilir; ikisini de okur ve ilk basamağı döndürür.
+    /// </summary>
+    private static (string Provider, string Model, int ChainLength) ReadFallback(JsonElement config)
+    {
+        if (!config.TryGetProperty("fallback_model", out var fb))
+        {
+            return ("", "", 0);
+        }
+
+        if (fb.ValueKind == JsonValueKind.Array)
+        {
+            var length = fb.GetArrayLength();
+            foreach (var entry in fb.EnumerateArray())
+            {
+                return (StringOf(entry, "provider"), StringOf(entry, "model"), length);
+            }
+            return ("", "", length);
+        }
+
+        if (fb.ValueKind == JsonValueKind.Object)
+        {
+            return (StringOf(fb, "provider"), StringOf(fb, "model"), 1);
+        }
+
+        return ("", "", 0);
+    }
+
+    private static string StringOf(JsonElement element, string name)
+        => element.ValueKind == JsonValueKind.Object &&
+           element.TryGetProperty(name, out var v) &&
+           v.ValueKind == JsonValueKind.String
+            ? v.GetString() ?? ""
+            : "";
+
+    /// <summary>Noktalı olmayan çok parçalı bir yolu JSON ağacında çözer.</summary>
+    private static string ReadString(JsonElement root, params string[] path)
+    {
+        var current = root;
+        foreach (var segment in path)
+        {
+            if (current.ValueKind != JsonValueKind.Object ||
+                !current.TryGetProperty(segment, out var next))
+            {
+                return "";
+            }
+            current = next;
+        }
+        return current.ValueKind == JsonValueKind.String ? current.GetString() ?? "" : "";
     }
 
     private void ProviderSelectBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
