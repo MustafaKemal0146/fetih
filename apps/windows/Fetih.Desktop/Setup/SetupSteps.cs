@@ -196,38 +196,69 @@ public sealed class StartDesktopBridgeStep : SetupStep
     }
 }
 
-/// <summary>Uçtan uca doğrulama: ping + sağlayıcı anahtarının görünürlüğü.</summary>
+/// <summary>
+/// Uçtan uca doğrulama: GERÇEK bir sohbet turu.
+///
+/// <para>Bu adım eskiden yalnızca köprüyü ping'liyor ve anahtarın
+/// <c>.env</c>'de görünüp görünmediğine bakıyordu. İkisi de doğruyken bile
+/// ilk mesaj <c>Unknown provider</c> ya da <c>model_not_found</c> ile
+/// ölebiliyordu: anahtarın var olması, sağlayıcının çözüldüğü ya da modelin
+/// hâlâ yayında olduğu anlamına gelmiyor. Tek dürüst doğrulama, kullanıcının
+/// birazdan yapacağı şeyi yapmaktır — bir mesaj gönderip yanıt beklemek.</para>
+///
+/// <para>Tur, sohbet sayfasının kullandığı kısıtların aynısıyla gönderilir
+/// (küçük araç seti, bağlam dosyaları ve hafıza atlanır): küçük bağlamlı
+/// ücretsiz katmanlar tam önsözü taşıyamıyor ve doğrulama 413 ile
+/// düşüyordu.</para>
+/// </summary>
 public sealed class VerifyEndToEndStep : SetupStep
 {
     public override string Id => "verify_end_to_end";
-    public override string DisplayName => "Uçtan uca doğrulama";
+    public override string DisplayName => "Gerçek mesajla doğrulama";
 
     public override async Task<StepResult> ExecuteAsync(SetupContext ctx, CancellationToken ct)
     {
         await BridgeClient.Shared.PingAsync(ct).ConfigureAwait(false);
 
-        // Anahtarsız (OAuth/yerel) sağlayıcılarda anahtar denetimi atlanır.
-        if (string.IsNullOrWhiteSpace(ctx.KeyEnvVar))
-        {
-            return StepResult.Ok("Köprü yanıt veriyor.");
-        }
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        timeout.CancelAfter(TimeSpan.FromSeconds(90));
 
-        var providers = await BridgeClient.Shared.ProvidersListAsync(ct).ConfigureAwait(false);
-        if (providers.ValueKind == System.Text.Json.JsonValueKind.Object &&
-            providers.TryGetProperty("providers", out var list) &&
-            list.ValueKind == System.Text.Json.JsonValueKind.Array)
+        try
         {
-            foreach (var p in list.EnumerateArray())
-            {
-                if (p.TryGetProperty("id", out var idEl) && idEl.GetString() == ctx.ProviderId)
-                {
-                    var present = p.TryGetProperty("key_present", out var kp) && kp.GetBoolean();
-                    return present
-                        ? StepResult.Ok("Sağlayıcı anahtarı görünüyor; kurulum doğrulandı.")
-                        : StepResult.Ok("Kurulum tamam ancak anahtar henüz görünmüyor (yeni oturum gerekebilir).");
-                }
-            }
+            var res = await BridgeClient.Shared.SendMessageAsync(
+                "Bu bir kurulum denetimidir. Yalnızca şu kelimeyle yanıt ver: TAMAM",
+                stream: false,
+                toolsets: new[] { "file" },
+                skipContextFiles: true,
+                skipMemory: true,
+                ct: timeout.Token).ConfigureAwait(false);
+
+            var text = res.ValueKind == System.Text.Json.JsonValueKind.Object &&
+                       res.TryGetProperty("text", out var t)
+                ? (t.GetString() ?? "")
+                : "";
+
+            return string.IsNullOrWhiteSpace(text)
+                ? StepResult.Ok("Model yanıt verdi (boş metin) — kurulum tamam.")
+                : StepResult.Ok("Model yanıt verdi: " + Shorten(text));
         }
-        return StepResult.Ok("Köprü yanıt veriyor.");
+        catch (BridgeRpcException rpc)
+        {
+            // Sağlayıcı/model hatasını BURADA yakala: kullanıcı sihirbazdan
+            // çıkmadan düzeltebilsin, ilk mesajında sürprizle karşılaşmasın.
+            return StepResult.Fail(
+                $"Model yanıt vermedi ({rpc.Code}): {Shorten(rpc.Message, 260)}  " +
+                "Sağlayıcıya dönüp anahtarı ya da modeli düzelt.");
+        }
+        catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+        {
+            return StepResult.Fail("Model 90 saniyede yanıt vermedi. Ağ/uç nokta erişilebilir mi?");
+        }
+    }
+
+    private static string Shorten(string s, int max = 120)
+    {
+        s = s.Replace("\r", " ").Replace("\n", " ").Trim();
+        return s.Length <= max ? s : s[..max] + "…";
     }
 }

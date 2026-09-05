@@ -390,8 +390,32 @@ public sealed class BridgeClient : IDisposable
         {
             p["session_id"] = sessionId;
         }
-        return await CallAsync("session.send", p, ct).ConfigureAwait(false);
+
+        // Model sağlığını BURADA raporla, çağıranlarda değil: her sohbet yolu
+        // bu metottan geçer, dolayısıyla rozet hiçbir çağrı yerinde unutulmaz.
+        try
+        {
+            var result = await CallAsync("session.send", p, ct).ConfigureAwait(false);
+            Status.ReportModelHealthy();
+            return result;
+        }
+        catch (BridgeRpcException rpc) when (IsModelFault(rpc.Code))
+        {
+            Status.ReportModelFault(rpc.Code, rpc.Message);
+            throw;
+        }
     }
+
+    /// <summary>
+    /// Bu hata kodu "model/sağlayıcı yapılandırması bozuk" anlamına mı geliyor?
+    ///
+    /// <para>Yalnızca kullanıcının Ayarlar'dan düzeltebileceği hatalar rozeti
+    /// kırmızıya çevirir. Oturum meşgul (-32002) ve iptal (-32005) geçicidir;
+    /// bunlarda rozeti bozmak yanlış alarm olur.</para>
+    /// </summary>
+    private static bool IsModelFault(int code) => code is
+        -32003 or   // AGENT_ERROR — sağlayıcı isteği reddetti (401/404/413…)
+        -32004;     // CONFIG_ERROR — sağlayıcı çözümlemesi başarısız
 
     public async Task<JsonElement> CancelAsync(string sessionId, CancellationToken ct = default)
     {
@@ -422,6 +446,46 @@ public sealed class BridgeClient : IDisposable
     {
         await EnsureConnectedAsync(ct).ConfigureAwait(false);
         return await CallAsync("providers.list", null, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// <c>providers.catalog</c> — CLI'nin KANONİK sağlayıcı listesi.
+    ///
+    /// <para><c>providers.list</c>'ten farkı: o, kullanıcının
+    /// <c>config.yaml</c>'ında ne yapılandırdığını söyler (taze kurulumda
+    /// boştur). Bu ise "bu çalışma zamanı hangi sağlayıcı kimliklerini kabul
+    /// eder" sorusunu yanıtlar — sihirbazın sorması gereken soru budur.</para>
+    /// </summary>
+    public async Task<JsonElement> ProvidersCatalogAsync(CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("providers.catalog", null, ct).ConfigureAwait(false);
+    }
+
+    /// <summary><c>providers.models</c> — sağlayıcının ŞU AN sunduğu model kimlikleri.</summary>
+    public async Task<JsonElement> ProvidersModelsAsync(string provider, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("providers.models",
+            new Dictionary<string, object?> { ["provider"] = provider }, ct).ConfigureAwait(false);
+    }
+
+    /// <summary><c>providers.probe_local</c> — yerel sunucu ayakta mı, hangi modeller inik?</summary>
+    public async Task<JsonElement> ProvidersProbeLocalAsync(
+        string provider, string? baseUrl = null, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        var p = new Dictionary<string, object?> { ["provider"] = provider };
+        if (!string.IsNullOrWhiteSpace(baseUrl)) p["base_url"] = baseUrl;
+        return await CallAsync("providers.probe_local", p, ct).ConfigureAwait(false);
+    }
+
+    /// <summary><c>providers.auth_status</c> — OAuth sağlayıcısına giriş yapılmış mı (istem YOK).</summary>
+    public async Task<JsonElement> ProvidersAuthStatusAsync(string provider, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("providers.auth_status",
+            new Dictionary<string, object?> { ["provider"] = provider }, ct).ConfigureAwait(false);
     }
 
     public async Task<JsonElement> SkillsListAsync(

@@ -46,6 +46,10 @@ public sealed partial class MainWindow : Window
         ExtendsContentIntoTitleBar = true;
         SetTitleBar(AppTitleBar);
 
+        // Görev çubuğu / Alt+Tab ikonu. MSIX'siz derlemede paket manifesti
+        // yok, dolayısıyla ikon çalışma zamanında bildirilmek zorunda.
+        ApplyBrandIcon();
+
         // Başlık çubuğundaki alt başlık da yerelleştirilir; aksi hâlde arayüz
         // İngilizceyken burada Türkçe bir metin kalıyordu.
         TaglineText.Text = Loc.T("app.tagline");
@@ -84,6 +88,21 @@ public sealed partial class MainWindow : Window
             }
         };
 
+    }
+
+    /// <summary>Pencere ikonunu marka işaretine ayarlar (bkz. Services/BrandIcon.cs).</summary>
+    private void ApplyBrandIcon()
+    {
+        try
+        {
+            var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
+            var id = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hwnd);
+            BrandIcon.Apply(Microsoft.UI.Windowing.AppWindow.GetFromWindowId(id));
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("MainWindow.ApplyBrandIcon", ex, ex.Message);
+        }
     }
 
     /// <summary>Dil değişiminde: mevcut moda göre menüyü baştan kur.</summary>
@@ -263,6 +282,21 @@ public sealed partial class MainWindow : Window
 
             NavigateTo(tag);
         }, nameof(OnShellNavigationRequested));
+    }
+
+    /// <summary>
+    /// Durum rozetine tıklandı. Yalnızca çözülebilir bir hata varsa gezinir:
+    /// model hatasında Model/Sağlayıcı sayfasına, taşıma hatasında Masaüstü
+    /// Köprüsü sayfasına. Sağlıklıyken tıklama sessizce yutulur.
+    /// </summary>
+    private void StatusBadge_Click(object sender, RoutedEventArgs e)
+    {
+        var status = Bridge.BridgeStatus.Shared;
+        if (!status.IsActionable)
+        {
+            return;
+        }
+        ShellNavigation.Request(status.ActionNavTag);
     }
 
     // ── Olaylar ─────────────────────────────────────────────────────────────
