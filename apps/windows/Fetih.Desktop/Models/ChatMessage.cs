@@ -1,6 +1,8 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using Fetih.Desktop.Services;
+using Microsoft.UI.Xaml;
 
 namespace Fetih.Desktop.Models;
 
@@ -109,10 +111,10 @@ public sealed class ChatMessage : INotifyPropertyChanged
     /// <summary>Baloncuğun üzerinde gösterilen kısa etiket.</summary>
     public string RoleLabel => Role switch
     {
-        ChatRole.User => "Sen",
-        ChatRole.Agent => "FETİH",
+        ChatRole.User => Loc.T("chat.role.user"),
+        ChatRole.Agent => Loc.T("chat.role.agent"),
         ChatRole.Tool => "🔧 Araç",
-        _ => "Sistem",
+        _ => Loc.T("chat.role.system"),
     };
 
     public string TimeLabel => Timestamp.ToString("HH:mm");
@@ -125,6 +127,57 @@ public sealed class ChatMessage : INotifyPropertyChanged
 
     /// <summary>Normal baloncuk mu (araç kartı değil)?</summary>
     public bool IsBubble => Role != ChatRole.Tool;
+
+    // ── Baloncuk yerleşimi (modern sohbet tasarımı) ──────────────────────────
+
+    /// <summary>Kullanıcı sağa, asistan/araç sola, sistem ortaya yaslanır.</summary>
+    public HorizontalAlignment BubbleAlignment => Role switch
+    {
+        ChatRole.User => HorizontalAlignment.Right,
+        ChatRole.System => HorizontalAlignment.Center,
+        _ => HorizontalAlignment.Left,
+    };
+
+    /// <summary>Baloncuk arka planı için tema fırçası anahtarı.</summary>
+    public string BubbleBrushKey => Role switch
+    {
+        ChatRole.User => "AccentFillColorDefaultBrush",
+        ChatRole.System => "CardBackgroundFillColorSecondaryBrush",
+        _ => "CardBackgroundFillColorDefaultBrush",
+    };
+
+    /// <summary>Baloncuk kenarlığı için tema fırçası anahtarı.</summary>
+    public string BubbleBorderBrushKey => Role switch
+    {
+        ChatRole.User => "AccentFillColorSecondaryBrush",
+        _ => "CardStrokeColorDefaultBrush",
+    };
+
+    /// <summary>Gövde metni fırçası (kullanıcı balonunda vurgu üstü metin).</summary>
+    public string TextBrushKey => Role == ChatRole.User
+        ? "TextOnAccentFillColorPrimaryBrush"
+        : "TextFillColorPrimaryBrush";
+
+    /// <summary>Rol/zaman etiketi fırçası.</summary>
+    public string MetaBrushKey => Role == ChatRole.User
+        ? "TextOnAccentFillColorSecondaryBrush"
+        : "TextFillColorSecondaryBrush";
+
+    /// <summary>Kuyruğu konuşana bakan asimetrik köşe yarıçapı.</summary>
+    public CornerRadius BubbleCorner => Role switch
+    {
+        ChatRole.User => new CornerRadius(14, 14, 4, 14),
+        ChatRole.System => new CornerRadius(10),
+        _ => new CornerRadius(14, 14, 14, 4),
+    };
+
+    /// <summary>Baloncuk yatay iç boşluğu — sistem satırı daha dar.</summary>
+    public Thickness BubbleMargin => Role switch
+    {
+        ChatRole.User => new Thickness(64, 0, 0, 0),
+        ChatRole.System => new Thickness(24, 0, 24, 0),
+        _ => new Thickness(0, 0, 64, 0),
+    };
 
     /// <summary>Araç kartının başlığı: "🔧 read_file çalışıyor…".</summary>
     public string ToolHeader => $"🔧 {ToolName} {ToolStatusLabel}";

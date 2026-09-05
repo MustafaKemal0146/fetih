@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
+using System.ComponentModel;
 using Fetih.Desktop.Bridge;
 using Fetih.Desktop.Models;
+using Fetih.Desktop.Services;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
@@ -41,8 +43,17 @@ public sealed partial class ChatPage : Page
     public ChatPage()
     {
         InitializeComponent();
+        ApplyLanguage();
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
+    }
+
+    /// <summary>Sabit arayüz metinlerini etkin dile göre ayarlar.</summary>
+    private void ApplyLanguage()
+    {
+        PromptBox.PlaceholderText = Loc.T("chat.placeholder");
+        HintText.Text = Loc.T("chat.hint");
+        UpdateSendButton();
     }
 
     public ObservableCollection<ChatMessage> Messages => SharedMessages;
@@ -51,16 +62,19 @@ public sealed partial class ChatPage : Page
 
     private static ObservableCollection<ChatMessage> CreateInitialMessages() => new()
     {
-        new ChatMessage(
-            ChatRole.System,
-            "FETİH masaüstü kabuğu açıldı. İlk mesajını gönderdiğinde Masaüstü Köprüsü " +
-            "otomatik başlatılır ve yanıtlar gerçek zamanlı olarak buraya akar."),
+        new ChatMessage(ChatRole.System, Loc.T("chat.welcome")),
     };
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         Loaded -= OnLoaded;
         HookBridgeEvents();
+
+        // Bağlantı durumu değiştikçe Gönder butonunu güncelle: köprü "Bağlı"
+        // olmadan mesaj gönderip sessizce kaybetmeyi önler (Görev B).
+        Status.PropertyChanged += OnStatusChanged;
+        Loc.LanguageChanged += ApplyLanguage;
+
         UpdateSendButton();
         ScrollToEnd();
 
@@ -72,6 +86,15 @@ public sealed partial class ChatPage : Page
     {
         // Sayfa yeniden gezinince olayları iki kez bağlamamak için çöz.
         UnhookBridgeEvents();
+        Status.PropertyChanged -= OnStatusChanged;
+        Loc.LanguageChanged -= ApplyLanguage;
+    }
+
+    private void OnStatusChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        // Durum güncellemeleri UI iş parçacığında yayınlanır (BridgeStatus.Update),
+        // yine de güvenli tarafta kalıp yönlendiriyoruz.
+        RunOnUi(UpdateSendButton);
     }
 
     private async Task WarmUpAsync()
@@ -199,23 +222,26 @@ public sealed partial class ChatPage : Page
 
     private void PromptBox_KeyDown(object sender, KeyRoutedEventArgs e)
     {
+        // Görev D: Enter yeni satır ekler (varsayılan davranış, AcceptsReturn=True);
+        // yalnızca Ctrl+Enter gönderir.
         if (e.Key != VirtualKey.Enter)
         {
             return;
         }
-        if (IsShiftDown())
+        if (!IsCtrlDown())
         {
+            // Ctrl basılı değil → Enter'ı TextBox'a bırak (yeni satır).
             return;
         }
         e.Handled = true;
         _ = SendAsync();
     }
 
-    private static bool IsShiftDown()
+    private static bool IsCtrlDown()
     {
         try
         {
-            var state = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Shift);
+            var state = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
             return state.HasFlag(CoreVirtualKeyStates.Down);
         }
         catch
@@ -224,9 +250,30 @@ public sealed partial class ChatPage : Page
         }
     }
 
+    /// <summary>
+    /// Gönder butonunun etkinliğini ve etiketini bağlantı durumuna göre günceller.
+    /// Köprü bağlanırken buton "Bağlanıyor…" gösterip devre dışı kalır; böylece
+    /// mesaj bağlantı kurulmadan gönderilip sessizce kaybolmaz (Görev B). Hata
+    /// durumunda (Faulted) buton yeniden denemeye izin vermek için açık kalır.
+    /// </summary>
     private void UpdateSendButton()
     {
-        SendButton.IsEnabled = !_turnInProgress && !string.IsNullOrWhiteSpace(PromptBox.Text);
+        var hasText = !string.IsNullOrWhiteSpace(PromptBox.Text);
+        var state = Status.State;
+        var connecting = state is BridgeConnectionState.Idle
+            or BridgeConnectionState.Connecting
+            or BridgeConnectionState.Reconnecting;
+
+        if (connecting && !_turnInProgress)
+        {
+            SendButton.Content = Loc.T("chat.connecting");
+            SendButton.IsEnabled = false;
+        }
+        else
+        {
+            SendButton.Content = Loc.T("chat.send");
+            SendButton.IsEnabled = !_turnInProgress && hasText;
+        }
     }
 
     private async Task SendAsync()

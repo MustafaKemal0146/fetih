@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using Fetih.Desktop.Bridge;
+using Fetih.Desktop.Services;
 using Fetih.Desktop.Views;
 using Fetih.Desktop.Views.Settings;
 using Microsoft.UI.Xaml;
@@ -58,11 +59,15 @@ public sealed partial class MainWindow : Window
         // Loaded olduğunda kuruyoruz.
         RootNavigation.Loaded += RootNavigation_Loaded;
 
+        // Dil değişince (Görünüm ayarından) sol menüyü yeniden kur.
+        Loc.LanguageChanged += OnLanguageChanged;
+
         // Pencere kapanınca Masaüstü Köprüsü alt sürecini de sonlandır.
         Closed += (_, _) =>
         {
             try
             {
+                Loc.LanguageChanged -= OnLanguageChanged;
                 Bridge.BridgeClient.Shared.Dispose();
             }
             catch
@@ -71,6 +76,22 @@ public sealed partial class MainWindow : Window
             }
         };
 
+    }
+
+    /// <summary>Dil değişiminde: mevcut moda göre menüyü baştan kur.</summary>
+    private void OnLanguageChanged()
+    {
+        EnqueueSafe(() =>
+        {
+            if (_mode == ShellMode.Settings)
+            {
+                BuildSettingsMenu();
+            }
+            else
+            {
+                BuildNormalMenu();
+            }
+        }, nameof(OnLanguageChanged));
     }
 
     private void RootNavigation_Loaded(object sender, RoutedEventArgs e)
@@ -98,12 +119,12 @@ public sealed partial class MainWindow : Window
             _menuItems.Clear();
             _footerItems.Clear();
 
-            _menuItems.Add(CreateItem("Sohbet", NavTags.Chat, Symbol.Message));
-            _menuItems.Add(CreateItem("Yetenekler", NavTags.Skills, Symbol.Library));
-            _menuItems.Add(CreateItem("Bulgular", NavTags.Findings, Symbol.Flag));
+            _menuItems.Add(CreateItem(Loc.T("nav.chat"), NavTags.Chat, Symbol.Message));
+            _menuItems.Add(CreateItem(Loc.T("nav.skills"), NavTags.Skills, Symbol.Library));
+            _menuItems.Add(CreateItem(Loc.T("nav.findings"), NavTags.Findings, Symbol.Flag));
 
-            _footerItems.Add(CreateItem("Tanılama", NavTags.Diagnostics, Symbol.Repair));
-            _footerItems.Add(CreateItem("Ayarlar", NavTags.SettingsRoot, Symbol.Setting));
+            _footerItems.Add(CreateItem(Loc.T("nav.diagnostics"), NavTags.Diagnostics, Symbol.Repair));
+            _footerItems.Add(CreateItem(Loc.T("nav.settings"), NavTags.SettingsRoot, Symbol.Setting));
 
             // Yerleşik Ayarlar ögesi (cog) yükleme sırasında kendiliğinden
             // seçilip uygulamayı Ayarlar moduna atıyordu; kendi "Ayarlar"
@@ -139,32 +160,33 @@ public sealed partial class MainWindow : Window
             _menuItems.Clear();
             _footerItems.Clear();
 
-            _menuItems.Add(new NavigationViewItemHeader { Content = "Bağlantı" });
-            _menuItems.Add(CreateItem("Masaüstü Köprüsü", NavTags.SettingsBridge, Symbol.Link));
+            _menuItems.Add(new NavigationViewItemHeader { Content = Loc.T("settings.header.connection") });
+            _menuItems.Add(CreateItem(Loc.T("settings.bridge"), NavTags.SettingsBridge, Symbol.Link));
 
-            _menuItems.Add(new NavigationViewItemHeader { Content = "Model ve Araçlar" });
-            _menuItems.Add(CreateItem("Model ve Sağlayıcı", NavTags.SettingsProvider, Symbol.Target));
-            _menuItems.Add(CreateItem("Araçlar", NavTags.SettingsTools, Symbol.AllApps));
-            _menuItems.Add(CreateItem("Ajan", NavTags.SettingsAgent, Symbol.Play));
-            _menuItems.Add(CreateItem("Ses", NavTags.SettingsVoice, Symbol.Microphone));
+            _menuItems.Add(new NavigationViewItemHeader { Content = Loc.T("settings.header.model_tools") });
+            _menuItems.Add(CreateItem(Loc.T("settings.provider"), NavTags.SettingsProvider, Symbol.Target));
+            _menuItems.Add(CreateItem(Loc.T("settings.tools"), NavTags.SettingsTools, Symbol.AllApps));
+            _menuItems.Add(CreateItem(Loc.T("settings.agent"), NavTags.SettingsAgent, Symbol.Play));
+            _menuItems.Add(CreateItem(Loc.T("settings.voice"), NavTags.SettingsVoice, Symbol.Microphone));
 
-            _menuItems.Add(new NavigationViewItemHeader { Content = "Güvenlik ve Yürütme" });
-            _menuItems.Add(CreateItem("İzinler", NavTags.SettingsPermissions, Symbol.Permissions));
-            _menuItems.Add(CreateItem("Güvenlik", NavTags.SettingsSecurity, Symbol.ProtectedDocument));
-            _menuItems.Add(CreateItem("Sandbox", NavTags.SettingsSandbox, Symbol.ProtectedDocument));
+            _menuItems.Add(new NavigationViewItemHeader { Content = Loc.T("settings.header.security_exec") });
+            _menuItems.Add(CreateItem(Loc.T("settings.permissions"), NavTags.SettingsPermissions, Symbol.Permissions));
+            _menuItems.Add(CreateItem(Loc.T("settings.security"), NavTags.SettingsSecurity, Symbol.ProtectedDocument));
+            _menuItems.Add(CreateItem(Loc.T("settings.sandbox"), NavTags.SettingsSandbox, Symbol.ProtectedDocument));
+            _menuItems.Add(CreateItem(Loc.T("settings.shell"), NavTags.SettingsShell, Symbol.Admin));
 
-            _menuItems.Add(new NavigationViewItemHeader { Content = "Otomasyon ve Bağlam" });
-            _menuItems.Add(CreateItem("Kanallar", NavTags.SettingsChannels, Symbol.Message));
-            _menuItems.Add(CreateItem("Hafıza", NavTags.SettingsMemory, Symbol.Library));
-            _menuItems.Add(CreateItem("Otomasyon", NavTags.SettingsAutomation, Symbol.Clock));
-            _menuItems.Add(CreateItem("Görünüm", NavTags.SettingsAppearance, Symbol.View));
+            _menuItems.Add(new NavigationViewItemHeader { Content = Loc.T("settings.header.automation") });
+            _menuItems.Add(CreateItem(Loc.T("settings.channels"), NavTags.SettingsChannels, Symbol.Message));
+            _menuItems.Add(CreateItem(Loc.T("settings.memory"), NavTags.SettingsMemory, Symbol.Library));
+            _menuItems.Add(CreateItem(Loc.T("settings.automation"), NavTags.SettingsAutomation, Symbol.Clock));
+            _menuItems.Add(CreateItem(Loc.T("settings.appearance"), NavTags.SettingsAppearance, Symbol.View));
 
-            _menuItems.Add(new NavigationViewItemHeader { Content = "Gelişmiş" });
-            _menuItems.Add(CreateItem("Sistem", NavTags.SettingsSystem, Symbol.Setting));
-            _menuItems.Add(CreateItem("Tüm Ayarlar", NavTags.SettingsAll, Symbol.List));
+            _menuItems.Add(new NavigationViewItemHeader { Content = Loc.T("settings.header.advanced") });
+            _menuItems.Add(CreateItem(Loc.T("settings.system"), NavTags.SettingsSystem, Symbol.Setting));
+            _menuItems.Add(CreateItem(Loc.T("settings.all"), NavTags.SettingsAll, Symbol.List));
 
-            _footerItems.Add(CreateItem("Tanılama", NavTags.Diagnostics, Symbol.Repair));
-            _footerItems.Add(CreateItem("Hakkında", NavTags.SettingsAbout, Symbol.Help));
+            _footerItems.Add(CreateItem(Loc.T("nav.diagnostics"), NavTags.Diagnostics, Symbol.Repair));
+            _footerItems.Add(CreateItem(Loc.T("settings.about"), NavTags.SettingsAbout, Symbol.Help));
 
             RootNavigation.IsBackButtonVisible = NavigationViewBackButtonVisible.Visible;
             RootNavigation.IsBackEnabled = true;
@@ -332,6 +354,7 @@ public sealed partial class MainWindow : Window
         NavTags.SettingsVoice => (typeof(VoicePage), null),
         NavTags.SettingsPermissions => (typeof(PermissionsPage), null),
         NavTags.SettingsSandbox => (typeof(SandboxPage), null),
+        NavTags.SettingsShell => (typeof(ShellPage), null),
         NavTags.SettingsAbout => (typeof(AboutPage), null),
 
         // Jenerik, düzenlenebilir config editörü bölümleri.
@@ -374,6 +397,7 @@ internal static class NavTags
     public const string SettingsVoice = "nav_settings_voice";
     public const string SettingsPermissions = "nav_settings_permissions";
     public const string SettingsSandbox = "nav_settings_sandbox";
+    public const string SettingsShell = "nav_settings_shell";
     public const string SettingsAbout = "nav_settings_about";
 
     // Jenerik config editörü bölümleri (envantere göre).

@@ -66,37 +66,45 @@
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="Padding" Value="0,4" />
+                    <Setter Property="Padding" Value="0,3" />
                 </Style>
             </ListView.ItemContainerStyle>
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="models:ChatMessage">
-                    <Grid>
-                        <!-- Normal mesaj baloncuğu -->
-                        <Border Padding="12,10"
-                                CornerRadius="8"
-                                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    <!-- Baloncuk, role göre sağa/sola/ortaya yaslanır -->
+                    <Grid HorizontalAlignment="{x:Bind BubbleAlignment}"
+                          Margin="{x:Bind BubbleMargin}"
+                          MaxWidth="720">
+                        <!-- Normal mesaj baloncuğu (kullanıcı / asistan / sistem) -->
+                        <Border Padding="14,10"
+                                CornerRadius="{x:Bind BubbleCorner}"
+                                Background="{x:Bind BubbleBrushKey, Converter={StaticResource ThemeBrushConverter}}"
                                 BorderThickness="1"
-                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                BorderBrush="{x:Bind BubbleBorderBrushKey, Converter={StaticResource ThemeBrushConverter}}"
                                 Visibility="{x:Bind IsBubble, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <StackPanel Spacing="4">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
+                            <StackPanel Spacing="3">
+                                <StackPanel Orientation="Horizontal" Spacing="8"
+                                            Visibility="{x:Bind IsSystem, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=invert}">
                                     <TextBlock Text="{x:Bind RoleLabel}"
                                                FontWeight="SemiBold"
-                                               FontSize="12" />
-                                    <TextBlock Text="{x:Bind TimeLabel}"
                                                FontSize="12"
-                                               Opacity="0.5" />
+                                               Foreground="{x:Bind MetaBrushKey, Converter={StaticResource ThemeBrushConverter}}" />
+                                    <TextBlock Text="{x:Bind TimeLabel}"
+                                               FontSize="11"
+                                               Foreground="{x:Bind MetaBrushKey, Converter={StaticResource ThemeBrushConverter}}"
+                                               Opacity="0.8"
+                                               VerticalAlignment="Center" />
                                 </StackPanel>
                                 <TextBlock Text="{x:Bind Text, Mode=OneWay}"
                                            TextWrapping="Wrap"
-                                           IsTextSelectionEnabled="True" />
+                                           IsTextSelectionEnabled="True"
+                                           Foreground="{x:Bind TextBrushKey, Converter={StaticResource ThemeBrushConverter}}" />
                             </StackPanel>
                         </Border>
 
                         <!-- Araç-kullanım kartı (session.tool_call / tool_result) -->
                         <Border Padding="12,10"
-                                CornerRadius="8"
+                                CornerRadius="{x:Bind BubbleCorner}"
                                 Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
                                 BorderThickness="1"
                                 BorderBrush="{ThemeResource SystemFillColorAttentionBackgroundBrush}"
@@ -133,7 +141,7 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <!-- Giriş kutusu: Enter gönderir, Shift+Enter satır atlar -->
+        <!-- Giriş kutusu: Enter yeni satır, Ctrl+Enter gönderir -->
         <Grid Grid.Row="2" ColumnSpacing="8" RowSpacing="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -148,7 +156,6 @@
                      Grid.Row="0"
                      Grid.Column="0"
                      AutomationProperties.AutomationId="chat_input"
-                     PlaceholderText="Bir görev yaz… (ör. hedef alan adı için OSINT toplama)"
                      AcceptsReturn="True"
                      TextWrapping="Wrap"
                      MinHeight="60"
@@ -160,7 +167,6 @@
             <Button x:Name="SendButton"
                     Grid.Row="0"
                     Grid.Column="1"
-                    Content="Gönder"
                     MinWidth="96"
                     VerticalAlignment="Bottom"
                     IsEnabled="False"
@@ -168,12 +174,12 @@
                     Style="{StaticResource AccentButtonStyle}"
                     Click="SendButton_Click" />
 
-            <TextBlock Grid.Row="1"
+            <TextBlock x:Name="HintText"
+                       Grid.Row="1"
                        Grid.Column="0"
                        Grid.ColumnSpan="2"
                        FontSize="11"
-                       Opacity="0.5"
-                       Text="Enter gönderir · Shift+Enter yeni satır" />
+                       Opacity="0.5" />
         </Grid>
     </Grid>
 </Page>
