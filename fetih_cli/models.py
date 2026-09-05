@@ -161,32 +161,6 @@ def _xai_curated_models() -> list[str]:
 
 
 _PROVIDER_MODELS: dict[str, list[str]] = {
-    "nous": [
-        "anthropic/claude-opus-4.7",
-        "anthropic/claude-opus-4.6",
-        "anthropic/claude-sonnet-4.6",
-        "moonshotai/kimi-k2.6",
-        "qwen/qwen3.6-plus",
-        "anthropic/claude-haiku-4.5",
-        "openai/gpt-5.5",
-        "openai/gpt-5.5-pro",
-        "openai/gpt-5.4-mini",
-        "openai/gpt-5.4-nano",
-        "openai/gpt-5.3-codex",
-        "xiaomi/mimo-v2.5-pro",
-        "tencent/hy3-preview",
-        "google/gemini-3-pro-preview",
-        "google/gemini-3-flash-preview",
-        "google/gemini-3.1-pro-preview",
-        "google/gemini-3.1-flash-lite-preview",
-        "qwen/qwen3.6-35b-a3b",
-        "stepfun/step-3.5-flash",
-        "minimax/minimax-m2.7",
-        "z-ai/glm-5.1",
-        "x-ai/grok-4.3",
-        "nvidia/nemotron-3-super-120b-a12b",
-        "deepseek/deepseek-v4-pro",
-    ],
     # Native OpenAI Chat Completions (api.openai.com). Used by /model counts and
     # provider_model_ids fallback when /v1/models is unavailable.
     "openai": [
@@ -922,7 +896,6 @@ class ProviderEntry(NamedTuple):
     tui_desc: str   # detailed description for `fetih model` TUI
 
 CANONICAL_PROVIDERS: list[ProviderEntry] = [
-    ProviderEntry("nous",           "FETIH Portal",              "FETIH Portal (FETIH subscription)"),
     ProviderEntry("openrouter",     "OpenRouter",               "OpenRouter (100+ models, pay-per-use)"),
     ProviderEntry("novita",         "NovitaAI",                 "NovitaAI (AI-native cloud: Model API, Agent Sandbox, GPU Cloud)"),
     ProviderEntry("lmstudio",       "LM Studio",                "LM Studio (local desktop app with built-in model server)"),
@@ -1061,7 +1034,10 @@ _PROVIDER_ALIASES = {
     "lmstudio": "lmstudio",
     "lm-studio": "lmstudio",
     "lm_studio": "lmstudio",
-    "ollama": "custom",  # bare "ollama" = local; use "ollama-cloud" for cloud
+    # bare "ollama" = the local daemon (own registry entry, loopback
+    # endpoint). Never alias it to "custom": that resolves to OpenRouter.
+    "ollama-local": "ollama",
+    "ollama_local": "ollama",
     "ollama_cloud": "ollama-cloud",
 }
 
@@ -1666,7 +1642,6 @@ def parse_model_input(raw: str, current_provider: str) -> tuple[str, str]:
     Supports ``provider:model`` syntax to switch providers at runtime::
 
         openrouter:anthropic/claude-sonnet-4.5  →  ("openrouter", "anthropic/claude-sonnet-4.5")
-        nous:fetih-3                           →  ("nous", "fetih-3")
         anthropic/claude-sonnet-4.5             →  (current_provider, "anthropic/claude-sonnet-4.5")
         gpt-5.4                                 →  (current_provider, "gpt-5.4")
 
@@ -1724,7 +1699,7 @@ def curated_models_for_provider(
     if normalized == "openrouter":
         return fetch_openrouter_models(force_refresh=force_refresh)
 
-    # Try live API first (Codex, Nous, etc. all support /models)
+    # Try live API first (Codex etc. all support /models)
     live = provider_model_ids(normalized)
     if live:
         return [(m, "") for m in live]
@@ -1749,7 +1724,7 @@ def _model_in_provider_catalog(name_lower: str, providers: set[str]) -> bool:
 
 
 _AGGREGATOR_PROVIDERS = frozenset(
-    {"nous", "openrouter", "ai-gateway", "copilot", "kilocode"}
+    {"openrouter", "ai-gateway", "copilot", "kilocode"}
 )
 
 
@@ -1823,7 +1798,7 @@ def detect_static_provider_for_model(
         return alias_match
 
     # --- Step 0: bare provider name typed as model ---
-    # If someone types `/model nous` or `/model anthropic`, treat it as a
+    # If someone types `/model groq` or `/model anthropic`, treat it as a
     # provider switch and pick the first model from that provider's catalog.
     # Skip "custom" and "openrouter" — custom has no model catalog, and
     # openrouter requires an explicit model name to be useful.
@@ -2093,8 +2068,6 @@ def _resolve_copilot_catalog_api_key() -> str:
 # DELIBERATELY EXCLUDED:
 #   - "openrouter": curated list is already a hand-picked agentic subset of
 #     OpenRouter's 400+ catalog. Blindly merging would dump everything.
-#   - "nous": curated list and Portal /models endpoint are the source of
-#     truth for the subscription tier.
 # Also excluded: providers that already have dedicated live-endpoint
 # branches below (copilot, anthropic, ai-gateway, ollama-cloud, custom,
 # stepfun, openai-codex) — those paths handle freshness themselves.
@@ -2157,7 +2130,7 @@ def _merge_with_models_dev(provider: str, curated: list[str]) -> list[str]:
 def provider_model_ids(provider: Optional[str], *, force_refresh: bool = False) -> list[str]:
     """Return the best known model catalog for a provider.
 
-    Tries live API endpoints for providers that support them (Codex, Nous),
+    Tries live API endpoints for providers that support them (Codex, etc.),
     falling back to static lists. For providers in ``_MODELS_DEV_PREFERRED``
     (opencode-go/zen, xiaomi, deepseek, smaller inference providers, etc.),
     models.dev entries are merged on top of curated so new models released

@@ -53,8 +53,13 @@ class CustomProfile(ProviderProfile):
 
 custom = CustomProfile(
     name="custom",
+    # "ollama" is deliberately NOT an alias here. The local daemon has a
+    # fixed loopback endpoint and its own profile (model-providers/ollama);
+    # folding it in here gave it this profile's empty base_url, which the
+    # runtime resolver then filled in with OpenRouter's — silently routing a
+    # deliberately-local setup off the machine. Servers below keep the alias
+    # because they have no conventional port to assume.
     aliases=(
-        "ollama",
         "local",
         "vllm",
         "llamacpp",

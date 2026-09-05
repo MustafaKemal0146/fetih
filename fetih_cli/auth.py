@@ -158,6 +158,14 @@ GEMINI_OAUTH_ACCESS_TOKEN_REFRESH_SKEW_SECONDS = 60  # refresh 60s before expiry
 # any remote service.
 LMSTUDIO_NOAUTH_PLACEHOLDER = "dummy-lm-api-key"
 
+# Local Ollama daemon. Its OpenAI-compatible surface lives under /v1 on the
+# same port as the native API.
+DEFAULT_OLLAMA_LOCAL_BASE_URL = "http://localhost:11434/v1"
+
+# Ollama serves unauthenticated on loopback; same rationale as the LM Studio
+# placeholder above. Never leaves the machine.
+OLLAMA_NOAUTH_PLACEHOLDER = "dummy-ollama-api-key"
+
 
 # =============================================================================
 # Provider Registry
@@ -181,15 +189,6 @@ class ProviderConfig:
 
 
 PROVIDER_REGISTRY: Dict[str, ProviderConfig] = {
-    "nous": ProviderConfig(
-        id="nous",
-        name="FETIH Portal",
-        auth_type="oauth_device_code",
-        portal_base_url=DEFAULT_NOUS_PORTAL_URL,
-        inference_base_url=DEFAULT_NOUS_INFERENCE_URL,
-        client_id=DEFAULT_NOUS_CLIENT_ID,
-        scope=DEFAULT_NOUS_SCOPE,
-    ),
     "openai-codex": ProviderConfig(
         id="openai-codex",
         name="OpenAI Codex",
@@ -437,6 +436,26 @@ PROVIDER_REGISTRY: Dict[str, ProviderConfig] = {
         inference_base_url=DEFAULT_OLLAMA_CLOUD_BASE_URL,
         api_key_env_vars=("OLLAMA_API_KEY",),
         base_url_env_var="OLLAMA_BASE_URL",
+    ),
+    # Local Ollama daemon — a FIRST-CLASS provider, not an alias.
+    #
+    # ``ollama`` used to be aliased to the generic ``custom`` provider below.
+    # ``custom`` defaults to the OpenRouter endpoint when no base URL is
+    # configured, so choosing "Ollama (local)" and typing nothing else sent
+    # the user's prompts to OpenRouter — the exact opposite of what picking a
+    # local model promises. Pinning the loopback endpoint here makes the
+    # local choice actually local.
+    #
+    # Base URL override is OLLAMA_LOCAL_BASE_URL, not OLLAMA_BASE_URL:
+    # the latter already belongs to ollama-cloud above, and one variable
+    # cannot mean both "my laptop" and "ollama.com".
+    "ollama": ProviderConfig(
+        id="ollama",
+        name="Ollama (local)",
+        auth_type="api_key",
+        inference_base_url=DEFAULT_OLLAMA_LOCAL_BASE_URL,
+        api_key_env_vars=("OLLAMA_LOCAL_API_KEY",),
+        base_url_env_var="OLLAMA_LOCAL_BASE_URL",
     ),
     "bedrock": ProviderConfig(
         id="bedrock",
@@ -1430,8 +1449,12 @@ def resolve_provider(
         "go": "opencode-go", "opencode-go-sub": "opencode-go",
         "kilo": "kilocode", "kilo-code": "kilocode", "kilo-gateway": "kilocode",
         "lmstudio": "lmstudio", "lm-studio": "lmstudio", "lm_studio": "lmstudio",
-        # Local server aliases — route through the generic custom provider
-        "ollama": "custom", "ollama_cloud": "ollama-cloud",
+        # Local Ollama has its own registry entry with a loopback endpoint;
+        # do NOT fold it into "custom" (that defaults to OpenRouter).
+        "ollama-local": "ollama", "ollama_local": "ollama",
+        "ollama_cloud": "ollama-cloud",
+        # Servers with no conventional port still route through the generic
+        # custom provider — the user must supply model.base_url themselves.
         "vllm": "custom", "llamacpp": "custom",
         "llama.cpp": "custom", "llama-cpp": "custom",
     }
@@ -1488,11 +1511,11 @@ def resolve_provider(
             continue
         # GitHub tokens are commonly present for repo/tool access but should not
         # hijack inference auto-selection unless the user explicitly chooses
-        # Copilot/GitHub Models as the provider. LM Studio is a local server
-        # whose availability isn't implied by LM_API_KEY presence (it may be
-        # offline, and the no-auth setup uses a placeholder value), so it
-        # also requires explicit selection.
-        if pid in {"copilot", "lmstudio"}:
+        # Copilot/GitHub Models as the provider. LM Studio and Ollama are
+        # local servers whose availability isn't implied by their env var
+        # being present (they may be offline, and the no-auth setup uses a
+        # placeholder value), so they also require explicit selection.
+        if pid in {"copilot", "lmstudio", "ollama"}:
             continue
         for env_var in pconfig.api_key_env_vars:
             if has_usable_secret(os.getenv(env_var, "")):
@@ -5556,11 +5579,15 @@ def resolve_api_key_provider_credentials(provider_id: str) -> Dict[str, Any]:
     key_source = ""
     api_key, key_source = _resolve_api_key_provider_secret(provider_id, pconfig)
 
-    # No-auth LM Studio: substitute a placeholder so runtime / auxiliary_client
-    # see the local server as configured. doctor still reports unconfigured
-    # because get_api_key_provider_status uses the raw secret resolver.
+    # No-auth local servers: substitute a placeholder so runtime /
+    # auxiliary_client see the local server as configured. doctor still
+    # reports unconfigured because get_api_key_provider_status uses the raw
+    # secret resolver. These values never leave the machine.
     if not api_key and provider_id == "lmstudio":
         api_key = LMSTUDIO_NOAUTH_PLACEHOLDER
+        key_source = key_source or "default"
+    if not api_key and provider_id == "ollama":
+        api_key = OLLAMA_NOAUTH_PLACEHOLDER
         key_source = key_source or "default"
 
     env_url = ""
@@ -6847,324 +6874,6 @@ def _login_minimax_oauth(args, pconfig: ProviderConfig) -> None:
         )
     except AuthError as exc:
         print(format_auth_error(exc))
-        raise SystemExit(1)
-
-
-def _nous_device_code_login(
-    *,
-    portal_base_url: Optional[str] = None,
-    inference_base_url: Optional[str] = None,
-    client_id: Optional[str] = None,
-    scope: Optional[str] = None,
-    open_browser: bool = True,
-    timeout_seconds: float = 15.0,
-    insecure: bool = False,
-    ca_bundle: Optional[str] = None,
-    min_key_ttl_seconds: int = 5 * 60,
-) -> Dict[str, Any]:
-    """Run the Nous device-code flow and return full OAuth state without persisting."""
-    pconfig = PROVIDER_REGISTRY["nous"]
-    portal_base_url = (
-        portal_base_url
-        or os.getenv("FETIH_PORTAL_BASE_URL")
-        or os.getenv("NOUS_PORTAL_BASE_URL")
-        or pconfig.portal_base_url
-    ).rstrip("/")
-    requested_inference_url = (
-        inference_base_url
-        or os.getenv("NOUS_INFERENCE_BASE_URL")
-        or pconfig.inference_base_url
-    ).rstrip("/")
-    client_id = client_id or pconfig.client_id
-    scope, explicit_scope = _nous_device_scope_with_env_override(
-        scope,
-        default_scope=pconfig.scope,
-    )
-    timeout = httpx.Timeout(timeout_seconds)
-    verify: bool | str = False if insecure else (ca_bundle if ca_bundle else True)
-
-    if _is_remote_session():
-        open_browser = False
-
-    print(f"Starting FETIH login via {pconfig.name}...")
-    print(f"Portal: {portal_base_url}")
-    if insecure:
-        print("TLS verification: disabled (--insecure)")
-    elif ca_bundle:
-        print(f"TLS verification: custom CA bundle ({ca_bundle})")
-
-    with httpx.Client(timeout=timeout, headers={"Accept": "application/json"}, verify=verify) as client:
-        device_data, scope = _request_nous_device_code_with_scope_fallback(
-            client=client,
-            portal_base_url=portal_base_url,
-            client_id=client_id,
-            scope=scope,
-            allow_legacy_fallback=not explicit_scope,
-        )
-
-        verification_url = str(device_data["verification_uri_complete"])
-        user_code = str(device_data["user_code"])
-        expires_in = int(device_data["expires_in"])
-        interval = int(device_data["interval"])
-
-        print()
-        print("To continue:")
-        print(f"  1. Open: {verification_url}")
-        print(f"  2. If prompted, enter code: {user_code}")
-
-        if open_browser:
-            opened = webbrowser.open(verification_url)
-            if opened:
-                print("  (Opened browser for verification)")
-            else:
-                print("  Could not open browser automatically — use the URL above.")
-
-        effective_interval = max(1, min(interval, DEVICE_AUTH_POLL_INTERVAL_CAP_SECONDS))
-        print(f"Waiting for approval (polling every {effective_interval}s)...")
-
-        token_data = _poll_for_token(
-            client=client,
-            portal_base_url=portal_base_url,
-            client_id=client_id,
-            device_code=str(device_data["device_code"]),
-            expires_in=expires_in,
-            poll_interval=interval,
-        )
-
-    now = datetime.now(timezone.utc)
-    token_expires_in = _coerce_ttl_seconds(token_data.get("expires_in", 0))
-    expires_at = now.timestamp() + token_expires_in
-    resolved_inference_url = (
-        _optional_base_url(token_data.get("inference_base_url"))
-        or requested_inference_url
-    )
-    if resolved_inference_url != requested_inference_url:
-        print(f"Using portal-provided inference URL: {resolved_inference_url}")
-
-    auth_state = {
-        "portal_base_url": portal_base_url,
-        "inference_base_url": resolved_inference_url,
-        "client_id": client_id,
-        "scope": token_data.get("scope") or scope,
-        "token_type": token_data.get("token_type", "Bearer"),
-        "access_token": token_data["access_token"],
-        "refresh_token": token_data.get("refresh_token"),
-        "obtained_at": now.isoformat(),
-        "expires_at": datetime.fromtimestamp(expires_at, tz=timezone.utc).isoformat(),
-        "expires_in": token_expires_in,
-        "tls": {
-            "insecure": verify is False,
-            "ca_bundle": verify if isinstance(verify, str) else None,
-        },
-        "agent_key": None,
-        "agent_key_id": None,
-        "agent_key_expires_at": None,
-        "agent_key_expires_in": None,
-        "agent_key_reused": None,
-        "agent_key_obtained_at": None,
-    }
-    try:
-        return refresh_nous_oauth_from_state(
-            auth_state,
-            min_key_ttl_seconds=min_key_ttl_seconds,
-            timeout_seconds=timeout_seconds,
-            force_refresh=False,
-            inference_auth_mode=NOUS_INFERENCE_AUTH_MODE_FRESH,
-        )
-    except AuthError as exc:
-        if exc.code == "subscription_required":
-            portal_url = auth_state.get(
-                "portal_base_url", DEFAULT_NOUS_PORTAL_URL
-            ).rstrip("/")
-            print()
-            print("Your FETIH Portal account does not have an active subscription.")
-            print(f"  Subscribe here: {portal_url}/billing")
-            print()
-            print("After subscribing, run `fetih model` again to finish setup.")
-            raise SystemExit(1)
-        raise
-
-
-def _login_nous(args, pconfig: ProviderConfig) -> None:
-    """FETIH Portal device authorization flow."""
-    timeout_seconds = getattr(args, "timeout", None) or 15.0
-    insecure = bool(getattr(args, "insecure", False))
-    ca_bundle = (
-        getattr(args, "ca_bundle", None)
-        or os.getenv("FETIH_CA_BUNDLE")
-        or os.getenv("SSL_CERT_FILE")
-    )
-
-    try:
-        auth_state = None
-
-        # Codex-style auto-import: before launching a fresh device-code
-        # flow, check the shared store for an existing Nous credential
-        # from any other profile. If present, offer to rehydrate it.
-        shared = _read_shared_nous_state()
-        if shared:
-            try:
-                shared_path = _nous_shared_store_path()
-            except RuntimeError:
-                shared_path = None
-            print()
-            if shared_path:
-                print(f"Found existing Nous OAuth credentials at {shared_path}")
-            else:
-                print("Found existing shared Nous OAuth credentials")
-            try:
-                do_import = input("Import these credentials? [Y/n]: ").strip().lower()
-            except (EOFError, KeyboardInterrupt):
-                do_import = "y"
-            if do_import in {"", "y", "yes"}:
-                print("Rehydrating Nous session from shared credentials...")
-                auth_state = _try_import_shared_nous_state(
-                    timeout_seconds=timeout_seconds,
-                    min_key_ttl_seconds=5 * 60,
-                )
-                if auth_state is None:
-                    print("Could not refresh shared credentials — falling back to device-code login.")
-
-        if auth_state is None:
-            auth_state = _nous_device_code_login(
-                portal_base_url=getattr(args, "portal_url", None),
-                inference_base_url=getattr(args, "inference_url", None),
-                client_id=getattr(args, "client_id", None) or pconfig.client_id,
-                scope=getattr(args, "scope", None),
-                open_browser=not getattr(args, "no_browser", False),
-                timeout_seconds=timeout_seconds,
-                insecure=insecure,
-                ca_bundle=ca_bundle,
-                min_key_ttl_seconds=5 * 60,
-            )
-
-        inference_base_url = auth_state["inference_base_url"]
-
-        # Snapshot the prior active_provider BEFORE _save_provider_state
-        # overwrites it to "nous".  If the user picks "Skip (keep current)"
-        # during model selection below, we restore this so the user's previous
-        # provider (e.g. openrouter) is preserved.
-        with _auth_store_lock():
-            _prior_store = _load_auth_store()
-            prior_active_provider = _prior_store.get("active_provider")
-
-        with _auth_store_lock():
-            auth_store = _load_auth_store()
-            _save_provider_state(auth_store, "nous", auth_state)
-            saved_to = _save_auth_store(auth_store)
-
-        # Mirror to the shared store so other profiles can one-tap import
-        # these credentials. Best-effort: any I/O failure is logged and
-        # swallowed inside the helper.
-        _write_shared_nous_state(auth_state)
-        _sync_nous_pool_from_auth_store()
-
-        print()
-        print("Login successful!")
-        print(f"  Auth state: {saved_to}")
-
-        # Resolve model BEFORE writing provider to config.yaml so we never
-        # leave the config in a half-updated state (provider=nous but model
-        # still set to the previous provider's model, e.g. opus from
-        # OpenRouter).  The auth.json active_provider was already set above.
-        selected_model = None
-        try:
-            runtime_key = auth_state.get("agent_key") or auth_state.get("access_token")
-            if not isinstance(runtime_key, str) or not runtime_key:
-                raise AuthError(
-                    "No runtime API key available to fetch models",
-                    provider="nous",
-                    code="invalid_token",
-                )
-
-            from fetih_cli.models import (
-                get_curated_nous_model_ids, get_pricing_for_provider,
-                check_nous_free_tier, partition_nous_models_by_tier,
-                union_with_portal_free_recommendations,
-                union_with_portal_paid_recommendations,
-            )
-            model_ids = get_curated_nous_model_ids()
-
-            print()
-            unavailable_models: list = []
-            if model_ids:
-                pricing = get_pricing_for_provider("nous")
-                free_tier = check_nous_free_tier()
-                _portal_for_recs = auth_state.get("portal_base_url", "")
-                if free_tier:
-                    # The Portal's freeRecommendedModels endpoint is the
-                    # source of truth for what's free *right now*. Augment
-                    # the curated list with anything new the Portal flags
-                    # as free so users on older FETIH builds still see
-                    # newly-launched free models without a CLI release.
-                    model_ids, pricing = union_with_portal_free_recommendations(
-                        model_ids, pricing, _portal_for_recs,
-                    )
-                    model_ids, unavailable_models = partition_nous_models_by_tier(
-                        model_ids, pricing, free_tier=True,
-                    )
-                else:
-                    # Paid-tier mirror: pull paidRecommendedModels so newly
-                    # launched paid models surface in the picker even if
-                    # the in-repo curated list and docs-hosted manifest
-                    # haven't caught up yet.
-                    model_ids, pricing = union_with_portal_paid_recommendations(
-                        model_ids, pricing, _portal_for_recs,
-                    )
-            _portal = auth_state.get("portal_base_url", "")
-            if model_ids:
-                print(f"Showing {len(model_ids)} curated models — use \"Enter custom model name\" for others.")
-                selected_model = _prompt_model_selection(
-                    model_ids, pricing=pricing,
-                    unavailable_models=unavailable_models,
-                    portal_url=_portal,
-                )
-            elif unavailable_models:
-                _url = (_portal or DEFAULT_NOUS_PORTAL_URL).rstrip("/")
-                print("No free models currently available.")
-                print(f"Upgrade at {_url} to access paid models.")
-            else:
-                print("No curated models available for FETIH Portal.")
-        except Exception as exc:
-            message = format_auth_error(exc) if isinstance(exc, AuthError) else str(exc)
-            print()
-            print(f"Login succeeded, but could not fetch available models. Reason: {message}")
-
-        # Write provider + model atomically so config is never mismatched.
-        # If no model was selected (user picked "Skip (keep current)",
-        # model list fetch failed, or no curated models were available),
-        # preserve the user's previous provider — don't silently switch
-        # them to Nous with a mismatched model.  The Nous OAuth tokens
-        # stay saved for future use.
-        if not selected_model:
-            # Restore the prior active_provider that _save_provider_state
-            # overwrote to "nous".  config.yaml model.provider is left
-            # untouched, so the user's previous provider is fully preserved.
-            with _auth_store_lock():
-                auth_store = _load_auth_store()
-                if prior_active_provider:
-                    auth_store["active_provider"] = prior_active_provider
-                else:
-                    auth_store.pop("active_provider", None)
-                _save_auth_store(auth_store)
-            print()
-            print("No provider change. Nous credentials saved for future use.")
-            print("  Run `fetih model` again to switch to FETIH Portal.")
-            return
-
-        config_path = _update_config_for_provider(
-            "nous", inference_base_url, default_model=selected_model,
-        )
-        if selected_model:
-            _save_model_choice(selected_model)
-            print(f"Default model set to: {selected_model}")
-        print(f"  Config updated: {config_path} (model.provider=nous)")
-
-    except KeyboardInterrupt:
-        print("\nLogin cancelled.")
-        raise SystemExit(130)
-    except Exception as exc:
-        print(f"Login failed: {exc}")
         raise SystemExit(1)
 
 

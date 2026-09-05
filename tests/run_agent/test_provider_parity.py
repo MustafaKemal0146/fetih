@@ -347,20 +347,7 @@ class TestBuildApiKwargsAIGateway:
         assert "web_search" in tool_names
 
 
-class TestBuildApiKwargsNousPortal:
-    def test_includes_nous_product_tags(self, monkeypatch):
-        from agent.portal_tags import nous_portal_tags
-        agent = _make_agent(
-            monkeypatch,
-            "nous",
-            base_url="https://inference-api.github.com/MustafaKemal0146/fetih/v1",
-            model="gpt-5",
-        )
-        messages = [{"role": "user", "content": "hi"}]
-        kwargs = agent._build_api_kwargs(messages)
-        extra = kwargs.get("extra_body", {})
-        assert extra.get("tags") == nous_portal_tags()
-
+class TestBuildApiKwargsOpenAICompatiblePortal:
     def test_uses_chat_completions_format(self, monkeypatch):
         agent = _make_agent(
             monkeypatch,

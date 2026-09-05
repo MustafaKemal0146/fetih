@@ -48,14 +48,3 @@ def test_auxiliary_client_nous_extra_body_uses_helper():
     from agent.portal_tags import nous_portal_tags
 
     assert NOUS_EXTRA_BODY == {"tags": nous_portal_tags()}
-
-
-def test_nous_provider_profile_uses_helper():
-    """The Nous provider profile (main agent loop) must use the canonical tags."""
-    from agent.portal_tags import nous_portal_tags
-    from providers import get_provider_profile
-
-    profile = get_provider_profile("nous")
-    assert profile is not None
-    body = profile.build_extra_body()
-    assert body["tags"] == nous_portal_tags()

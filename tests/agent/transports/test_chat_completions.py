@@ -146,14 +146,6 @@ class TestChatCompletionsBuildKwargs:
             {"id": "pareto-router", "min_coding_score": 0.8}
         ]
 
-    def test_nous_tags(self, transport):
-        from agent.portal_tags import nous_portal_tags
-        from providers import get_provider_profile
-        profile = get_provider_profile("nous")
-        msgs = [{"role": "user", "content": "Hi"}]
-        kw = transport.build_kwargs(model="gpt-4o", messages=msgs, provider_profile=profile)
-        assert kw["extra_body"]["tags"] == nous_portal_tags()
-
     def test_reasoning_default(self, transport):
         msgs = [{"role": "user", "content": "Hi"}]
         kw = transport.build_kwargs(
@@ -161,19 +153,6 @@ class TestChatCompletionsBuildKwargs:
             supports_reasoning=True,
         )
         assert kw["extra_body"]["reasoning"] == {"enabled": True, "effort": "medium"}
-
-    def test_nous_omits_disabled_reasoning(self, transport):
-        from providers import get_provider_profile
-        profile = get_provider_profile("nous")
-        msgs = [{"role": "user", "content": "Hi"}]
-        kw = transport.build_kwargs(
-            model="gpt-4o", messages=msgs,
-            provider_profile=profile,
-            supports_reasoning=True,
-            reasoning_config={"enabled": False},
-        )
-        # Nous rejects enabled=false; reasoning omitted entirely
-        assert "reasoning" not in kw.get("extra_body", {})
 
     def test_ollama_num_ctx(self, transport):
         from providers import get_provider_profile

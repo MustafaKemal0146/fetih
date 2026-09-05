@@ -1161,7 +1161,7 @@ class TestProviderRegistration:
     def test_oauth_capable_set_preserves_existing(self):
         from fetih_cli.auth_commands import _OAUTH_CAPABLE_PROVIDERS
 
-        for required in ("anthropic", "nous", "openai-codex", "qwen-oauth", "google-gemini-cli"):
+        for required in ("anthropic", "openai-codex", "qwen-oauth", "google-gemini-cli"):
             assert required in _OAUTH_CAPABLE_PROVIDERS
 
     def test_config_env_vars_registered(self):

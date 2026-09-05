@@ -50,11 +50,6 @@ FETIH_OVERLAYS: Dict[str, FETIHOverlay] = {
         extra_env_vars=("OPENAI_API_KEY",),
         base_url_env_var="OPENROUTER_BASE_URL",
     ),
-    "nous": FETIHOverlay(
-        transport="openai_chat",
-        auth_type="oauth_device_code",
-        base_url_override="https://inference-api.github.com/MustafaKemal0146/fetih/v1",
-    ),
     "openai-codex": FETIHOverlay(
         transport="codex_responses",
         auth_type="oauth_external",
@@ -356,7 +351,12 @@ ALIASES: Dict[str, str] = {
     "lmstudio": "lmstudio",
     "lm-studio": "lmstudio",
     "lm_studio": "lmstudio",
-    "ollama": "custom",  # bare "ollama" = local; use "ollama-cloud" for cloud
+    # bare "ollama" = the local daemon, a first-class provider with a
+    # loopback endpoint (see auth.PROVIDER_REGISTRY). It must NOT collapse
+    # into "custom", whose default endpoint is OpenRouter — that quietly
+    # turned "run my model locally" into "send my prompts to a third party".
+    "ollama-local": "ollama",
+    "ollama_local": "ollama",
     "vllm": "local",
     "llamacpp": "local",
     "llama.cpp": "local",
@@ -369,7 +369,6 @@ ALIASES: Dict[str, str] = {
 # not in the catalog.
 
 _LABEL_OVERRIDES: Dict[str, str] = {
-    "nous": "FETIH Portal",
     "openai-codex": "OpenAI Codex",
     "copilot-acp": "GitHub Copilot ACP",
     "stepfun": "StepFun Step Plan",

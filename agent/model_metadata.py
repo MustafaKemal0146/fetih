@@ -377,13 +377,22 @@ _URL_TO_PROVIDER: Dict[str, str] = {
     "ollama.com": "ollama-cloud",
 }
 
+# A loopback hostname names the MACHINE, not the provider: Ollama, LM Studio,
+# vLLM and llama.cpp all answer on it. Mapping "localhost" to whichever local
+# profile happens to declare it would make every local endpoint look like that
+# one provider — and then resolve context lengths from that provider's public
+# catalog instead of asking the server in front of us.
+_NON_IDENTIFYING_HOSTS = frozenset(
+    {"localhost", "127.0.0.1", "0.0.0.0", "::1", "host.docker.internal"}
+)
+
 # Auto-extend with hostnames derived from provider profiles.
 # Any provider with a base_url not already in the map gets added automatically.
 try:
     from providers import list_providers as _list_providers
     for _pp in _list_providers():
         _host = _pp.get_hostname()
-        if _host and _host not in _URL_TO_PROVIDER:
+        if _host and _host not in _URL_TO_PROVIDER and _host not in _NON_IDENTIFYING_HOSTS:
             _URL_TO_PROVIDER[_host] = _pp.name
 except Exception:
     pass

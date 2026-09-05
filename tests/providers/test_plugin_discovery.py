@@ -46,19 +46,31 @@ def test_bundled_plugins_discovered():
         assert (child / "plugin.yaml").exists(), f"{child.name} missing plugin.yaml"
 
 
-def test_all_34_profiles_register():
-    """After discovery, the registry must contain exactly 34 distinct profiles."""
+def test_every_bundled_plugin_registers_a_profile():
+    """Discovery must yield exactly one profile per bundled plugin directory.
+
+    Pinning a literal count made this test a chore that had to be edited on
+    every provider addition, and it said nothing about *which* profile was
+    missing. Comparing against the directory listing catches the real failure
+    — a plugin that throws at import and silently vanishes from the registry.
+    """
     _clear_provider_caches()
     from providers import list_providers
 
-    profiles = list_providers()
-    names = sorted(p.name for p in profiles)
-    assert len(names) == 34, f"Expected 34 profiles, got {len(names)}: {names}"
+    plugins_dir = REPO_ROOT / "plugins" / "model-providers"
+    expected = {c.name for c in plugins_dir.iterdir()
+                if c.is_dir() and not c.name.startswith(("_", "."))}
+
+    names = sorted(p.name for p in list_providers())
+    missing = sorted(expected - set(names))
+    assert not missing, f"bundled plugins that failed to register: {missing}"
+    assert len(names) >= len(expected)
 
     # Spot-check representative providers from different categories
     for required in (
         "openrouter", "anthropic", "custom", "bedrock", "openai-codex",
         "minimax-oauth", "gmi", "xiaomi", "alibaba-coding-plan",
+        "groq", "ollama", "ollama-cloud",
     ):
         assert required in names, f"Missing profile: {required}"
 

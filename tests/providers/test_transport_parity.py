@@ -161,44 +161,6 @@ class TestOpenRouterParity:
         assert kw["extra_body"]["reasoning"] == {"enabled": True, "effort": "medium"}
 
 
-class TestNousParity:
-    """Nous: product tags, reasoning, omit when disabled."""
-
-    def test_tags(self, transport):
-        from agent.portal_tags import nous_portal_tags
-        kw = transport.build_kwargs(
-            model="fetih-3-llama-3.1-405b",
-            messages=_simple_messages(),
-            tools=None,
-            provider_profile=get_provider_profile("nous"),
-        )
-        assert kw["extra_body"]["tags"] == nous_portal_tags()
-
-    def test_reasoning_omitted_when_disabled(self, transport):
-        """Nous special case: reasoning omitted entirely when disabled."""
-        kw = transport.build_kwargs(
-            model="fetih-3-llama-3.1-405b",
-            messages=_simple_messages(),
-            tools=None,
-            provider_profile=get_provider_profile("nous"),
-            supports_reasoning=True,
-            reasoning_config={"enabled": False},
-        )
-        assert "reasoning" not in kw.get("extra_body", {})
-
-    def test_reasoning_enabled(self, transport):
-        rc = {"enabled": True, "effort": "high"}
-        kw = transport.build_kwargs(
-            model="fetih-3-llama-3.1-405b",
-            messages=_simple_messages(),
-            tools=None,
-            provider_profile=get_provider_profile("nous"),
-            supports_reasoning=True,
-            reasoning_config=rc,
-        )
-        assert kw["extra_body"]["reasoning"] == rc
-
-
 class TestQwenParity:
     """Qwen: max_tokens=65536, vl_high_resolution, metadata top-level."""
 

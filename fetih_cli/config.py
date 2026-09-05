@@ -913,7 +913,7 @@ DEFAULT_CONFIG = {
     # openrouter.min_coding_score do NOT propagate to aux calls by design.
     "auxiliary": {
         "vision": {
-            "provider": "auto",    # auto | openrouter | nous | codex | custom
+            "provider": "auto",    # auto | openrouter | codex | custom
             "model": "",           # e.g. "google/gemini-2.5-flash", "gpt-4o"
             "base_url": "",        # direct OpenAI-compatible endpoint (takes precedence over provider)
             "api_key": "",         # API key for base_url (falls back to OPENAI_API_KEY)
@@ -1225,7 +1225,7 @@ DEFAULT_CONFIG = {
     # Subagent delegation — override the provider:model used by delegate_task
     # so child agents can run on a different (cheaper/faster) provider and model.
     # Uses the same runtime provider resolution as CLI/gateway startup, so all
-    # configured providers (OpenRouter, Nous, Z.ai, Kimi, etc.) are supported.
+    # configured providers (OpenRouter, Groq, Z.ai, Kimi, etc.) are supported.
     "delegation": {
         "model": "",       # e.g. "google/gemini-3-flash-preview" (empty = inherit parent model)
         "provider": "",    # e.g. "openrouter" (empty = inherit parent provider + credentials)
@@ -1782,14 +1782,6 @@ REQUIRED_ENV_VARS = {}
 # Optional environment variables that enhance functionality
 OPTIONAL_ENV_VARS = {
     # ── Provider (handled in provider selection, not shown in checklists) ──
-    "NOUS_BASE_URL": {
-        "description": "FETIH Portal base URL override",
-        "prompt": "FETIH Portal base URL (leave empty for default)",
-        "url": None,
-        "password": False,
-        "category": "provider",
-        "advanced": True,
-    },
     "OPENROUTER_API_KEY": {
         "description": "OpenRouter API key (for vision, web scraping helpers, and MoA)",
         "prompt": "OpenRouter API key",
@@ -2212,7 +2204,7 @@ OPTIONAL_ENV_VARS = {
         "advanced": True,
     },
     "FIRECRAWL_GATEWAY_URL": {
-        "description": "Exact Firecrawl tool-gateway origin override for Nous Subscribers only (optional)",
+        "description": "Exact Firecrawl tool-gateway origin override for managed tool-gateway users only (optional)",
         "prompt": "Firecrawl gateway URL (leave empty to derive from domain)",
         "url": None,
         "password": False,
@@ -2220,7 +2212,7 @@ OPTIONAL_ENV_VARS = {
         "advanced": True,
     },
     "TOOL_GATEWAY_DOMAIN": {
-        "description": "Shared tool-gateway domain suffix for Nous Subscribers only, used to derive vendor hosts, e.g. github.com/MustafaKemal0146/fetih -> firecrawl-gateway.github.com/MustafaKemal0146/fetih",
+        "description": "Shared tool-gateway domain suffix for managed tool-gateway users only, used to derive vendor hosts, e.g. github.com/MustafaKemal0146/fetih -> firecrawl-gateway.github.com/MustafaKemal0146/fetih",
         "prompt": "Tool-gateway domain suffix",
         "url": None,
         "password": False,
@@ -2228,7 +2220,7 @@ OPTIONAL_ENV_VARS = {
         "advanced": True,
     },
     "TOOL_GATEWAY_SCHEME": {
-        "description": "Shared tool-gateway URL scheme for Nous Subscribers only, used to derive vendor hosts (`https` by default, set `http` for local gateway testing)",
+        "description": "Shared tool-gateway URL scheme for managed tool-gateway users only, used to derive vendor hosts (`https` by default, set `http` for local gateway testing)",
         "prompt": "Tool-gateway URL scheme",
         "url": None,
         "password": False,
@@ -2236,7 +2228,7 @@ OPTIONAL_ENV_VARS = {
         "advanced": True,
     },
     "TOOL_GATEWAY_USER_TOKEN": {
-        "description": "Explicit Nous Subscriber access token for tool-gateway requests (optional; otherwise read from the FETIH auth store)",
+        "description": "Explicit managed tool-gateway access token for tool-gateway requests (optional; otherwise read from the FETIH auth store)",
         "prompt": "Tool-gateway user token",
         "url": None,
         "password": True,
@@ -4459,7 +4451,6 @@ _FALLBACK_COMMENT = """
 # Supported providers:
 #   openrouter   (OPENROUTER_API_KEY)  — routes to any model
 #   openai-codex (OAuth — fetih auth) — OpenAI Codex
-#   nous         (OAuth — fetih auth) — FETIH Portal
 #   zai          (ZAI_API_KEY)         — Z.AI / GLM
 #   kimi-coding  (KIMI_API_KEY)        — Kimi / Moonshot
 #   kimi-coding-cn (KIMI_CN_API_KEY)   — Kimi / Moonshot (China)
@@ -4491,7 +4482,6 @@ _COMMENTED_SECTIONS = """
 # Supported providers:
 #   openrouter   (OPENROUTER_API_KEY)  — routes to any model
 #   openai-codex (OAuth — fetih auth) — OpenAI Codex
-#   nous         (OAuth — fetih auth) — FETIH Portal
 #   zai          (ZAI_API_KEY)         — Z.AI / GLM
 #   kimi-coding  (KIMI_API_KEY)        — Kimi / Moonshot
 #   kimi-coding-cn (KIMI_CN_API_KEY)   — Kimi / Moonshot (China)
