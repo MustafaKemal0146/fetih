@@ -5,114 +5,235 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    Title="FETİH — İlk Kurulum">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Başlık çubuğu -->
-        <Border x:Name="AppTitleBar" Grid.Row="0" Height="40" Padding="16,0">
-            <TextBlock Text="FETİH · İlk Kurulum"
-                       VerticalAlignment="Center"
-                       FontWeight="SemiBold" />
+        <!-- Başlık çubuğu: marka işareti + adım göstergesi -->
+        <Border x:Name="AppTitleBar" Grid.Row="0" Height="48" Padding="20,0">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <ContentControl Grid.Column="0"
+                                Height="26"
+                                VerticalAlignment="Center"
+                                IsTabStop="False"
+                                Template="{StaticResource FetihWordmarkTemplate}" />
+                <TextBlock Grid.Column="1"
+                           Text="İlk Kurulum"
+                           VerticalAlignment="Center"
+                           Opacity="0.6"
+                           FontSize="12" />
+            </Grid>
         </Border>
 
-        <Grid Grid.Row="1" Padding="32,12,32,28">
-            <!-- 1) Karşılama / güvenlik uyarısı -->
-            <StackPanel x:Name="WelcomePanel" Spacing="16" MaxWidth="620" HorizontalAlignment="Left">
-                <TextBlock Text="FETİH'e hoş geldin" Style="{StaticResource PageTitleTextStyle}" />
-                <TextBlock Style="{StaticResource MutedTextStyle}"
-                           Text="FETİH bir CTF / sızma testi / OSINT yapay zekâ ajanıdır. Bu sihirbaz bir model sağlayıcısı seçmene, API anahtarını güvenle kaydetmene ve Masaüstü Köprüsü'nü başlatmana yardımcı olur." />
-                <Border Style="{StaticResource CardBorderStyle}">
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="Güvenlik notu" FontWeight="SemiBold" />
-                        <TextBlock Style="{StaticResource MutedTextStyle}"
-                                   Text="API anahtarın yalnızca bu bilgisayardaki ~/.fetih/.env dosyasına yazılır. Değeri hiçbir zaman ekranda gösterilmez, günlüğe yazılmaz veya ağ üzerinden gönderilmez." />
+        <!--
+            Adım ilerlemesi: ●●○○. Yüzdesiz bir ilerleme çubuğu "ne kadar
+            kaldı"ya cevap vermiyordu; noktalar hem kaç adım olduğunu hem
+            hangisinde olduğunu tek bakışta gösterir.
+        -->
+        <StackPanel Grid.Row="1"
+                    x:Name="StepDots"
+                    Orientation="Horizontal"
+                    Spacing="8"
+                    HorizontalAlignment="Center"
+                    Margin="0,4,0,0"
+                    AutomationProperties.AutomationId="setup_step_dots" />
+
+        <!-- İçerik: pencere ortasında, sabit genişlikli bir kart -->
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Padding="24,16,24,28">
+            <Grid HorizontalAlignment="Center" MaxWidth="640">
+
+                <!-- 1) Karşılama -->
+                <StackPanel x:Name="WelcomePanel" Spacing="18">
+                    <ContentControl HorizontalAlignment="Center"
+                                    Margin="0,8,0,0"
+                                    Width="480"
+                                    IsTabStop="False"
+                                    AutomationProperties.AutomationId="setup_brandmark"
+                                    AutomationProperties.Name="FETİH — terminalde çalışan otonom yapay zekâ güvenlik ajanı"
+                                    AutomationProperties.AccessibilityView="Content"
+                                    Template="{StaticResource FetihBrandmarkTemplate}" />
+
+                    <TextBlock Text="FETİH'e hoş geldin"
+                               HorizontalAlignment="Center"
+                               Style="{StaticResource PageTitleTextStyle}" />
+                    <TextBlock Style="{StaticResource MutedTextStyle}"
+                               TextAlignment="Center"
+                               Text="Bu sihirbaz bir model sağlayıcısı seçmene, kimlik bilgilerini güvenle kaydetmene ve Masaüstü Köprüsü'nü başlatmana yardımcı olur. Üç adım sürer." />
+                    <Border Style="{StaticResource CardBorderStyle}">
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Güvenlik notu" FontWeight="SemiBold" />
+                            <TextBlock Style="{StaticResource MutedTextStyle}"
+                                       Text="API anahtarın yalnızca bu bilgisayardaki ~/.fetih/.env dosyasına yazılır. Değeri hiçbir zaman ekranda gösterilmez, günlüğe yazılmaz veya ağ üzerinden gönderilmez. Yerel sağlayıcı (Ollama, LM Studio) seçersen hiç anahtar istenmez." />
+                        </StackPanel>
+                    </Border>
+                    <Button Content="Devam"
+                            HorizontalAlignment="Center"
+                            Style="{StaticResource AccentButtonStyle}"
+                            AutomationProperties.AutomationId="setup_welcome_continue"
+                            Click="WelcomeContinue_Click" />
+                </StackPanel>
+
+                <!-- 2) Sağlayıcı — içerik sağlayıcının TÜRÜNE göre değişir -->
+                <StackPanel x:Name="ProviderPanel" Spacing="14" Visibility="Collapsed">
+                    <TextBlock Text="Model sağlayıcısı" Style="{StaticResource PageTitleTextStyle}" />
+                    <TextBlock Style="{StaticResource MutedTextStyle}"
+                               Text="FETİH model-agnostiktir. Ücretsiz başlamak için Groq, verinin makineden çıkmasını istemiyorsan Ollama iyi bir seçim." />
+
+                    <ComboBox x:Name="ProviderCombo"
+                              Header="Sağlayıcı"
+                              Width="380"
+                              HorizontalAlignment="Left"
+                              AutomationProperties.AutomationId="setup_provider_combo"
+                              SelectionChanged="ProviderCombo_SelectionChanged" />
+
+                    <!-- (a) Bulut sağlayıcı: API anahtarı -->
+                    <StackPanel x:Name="ApiKeySection" Spacing="8" Visibility="Collapsed">
+                        <PasswordBox x:Name="KeyBox"
+                                     Header="API anahtarı"
+                                     Width="380"
+                                     HorizontalAlignment="Left"
+                                     AutomationProperties.AutomationId="setup_api_key"
+                                     PlaceholderText="sk-… / gsk_…" />
+                        <HyperlinkButton x:Name="SignupLink"
+                                         Content="Anahtar al"
+                                         Padding="0"
+                                         AutomationProperties.AutomationId="setup_signup_link"
+                                         Visibility="Collapsed" />
                     </StackPanel>
-                </Border>
-                <Button Content="Devam"
-                        Style="{StaticResource AccentButtonStyle}"
-                        AutomationProperties.AutomationId="setup_welcome_continue"
-                        Click="WelcomeContinue_Click" />
-            </StackPanel>
 
-            <!-- 2) Sağlayıcı + anahtar -->
-            <StackPanel x:Name="ProviderPanel" Spacing="14" Visibility="Collapsed"
-                        MaxWidth="620" HorizontalAlignment="Left">
-                <TextBlock Text="Model sağlayıcısı" Style="{StaticResource PageTitleTextStyle}" />
-                <TextBlock Style="{StaticResource MutedTextStyle}"
-                           Text="FETİH model-agnostiktir; aşağıdan bir sağlayıcı seç. Ücretsiz başlamak için Groq iyi bir seçenektir." />
+                    <!-- (b) Yerel sunucu: anahtar YOK, uç nokta yoklanır -->
+                    <StackPanel x:Name="LocalSection" Spacing="8" Visibility="Collapsed">
+                        <InfoBar x:Name="LocalStatusBar"
+                                 IsOpen="True"
+                                 IsClosable="False"
+                                 AutomationProperties.AutomationId="setup_local_status" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Content="Yeniden yokla"
+                                    AutomationProperties.AutomationId="setup_local_reprobe"
+                                    Click="LocalReprobe_Click" />
+                            <HyperlinkButton x:Name="LocalInstallLink"
+                                             Content="Kurulum sayfasını aç"
+                                             AutomationProperties.AutomationId="setup_local_install_link"
+                                             Visibility="Collapsed" />
+                        </StackPanel>
+                    </StackPanel>
 
-                <ComboBox x:Name="ProviderCombo"
-                          Header="Sağlayıcı"
-                          Width="360"
-                          HorizontalAlignment="Left"
-                          AutomationProperties.AutomationId="setup_provider_combo"
-                          SelectionChanged="ProviderCombo_SelectionChanged" />
+                    <!-- (c) CLI / tarayıcı oturumu -->
+                    <StackPanel x:Name="CliLoginSection" Spacing="8" Visibility="Collapsed">
+                        <InfoBar x:Name="CliLoginBar"
+                                 IsOpen="True"
+                                 IsClosable="False"
+                                 AutomationProperties.AutomationId="setup_cli_login_status" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button x:Name="CliLoginButton"
+                                    Content="Oturum aç"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    AutomationProperties.AutomationId="setup_cli_login"
+                                    Click="CliLogin_Click" />
+                            <Button Content="Durumu denetle"
+                                    AutomationProperties.AutomationId="setup_cli_login_check"
+                                    Click="CliLoginCheck_Click" />
+                        </StackPanel>
+                    </StackPanel>
 
-                <PasswordBox x:Name="KeyBox"
-                             Header="API anahtarı"
-                             Width="360"
-                             HorizontalAlignment="Left"
-                             AutomationProperties.AutomationId="setup_api_key"
-                             PlaceholderText="sk-… / gsk_…" />
+                    <!-- (d) AWS kimlik zinciri -->
+                    <StackPanel x:Name="AwsSection" Spacing="8" Visibility="Collapsed">
+                        <InfoBar IsOpen="True" IsClosable="False" Severity="Informational"
+                                 Title="AWS kimlik zinciri"
+                                 Message="Bu sağlayıcı anahtar istemez; AWS_PROFILE / IAM rolü gibi ortam kimlik bilgilerini kullanır."
+                                 AutomationProperties.AutomationId="setup_aws_note" />
+                    </StackPanel>
 
-                <TextBox x:Name="ModelBox"
-                         Header="Varsayılan model (isteğe bağlı)"
-                         Width="360"
-                         HorizontalAlignment="Left"
-                         AutomationProperties.AutomationId="setup_model"
-                         PlaceholderText="ör. openai/gpt-oss-120b" />
+                    <!-- Model seçimi — canlı katalogdan -->
+                    <ComboBox x:Name="ModelCombo"
+                              Header="Varsayılan model"
+                              Width="380"
+                              IsEditable="False"
+                              HorizontalAlignment="Left"
+                              AutomationProperties.AutomationId="setup_model_combo" />
+                    <TextBlock x:Name="ModelHint" Style="{StaticResource MutedTextStyle}"
+                               AutomationProperties.AutomationId="setup_model_hint" />
 
-                <TextBlock x:Name="KeyHint" Style="{StaticResource MutedTextStyle}" />
+                    <TextBlock x:Name="KeyHint" Style="{StaticResource MutedTextStyle}" />
 
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Button Content="Geri" Click="ProviderBack_Click" />
-                    <Button Content="Kur ve başlat"
-                            Style="{StaticResource AccentButtonStyle}"
-                            AutomationProperties.AutomationId="setup_install"
-                            Click="ProviderInstall_Click" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Content="Geri" Click="BackToWelcome_Click" />
+                        <Button Content="Kur ve başlat"
+                                Style="{StaticResource AccentButtonStyle}"
+                                AutomationProperties.AutomationId="setup_install"
+                                Click="ProviderInstall_Click" />
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
 
-            <!-- 3) Kurulum ilerlemesi -->
-            <StackPanel x:Name="ProgressPanel" Spacing="14" Visibility="Collapsed"
-                        MaxWidth="680" HorizontalAlignment="Left">
-                <TextBlock Text="Kuruluyor" Style="{StaticResource PageTitleTextStyle}" />
-                <ProgressBar x:Name="OverallProgress" Minimum="0" Maximum="1" Value="0" Width="640" HorizontalAlignment="Left" />
-                <ItemsControl x:Name="StepList"
-                              AutomationProperties.AutomationId="setup_steps">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Grid ColumnSpacing="10" Padding="0,5">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="22" />
-                                    <ColumnDefinition Width="220" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="{Binding Glyph}" FontSize="14" />
-                                <TextBlock Grid.Column="1" Text="{Binding DisplayName}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                                <TextBlock Grid.Column="2" Text="{Binding Message}" Opacity="0.7" TextWrapping="Wrap" />
-                            </Grid>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
+                <!-- 3) Kurulum ilerlemesi -->
+                <StackPanel x:Name="ProgressPanel" Spacing="14" Visibility="Collapsed">
+                    <TextBlock Text="Kuruluyor" Style="{StaticResource PageTitleTextStyle}" />
+                    <ProgressBar x:Name="OverallProgress" Minimum="0" Maximum="1" Value="0"
+                                 HorizontalAlignment="Stretch" />
 
-                <InfoBar x:Name="ResultBar" IsOpen="False" IsClosable="False" />
+                    <ItemsControl x:Name="StepList"
+                                  AutomationProperties.AutomationId="setup_steps">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Padding="12,10" Margin="0,3"
+                                        CornerRadius="8"
+                                        Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                        BorderThickness="1"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                                    <Grid ColumnSpacing="12">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="20" />
+                                            <ColumnDefinition Width="200" />
+                                            <ColumnDefinition Width="*" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0"
+                                                   Text="{Binding Glyph}"
+                                                   FontSize="14"
+                                                   VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1"
+                                                   Text="{Binding DisplayName}"
+                                                   FontWeight="SemiBold"
+                                                   TextWrapping="Wrap"
+                                                   VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="2"
+                                                   Text="{Binding Message}"
+                                                   Opacity="0.7"
+                                                   TextWrapping="Wrap"
+                                                   VerticalAlignment="Center" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
 
-                <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Button x:Name="RetryButton" Content="Yeniden dene" Visibility="Collapsed" Click="Retry_Click" />
-                    <Button x:Name="BackToProviderButton" Content="Sağlayıcıya dön" Visibility="Collapsed" Click="ProviderBack_Click" />
-                    <Button x:Name="GoToChatButton" Content="Sohbete geç"
-                            Style="{StaticResource AccentButtonStyle}"
-                            Visibility="Collapsed"
-                            AutomationProperties.AutomationId="setup_finish"
-                            Click="GoToChat_Click" />
+                    <InfoBar x:Name="ResultBar" IsOpen="False" IsClosable="False"
+                             AutomationProperties.AutomationId="setup_result" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button x:Name="RetryButton" Content="Yeniden dene" Visibility="Collapsed"
+                                AutomationProperties.AutomationId="setup_retry"
+                                Click="Retry_Click" />
+                        <Button x:Name="BackToProviderButton" Content="Sağlayıcıya dön" Visibility="Collapsed"
+                                AutomationProperties.AutomationId="setup_back_provider"
+                                Click="BackToProvider_Click" />
+                        <Button x:Name="GoToChatButton" Content="Sohbete geç"
+                                Style="{StaticResource AccentButtonStyle}"
+                                Visibility="Collapsed"
+                                AutomationProperties.AutomationId="setup_finish"
+                                Click="GoToChat_Click" />
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
-        </Grid>
+            </Grid>
+        </ScrollViewer>
     </Grid>
 </Window>

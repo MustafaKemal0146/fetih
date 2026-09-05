@@ -37,11 +37,19 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Column="0"
-                       Text="FETİH"
-                       VerticalAlignment="Center"
-                       FontWeight="SemiBold"
-                       FontSize="14" />
+            <!--
+                Başlık çubuğu marka işareti. Düz "FETİH" metni yerine
+                sadeleştirilmiş kelime işareti (bkz. assets/Branding.xaml):
+                bu ölçekte devre dokusu ve tagline okunmaz, o yüzden onlar
+                yalnızca büyük yüzeydeki tam sanatta yer alır.
+            -->
+            <ContentControl Grid.Column="0"
+                            Height="22"
+                            VerticalAlignment="Center"
+                            IsTabStop="False"
+                            AutomationProperties.AutomationId="app_wordmark"
+                            AutomationProperties.Name="FETİH"
+                            Template="{StaticResource FetihWordmarkTemplate}" />
 
             <TextBlock Grid.Column="1"
                        x:Name="TaglineText"
@@ -49,24 +57,38 @@
                        FontSize="12"
                        Opacity="0.6" />
 
-            <Border Grid.Column="3"
+            <!--
+                Durum rozeti. Nokta artık sabit sarı değil: BadgeBrushKey'den
+                gelir (yeşil=bağlı, sarı=bağlanıyor, kırmızı=model/taşıma
+                hatası). Hata durumunda rozet TIKLANABİLİR ve kullanıcıyı
+                sorunu düzeltebileceği ayar sayfasına götürür — kırmızı bir
+                nokta gösterip kullanıcıyı orada bırakmak yarım bir uyarıdır.
+            -->
+            <Button Grid.Column="3"
+                    x:Name="StatusBadge"
                     Margin="0,0,160,0"
                     Padding="10,3"
                     VerticalAlignment="Center"
                     CornerRadius="10"
                     Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
                     BorderThickness="1"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    IsTabStop="{x:Bind Status.IsActionable, Mode=OneWay}"
+                    AutomationProperties.AutomationId="bridge_status_badge"
+                    AutomationProperties.Name="{x:Bind Status.StateLabel, Mode=OneWay}"
+                    ToolTipService.ToolTip="{x:Bind Status.Detail, Mode=OneWay}"
+                    Click="StatusBadge_Click">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <Ellipse Width="8"
                              Height="8"
                              VerticalAlignment="Center"
-                             Fill="{ThemeResource SystemFillColorCautionBrush}" />
+                             Fill="{x:Bind Status.BadgeBrush, Mode=OneWay}" />
                     <TextBlock FontSize="12"
                                VerticalAlignment="Center"
+                               AutomationProperties.AutomationId="bridge_status_text"
                                Text="{x:Bind Status.StateLabel, Mode=OneWay}" />
                 </StackPanel>
-            </Border>
+            </Button>
         </Grid>
 
         <!--
