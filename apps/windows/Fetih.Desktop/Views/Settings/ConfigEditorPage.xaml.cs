@@ -65,7 +65,17 @@ public sealed partial class ConfigEditorPage : Page
         }
 
         TitleText.Text = _title;
-        SubtitleText.Text = Loc.T("config.subtitle");
+
+        // Filtresiz açıldığında sayfa "Detaylı Mod"dur: TÜM ham anahtarlar
+        // görünür, bu yüzden kapatılamayan bir uyarı şeridi gösterilir.
+        var isAdvancedMode = _rootFilter.Length == 0;
+        SubtitleText.Text = isAdvancedMode
+            ? Loc.T("config.advanced.subtitle")
+            : Loc.T("config.subtitle");
+        AdvancedWarning.Title = Loc.T("config.advanced.warn.title");
+        AdvancedWarning.Message = Loc.T("config.advanced.warn.body");
+        AdvancedWarning.IsOpen = isAdvancedMode;
+
         ReloadButton.Content = Loc.T("config.reload");
         EmptyText.Text = Loc.T("config.empty");
         _ = LoadAsync();
@@ -79,13 +89,9 @@ public sealed partial class ConfigEditorPage : Page
         FieldsHost.Children.Clear();
         EmptyText.Visibility = Visibility.Collapsed;
 
-        // Görev E: "Görünüm" bölümünde arayüz dili seçicisini en üste ekle.
-        // Dil tercihi config.yaml'da değil yerel bir dosyada tutulduğundan
-        // jenerik editör onu göstermez; bu yüzden özel bir kart çiziyoruz.
-        if (Array.IndexOf(_rootFilter, "display") >= 0)
-        {
-            FieldsHost.Children.Add(BuildLanguageCard());
-        }
+        // Not: arayüz dili seçicisi artık burada değil, sadeleştirilmiş
+        // "Görünüm" sayfasındadır (SimpleSettingsCatalog → appearance).
+        // Detaylı Mod yalnızca config.yaml'daki ham anahtarları gösterir.
 
         try
         {
@@ -427,73 +433,6 @@ public sealed partial class ConfigEditorPage : Page
             revert();
             status.Text = "✗ " + ex.Message;
         }
-    }
-
-    // ── Dil seçici kartı (Görev E) ─────────────────────────────────────────
-
-    private static Border BuildLanguageCard()
-    {
-        var combo = new ComboBox
-        {
-            MinWidth = 240,
-            HorizontalAlignment = HorizontalAlignment.Left,
-        };
-        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(combo, "ui_language");
-        combo.Items.Add(new ComboBoxItem { Content = Loc.T("appearance.language.auto"), Tag = "auto" });
-        combo.Items.Add(new ComboBoxItem { Content = Loc.T("appearance.language.tr"), Tag = "tr" });
-        combo.Items.Add(new ComboBoxItem { Content = Loc.T("appearance.language.en"), Tag = "en" });
-
-        var pref = Loc.Preference;
-        combo.SelectedIndex = pref switch { "tr" => 1, "en" => 2, _ => 0 };
-
-        var status = StatusText();
-        combo.SelectionChanged += (_, _) =>
-        {
-            if (combo.SelectedItem is ComboBoxItem { Tag: string tag })
-            {
-                Loc.SetPreference(tag);
-                status.Text = Loc.T("appearance.language.note");
-            }
-        };
-
-        var header = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 12 };
-        header.Children.Add(new FontIcon
-        {
-            Glyph = "",
-            FontSize = 16,
-            VerticalAlignment = VerticalAlignment.Center,
-            Opacity = 0.8,
-        });
-        header.Children.Add(new TextBlock
-        {
-            Text = Loc.T("appearance.language"),
-            FontWeight = FontWeights.SemiBold,
-            FontSize = 15,
-            VerticalAlignment = VerticalAlignment.Center,
-        });
-
-        var panel = new StackPanel { Spacing = 8 };
-        panel.Children.Add(header);
-        panel.Children.Add(new TextBlock
-        {
-            Text = Loc.T("appearance.language.note"),
-            FontSize = 12,
-            Opacity = 0.7,
-            TextWrapping = TextWrapping.Wrap,
-        });
-        panel.Children.Add(combo);
-        panel.Children.Add(status);
-
-        return new Border
-        {
-            Padding = new Thickness(16),
-            CornerRadius = new CornerRadius(8),
-            Margin = new Thickness(0, 0, 0, 10),
-            Background = (Brush)Application.Current.Resources["CardBackgroundFillColorDefaultBrush"],
-            BorderThickness = new Thickness(1),
-            BorderBrush = (Brush)Application.Current.Resources["CardStrokeColorDefaultBrush"],
-            Child = panel,
-        };
     }
 
     // ── Görsel yardımcılar ───────────────────────────────────────────────────

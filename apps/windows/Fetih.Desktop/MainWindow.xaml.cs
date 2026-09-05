@@ -66,12 +66,16 @@ public sealed partial class MainWindow : Window
         // Dil değişince (Görünüm ayarından) sol menüyü yeniden kur.
         Loc.LanguageChanged += OnLanguageChanged;
 
+        // Sadeleştirilmiş ayar sayfalarındaki "Detaylı Mod'da aç" bağlantısı.
+        ShellNavigation.Requested += OnShellNavigationRequested;
+
         // Pencere kapanınca Masaüstü Köprüsü alt sürecini de sonlandır.
         Closed += (_, _) =>
         {
             try
             {
                 Loc.LanguageChanged -= OnLanguageChanged;
+                ShellNavigation.Requested -= OnShellNavigationRequested;
                 Bridge.BridgeClient.Shared.Dispose();
             }
             catch
@@ -187,9 +191,16 @@ public sealed partial class MainWindow : Window
             _menuItems.Add(CreateItem(Loc.T("settings.automation"), NavTags.SettingsAutomation, Symbol.Clock));
             _menuItems.Add(CreateItem(Loc.T("settings.appearance"), NavTags.SettingsAppearance, Symbol.View));
 
-            _menuItems.Add(new NavigationViewItemHeader { Content = Loc.T("settings.header.advanced") });
+            _menuItems.Add(new NavigationViewItemHeader { Content = Loc.T("settings.header.app") });
             _menuItems.Add(CreateItem(Loc.T("settings.system"), NavTags.SettingsSystem, Symbol.Setting));
-            _menuItems.Add(CreateItem(Loc.T("settings.all"), NavTags.SettingsAll, Symbol.List));
+
+            // "Detaylı Mod" ham config editörüdür ve yukarıdaki sadeleştirilmiş
+            // sayfalarla aynı türden bir sayfa DEĞİLDİR; bu yüzden bir ayraçla
+            // ayrılmış, kendi "Gelişmiş" başlığı altında, kendine ait bir
+            // ikonla (kod/geliştirici) tek başına durur.
+            _menuItems.Add(new NavigationViewItemSeparator());
+            _menuItems.Add(new NavigationViewItemHeader { Content = Loc.T("settings.header.advanced") });
+            _menuItems.Add(CreateGlyphItem(Loc.T("settings.all"), NavTags.SettingsAll, "\uE943"));
 
             _footerItems.Add(CreateItem(Loc.T("nav.diagnostics"), NavTags.Diagnostics, Symbol.Repair));
             _footerItems.Add(CreateItem(Loc.T("settings.about"), NavTags.SettingsAbout, Symbol.Help));
@@ -209,18 +220,49 @@ public sealed partial class MainWindow : Window
     }
 
     private static NavigationViewItem CreateItem(string content, string tag, Symbol symbol)
+        => Decorate(new NavigationViewItem { Icon = new SymbolIcon(symbol) }, content, tag);
+
+    /// <summary>Segoe Fluent Icons kod noktasıyla menü ögesi (Symbol yetmediğinde).</summary>
+    private static NavigationViewItem CreateGlyphItem(string content, string tag, string glyph)
+        => Decorate(new NavigationViewItem { Icon = new FontIcon { Glyph = glyph } }, content, tag);
+
+    private static NavigationViewItem Decorate(NavigationViewItem item, string content, string tag)
     {
-        var item = new NavigationViewItem
-        {
-            Content = content,
-            Tag = tag,
-            Icon = new SymbolIcon(symbol),
-        };
+        item.Content = content;
+        item.Tag = tag;
 
         // UI Automation ile programatik gezinme/testi mümkün kılar.
         AutomationProperties.SetAutomationId(item, tag);
         AutomationProperties.SetName(item, content);
         return item;
+    }
+
+    /// <summary>
+    /// Bir sayfanın ("Detaylı Mod'da aç" bağlantısı gibi) istediği gezinme.
+    /// Sol menüdeki ögeyi de seçili hâle getirir ki kullanıcı nerede olduğunu
+    /// görsün.
+    /// </summary>
+    private void OnShellNavigationRequested(string tag)
+    {
+        EnqueueSafe(() =>
+        {
+            if (_mode != ShellMode.Settings && tag.StartsWith("nav_settings", StringComparison.Ordinal))
+            {
+                BuildSettingsMenu();
+            }
+
+            foreach (var candidate in _menuItems)
+            {
+                if (candidate is NavigationViewItem { Tag: string itemTag } item &&
+                    string.Equals(itemTag, tag, StringComparison.Ordinal))
+                {
+                    RootNavigation.SelectedItem = item;
+                    return;
+                }
+            }
+
+            NavigateTo(tag);
+        }, nameof(OnShellNavigationRequested));
     }
 
     // ── Olaylar ─────────────────────────────────────────────────────────────
@@ -358,30 +400,27 @@ public sealed partial class MainWindow : Window
         NavTags.SettingsBridge => (typeof(BridgePage), null),
         NavTags.SettingsProvider => (typeof(ProviderPage), null),
         NavTags.SettingsVoice => (typeof(VoicePage), null),
-        NavTags.SettingsPermissions => (typeof(PermissionsPage), null),
-        NavTags.SettingsSandbox => (typeof(SandboxPage), null),
         NavTags.SettingsShell => (typeof(ShellPage), null),
         NavTags.SettingsAbout => (typeof(AboutPage), null),
 
-        // Jenerik, düzenlenebilir config editörü bölümleri. Başlık, sol menüdeki
-        // öge adıyla aynı kalsın diye yerelleştirme tablosundan okunur — sayfa
-        // başlığının İngilizce, menünün Türkçe kalması gibi bir tutarsızlık olmaz.
-        NavTags.SettingsTools => (typeof(ConfigEditorPage),
-            (object)(Loc.T("settings.tools") + "|toolsets,agent")),
-        NavTags.SettingsAgent => (typeof(ConfigEditorPage),
-            (object)(Loc.T("settings.agent") + "|agent,browser,web")),
-        NavTags.SettingsSecurity => (typeof(ConfigEditorPage),
-            (object)(Loc.T("settings.security") + "|security")),
-        NavTags.SettingsChannels => (typeof(ConfigEditorPage),
-            (object)(Loc.T("settings.channels") + "|slack,discord,telegram,whatsapp,mattermost,matrix")),
-        NavTags.SettingsMemory => (typeof(ConfigEditorPage),
-            (object)(Loc.T("settings.memory") + "|memory,curator,honcho,context,compression,prompt_caching")),
-        NavTags.SettingsAutomation => (typeof(ConfigEditorPage),
-            (object)(Loc.T("settings.automation") + "|cron,kanban,goals,delegation")),
-        NavTags.SettingsAppearance => (typeof(ConfigEditorPage),
-            (object)(Loc.T("settings.appearance") + "|display,dashboard,privacy")),
-        NavTags.SettingsSystem => (typeof(ConfigEditorPage),
-            (object)(Loc.T("settings.system") + "|logging,sessions,checkpoints,updates,network,lsp")),
+        // ── Sadeleştirilmiş ayar sayfaları ──────────────────────────────────
+        // Bunların hepsi TEK bir motordan (SimpleSettingsPage) üretilir; içerik
+        // SimpleSettingsCatalog'dadır. Ham config anahtarları burada değil,
+        // yalnızca Detaylı Mod'da görünür.
+        NavTags.SettingsPermissions => (typeof(SimpleSettingsPage), (object)"permissions"),
+        NavTags.SettingsSecurity => (typeof(SimpleSettingsPage), (object)"security"),
+        NavTags.SettingsSandbox => (typeof(SimpleSettingsPage), (object)"sandbox"),
+        NavTags.SettingsTools => (typeof(SimpleSettingsPage), (object)"tools"),
+        NavTags.SettingsAgent => (typeof(SimpleSettingsPage), (object)"agent"),
+        NavTags.SettingsChannels => (typeof(SimpleSettingsPage), (object)"channels"),
+        NavTags.SettingsMemory => (typeof(SimpleSettingsPage), (object)"memory"),
+        NavTags.SettingsAutomation => (typeof(SimpleSettingsPage), (object)"automation"),
+        NavTags.SettingsAppearance => (typeof(SimpleSettingsPage), (object)"appearance"),
+        NavTags.SettingsSystem => (typeof(SimpleSettingsPage), (object)"system"),
+
+        // ── Detaylı Mod ─────────────────────────────────────────────────────
+        // Ham config editörünün TEK kullanım yeri: filtresiz, bütün kökleri
+        // kendi bölüm başlığıyla gösterir.
         NavTags.SettingsAll => (typeof(ConfigEditorPage),
             (object)(Loc.T("settings.all") + "|")),
 

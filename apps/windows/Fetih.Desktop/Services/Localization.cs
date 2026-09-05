@@ -188,16 +188,21 @@ public static class Loc
         ["settings.header.security_exec"] = new("Güvenlik ve Yürütme", "Security & Execution"),
         ["settings.permissions"] = new("İzinler", "Permissions"),
         ["settings.security"] = new("Güvenlik", "Security"),
-        ["settings.sandbox"] = new("Sandbox", "Sandbox"),
+        ["settings.sandbox"] = new("Çalışma Ortamı", "Execution Environment"),
         ["settings.shell"] = new("Kabuk (Windows)", "Shell (Windows)"),
         ["settings.header.automation"] = new("Otomasyon ve Bağlam", "Automation & Context"),
         ["settings.channels"] = new("Kanallar", "Channels"),
         ["settings.memory"] = new("Hafıza", "Memory"),
         ["settings.automation"] = new("Otomasyon", "Automation"),
         ["settings.appearance"] = new("Görünüm", "Appearance"),
+        ["settings.header.app"] = new("Uygulama", "Application"),
         ["settings.header.advanced"] = new("Gelişmiş", "Advanced"),
         ["settings.system"] = new("Sistem", "System"),
-        ["settings.all"] = new("Tüm Ayarlar", "All Settings"),
+
+        // Sol menüde ham config editörü artık açıkça "Detaylı Mod" adını taşır;
+        // normal ayar sayfalarından ayrılsın diye kendi başlığı altında,
+        // ayraçla ayrılmış olarak, tek başına durur (bkz. MainWindow).
+        ["settings.all"] = new("Detaylı Mod", "Advanced Mode"),
         ["settings.about"] = new("Hakkında", "About"),
 
         // ── Sohbet ───────────────────────────────────────────────────────
@@ -298,5 +303,29 @@ public static class Loc
             "  (karmaşık liste — burada düzenlenmez)",
             "  (complex list — not editable here)"),
         ["config.list_placeholder"] = new("virgülle ayrılmış liste", "comma-separated list"),
+
+        // ── Detaylı Mod (ham config editörü) ─────────────────────────────
+        ["config.advanced.subtitle"] = new(
+            "FETİH'in diskteki yapılandırma dosyasının tamamı, bölüm bölüm. Her satırda ham anahtar adı ve o anahtara özgü açıklama vardır; bir değeri değiştirdiğinde ~/.fetih/config.yaml dosyasına anında yazılır.",
+            "The whole of FETİH's on-disk configuration file, section by section. Every row shows the raw key name and a note specific to it; changing a value writes to ~/.fetih/config.yaml immediately."),
+        ["config.advanced.warn.title"] = new(
+            "Detaylı Mod — ham yapılandırma",
+            "Advanced Mode — raw configuration"),
+        ["config.advanced.warn.body"] = new(
+            "Burada FETİH'in TÜM ham yapılandırma anahtarları bulunur. Ne yaptığınızdan emin değilseniz normal Ayarlar sayfalarını kullanın.",
+            "This page holds ALL of FETİH's raw configuration keys. If you are not sure what you are doing, use the normal Settings pages instead."),
+
+        // ── Sadeleştirilmiş ayar sayfaları ───────────────────────────────
+        ["simple.reload"] = new("Yenile", "Reload"),
+        ["simple.advanced_group"] = new("Gelişmiş", "Advanced"),
+        ["simple.reference"] = new("Ayrıntılar", "Details"),
+        ["simple.list_empty"] = new("Liste boş.", "The list is empty."),
+        ["simple.list_clear"] = new("Listeyi boşalt", "Clear the list"),
+        ["simple.unknown_value"] = new(
+            "Şu anki değer listede yok: {0}",
+            "The current value is not in the list: {0}"),
+        ["simple.open_advanced"] = new(
+            "Bu ayarların ham hâlini Detaylı Mod'da aç",
+            "Open the raw form of these settings in Advanced Mode"),
     };
 }

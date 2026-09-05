@@ -26,6 +26,18 @@
                        MaxWidth="820"
                        HorizontalAlignment="Left" />
 
+            <!--
+                Detaylı Mod uyarısı: bu sayfa ham yapılandırmadır ve normal
+                Ayarlar sayfalarıyla karıştırılmamalıdır. Kapatılamaz.
+            -->
+            <InfoBar x:Name="AdvancedWarning"
+                     AutomationProperties.AutomationId="config_advanced_warning"
+                     IsOpen="False"
+                     IsClosable="False"
+                     Severity="Warning"
+                     MaxWidth="900"
+                     HorizontalAlignment="Left" />
+
             <!-- Durum / uyarı şeridi -->
             <InfoBar x:Name="StatusBar"
                      IsOpen="False"

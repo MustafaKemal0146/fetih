@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Fetih.Desktop.Views.Settings.SimpleSettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <!--
+        Sadeleştirilmiş ayar sayfası kabuğu. İçerik (kartlar, kontroller)
+        kod arkasında SimpleSettingsCatalog tanımlarından üretilir; burada
+        yalnızca kaydırılabilir çerçeve, başlık ve durum şeridi vardır.
+    -->
+    <ScrollViewer Padding="24,20,24,32"
+                  AutomationProperties.AutomationId="simple_scroll"
+                  VerticalScrollBarVisibility="Auto"
+                  VerticalScrollMode="Enabled">
+        <StackPanel Spacing="12" MaxWidth="900" HorizontalAlignment="Left">
+
+            <TextBlock x:Name="TitleText" Style="{StaticResource PageTitleTextStyle}" />
+
+            <TextBlock x:Name="IntroText"
+                       Style="{StaticResource MutedTextStyle}"
+                       MaxWidth="820"
+                       HorizontalAlignment="Left" />
+
+            <InfoBar x:Name="StatusBar"
+                     IsOpen="False"
+                     IsClosable="True"
+                     Severity="Informational" />
+
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button x:Name="ReloadButton"
+                        AutomationProperties.AutomationId="simple_reload"
+                        Click="ReloadButton_Click" />
+                <ProgressRing x:Name="BusyRing"
+                              Width="18" Height="18"
+                              IsActive="False"
+                              VerticalAlignment="Center" />
+            </StackPanel>
+
+            <StackPanel x:Name="SectionsHost"
+                        AutomationProperties.AutomationId="simple_sections"
+                        Spacing="14" />
+
+            <HyperlinkButton x:Name="AdvancedLink"
+                             AutomationProperties.AutomationId="simple_open_advanced"
+                             Margin="0,4,0,0"
+                             Click="AdvancedLink_Click" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>
