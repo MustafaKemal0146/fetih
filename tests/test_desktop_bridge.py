@@ -255,3 +255,112 @@ def test_skills_list_is_paged_and_categorised():
     assert res["total"] >= len(res["skills"])
     for s in res["skills"]:
         assert {"name", "description", "category", "source"} <= set(s)
+
+
+# ── providers.catalog / .models / .probe_local / .auth_status ────────────
+#
+# These four exist so the desktop shell stops guessing. Before them the app
+# answered "which providers exist?" and "which models exist?" from tables
+# compiled into the C# binary; both drifted from what the runtime actually
+# accepted, and the drift only surfaced as a failed first chat message.
+
+
+def test_providers_catalog_serves_the_canonical_registry():
+    from fetih_cli.auth import PROVIDER_REGISTRY
+
+    server = BridgeServer(require_auth=False)
+    conn = FakeConn(authenticated=True)
+    res = drive(server, conn, "providers.catalog")["result"]
+
+    ids = {p["id"] for p in res["providers"]}
+    assert res["count"] == len(res["providers"])
+    assert "groq" in ids, "groq must be offerable — its absence was the original bug"
+    assert "ollama" in ids
+
+    # Canonical ids only: aliases ride along on their owner's row.
+    assert "groqcloud" not in ids
+    groq = next(p for p in res["providers"] if p["id"] == "groq")
+    assert "groqcloud" in groq["aliases"]
+
+    # Every advertised id must be one the resolver accepts.
+    for pid in ids:
+        assert pid in PROVIDER_REGISTRY or pid in {"openrouter", "custom", "local"}
+
+
+def test_providers_catalog_classifies_setup_flow():
+    """The wizard branches on `kind`; a mislabelled provider asks the wrong question."""
+    server = BridgeServer(require_auth=False)
+    conn = FakeConn(authenticated=True)
+    rows = {p["id"]: p for p in drive(server, conn, "providers.catalog")["result"]["providers"]}
+
+    assert rows["groq"]["kind"] == "cloud_api_key"
+    assert rows["ollama"]["kind"] == "local_server" and rows["ollama"]["is_local"]
+    assert rows["lmstudio"]["kind"] == "local_server"
+    # Hosted Ollama is NOT local — it must keep asking for a key.
+    assert rows["ollama-cloud"]["kind"] == "cloud_api_key"
+    assert not rows["ollama-cloud"]["is_local"]
+    assert rows["google-gemini-cli"]["kind"] == "cli_login"
+    assert rows["openai-codex"]["kind"] == "cli_login"
+    assert rows["bedrock"]["kind"] == "aws_sdk"
+
+
+def test_providers_catalog_never_leaks_a_secret():
+    server = BridgeServer(require_auth=False)
+    conn = FakeConn(authenticated=True)
+    for p in drive(server, conn, "providers.catalog")["result"]["providers"]:
+        # Env var NAMES are fine; values must never appear.
+        assert "api_key" not in p or isinstance(p.get("api_key_env_vars"), list)
+        assert "token" not in p
+
+
+def test_providers_models_requires_a_provider():
+    server = BridgeServer(require_auth=False)
+    conn = FakeConn(authenticated=True)
+    err = drive(server, conn, "providers.models", {})["error"]
+    assert err["code"] == INVALID_PARAMS
+
+
+def test_providers_models_recommends_a_tool_capable_model():
+    """models[0] is what the wizard writes as model.default, so it must be usable."""
+    server = BridgeServer(require_auth=False)
+    conn = FakeConn(authenticated=True)
+    res = drive(server, conn, "providers.models", {"provider": "groq"})["result"]
+
+    assert res["provider"] == "groq"
+    assert res["models"], "groq must always offer at least the offline seed"
+    assert res["recommended"] == res["models"][0]
+    # Transcription / speech / classifier models cannot drive the agent loop
+    # and must never be the default.
+    assert not res["recommended"].startswith(("whisper", "canopylabs/"))
+    assert "llama-3.3-70b-versatile" not in res["models"][:1]
+
+
+def test_providers_probe_local_reports_a_dead_endpoint_as_dead():
+    """No server on that port must read as 'not running', not as an RPC error."""
+    server = BridgeServer(require_auth=False)
+    conn = FakeConn(authenticated=True)
+    res = drive(server, conn, "providers.probe_local",
+                {"provider": "ollama", "base_url": "http://127.0.0.1:1", "timeout": 1})["result"]
+
+    assert res["running"] is False
+    assert res["models"] == []
+    assert res["detail"]
+
+
+def test_providers_probe_local_rejects_unknown_provider():
+    server = BridgeServer(require_auth=False)
+    conn = FakeConn(authenticated=True)
+    err = drive(server, conn, "providers.probe_local", {"provider": "no-such-thing"})["error"]
+    assert err["code"] == INVALID_PARAMS
+
+
+def test_providers_auth_status_is_presence_only():
+    server = BridgeServer(require_auth=False)
+    conn = FakeConn(authenticated=True)
+    res = drive(server, conn, "providers.auth_status", {"provider": "google-gemini-cli"})["result"]
+
+    assert res["provider"] == "google-gemini-cli"
+    assert isinstance(res["logged_in"], bool)
+    # Whatever the CLI's status dict carries, no credential material crosses.
+    for key in res:
+        assert not any(hint in key.lower() for hint in ("token", "secret", "api_key", "password"))

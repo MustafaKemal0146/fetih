@@ -215,6 +215,10 @@ class BridgeServer:
                 "config.get": self._m_config_get,
                 "config.set": self._m_config_set,
                 "providers.list": self._m_providers_list,
+                "providers.catalog": self._m_providers_catalog,
+                "providers.models": self._m_providers_models,
+                "providers.probe_local": self._m_providers_probe_local,
+                "providers.auth_status": self._m_providers_auth_status,
                 "skills.list": self._m_skills_list,
                 "diagnostics.info": self._m_diagnostics_info,
                 "shell.status": self._m_shell_status,
@@ -513,6 +517,245 @@ class BridgeServer:
             "providers": out,
             "fallback_providers": cfg.get("fallback_providers") or [],
         }
+
+    def _m_providers_catalog(self, conn, params):
+        """Return the CANONICAL provider catalog straight out of the CLI.
+
+        ``providers.list`` answers "what has the user configured?" — it walks
+        ``config.yaml``'s ``providers:`` block and is empty on a fresh install.
+        This method answers the different question the setup wizard actually
+        needs: "which provider ids does this FETİH runtime accept?"
+
+        The desktop shell used to answer that from a hand-maintained C# table.
+        When an id in that table drifted from the CLI's own registry, setup
+        completed happily and then the first chat turn died with
+        ``Unknown provider '<id>'``. Serving the ids from the same
+        ``auth.PROVIDER_REGISTRY`` that ``resolve_provider()`` consults makes
+        that class of bug unrepresentable: if it is listed here, it resolves.
+        """
+        from fetih_cli import auth as _auth
+
+        try:
+            from providers import get_provider_profile, list_providers
+        except Exception:  # pragma: no cover - providers pkg always ships
+            get_provider_profile, list_providers = (lambda _n: None), (lambda: [])
+
+        # Canonical ids only: PROVIDER_REGISTRY also holds alias -> same object
+        # entries (groqcloud, groq-cloud …). Emit the canonical row once and
+        # carry its aliases alongside it.
+        alias_map: Dict[str, List[str]] = {}
+        for pid, pconfig in _auth.PROVIDER_REGISTRY.items():
+            if pid != pconfig.id:
+                alias_map.setdefault(pconfig.id, []).append(pid)
+
+        out: List[Dict[str, Any]] = []
+        seen: set = set()
+        for pid, pconfig in _auth.PROVIDER_REGISTRY.items():
+            if pid != pconfig.id or pconfig.id in seen:
+                continue
+            seen.add(pconfig.id)
+            profile = _safe(get_provider_profile, pconfig.id)
+            base_url = pconfig.inference_base_url or getattr(profile, "base_url", "")
+            out.append(
+                {
+                    "id": pconfig.id,
+                    "name": pconfig.name,
+                    "aliases": sorted(alias_map.get(pconfig.id, [])),
+                    "auth_type": pconfig.auth_type,
+                    "api_key_env_vars": list(pconfig.api_key_env_vars),
+                    "base_url_env_var": pconfig.base_url_env_var,
+                    "base_url": base_url,
+                    "api_mode": getattr(profile, "api_mode", "") or "",
+                    "display_name": getattr(profile, "display_name", "") or pconfig.name,
+                    "signup_url": getattr(profile, "signup_url", "") or "",
+                    "is_local": _is_local_endpoint(base_url),
+                    "kind": _provider_kind(pconfig, base_url),
+                }
+            )
+
+        # Profiles with no auth (pure local endpoints such as Ollama) never
+        # reach PROVIDER_REGISTRY — it only auto-extends api_key providers —
+        # but the wizard must still offer them.
+        for profile in _safe(list_providers, default=[]) or []:
+            if profile.name in seen:
+                continue
+            seen.add(profile.name)
+            out.append(
+                {
+                    "id": profile.name,
+                    "name": profile.display_name or profile.name,
+                    "aliases": sorted(profile.aliases),
+                    "auth_type": profile.auth_type,
+                    "api_key_env_vars": list(profile.env_vars),
+                    "base_url_env_var": "",
+                    "base_url": profile.base_url,
+                    "api_mode": profile.api_mode,
+                    "display_name": profile.display_name or profile.name,
+                    "signup_url": profile.signup_url,
+                    "is_local": _is_local_endpoint(profile.base_url),
+                    "kind": _provider_kind(None, profile.base_url, profile.auth_type),
+                }
+            )
+
+        out.sort(key=lambda r: r["id"])
+        return {"providers": out, "count": len(out)}
+
+    def _m_providers_models(self, conn, params):
+        """Model ids offered for one provider — live endpoint first.
+
+        The wizard used to ship a hardcoded placeholder model. Providers
+        retire model ids (Groq dropped ``llama-3.3-70b-versatile``), so a
+        stale placeholder turns setup's "success" into a 404 on the first
+        message. Asking the provider is the only answer that cannot go stale.
+        """
+        pid = str(params.get("provider") or "").strip()
+        if not pid:
+            raise BridgeError(INVALID_PARAMS, "'provider' is required")
+
+        source = "fallback"
+        models: List[str] = []
+
+        try:
+            from providers import get_provider_profile
+
+            profile = get_provider_profile(pid)
+        except Exception:
+            profile = None
+
+        # The CLI's own picker first, so the desktop shell and ``fetih model``
+        # never disagree about what exists.
+        live = _safe(_provider_model_ids_for, pid, default=None)
+        if live:
+            models = [str(m) for m in live]
+            source = "live"
+        elif profile is not None and profile.fallback_models:
+            models = [str(m) for m in profile.fallback_models]
+
+        # Rank the curated tool-calling ids the profile vouches for ahead of
+        # everything else. A live catalog also carries transcription, speech
+        # and safety-classifier models; the agent loop cannot drive those, and
+        # models[0] is what the wizard offers as the default.
+        curated = [str(m) for m in (getattr(profile, "fallback_models", ()) or ())]
+        if curated and models:
+            preferred = [m for m in curated if m in models]
+            models = preferred + [m for m in models if m not in preferred]
+
+        return {
+            "provider": pid,
+            "models": models,
+            "source": source,
+            "recommended": models[0] if models else "",
+        }
+
+    def _m_providers_probe_local(self, conn, params):
+        """Is a local inference server up, and what has it downloaded?
+
+        Ollama and LM Studio need no API key — asking for one is the wrong
+        question. What the wizard actually needs to know is whether the
+        daemon is running and which models the user already pulled.
+        """
+        import json as _json
+        import urllib.error
+        import urllib.request
+
+        pid = str(params.get("provider") or "ollama").strip()
+        base = str(params.get("base_url") or "").strip().rstrip("/")
+
+        if not base:
+            base = {
+                "ollama": "http://localhost:11434",
+                "lmstudio": "http://127.0.0.1:1234/v1",
+            }.get(pid, "")
+        if not base:
+            raise BridgeError(INVALID_PARAMS, f"no default endpoint known for '{pid}'")
+
+        # Ollama's native tag listing carries sizes; every other local server
+        # we support speaks the OpenAI-compatible /models shape.
+        if pid == "ollama":
+            probe_url = base[: -len("/v1")].rstrip("/") + "/api/tags" if base.endswith("/v1") else base + "/api/tags"
+        else:
+            probe_url = base + "/models" if base.endswith("/v1") else base + "/v1/models"
+
+        try:
+            req = urllib.request.Request(probe_url, headers={"User-Agent": "fetih-desktop-bridge"})
+            with urllib.request.urlopen(req, timeout=float(params.get("timeout") or 4.0)) as resp:
+                payload = _json.loads(resp.read().decode("utf-8", "replace"))
+        except urllib.error.HTTPError as exc:
+            # A 401/403 still proves something is listening on that port.
+            return {
+                "provider": pid,
+                "running": True,
+                "endpoint": probe_url,
+                "models": [],
+                "detail": f"HTTP {exc.code}",
+            }
+        except Exception as exc:
+            return {
+                "provider": pid,
+                "running": False,
+                "endpoint": probe_url,
+                "models": [],
+                "detail": f"{type(exc).__name__}: {exc}",
+            }
+
+        models: List[str] = []
+        if isinstance(payload, dict):
+            for item in payload.get("models") or payload.get("data") or []:
+                if isinstance(item, dict):
+                    name = item.get("name") or item.get("model") or item.get("id")
+                    if name:
+                        models.append(str(name))
+                elif item:
+                    models.append(str(item))
+
+        return {
+            "provider": pid,
+            "running": True,
+            "endpoint": probe_url,
+            "models": sorted(set(models)),
+            "detail": "",
+        }
+
+    def _m_providers_auth_status(self, conn, params):
+        """Is this provider signed in? Read-only, never prompts.
+
+        The OAuth providers (Gemini Code Assist, Codex/ChatGPT, Qwen, xAI)
+        cannot be authenticated by pasting a string into a text box — they
+        need a browser round trip that the CLI already implements. The
+        wizard's job is therefore to (a) launch that real flow and (b) poll
+        this method until it reports success. Nothing here is simulated: the
+        answer comes from the same ``auth.get_auth_status`` the CLI uses.
+
+        Returns presence/expiry facts only — never a token.
+        """
+        pid = str(params.get("provider") or "").strip()
+        if not pid:
+            raise BridgeError(INVALID_PARAMS, "'provider' is required")
+
+        from fetih_cli.auth import get_auth_status
+
+        try:
+            status = get_auth_status(pid) or {}
+        except Exception as exc:
+            return {
+                "provider": pid,
+                "logged_in": False,
+                "detail": f"{type(exc).__name__}: {exc}",
+                "auth_type": "",
+            }
+
+        # Whitelist the non-secret fields; get_auth_status shapes differ per
+        # provider and some carry token material.
+        safe_keys = (
+            "logged_in", "expired", "expires_at", "email", "account",
+            "plan", "source", "auth_type", "configured", "reason", "detail",
+        )
+        out: Dict[str, Any] = {"provider": pid}
+        for key in safe_keys:
+            if key in status and not _looks_secret(key):
+                out[key] = status[key]
+        out["logged_in"] = bool(status.get("logged_in") or status.get("configured"))
+        return out
 
     # ── skills.* ────────────────────────────────────────────────────────
 
@@ -903,11 +1146,60 @@ def _shrink(value: Any, limit: int = 2000) -> Any:
     return value
 
 
-def _safe(fn: Callable[..., Any], *args, default: Any = None) -> Any:
+def _safe(fn: Callable[..., Any], *args, default: Any = None, **kwargs) -> Any:
     try:
-        return fn(*args)
+        return fn(*args, **kwargs)
     except Exception:
         return default
+
+
+def _provider_model_ids_for(pid: str) -> List[str]:
+    """``fetih model``'s catalog for one provider, as a plain list."""
+    from fetih_cli.models import provider_model_ids
+
+    return [str(m) for m in (provider_model_ids(pid) or [])]
+
+
+#: Hosts that mean "this inference endpoint never leaves the machine".
+_LOCAL_HOSTS = ("localhost", "127.0.0.1", "0.0.0.0", "::1", "host.docker.internal")
+
+
+def _is_local_endpoint(base_url: str) -> bool:
+    """True when ``base_url`` points at a server on this machine.
+
+    Drives the wizard's "don't ask for an API key" branch — a loopback
+    endpoint has nobody to authenticate against.
+    """
+    if not base_url:
+        return False
+    try:
+        from urllib.parse import urlparse
+
+        host = (urlparse(base_url).hostname or "").lower()
+    except Exception:
+        return False
+    return host in _LOCAL_HOSTS
+
+
+def _provider_kind(pconfig: Any, base_url: str, auth_type: str = "") -> str:
+    """Classify a provider into the setup flow it needs.
+
+    The wizard branches on this instead of showing every provider the same
+    "paste an API key" box: ``local_server`` gets an endpoint probe,
+    ``cli_login`` gets a "sign in with the vendor's CLI" step, ``aws_sdk``
+    defers to the ambient credential chain, and only ``cloud_api_key``
+    actually needs a secret typed in.
+    """
+    kind_auth = auth_type or getattr(pconfig, "auth_type", "") or ""
+    if _is_local_endpoint(base_url):
+        return "local_server"
+    if kind_auth == "aws_sdk":
+        return "aws_sdk"
+    if kind_auth in ("oauth_external", "oauth_device_code", "oauth_minimax", "external_process"):
+        return "cli_login"
+    if kind_auth in ("", "none"):
+        return "no_auth"
+    return "cloud_api_key"
 
 
 def _fetih_version() -> str:
