@@ -30,12 +30,19 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
+                <!--
+                    Sohbet şeridindeki nokta da başlık çubuğu rozetiyle AYNI
+                    kaynaktan boyanır. Sabit sarı kaldığında iki gösterge aynı
+                    anda farklı şey söylüyordu: rozet "Model hatası", şerit
+                    hâlâ nötr sarı.
+                -->
                 <Ellipse x:Name="StatusDot"
                          Grid.Column="0"
                          Width="10"
                          Height="10"
                          VerticalAlignment="Center"
-                         Fill="{ThemeResource SystemFillColorCautionBrush}" />
+                         AutomationProperties.AutomationId="chat_status_dot"
+                         Fill="{x:Bind Status.BadgeBrush, Mode=OneWay}" />
 
                 <TextBlock Grid.Column="1"
                            VerticalAlignment="Center"

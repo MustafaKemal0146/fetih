@@ -46,6 +46,13 @@ public static class FetihPaths
     /// </summary>
     public static string? RepositoryRoot => RepoLazy.Value;
 
+    /// <summary>
+    /// Alt süreç başlatmak için çalışma dizini: depo kökü bulunduysa o,
+    /// bulunamadıysa uygulamanın kendi klasörü. Kurulan (depo dışı) bir
+    /// dağıtımda <c>python -m fetih_cli</c> yine site-packages'tan çözülür.
+    /// </summary>
+    public static string RepoRootOrCurrent => RepositoryRoot ?? AppContext.BaseDirectory;
+
     /// <summary>Depo içindeki <c>skills/</c> klasörü.</summary>
     public static string? SkillsRoot =>
         RepositoryRoot is null ? null : Path.Combine(RepositoryRoot, "skills");

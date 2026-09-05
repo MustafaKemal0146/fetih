@@ -9,6 +9,12 @@
     <RootNamespace>Fetih.Desktop</RootNamespace>
     <AssemblyName>Fetih.Desktop</AssemblyName>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!--
+      .exe'nin Gezgin'de ve görev çubuğunda taşıdığı ikon. Pencere ikonu ayrıca
+      çalışma zamanında ayarlanır (Services/BrandIcon.cs) — MSIX'siz derlemede
+      Windows ikonu bir paket manifestinden okuyamıyor.
+    -->
+    <ApplicationIcon>assets\fetih.ico</ApplicationIcon>
 
     <Platforms>x64;x86;ARM64</Platforms>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -57,6 +63,16 @@
   <ItemGroup>
     <AssemblyMetadata Include="WindowsAppSdkVersion" Value="$(WindowsAppSdkPackageVersion)" />
     <AssemblyMetadata Include="TargetFramework" Value="$(TargetFramework)" />
+  </ItemGroup>
+
+  <!--
+    Marka varlıkları. assets/Branding.xaml WindowsAppSDK hedefleri tarafından
+    zaten Page olarak toplanır (elle eklemek NETSDK1022 verir); burada yalnızca
+    ikon dosyalarını çıktıya kopyalarız — BrandIcon.cs onları diskten okur.
+  -->
+  <ItemGroup>
+    <Content Include="assets\fetih.ico" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="assets\fetih.png" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!--

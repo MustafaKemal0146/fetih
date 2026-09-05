@@ -270,6 +270,13 @@ public static class Loc
         ["bridge.state.ready"] = new("Bağlı", "Connected"),
         ["bridge.state.reconnecting"] = new("Yeniden bağlanılıyor…", "Reconnecting…"),
         ["bridge.state.error"] = new("Bağlantı hatası", "Connection error"),
+        ["bridge.state.model_error"] = new("Model hatası", "Model error"),
+        ["bridge.detail.model_error"] = new(
+            "Köprü bağlı ama modele ulaşılamıyor. Ayarlar › Model ve Sağlayıcı'yı denetle.",
+            "The bridge is connected but the model is unreachable. Check Settings › Model & Provider."),
+        ["bridge.detail.model_ok"] = new("Bağlı — model yanıt veriyor.", "Connected — the model is responding."),
+        ["bridge.badge.tooltip_fix"] = new(
+            "Düzeltmek için tıkla", "Click to fix"),
 
         // ── Genel ────────────────────────────────────────────────────────
         ["common.reload"] = new("Yenile", "Reload"),
