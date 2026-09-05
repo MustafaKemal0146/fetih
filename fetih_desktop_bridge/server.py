@@ -440,7 +440,13 @@ class BridgeServer:
             raise BridgeError(INVALID_PARAMS, "'key' is required (dotted path)")
         if "value" not in params:
             raise BridgeError(INVALID_PARAMS, "'value' is required")
-        if _looks_secret(key.split(".")[-1]):
+        # Credential-shaped keys never travel through config.set. A *boolean*
+        # is the one shape a credential can never take, so switches whose name
+        # merely contains a hint word — ``security.redact_secrets`` is the
+        # canonical example — stay editable. Without this carve-out that
+        # security switch was permanently stuck at its current value in both
+        # the desktop settings pages and the raw config editor.
+        if _looks_secret(key.split(".")[-1]) and not isinstance(params["value"], bool):
             raise BridgeError(
                 CONFIG_ERROR,
                 "credentials are not written through config.set — "
