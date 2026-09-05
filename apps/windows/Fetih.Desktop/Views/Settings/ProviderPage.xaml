@@ -22,11 +22,65 @@
                        Text="FETİH model-agnostiktir. Aşağıdaki liste desteklenen sağlayıcıları ve her biri için gereken ortam değişkenlerinin tanımlı olup olmadığını gösterir. Güvenlik gereği anahtar değerleri asla okunmaz veya gösterilmez." />
         </StackPanel>
 
-        <!-- Aktif model -->
+        <!-- Aktif model + düzenleyici -->
         <Border Grid.Row="1" Style="{StaticResource CardBorderStyle}">
-            <StackPanel>
+            <StackPanel Spacing="4">
                 <TextBlock Text="Etkin yapılandırma" Style="{StaticResource SectionHeaderTextStyle}" />
                 <ItemsControl x:Name="ActiveRows" ItemTemplate="{StaticResource SettingRowTemplate}" />
+
+                <!-- Görev G: etkin model/sağlayıcıyı buradan değiştir (config.set) -->
+                <TextBlock Text="Etkin modeli değiştir"
+                           Style="{StaticResource SectionHeaderTextStyle}"
+                           Margin="0,12,0,0" />
+                <TextBlock Style="{StaticResource MutedTextStyle}"
+                           FontSize="12"
+                           Text="Sağlayıcıyı ara ve seç, model kimliğini gir. Kaydettiğinde config.set ile ~/.fetih/config.yaml'a yazılır ve bir sonraki mesajda etkili olur. API anahtarı ~/.fetih/.env içinde tanımlı olmalıdır." />
+
+                <Grid ColumnSpacing="10" RowSpacing="8" Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.Column="0"
+                               Text="Sağlayıcı"
+                               VerticalAlignment="Center"
+                               Width="80" />
+                    <AutoSuggestBox Grid.Row="0" Grid.Column="1"
+                                    x:Name="ProviderSelectBox"
+                                    AutomationProperties.AutomationId="provider_select"
+                                    PlaceholderText="Sağlayıcı ara (ör. groq, anthropic)…"
+                                    TextChanged="ProviderSelectBox_TextChanged"
+                                    SuggestionChosen="ProviderSelectBox_SuggestionChosen" />
+
+                    <TextBlock Grid.Row="1" Grid.Column="0"
+                               Text="Model"
+                               VerticalAlignment="Center"
+                               Width="80" />
+                    <TextBox Grid.Row="1" Grid.Column="1"
+                             x:Name="ModelBox"
+                             AutomationProperties.AutomationId="provider_model"
+                             PlaceholderText="Model kimliği (ör. llama-3.3-70b-versatile)" />
+
+                    <StackPanel Grid.Row="2" Grid.Column="1"
+                                Orientation="Horizontal"
+                                Spacing="10">
+                        <Button x:Name="SaveModelButton"
+                                Content="Kaydet"
+                                AutomationProperties.AutomationId="provider_save"
+                                Style="{StaticResource AccentButtonStyle}"
+                                Click="SaveModelButton_Click" />
+                        <TextBlock x:Name="SaveModelStatus"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   Opacity="0.85" />
+                    </StackPanel>
+                </Grid>
             </StackPanel>
         </Border>
 

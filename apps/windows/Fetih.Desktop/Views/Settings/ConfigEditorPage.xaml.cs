@@ -67,6 +67,14 @@ public sealed partial class ConfigEditorPage : Page
         FieldsHost.Children.Clear();
         EmptyText.Visibility = Visibility.Collapsed;
 
+        // Görev E: "Görünüm" bölümünde arayüz dili seçicisini en üste ekle.
+        // Dil tercihi config.yaml'da değil yerel bir dosyada tutulduğundan
+        // jenerik editör onu göstermez; bu yüzden özel bir kart çiziyoruz.
+        if (Array.IndexOf(_rootFilter, "display") >= 0)
+        {
+            FieldsHost.Children.Add(BuildLanguageCard());
+        }
+
         try
         {
             var res = await _bridge.ConfigGetAsync().ConfigureAwait(true);
@@ -103,7 +111,9 @@ public sealed partial class ConfigEditorPage : Page
                 }
             }
 
-            EmptyText.Visibility = any ? Visibility.Collapsed : Visibility.Visible;
+            EmptyText.Visibility = any || FieldsHost.Children.Count > 0
+                ? Visibility.Collapsed
+                : Visibility.Visible;
             HideStatus();
         }
         catch (BridgeRpcException rpc)
@@ -334,13 +344,71 @@ public sealed partial class ConfigEditorPage : Page
         }
     }
 
+    // ── Dil seçici kartı (Görev E) ─────────────────────────────────────────
+
+    private static Border BuildLanguageCard()
+    {
+        var combo = new ComboBox
+        {
+            MinWidth = 240,
+            HorizontalAlignment = HorizontalAlignment.Left,
+        };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(combo, "ui_language");
+        combo.Items.Add(new ComboBoxItem { Content = Services.Loc.T("appearance.language.auto"), Tag = "auto" });
+        combo.Items.Add(new ComboBoxItem { Content = Services.Loc.T("appearance.language.tr"), Tag = "tr" });
+        combo.Items.Add(new ComboBoxItem { Content = Services.Loc.T("appearance.language.en"), Tag = "en" });
+
+        var pref = Services.Loc.Preference;
+        combo.SelectedIndex = pref switch { "tr" => 1, "en" => 2, _ => 0 };
+
+        var status = StatusText();
+        combo.SelectionChanged += (_, _) =>
+        {
+            if (combo.SelectedItem is ComboBoxItem { Tag: string tag })
+            {
+                Services.Loc.SetPreference(tag);
+                status.Text = Services.Loc.T("appearance.language.note");
+            }
+        };
+
+        var panel = new StackPanel { Spacing = 6 };
+        panel.Children.Add(new TextBlock
+        {
+            Text = Services.Loc.T("appearance.language"),
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+            FontSize = 16,
+        });
+        panel.Children.Add(new TextBlock
+        {
+            Text = Services.Loc.T("appearance.language.note"),
+            FontSize = 12,
+            Opacity = 0.65,
+            TextWrapping = TextWrapping.Wrap,
+        });
+        panel.Children.Add(combo);
+        panel.Children.Add(status);
+
+        return new Border
+        {
+            Padding = new Thickness(16),
+            CornerRadius = new CornerRadius(8),
+            Margin = new Thickness(0, 0, 0, 8),
+            Background = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["CardBackgroundFillColorDefaultBrush"],
+            BorderThickness = new Thickness(1),
+            BorderBrush = (Microsoft.UI.Xaml.Media.Brush)Application.Current.Resources["CardStrokeColorDefaultBrush"],
+            Child = panel,
+        };
+    }
+
     // ── Görsel yardımcılar ───────────────────────────────────────────────────
 
     private static Border RowShell(string keyPath, FrameworkElement control, TextBlock? status)
     {
-        var grid = new Grid { ColumnSpacing = 16 };
+        var grid = new Grid { ColumnSpacing = 16, RowSpacing = 6 };
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(260) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
         var labelPanel = new StackPanel { Spacing = 2, VerticalAlignment = VerticalAlignment.Center };
         labelPanel.Children.Add(new TextBlock
@@ -359,6 +427,7 @@ public sealed partial class ConfigEditorPage : Page
             TextWrapping = TextWrapping.Wrap,
         });
         Grid.SetColumn(labelPanel, 0);
+        Grid.SetRow(labelPanel, 0);
         grid.Children.Add(labelPanel);
 
         var right = new StackPanel { Spacing = 3, VerticalAlignment = VerticalAlignment.Center };
@@ -368,7 +437,25 @@ public sealed partial class ConfigEditorPage : Page
             right.Children.Add(status);
         }
         Grid.SetColumn(right, 1);
+        Grid.SetRow(right, 0);
         grid.Children.Add(right);
+
+        // Görev F: satırın altına, iki sütunu kaplayan bilgilendirici açıklama (varsa).
+        var description = Services.SettingDescriptions.For(keyPath);
+        if (!string.IsNullOrEmpty(description))
+        {
+            var desc = new TextBlock
+            {
+                Text = description,
+                FontSize = 12,
+                Opacity = 0.65,
+                TextWrapping = TextWrapping.Wrap,
+            };
+            Grid.SetColumn(desc, 0);
+            Grid.SetColumnSpan(desc, 2);
+            Grid.SetRow(desc, 1);
+            grid.Children.Add(desc);
+        }
 
         return new Border
         {

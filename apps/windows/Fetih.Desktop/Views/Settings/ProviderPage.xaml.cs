@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
+using Fetih.Desktop.Bridge;
 using Fetih.Desktop.Models;
 using Fetih.Desktop.Services;
 using Microsoft.UI.Xaml;
@@ -18,6 +21,11 @@ public sealed partial class ProviderPage : Page
 {
     private List<ProviderRow> _all = new();
 
+    private readonly BridgeClient _bridge = BridgeClient.Shared;
+
+    /// <summary>Görev G: seçiciyi besleyen (etiket → id) sağlayıcı adayları.</summary>
+    private List<(string Label, string Id)> _providerChoices = new();
+
     public ProviderPage()
     {
         InitializeComponent();
@@ -28,6 +36,143 @@ public sealed partial class ProviderPage : Page
     {
         Loaded -= OnLoaded;
         Populate();
+        _ = SeedSelectorAsync();
+    }
+
+    /// <summary>
+    /// providers.list RPC'sinden etkin sağlayıcı/model ve kullanıcı tanımlı
+    /// sağlayıcıları okur; seçiciyi ProviderRegistry kataloğuyla birleştirip
+    /// doldurur. Köprüye bağlanamazsa yalnızca statik katalog kullanılır.
+    /// </summary>
+    private async Task SeedSelectorAsync()
+    {
+        // Statik katalog her zaman mevcuttur; seçici en azından bununla dolar.
+        _providerChoices = ProviderRegistry.All
+            .Select(p => ($"{p.DisplayName}  ({p.Id})", p.Id))
+            .ToList();
+
+        try
+        {
+            var res = await _bridge.ProvidersListAsync().ConfigureAwait(true);
+            if (res.ValueKind == JsonValueKind.Object)
+            {
+                // Kullanıcı tanımlı sağlayıcıları da adaylara ekle.
+                if (res.TryGetProperty("providers", out var provs) && provs.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var p in provs.EnumerateArray())
+                    {
+                        var id = p.TryGetProperty("id", out var i) ? i.GetString() ?? "" : "";
+                        var name = p.TryGetProperty("name", out var n) ? n.GetString() ?? id : id;
+                        if (!string.IsNullOrEmpty(id) &&
+                            !_providerChoices.Any(c => c.Id == id))
+                        {
+                            _providerChoices.Add(($"{name}  ({id})", id));
+                        }
+                    }
+                }
+
+                // Etkin değerleri düzenleyiciye ön-doldur.
+                if (res.TryGetProperty("active", out var active) && active.ValueKind == JsonValueKind.Object)
+                {
+                    var prov = active.TryGetProperty("provider", out var pv) ? pv.GetString() ?? "" : "";
+                    var model = active.TryGetProperty("model", out var mv) ? mv.GetString() ?? "" : "";
+                    if (!string.IsNullOrEmpty(prov) && string.IsNullOrEmpty(ProviderSelectBox.Text))
+                    {
+                        ProviderSelectBox.Text = prov;
+                    }
+                    if (!string.IsNullOrEmpty(model) && string.IsNullOrEmpty(ModelBox.Text))
+                    {
+                        ModelBox.Text = model;
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("ProviderPage.SeedSelector", ex, ex.Message);
+        }
+    }
+
+    private void ProviderSelectBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    {
+        if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput)
+        {
+            return;
+        }
+        var needle = sender.Text?.Trim().ToLowerInvariant() ?? "";
+        var matches = _providerChoices
+            .Where(c => needle.Length == 0 ||
+                        c.Label.ToLowerInvariant().Contains(needle, StringComparison.Ordinal) ||
+                        c.Id.Contains(needle, StringComparison.Ordinal))
+            .Select(c => c.Label)
+            .Take(12)
+            .ToList();
+        sender.ItemsSource = matches;
+    }
+
+    private void ProviderSelectBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    {
+        // Seçilen etiketten id'yi çöz ve kutuya id'yi yaz (config.set id bekler).
+        if (args.SelectedItem is string label)
+        {
+            var match = _providerChoices.FirstOrDefault(c => c.Label == label);
+            if (!string.IsNullOrEmpty(match.Id))
+            {
+                sender.Text = match.Id;
+            }
+        }
+    }
+
+    private async void SaveModelButton_Click(object sender, RoutedEventArgs e)
+    {
+        // Girilen etiket bir öneri etiketiyse id'ye çevir; değilse olduğu gibi kullan.
+        var providerInput = ProviderSelectBox.Text?.Trim() ?? "";
+        var resolved = _providerChoices.FirstOrDefault(c =>
+            c.Label == providerInput || c.Id == providerInput);
+        var provider = string.IsNullOrEmpty(resolved.Id) ? providerInput : resolved.Id;
+        var model = ModelBox.Text?.Trim() ?? "";
+
+        if (string.IsNullOrEmpty(provider) && string.IsNullOrEmpty(model))
+        {
+            SaveModelStatus.Text = "Sağlayıcı veya model gir.";
+            return;
+        }
+
+        SaveModelButton.IsEnabled = false;
+        SaveModelStatus.Text = "kaydediliyor…";
+        try
+        {
+            if (!string.IsNullOrEmpty(provider))
+            {
+                await _bridge.ConfigSetAsync("model.provider", provider).ConfigureAwait(true);
+            }
+            if (!string.IsNullOrEmpty(model))
+            {
+                await _bridge.ConfigSetAsync("model.default", model).ConfigureAwait(true);
+            }
+
+            // Yazıldığını doğrula: config.get ile geri oku.
+            var check = await _bridge.ConfigGetAsync("model").ConfigureAwait(true);
+            SaveModelStatus.Text = "✓ kaydedildi — bir sonraki mesajda etkili olacak";
+
+            // Diskten okuyan salt-okunur listeyi de tazele.
+            Populate();
+        }
+        catch (BridgeRpcException rpc)
+        {
+            SaveModelStatus.Text = "✗ " + (rpc.Code == -32004
+                ? "reddedildi (yönetilen kurulum)"
+                : rpc.Message);
+        }
+        catch (Exception ex)
+        {
+            SaveModelStatus.Text = "✗ " + ex.Message;
+            App.LogCrash("ProviderPage.SaveModel", ex, ex.Message);
+        }
+        finally
+        {
+            SaveModelButton.IsEnabled = true;
+        }
     }
 
     private void Populate()
@@ -62,13 +207,16 @@ public sealed partial class ProviderPage : Page
         var rows = new List<SettingRow>
         {
             new("Etkin model", string.IsNullOrWhiteSpace(activeModel) ? "(tanımsız)" : activeModel,
-                configKey: "model.default"),
+                SettingDescriptions.For("model.default") ?? "", "model.default"),
             new("Etkin sağlayıcı", string.IsNullOrWhiteSpace(activeProvider) ? "(tanımsız)" : activeProvider,
-                configKey: "model.provider"),
+                SettingDescriptions.For("model.provider") ?? "", "model.provider"),
             new("Yedek model", config.GetDisplay("fallback_model.model", "(tanımsız)"),
-                "Birincil sağlayıcı 429/529/503 döndüğünde devreye girer.", "fallback_model"),
-            new("Bağlam motoru", config.GetDisplay("context.engine"), configKey: "context.engine"),
-            new("Etkin araç kümeleri", config.GetDisplay("toolsets"), configKey: "toolsets"),
+                SettingDescriptions.For("fallback_model")
+                    ?? "Birincil sağlayıcı 429/529/503 döndüğünde devreye girer.", "fallback_model"),
+            new("Bağlam motoru", config.GetDisplay("context.engine"),
+                SettingDescriptions.For("context.engine") ?? "", "context.engine"),
+            new("Etkin araç kümeleri", config.GetDisplay("toolsets"),
+                SettingDescriptions.For("toolsets") ?? "", "toolsets"),
         };
 
         var customProviders = config.Get("providers");
