@@ -118,3 +118,45 @@ def test_bridge_findings_ctf_flag_detection():
     flag_match = re.search(r"(?:CTF|FLAG|fetih)\{[A-Za-z0-9_\-!@#$%^&*+=]+\}", flag_text, re.IGNORECASE)
     assert flag_match is not None
     assert flag_match.group(0) == "fetih{byp4ss_s3cur1ty_ch3ck_2026}"
+
+
+def test_setup_steps_oauth_provider_auth_coverage():
+    """Verify SetupSteps.cs has EnsureProviderAuthStep in pipeline before VerifyEndToEndStep."""
+    setup_steps_cs = REPO_ROOT / "apps" / "windows" / "Fetih.Desktop" / "Setup" / "SetupSteps.cs"
+    assert setup_steps_cs.exists()
+    content = setup_steps_cs.read_text(encoding="utf-8")
+
+    assert "class EnsureProviderAuthStep" in content
+    assert "new EnsureProviderAuthStep()" in content
+
+    # Verify order in BuildDefaultSteps:
+    # EnsureProviderAuthStep must come after StartDesktopBridgeStep and before VerifyEndToEndStep
+    bridge_idx = content.find("new StartDesktopBridgeStep()")
+    auth_idx = content.find("new EnsureProviderAuthStep()")
+    verify_idx = content.find("new VerifyEndToEndStep()")
+
+    assert bridge_idx > 0
+    assert auth_idx > bridge_idx, "EnsureProviderAuthStep must be scheduled after StartDesktopBridgeStep"
+    assert verify_idx > auth_idx, "VerifyEndToEndStep must be scheduled after EnsureProviderAuthStep"
+
+
+def test_setup_window_handles_oauth_browser_and_cli_login():
+    """Verify SetupWindow.xaml.cs handles both CliLogin and OAuthBrowser."""
+    setup_win_cs = REPO_ROOT / "apps" / "windows" / "Fetih.Desktop" / "SetupWindow.xaml.cs"
+    assert setup_win_cs.exists()
+    content = setup_win_cs.read_text(encoding="utf-8")
+
+    assert "case ProviderKind.OAuthBrowser:" in content
+    assert "ProviderKind.OAuthBrowser" in content
+
+
+def test_auth_commands_add_dispatch_support():
+    """Verify both google-gemini-cli and openai-codex have real login handlers in auth_commands."""
+    auth_cmds = REPO_ROOT / "fetih_cli" / "auth_commands.py"
+    assert auth_cmds.exists()
+    content = auth_cmds.read_text(encoding="utf-8")
+
+    assert 'if provider == "google-gemini-cli":' in content
+    assert 'if provider == "openai-codex":' in content
+    assert "run_gemini_oauth_login_pure" in content
+    assert "_codex_device_code_login" in content

@@ -256,6 +256,7 @@ public sealed partial class SetupWindow : Window
                 break;
 
             case ProviderKind.CliLogin:
+            case ProviderKind.OAuthBrowser:
                 CliLoginSection.Visibility = Visibility.Visible;
                 CliLoginBar.Severity = InfoBarSeverity.Informational;
                 CliLoginBar.Title = "Tarayıcı oturumu gerekiyor";
@@ -392,10 +393,11 @@ public sealed partial class SetupWindow : Window
     /// </summary>
     private async void CliLogin_Click(object sender, RoutedEventArgs e)
     {
-        if (_selected is not { Kind: ProviderKind.CliLogin } p)
+        if (_selected is not ({ Kind: ProviderKind.CliLogin } or { Kind: ProviderKind.OAuthBrowser }))
         {
             return;
         }
+        var p = _selected;
 
         if (!BridgeLauncherProbe.HasUsablePython(out var python))
         {
@@ -446,7 +448,7 @@ public sealed partial class SetupWindow : Window
 
     private void CliLoginCheck_Click(object sender, RoutedEventArgs e)
     {
-        if (_selected is { Kind: ProviderKind.CliLogin } p)
+        if (_selected is { Kind: ProviderKind.CliLogin or ProviderKind.OAuthBrowser } p)
         {
             _ = CheckCliLoginAsync(p, announceOnly: false);
         }
@@ -571,7 +573,7 @@ public sealed partial class SetupWindow : Window
 
     private void BackToProvider_Click(object sender, RoutedEventArgs e) => GoToPhase(2);
 
-    private void ProviderInstall_Click(object sender, RoutedEventArgs e)
+    private async void ProviderInstall_Click(object sender, RoutedEventArgs e)
     {
         var p = SelectedProvider();
         if (p is null)
@@ -591,6 +593,28 @@ public sealed partial class SetupWindow : Window
         {
             KeyHint.Text = "Bu sağlayıcı bir API anahtarı gerektirir; lütfen anahtarı gir.";
             return;
+        }
+
+        // OAuth sağlayıcılarında ön denetim: Henüz oturum açılmamışsa kullanıcıyı uyar ve giriş akışını tetikle
+        if (p.Kind is ProviderKind.CliLogin or ProviderKind.OAuthBrowser)
+        {
+            try
+            {
+                var res = await Bridge.BridgeClient.Shared.ProvidersAuthStatusAsync(p.Id).ConfigureAwait(true);
+                var loggedIn = res.TryGetProperty("logged_in", out var li) && li.GetBoolean();
+                if (!loggedIn)
+                {
+                    CliLoginBar.Severity = InfoBarSeverity.Warning;
+                    CliLoginBar.Title = "Oturum açılması gerekiyor";
+                    CliLoginBar.Message = $"{p.DisplayName} ile devam etmek için lütfen 'Oturum aç' ile tarayıcıda girişi tamamlayın.";
+                    CliLogin_Click(sender, e);
+                    return;
+                }
+            }
+            catch
+            {
+                // Köprü henüz ayakta değilse pipeline EnsureProviderAuthStep aşamasında ele alacaktır
+            }
         }
 
         GoToPhase(3);

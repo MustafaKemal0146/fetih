@@ -25,6 +25,7 @@ public static class SetupStepFactory
         new WriteEnvKeyStep(),
         new WriteConfigStep(),
         new StartDesktopBridgeStep(),
+        new EnsureProviderAuthStep(),
         new VerifyEndToEndStep(),
     };
 }
@@ -193,6 +194,125 @@ public sealed class StartDesktopBridgeStep : SetupStep
     {
         await BridgeClient.Shared.EnsureConnectedAsync(ct).ConfigureAwait(false);
         return StepResult.Ok("Köprü bağlı (protokol v" + BridgeClient.Shared.ProtocolVersion + ").");
+    }
+}
+
+/// <summary>
+/// OAuth / CLI tabanlı oturum gerektiren sağlayıcılar (Gemini CLI, OpenAI Codex, Qwen, xAI vb.)
+/// için kimlik doğrulamasının gerçekten tamamlandığını denetler. Önceden oturum açılmamışsa
+/// kullanıcının oturum açabilmesi için görünür bir konsol penceresi açar ve sonucunu doğrular.
+/// </summary>
+public sealed class EnsureProviderAuthStep : SetupStep
+{
+    public override string Id => "ensure_provider_auth";
+    public override string DisplayName => "Sağlayıcı oturumu denetleniyor";
+
+    public override Task<bool> CanSkipAsync(SetupContext ctx)
+    {
+        // 1. API anahtarı girilmişse bu adım atlanır (zaten WriteEnvKeyStep yazdı).
+        if (!string.IsNullOrWhiteSpace(ctx.ApiKey))
+        {
+            return Task.FromResult(true);
+        }
+
+        // 2. Sağlayıcı yerel sunucuysa (Ollama, LM Studio, Custom) kimlik doğrulama gerekmez.
+        var p = ProviderRegistry.ById(ctx.ProviderId);
+        if (p is not null && p.Kind == ProviderKind.LocalServer)
+        {
+            return Task.FromResult(true);
+        }
+
+        // 3. AWS SDK kimlik zinciri kullanılıyorsa atla.
+        if (p is not null && p.Kind == ProviderKind.AwsSdk)
+        {
+            return Task.FromResult(true);
+        }
+
+        return Task.FromResult(false);
+    }
+
+    public override async Task<StepResult> ExecuteAsync(SetupContext ctx, CancellationToken ct)
+    {
+        var provider = ctx.ProviderId;
+        if (string.IsNullOrWhiteSpace(provider))
+        {
+            return StepResult.Fail("Sağlayıcı kimliği belirtilmedi.");
+        }
+
+        // 1. Köprü üzerinden oturum durumunu denetle (zaten giriş yapılmış mı?)
+        try
+        {
+            await BridgeClient.Shared.EnsureConnectedAsync(ct).ConfigureAwait(false);
+            var status = await BridgeClient.Shared.ProvidersAuthStatusAsync(provider, ct).ConfigureAwait(false);
+            if (status.TryGetProperty("logged_in", out var li) && li.GetBoolean())
+            {
+                var email = status.TryGetProperty("email", out var em) ? em.GetString() : null;
+                var accountInfo = string.IsNullOrWhiteSpace(email) ? "" : $" ({email})";
+                return StepResult.Ok($"Oturum doğrulandı{accountInfo}.");
+            }
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("EnsureProviderAuthStep.CheckInitial", ex, ex.Message);
+        }
+
+        // 2. Henüz oturum açılmamışsa, kullanıcı için gerçek OAuth / CLI giriş sürecini başlat
+        if (!BridgeLauncherProbe.HasUsablePython(out var python))
+        {
+            return StepResult.Fail("Giriş akışını çalıştırmak için Python bulunamadı.");
+        }
+
+        try
+        {
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = python,
+                UseShellExecute = true, // Kendi konsol penceresini açsın (cihaz kodu / tarayıcı yönlendirmesi için)
+                WorkingDirectory = FetihPaths.RepoRootOrCurrent,
+            };
+            psi.ArgumentList.Add("-m");
+            psi.ArgumentList.Add("fetih_cli");
+            psi.ArgumentList.Add("auth");
+            psi.ArgumentList.Add("add");
+            psi.ArgumentList.Add(provider);
+
+            var proc = System.Diagnostics.Process.Start(psi);
+            if (proc is null)
+            {
+                return StepResult.Fail($"Giriş süreci başlatılamadı ({python} -m fetih_cli auth add {provider}).");
+            }
+
+            await proc.WaitForExitAsync(ct).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            return StepResult.Fail("Giriş işlemi iptal edildi.");
+        }
+        catch (Exception ex)
+        {
+            return StepResult.Fail($"Giriş akışı sırasında hata: {ex.Message}");
+        }
+
+        // 3. Giriş süreci bittikten sonra oturumun gerçekten açıldığını doğrula
+        try
+        {
+            await BridgeClient.Shared.EnsureConnectedAsync(ct).ConfigureAwait(false);
+            var status = await BridgeClient.Shared.ProvidersAuthStatusAsync(provider, ct).ConfigureAwait(false);
+            if (status.TryGetProperty("logged_in", out var li) && li.GetBoolean())
+            {
+                var email = status.TryGetProperty("email", out var em) ? em.GetString() : null;
+                var accountInfo = string.IsNullOrWhiteSpace(email) ? "" : $" ({email})";
+                return StepResult.Ok($"Oturum başarıyla açıldı{accountInfo}.");
+            }
+        }
+        catch (Exception ex)
+        {
+            return StepResult.Fail($"Giriş doğrulanamadı: {ex.Message}");
+        }
+
+        return StepResult.Fail(
+            $"{provider} için oturum açma akışı tamamlanmadı. " +
+            "Lütfen açılan tarayıcıda veya konsolda oturum açma işlemini tamamlayıp yeniden deneyin.");
     }
 }
 
