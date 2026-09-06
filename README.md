@@ -1,3 +1,5 @@
+<div align="center">
+
 ```
  ███████╗███████╗████████╗██╗██╗  ██╗
  ██╔════╝██╔════╝╚══██╔══╝██║██║  ██║
@@ -7,32 +9,39 @@
  ╚═╝     ╚══════╝   ╚═╝   ╚═╝╚═╝  ╚═╝
 ```
 
-<p align="center">
-  <strong>CTF · Pentest · OSINT · Red Team — terminalde çalışan otonom yapay zeka ajanı</strong><br/>
-  Python · 20+ AI sağlayıcı · 912+ skill · Gateway · MCP · Docker · Kalıcı bellek
-</p>
+### ⚔️ Terminalde **ve** Windows masaüstünde çalışan otonom siber güvenlik yapay zeka ajanı
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white"/>
-  <img src="https://img.shields.io/badge/PyPI-fetih--agent-FFD43B?style=flat-square&logo=pypi&logoColor=black"/>
-  <img src="https://img.shields.io/badge/Lisans-GPL--v3-22c55e?style=flat-square"/>
-  <img src="https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-blue?style=flat-square"/>
-  <img src="https://img.shields.io/badge/Docker-Destekleniyor-2496ED?style=flat-square&logo=docker&logoColor=white"/>
-</p>
+**CTF · Pentest · OSINT · Red Team** — 20+ AI sağlayıcı · 912+ skill · Gateway · MCP · Docker · Kalıcı bellek
 
-<p align="center">
-  <a href="#-kurulum">Kurulum</a> ·
-  <a href="#-ctf--pentest-kullanımı">CTF & Pentest</a> ·
-  <a href="#-ai-sağlayıcıları">AI Sağlayıcıları</a> ·
-  <a href="#-skill-sistemi">Skill Sistemi</a> ·
-  <a href="#-gateway">Gateway</a>
-</p>
+<br/>
+
+<img src="https://img.shields.io/badge/⚔️_CTF-Ready-b91c1c?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/🛡️_Pentest-Ready-b91c1c?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/🔍_OSINT-Ready-b91c1c?style=for-the-badge"/>
+<img src="https://img.shields.io/badge/🖥️_Windows_App-YENİ-f59e0b?style=for-the-badge"/>
+
+<br/><br/>
+
+<img src="https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white"/>
+<img src="https://img.shields.io/badge/.NET-10-512BD4?style=flat-square&logo=dotnet&logoColor=white"/>
+<img src="https://img.shields.io/badge/WinUI-3-0078D6?style=flat-square&logo=windows&logoColor=white"/>
+<img src="https://img.shields.io/badge/AI_Sağlayıcı-20%2B-8b5cf6?style=flat-square"/>
+<img src="https://img.shields.io/badge/Skill-912%2B-ec4899?style=flat-square"/>
+<img src="https://img.shields.io/badge/Lisans-GPL--v3-22c55e?style=flat-square"/>
+<img src="https://img.shields.io/badge/Platform-Linux%20·%20macOS%20·%20Windows-blue?style=flat-square"/>
+<img src="https://img.shields.io/badge/Docker-Destekleniyor-2496ED?style=flat-square&logo=docker&logoColor=white"/>
+
+<br/><br/>
+
+### 📥 [**İndir & Kur**](#-kurulum) &nbsp;·&nbsp; 🖥️ [**Windows Masaüstü**](#️-fetih-masaüstü-windows) &nbsp;·&nbsp; 🚩 [**CTF & Pentest**](#-ctf--pentest-kullanımı) &nbsp;·&nbsp; 🤖 [**AI Sağlayıcıları**](#-ai-sağlayıcıları) &nbsp;·&nbsp; 🧩 [**Skill Sistemi**](#-skill-sistemi) &nbsp;·&nbsp; 🌐 [**Gateway**](#-gateway)
+
+</div>
 
 ---
 
 ## FETIH Nedir?
 
-FETIH, terminalde çalışan Türkçe/İngilizce destekli bir yapay zeka ajanıdır. Kod yazar, test çalıştırır, CTF challenge'ları çözer, pentest akışları yürütür ve raporlar üretir. İstediğin 20'den fazla AI sağlayıcısına bağlanır — ne pahalı bir API'ye kilitlisin, ne de tek bir modele.
+FETIH, hem terminalde hem de **modern bir Windows masaüstü uygulamasında** çalışan, Türkçe/İngilizce destekli bir siber güvenlik yapay zeka ajanıdır. Kod yazar, test çalıştırır, CTF challenge'ları çözer, pentest akışları yürütür ve raporlar üretir. İstediğin 20'den fazla AI sağlayıcısına bağlanır — ne pahalı bir API'ye kilitlisin, ne de tek bir modele.
 
 Temel fark: FETIH **öğrenir ve kendini geliştirir**. Karmaşık görevleri tamamlayınca otomatik skill oluşturur, bu skill'leri sonraki kullanımda iyileştirir, konuşmalarında önemli bilgileri hatırlar. Telegram'dan mesaj at, cloud VM'de çalışsın — dizüstüne bağlı kalmana gerek yok.
 
@@ -40,7 +49,7 @@ Temel fark: FETIH **öğrenir ve kendini geliştirir**. Karmaşık görevleri ta
 
 ```mermaid
 flowchart TD
-    A([Kullanıcı / Telegram / Discord]) --> B[Araştır\ngrep · web · nmap · shodan]
+    A([Kullanıcı / Masaüstü App / Telegram / Discord]) --> B[Araştır\ngrep · web · nmap · shodan]
     B --> C[Planla\nRisk analizi · adım sırası]
     C --> D{Plan Modu\nAçık mı?}
     D -- Evet --> E[/Kullanıcı Onayı/]
@@ -66,12 +75,48 @@ flowchart TD
 
 ---
 
+## 🖥️ FETİH Masaüstü (Windows)
+
+> **YENİ:** FETİH artık sadece bir terminal aracı değil — **WinUI 3 · .NET 10** ile geliştirilmiş, tamamen native bir Windows masaüstü uygulamasına sahip. Terminale hiç dokunmadan, çift tıkla aç, sohbet et, tara.
+
+<div align="center">
+
+| 🎯 Bileşen | Ne Sunar? |
+|---|---|
+| 🪄 **Akıllı Kurulum Sihirbazı** | Ortalanmış, nokta göstergeli modern akış. Otomatik Python tespiti; sağlayıcı türüne göre **dinamik form** — API anahtarı, tarayıcı/OAuth girişi (Gemini CLI · Codex) ya da yerel **Ollama** yoklaması. |
+| 💬 **Canlı Sohbet** | Akıcı token-token yanıt, araç çalıştırma kartları (🔧 çalışıyor → tamamlandı), modern sağ/sol hizalı balonlar, `Ctrl+Enter` ile gönder. |
+| 🚩 **Bulgular (Findings) Paneli** | Gerçek zamanlı güvenlik taraması + ajanın yakaladığı **CTF bayraklarını** (`fetih{...}`, `CTF{...}`) otomatik algılayıp listeleyen canlı panel. |
+| 🧩 **Yetenekler (Skills)** | **912+** güvenlik becerisini görsel arayüzden ara, filtrele, çalıştır. |
+| 🔌 **Masaüstü Köprüsü** | Python çalışma zamanı ile WinUI kabuğu arasında yerel, çift yönlü **WebSocket / NDJSON JSON-RPC** mimarisi — hızlı ve güvenli (loopback + token). |
+| ⚙️ **Detaylı Ayarlar** | Sade sayfalar (günlük kullanım) + tüm ham anahtarların olduğu **Detaylı Mod**. Model/sağlayıcı seçimi, kabuk (Git Bash / WSL), izinler, sandbox — hepsi arayüzden. |
+
+</div>
+
+### 🚀 Hızlı Masaüstü Kurulumu
+
+```powershell
+# 1) Tek tıkla kurulum paketi (önerilen):
+#    packaging/windows/build-installer.ps1 ile üretilen
+#    Fetih-Setup-win-x64.exe dosyasına çift tıkla — gerisini installer halleder.
+
+# 2) Taşınabilir (portable) — kurulum yok, doğrudan çalıştır:
+dist\win-x64\Fetih.Desktop.exe
+
+# 3) Komut satırından (geliştirici):
+dotnet run --project apps\windows\Fetih.Desktop
+```
+
+> 💡 Installer, `fetih.cmd` launcher'ı ve `PYTHONPATH` ortamını **otomatik** ayarlar — elle PATH uğraşı yok.
+
+---
+
 ## Neden FETIH?
 
 | | **FETIH** | ChatGPT | Claude Code | Cursor | diğer CLI |
 |---|---|---|---|---|---|
 | AI Sağlayıcı sayısı | **20+** | 1 | 1 | çoklu | 1–5 |
 | Terminal / CLI | ✓ | ✓ | ✓ | kısmi | ✓ |
+| **Native Windows masaüstü (GUI)** | **✓ WinUI 3** | ✗ | ✗ | ✗ | ✗ |
 | Gerçek shell erişimi | ✓ | kısmi | ✓ | kısmi | bazıları |
 | CTF araç seti | **✓ (MCP köprüsü)** | ✗ | ✗ | ✗ | ✗ |
 | Pentest araç entegrasyonu | ✓ | ✗ | ✗ | ✗ | ✗ |
@@ -85,7 +130,7 @@ flowchart TD
 
 ---
 
-## CTF & Pentest Kullanımı
+## 🚩 CTF & Pentest Kullanımı
 
 FETIH'i CTF ve penetrasyon testlerinde kullanmak için özel bir kurulum gerekmez — sadece ilgili profili etkinleştir ve hedefe yönelt.
 
@@ -101,10 +146,8 @@ fetih --model deepseek/deepseek-r1     # Ücretsiz, thinking modeli — crypto m
 # 2. CTF profilini etkinleştir
 fetih config set profile ctf
 
-# 3. Challenge klasörüne gir
+# 3. Challenge klasörüne gir ve FETIH'e ver
 cd /home/ctf/challenge-2025/
-
-# 4. FETIH'e ver
 fetih -p "bu klasördeki tüm challenge'ları çöz, flag'leri flags.txt'e yaz"
 ```
 
@@ -116,72 +159,61 @@ fetih config set profile pentest
 
 # Hedef tara (SADECE YETKİLİ SİSTEMLERDE)
 fetih -p "hedef.local adresini tara: subdomain, port, web zafiyet, SSL sertifika"
-
-# Ya da interaktif modda
-fetih
-> /tools pentest          # Pentest araç setini etkinleştir
-> "hedef.local'in giriş sayfasını SQLi ve XSS açısından analiz et"
 ```
 
 ---
 
 ### CTF Kategorileri ve Yaklaşımlar
 
-FETIH'e herhangi bir challenge dosyası veya metni verdiğinde hangi araçları kullanacağını, hangi sırada deneyeceğini ve başarısız olursa nasıl geri döneceğini kendisi belirler. Aşağıdaki kategorilerde nasıl davrandığını görebilirsin:
+FETIH'e herhangi bir challenge dosyası verdiğinde hangi araçları, hangi sırada kullanacağını ve başarısız olursa nasıl geri döneceğini kendisi belirler.
 
-#### Kriptografi
+<details>
+<summary><b>🔐 Kriptografi</b></summary>
 
 ```
-# Classic encoding:
 sen: "bu string'i çöz: aGVsbG8gd29ybGQ="
 FETIH: Base64 decode → "hello world"
 
-# Çok katmanlı:
 sen: "enc.txt → recursive decode et"
 FETIH: Hex → Base64 → ROT13 → Caesar(13) → XOR(0x41) → flag{}
 
-# RSA (n, e, c verildiğinde):
 sen: "n=..., e=65537, c=... — RSA çöz"
 FETIH: factordb lookup → Fermat factorization → Wiener attack → flag
 
-# Modern:
 sen: "Bu AES-CBC ciphertext'te padding oracle açığı var mı?"
 FETIH: Padding oracle Python template üretir → saldırı kodu çalıştırır
 ```
+</details>
 
-#### Steganografi
+<details>
+<summary><b>🖼️ Steganografi</b></summary>
 
 ```
-# PNG:
 sen: "challenge.png'de gizlenmiş flag var"
 FETIH: LSB analiz (R/G/B/A kanalları) → alpha channel → görsel fark → flag
 
-# Ses:
 sen: "audio.wav'i incele"
 FETIH: DTMF tone decode → WAV LSB → Morse analiz → spektogram (vision ile) → flag
-
-# Görüntü analizi (VLM):
-sen: "bu fotoğraftaki yazıyı oku"
-FETIH: Bağlı AI modelinin vision kapasitesini kullanır → OCR + QR fallback
 ```
+</details>
 
-#### Binary / Reverse Engineering
+<details>
+<summary><b>⚙️ Binary / Reverse Engineering</b></summary>
 
 ```
-# Statik analiz:
 sen: "./binary'yi analiz et"
 FETIH: file + strings + objdump + readelf → NX/PIE/canary tespiti → zafiyet
 
-# Buffer overflow:
 sen: "buffer overflow var, exploit yaz"
 FETIH: cyclic pattern → offset hesapla → ROP gadget ara → shellcode üret → exploit
 
-# Remote:
 sen: "challenge.tld:1337'ye bağlan"
 FETIH: pwntools remote() wrapper → socket → exploit zinciri çalıştırır
 ```
+</details>
 
-#### Web
+<details>
+<summary><b>🌐 Web</b></summary>
 
 ```
 sen: "login.php'yi test et"
@@ -190,35 +222,42 @@ FETIH: SQLi (error-based, blind) → XSS → LFI → IDOR → dizin keşfi → p
 sen: "JWT token'ı kır: eyJ..."
 FETIH: Decode → alg:none saldırı → HMAC brute-force → claim forge → admin token
 ```
+</details>
 
-#### Forensics / OSINT
+<details>
+<summary><b>🔎 Forensics / OSINT</b></summary>
 
 ```
-# Dosya analizi:
 sen: "memory.dmp'den flag çıkar"
-FETIH: strings sweep → volatility/volatility3 → cmdline geçmişi → flag
+FETIH: strings sweep → volatility3 → cmdline geçmişi → flag
 
 sen: "bu PCAP'te ne var?"
 FETIH: Binary parser → HTTP/FTP/DNS stream → cleartext credential → flag
 
-# OSINT:
 sen: "hedef.com hakkında OSINT topla"
 FETIH: whois → DNS TXT/MX/NS → Shodan → cert.sh → LinkedIn/GitHub → rapor
 ```
+</details>
 
 ---
 
-### Senaryo: Tek Komutla 6 Challenge
+### 💥 Vitrin: Toplu & Paralel Çözüm
+
+**Tek komutla çok sayıda challenge** — sırayla ya da her kategori ayrı terminalde paralel:
 
 ```bash
-fetih --auto -p "
-/home/ctf/final/ klasöründeki 6 challenge'ı sırayla çöz.
-Her birini analiz et, flag formatı flag{...} olan string'i bul,
-sonuçları ./flags.txt dosyasına yaz ve hangi araçları kullandığını açıkla.
-"
+# Tek komut, sıralı çözüm:
+fetih --auto -p "/home/ctf/final/ klasöründeki tüm challenge'ları çöz,
+                 flag{...} formatındaki string'leri ./flags.txt'e yaz,
+                 hangi araçları kullandığını açıkla."
+
+# Ya da paralel — her kategori kendi terminalinde, farklı model:
+cd /ctf/crypto    && fetih --auto -p "tüm challenge'ları çöz, flag'leri kaydet"   # ucuz düşünen model
+cd /ctf/pwn       && fetih --auto -p "binary'leri analiz et, exploitleri yaz"     # kod odaklı model
+cd /ctf/forensics && fetih --auto -p ".pcap, .dmp, .raw dosyalarını incele"
 ```
 
-FETIH ne yapar:
+FETIH'in tipik çıktısı:
 ```
 [chal1.png]  → LSB R kanalı → flag{lsb_hidden_r}
 [audio.wav]  → DTMF Goertzel decode → 0258# → flag{dtmf_0258}
@@ -230,153 +269,108 @@ FETIH ne yapar:
 
 ---
 
-### Senaryo: Paralel Sınav Modu
-
-Büyük CTF'lerde her kategori için ayrı terminal açıp hepsini aynı anda çalıştır:
-
-```bash
-# Terminal 1 — Crypto
-cd /ctf/crypto && fetih --auto -p "tüm challenge'ları çöz, flag'leri kaydet"
-
-# Terminal 2 — Web
-cd /ctf/web && fetih --auto -p "her URL'yi ctf_web_analyzer ile tara"
-
-# Terminal 3 — PWN
-cd /ctf/pwn && fetih --auto -p "binary'leri analiz et, exploitlari yaz"
-
-# Terminal 4 — Forensics
-cd /ctf/forensics && fetih --auto -p ".pcap, .dmp, .raw dosyalarını incele"
-```
-
-Her terminal bağımsız, AI modeli farklı olabilir. Crypto için ucuz düşünen model, PWN için kod odaklı model.
-
----
-
-### Senaryo: Pentest Raporu
+### 📄 Vitrin: Pentest Raporu
 
 ```bash
 fetih
-
 > /tools pentest
-> "hedef.com alan adını kapsamlı tara:
->  - Subdomain keşfi
->  - Açık portlar ve servisler
->  - Web uygulaması zafiyetleri
->  - SSL/TLS konfigürasyon sorunları
->  - Bulunanları önem sırasına göre raporla"
+> "hedef.com'u kapsamlı tara: subdomain keşfi, açık portlar,
+>  web zafiyetleri, SSL/TLS sorunları — önem sırasına göre raporla"
 
-# FETIH sırayla yapar:
-#  subfinder/amass → subdomain listesi
-#  nmap SYN scan → port/servis/versiyon
-#  nuclei → template bazlı zafiyet tarama
-#  nikto → web başlık analizi
-#  testssl.sh → SSL sorunları
-#  Tüm bulguları birleştirir, CVSS skorlar, markdown rapor üretir
+# FETIH sırayla: subfinder/amass → nmap → nuclei → nikto → testssl.sh
+# Tüm bulguları birleştirir, CVSS skorlar, markdown rapor üretir.
 
 > /export pdf    # PDF raporu oluştur
 ```
 
 ---
 
-## AI Sağlayıcıları
+## 🤖 AI Sağlayıcıları
 
-FETIH 20'den fazla AI sağlayıcısına bağlanır. Hepsini `fetih model` komutuyla değiştirebilir, bir sonraki oturumda farklı sağlayıcı kullanabilirsin. Kod değişikliği yok, lock-in yok.
-
-### Bağlanma
+FETIH 20'den fazla AI sağlayıcısına bağlanır. Hepsini `fetih model` komutuyla ya da masaüstü uygulamasının **Model & Sağlayıcı** sayfasından değiştirebilirsin. Kod değişikliği yok, lock-in yok.
 
 ```bash
 # Başlatırken sağlayıcı belirt:
 fetih --model claude-sonnet-4-6
-fetih --model gpt-4o
 fetih --model gemini/gemini-2.5-pro
-fetih --model openrouter/deepseek/deepseek-r1
 fetih --model ollama/qwen2.5-coder:32b          # Yerel, ücretsiz, offline
 
 # Çalışırken değiştir:
 fetih model
 
-# API anahtarı ayarla:
-fetih config set api_key ANTHROPIC_API_KEY sk-ant-...
+# Tarayıcı / OAuth ile giriş (API anahtarı gerekmez):
+fetih auth add google-gemini-cli                 # Google Gemini hesabınla
+fetih auth add openai-codex                       # ChatGPT / Codex hesabınla
 ```
+
+> 🔑 **Yeni:** Gemini CLI ve OpenAI Codex/ChatGPT için artık API anahtarı yapıştırmana gerek yok — masaüstü kurulum sihirbazı (ya da `fetih auth add`) **tarayıcı/cihaz kodu OAuth** akışını başlatır, hesabınla tek tıkla giriş yaparsın.
 
 ### Sağlayıcı Tablosu
 
-| Sağlayıcı | Env Değişkeni | Özellik | CTF/Pentest için |
-|-----------|---------------|---------|-----------------|
+| Sağlayıcı | Env / Giriş | Özellik | CTF/Pentest için |
+|-----------|-------------|---------|-----------------|
 | **Anthropic (Claude)** | `ANTHROPIC_API_KEY` | Güçlü kod analizi, vision | ✓ Kod/RE/exploit |
 | **OpenAI (GPT-4o)** | `OPENAI_API_KEY` | Güçlü vision, genel | ✓ Stego/görsel |
+| **OpenAI Codex / ChatGPT** | 🔑 OAuth (tarayıcı) | Hesapla giriş | ✓ Genel |
 | **Google Gemini** | `GEMINI_API_KEY` | 2M token bağlam | ✓ Büyük dump dosyaları |
+| **Google Gemini CLI** | 🔑 OAuth (tarayıcı) | Hesapla giriş | ✓ Genel |
 | **Groq** | `GROQ_API_KEY` | En hızlı çıkarım (~900 tok/s) | ✓ Hızlı iterasyon |
 | **DeepSeek** | `DEEPSEEK_API_KEY` | Thinking mode, ucuz | ✓ Crypto/matematik |
 | **OpenRouter** | `OPENROUTER_API_KEY` | 200+ model tek API | ✓ Farklı model dene |
-| **Mistral** | `MISTRAL_API_KEY` | Avrupa gizliliği | ✓ Veri gizliliği önemse |
+| **Mistral** | `MISTRAL_API_KEY` | Avrupa gizliliği | ✓ Veri gizliliği |
 | **xAI (Grok)** | `XAI_API_KEY` | Gerçek zamanlı web | ✓ OSINT/web lookup |
-| **Cohere** | `COHERE_API_KEY` | RAG odaklı | — |
-| **Together AI** | `TOGETHER_API_KEY` | Açık ağırlıklı modeller | ✓ Llama/Mistral |
-| **Fireworks** | `FIREWORKS_API_KEY` | Hızlı inference | ✓ Hız gerektiğinde |
-| **Perplexity** | `PERPLEXITY_API_KEY` | Web aramalı yanıt | ✓ OSINT |
 | **Ollama** | — (yerel) | Ücretsiz, offline, gizli | ✓ Hassas hedefler |
 | **LM Studio** | — (yerel) | GUI ile yerel model | ✓ Air-gap ortam |
-| **Azure OpenAI** | `AZURE_OPENAI_API_KEY` | Kurumsal | ✓ Kurum pentesti |
-| **Vertex AI** | `GOOGLE_APPLICATION_CREDENTIALS` | GCP | ✓ |
-| **AWS Bedrock** | AWS credentials | AWS | ✓ |
-| **NVIDIA NIM** | `NVIDIA_API_KEY` | Nemotron | ✓ |
-| **HuggingFace** | `HF_TOKEN` | Açık model hub | ✓ |
-| **Kimi/Moonshot** | `MOONSHOT_API_KEY` | Uzun bağlam | ✓ |
+| **Together / Fireworks** | ilgili API key | Açık ağırlıklı, hızlı | ✓ Llama/Mistral |
+| **Perplexity** | `PERPLEXITY_API_KEY` | Web aramalı yanıt | ✓ OSINT |
+| **Azure / Vertex / Bedrock** | bulut kimlik | Kurumsal | ✓ Kurum pentesti |
+| **NVIDIA NIM · HuggingFace · Kimi** | ilgili API key | Nemotron / hub / uzun bağlam | ✓ |
 
-**CTF önerisi:** Ücretsiz başlamak için Ollama (yerel) + `qwen2.5-coder:32b` model, ağır analiz için `claude-sonnet-4-6` veya `gemini-2.5-pro`.
-
-**Pentest önerisi:** `deepseek-r1` (ucuz + düşünen) günlük kullanım, raporlama için `claude-sonnet-4-6`.
+**CTF önerisi:** Ücretsiz başlamak için Ollama (yerel) + `qwen2.5-coder:32b`; ağır analiz için `claude-sonnet-4-6` veya `gemini-2.5-pro`.
 
 ```bash
 # Ücretsiz yerel model kurulumu (Ollama):
 curl -fsSL https://ollama.com/install.sh | sh
 ollama pull qwen2.5-coder:32b          # 20GB — güçlü kod modeli
-ollama pull llama3.3:70b               # 43GB — genel güçlü model
-
 fetih --model ollama/qwen2.5-coder:32b
 ```
 
+> 💡 Masaüstü kurulum sihirbazında **Ollama** seçersen, FETİH bilgisayarındaki yerel modelleri otomatik tespit edip listeler — API anahtarı sormaz.
+
 ---
 
-## CTF / Pentest Araç Deposu
+## 🧰 CTF / Pentest Araç Deposu
 
-FETIH, **83 araç** ve **9 kategori** ile kurulu gelir. İlk kurulumda otomatik sorar; sonradan tek komutla indirilir:
+FETIH, **83 araç** ve **9 kategori** ile kurulu gelir. İlk kurulumda otomatik sorar; sonradan tek komutla:
 
 ```bash
 fetih download-tools            # interaktif menü
 fetih download-tools all        # hepsini kur
 fetih download-tools basic      # temel set (nmap, sqlmap, pwntools, gdb, binwalk...)
 fetih download-tools status     # hangisi kurulu göster
-fetih download-tools network    # sadece ağ araçları
-fetih download-tools web        # sadece web araçları
-fetih download-tools binary     # binary/exploit
-fetih download-tools forensics  # disk forensics
-fetih download-tools stego      # steganografi
-fetih download-tools crypto     # kriptografi kütüphaneleri
-fetih download-tools mobile     # Android/mobil
-fetih download-tools osint      # OSINT
 ```
 
-### Araç Kataloğu (83 araç)
-
-| Kategori | Araçlar | Yöntem |
-|----------|---------|--------|
-| **Ağ Keşif** (15) | nmap, masscan, arp-scan, dnsenum, fierce, rustscan, tshark, wireshark, scapy, pyshark, subfinder, amass, waybackurls, gau, assetfinder | apt/pip/go/cargo |
-| **Web Saldırı** (16) | sqlmap, nikto, nuclei, dalfox, ffuf, gobuster, feroxbuster, arjun, wafw00f, wpscan, katana, hakrawler, smuggler, httpx, aiohttp, racepwn | apt/pip/go/gem |
-| **Sızma Testi** (6) | hydra, john, hashcat, netexec, haiti-hash, metasploit | apt/pip/script |
-| **Binary/Exploit** (11) | gdb, pwntools, radare2, ropper, checksec, one_gadget, angr, z3-solver, seccomp-tools, pwndbg, ghidra | apt/pip/gem/git/deb |
-| **Kriptografi** (5) | pycryptodome, gmpy2, sympy, fpylll, padding-oracle | pip |
-| **Disk Forensics** (15) | binwalk, foremost, testdisk, sleuthkit, autopsy, exiftool, ewf-tools, ntfs-3g, volatility3, pypykatz, analyzeMFT, pytsk3, bless, wxhexeditor, wrk | apt/pip |
-| **Steganografi** (9) | steghide, zsteg, stegoveritas, stegseek, stegolsb, ffmpeg, sox, audacity, sonic-visualiser | apt/pip/gem/deb |
-| **Mobil** (4) | androguard, frida-tools, objection, ntfs-tools | pip |
-| **OSINT** (2) | maigret, sherlock | pip |
+| Kategori | Örnek Araçlar |
+|----------|---------|
+| **Ağ Keşif** (15) | nmap, masscan, rustscan, tshark, subfinder, amass, gau |
+| **Web Saldırı** (16) | sqlmap, nikto, nuclei, dalfox, ffuf, gobuster, wpscan, httpx |
+| **Sızma Testi** (6) | hydra, john, hashcat, netexec, metasploit |
+| **Binary/Exploit** (11) | gdb, pwntools, radare2, ropper, checksec, angr, z3, ghidra |
+| **Kriptografi** (5) | pycryptodome, gmpy2, sympy, fpylll, padding-oracle |
+| **Disk Forensics** (15) | binwalk, foremost, sleuthkit, exiftool, volatility3, pypykatz |
+| **Steganografi** (9) | steghide, zsteg, stegseek, ffmpeg, sox, sonic-visualiser |
+| **Mobil** (4) | androguard, frida-tools, objection |
+| **OSINT** (2) | maigret, sherlock |
 
 ---
 
-## Kurulum
+## 📦 Kurulum
 
-### Linux / macOS / WSL2
+### 🖥️ Windows — Native Masaüstü (en kolay)
+
+Yukarıdaki [**FETİH Masaüstü**](#️-fetih-masaüstü-windows) bölümüne bak: `Fetih-Setup-win-x64.exe` ile çift tıkla kur, ya da portable `.exe`'yi doğrudan çalıştır. Kurulum sihirbazı Python, sağlayıcı ve modeli senin için ayarlar.
+
+### 🐧 Linux / macOS / WSL2 (terminal)
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/MustafaKemal0146/fetih/main/scripts/install.sh | bash
@@ -384,77 +378,35 @@ source ~/.bashrc   # veya source ~/.zshrc
 fetih              # başlat
 ```
 
-### Windows (PowerShell)
+### 🪟 Windows — Terminal (PowerShell)
 
 ```powershell
 irm https://raw.githubusercontent.com/MustafaKemal0146/fetih/main/scripts/install.ps1 | iex
 ```
 
-#### Windows — Manuel / Geliştirici Kurulumu
+<details>
+<summary><b>🛠️ Sorun Giderme — <code>fetih</code> komutu tanınmıyor</b></summary>
 
-Eğer yukarıdaki tek satırlık installer çalışmazsa ya da geliştirme modunda kurmak istiyorsan:
-
-```powershell
-# 1. Repoyu klonla
-git clone https://github.com/MustafaKemal0146/fetih.git
-cd fetih\fetih
-
-# 2. Bağımlılıkları kur (computer-use dahil)
-py -m pip install -e .[computer-use]
-
-# 3. Komutu test et
-fetih --version
-```
-
-`fetih` komutu tanınmıyorsa Scripts klasörü PATH'te olmayabilir:
+Native installer ve `fetih.cmd` launcher'ı PATH'i otomatik ayarlar. Yine de manuel/geliştirici kurulumunda komut bulunamazsa Scripts klasörünü PATH'e ekle:
 
 ```powershell
-# Scripts klasörünün tam yolunu öğren
-py -c "import sysconfig; print(sysconfig.get_path('scripts'))"
-
-# Örnek çıktı: C:\Users\kullanici\AppData\Local\Programs\Python\Python313\Scripts
-# Bu yolu kalıcı olarak PATH'e ekle:
 $scriptsPath = py -c "import sysconfig; print(sysconfig.get_path('scripts'))"
 [Environment]::SetEnvironmentVariable("PATH", "$env:PATH;$scriptsPath", "User")
-
-# Terminali kapat/aç, sonra test et:
-fetih --version
+# Terminali kapat/aç, sonra: fetih --version
 ```
+</details>
 
-#### Windows — Computer-Use (Masaüstü Kontrol)
-
-Computer-use özelliği `pip install -e .[computer-use]` ile otomatik kurulur.
-Kurulum doğrulaması:
-
-```powershell
-# Bağımlılıkları kontrol et
-py -c "import pyautogui, PIL; print('pyautogui:', pyautogui.__version__); print('pillow OK')"
-
-# FETIH içinde computer-use'u etkinleştir:
-fetih
-> /computer-use on
-```
-
-Etkinleştirildiğinde TUI durum çubuğu kırmızıya döner. Fareyi ekranın sol üst köşesine (0, 0) götürünce kontrol durur (FAILSAFE).
-
-### Docker
+### 🐳 Docker
 
 ```bash
 docker run -it --rm \
   -e ANTHROPIC_API_KEY=sk-ant-... \
   -v "$HOME/.fetih:/opt/data" \
-  ghcr.io/mustafakemal0146/fetih
-
-# Tam araç seti için (nmap, sqlmap, nuclei vb. dahil):
-docker run -it --rm \
-  -e ANTHROPIC_API_KEY=sk-ant-... \
-  -e OPENAI_API_KEY=sk-... \
-  -v "$HOME/.fetih:/opt/data" \
   --network host \
   ghcr.io/mustafakemal0146/fetih
 ```
 
-### Geliştirici Kurulumu (uv)
+### 👷 Geliştirici Kurulumu (uv)
 
 ```bash
 git clone https://github.com/MustafaKemal0146/fetih.git
@@ -462,14 +414,9 @@ cd fetih
 uv sync --extra all
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 fetih --version
-
-# Computer-use özelliğiyle:
-uv sync --extra all --extra computer-use
-fetih
-# > /computer-use on
 ```
 
-### Termux (Android)
+### 📱 Termux (Android)
 
 ```bash
 pkg install python nodejs-lts ripgrep
@@ -479,357 +426,211 @@ fetih
 
 ---
 
-## Skill Sistemi
+## 🧩 Skill Sistemi
 
-FETIH'in en güçlü özelliklerinden biri **skill** sistemidir. Bir skill, tekrar eden görevleri tek komutla çalıştırmanı sağlayan yapılandırılmış bir iş akışıdır. FETIH kataloğunda **912+** hazır skill bulunur; kendi skill'lerini de yazabilirsin.
+FETIH'in en güçlü özelliklerinden biri **skill** sistemidir. Bir skill, tekrar eden görevleri tek komutla çalıştırmanı sağlayan yapılandırılmış bir iş akışıdır. Kataloğunda **912+** hazır skill bulunur; kendi skill'lerini de yazabilirsin. Masaüstü uygulamasının **Yetenekler** sayfasından görsel olarak ara ve çalıştır.
 
-> **Yeni:** [ljagiello/ctf-skills](https://github.com/ljagiello/ctf-skills) (107 referans dosya) ve [Eyadkelleh/awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) (SecLists + LLM testing + agent/command seti) entegre edildi.
-
-### Skill Kullanımı
+> **Entegre:** [ljagiello/ctf-skills](https://github.com/ljagiello/ctf-skills) (107 referans dosya) ve [Eyadkelleh/awesome-claude-skills-security](https://github.com/Eyadkelleh/awesome-claude-skills-security) (SecLists + LLM testing + agent/command seti).
 
 ```bash
-# Yüklü skill'leri listele
-fetih skills
-
-# Skill çalıştır
+fetih skills                       # yüklü skill'leri listele
 fetih /skill pentest-web hedef.com
 fetih /skill ctf-crypto enc.txt
 fetih /skill osint-domain hedef.com
-fetih /skill code-review src/
-
-# İnteraktif modda
-fetih
-> /pentest-web hedef.com
-> /osint-domain mustafa.com
 ```
-
-### Hazır Skill Örnekleri (CTF & Güvenlik)
 
 | Skill | Ne Yapar? |
 |-------|-----------|
-| `pentest-web` | Tam web application pentest: SQLi, XSS, LFI, IDOR, auth bypass |
+| `pentest-web` | Tam web pentest: SQLi, XSS, LFI, IDOR, auth bypass |
 | `pentest-network` | Ağ tarama + servis tespiti + zafiyet analizi |
-| `ctf-crypto` | Dosya/metin verildiğinde encoding katmanlarını çözer |
-| `ctf-forensics` | PCAP, dump, image dosyalarından flag çıkarır |
-| `osint-domain` | Alan adı OSINT: whois, DNS, cert, subdomain, wayback |
-| `osint-person` | Kişi araştırması: sosyal medya, e-posta, ihlal veritabanları |
-| `bug-bounty` | Web uygulaması kapsamlı bug bounty tarama akışı |
+| `ctf-crypto` | Encoding katmanlarını çözer |
+| `ctf-forensics` | PCAP, dump, image'dan flag çıkarır |
+| `osint-domain` | whois, DNS, cert, subdomain, wayback |
+| `bug-bounty` | Kapsamlı bug bounty tarama akışı |
 | `code-audit` | Güvenlik açısından kaynak kod denetimi |
-| `malware-analysis` | Statik ve dinamik zararlı yazılım analizi |
-| `report-generate` | Tüm bulguları profesyonel pentest raporu haline getirir |
+| `report-generate` | Bulguları profesyonel rapora dönüştürür |
 
-### Kendi Skill'ini Yaz
+<details>
+<summary><b>✍️ Kendi Skill'ini Yaz</b></summary>
 
-`~/.fetih/skills/ctf-pwn-auto/SKILL.md` oluştur:
+`~/.fetih/skills/ctf-pwn-auto/SKILL.md`:
 
 ```markdown
 ---
 name: ctf-pwn-auto
-description: Binary dosyası verildiğinde checksec + exploit zinciri otomatik çalıştır
+description: Binary verildiğinde checksec + exploit zinciri otomatik çalıştır
 tools: [bash, file_read]
 ---
 
 Verilen binary dosyasını analiz et: {{params}}
-
-Adımlar:
-1. checksec ile güvenlik bayraklarını kontrol et (NX, PIE, canary, RELRO)
-2. strings ile ilginç string'leri bul
-3. objdump/readelf ile fonksiyon listesi çıkar
-4. Buffer overflow varsa cyclic pattern ile offset hesapla
-5. İşe yarar exploit zinciri oluştur (ret2win, ret2libc, ROP)
-6. Exploit'i yaz ve çalıştır
+1. checksec ile güvenlik bayrakları (NX, PIE, canary, RELRO)
+2. strings + objdump/readelf ile fonksiyon listesi
+3. Buffer overflow varsa cyclic pattern ile offset
+4. Exploit zinciri oluştur (ret2win, ret2libc, ROP) ve çalıştır
 ```
 
 ```bash
 fetih /skill ctf-pwn-auto ./pwn_challenge
 ```
+</details>
 
 ---
 
-## Gateway
+## 🌐 Gateway
 
-FETIH, yalnızca terminal uygulaması değil — **gateway** modu ile Telegram, Discord ve diğer platformlardan da kullanılabilir. Bir kez çalıştır, her yerden eriş.
+FETIH, terminal ve masaüstü dışında **gateway** modu ile Telegram, Discord ve diğer platformlardan da kullanılabilir. Bir kez çalıştır, her yerden eriş.
 
 ```bash
-# Gateway kurulumu
 fetih gateway setup       # Tüm platformları tek sihirbazla yapılandır
 fetih gateway start       # Arka planda başlat
 fetih gateway status      # Aktif bağlantıları göster
 ```
 
-### Desteklenen Platformlar
-
-| Platform | Durum | Nasıl Kullanılır? |
-|----------|-------|-------------------|
-| **Telegram** | Stabil | Botu başlat, `TELEGRAM_BOT_TOKEN` ekle |
-| **Discord** | Stabil | Bot daveti, `DISCORD_BOT_TOKEN` ekle |
-| **Slack** | Stabil | Workspace kurulumu, `SLACK_BOT_TOKEN` ekle |
-| **WhatsApp** | Beta | Baileys bridge, QR kodu tara |
-| **Signal** | Beta | signal-cli ile |
-| **Matrix** | Beta | Matrix homeserver bağlantısı |
-| **API (REST)** | Stabil | HTTP endpoint — kendi integrasyon yazabilirsin |
-
-### Telegram ile CTF
+| Platform | Durum | Nasıl? |
+|----------|-------|--------|
+| **Telegram** | Stabil | `TELEGRAM_BOT_TOKEN` ekle |
+| **Discord** | Stabil | `DISCORD_BOT_TOKEN` ekle |
+| **Slack** | Stabil | `SLACK_BOT_TOKEN` ekle |
+| **WhatsApp** | Beta | Baileys bridge, QR tara |
+| **Signal / Matrix** | Beta | signal-cli / homeserver |
+| **API (REST)** | Stabil | HTTP endpoint |
 
 ```
-# Telefon:
+# Telefondan CTF:
 sen → Telegram bot: "pwn1 binary'sini analiz et"
-FETIH → checksec çalıştırır, offset hesaplar, exploit yazar
-FETIH → Telegram: "flag{buffer_overflow_pwned} — offset: 72, ret2win: 0x401196"
-
-# Uzak VM'deyken laptop kapatılabilir — FETIH çalışmaya devam eder
-```
-
-```bash
-# Telegram bot kurulumu
-export TELEGRAM_BOT_TOKEN=1234567890:ABC...
-fetih gateway start --platform telegram
+FETIH → checksec → offset → exploit → "flag{buffer_overflow_pwned} (offset: 72)"
+# Uzak VM'deyken laptop kapatılabilir — FETIH çalışmaya devam eder.
 ```
 
 ---
 
-## Özellikler
+## ✨ Öne Çıkan Özellikler
 
-### Kalıcı Bellek
+<details>
+<summary><b>🧠 Kalıcı Bellek</b></summary>
 
-FETIH iki katmanlı bellek sistemi kullanır:
-
-**Otomatik Bellek** — Konuşma sonunda AI önemli bilgileri otomatik kaydeder:
-```
-FETIH: "Bu hedefe daha önce baktım — subdomain listesi var,
-        önceki taramada port 8080'de Jenkins 2.3 bulunmuştu (CVE-2024-...)"
-```
-
-**Manuel Bellek:**
+**Otomatik:** Konuşma sonunda AI önemli bilgileri kaydeder ve sonraki oturumda hatırlar.
 ```bash
 fetih memory add user    "Kali Linux 2025.1, ağ: 10.10.10.0/24"
-fetih memory add project "Bu proje OWASP Top 10 odaklı — auth bypass öncelik"
 fetih memory add feedback "Raporları Türkçe yaz"
 ```
+</details>
 
-### Multi-Agent (Paralel)
+<details>
+<summary><b>🚀 Multi-Agent (Paralel)</b></summary>
 
-Büyük görevleri birden fazla alt ajana böler:
+```
+> "hedef.com'u tara: subdomain, port, web zafiyet — paralel çalıştır"
+  [Ajan 1] subfinder → 47 subdomain
+  [Ajan 2] nmap SYN → 12 açık port
+  [Ajan 3] nuclei → 2 kritik CVE
+  Koordinatör birleştirir → tek rapor
+```
+</details>
+
+<details>
+<summary><b>⏰ Hooks & Cron</b></summary>
 
 ```bash
-> "hedef.com'u tara: subdomain, port, web zafiyet — hepsini paralel çalıştır"
-
-# FETIH yapar:
-#  [Ajan 1] subfinder → 47 subdomain
-#  [Ajan 2] nmap SYN → 12 açık port
-#  [Ajan 3] nuclei → 2 kritik CVE
-#  Koordinatör birleştirir → tek rapor
+fetih cron add cve-watch "0 8 * * *" "dün yayımlanan kritik CVE'leri kontrol et, raporla"
 ```
+</details>
 
-### Hooks & Otomasyon
+<details>
+<summary><b>👁️ Vision (Görsel Analiz)</b></summary>
 
-`~/.fetih/hooks.json`:
-```json
-[
-  { "event": "PostToolUse", "tool": "bash",
-    "command": "notify-send 'FETIH tamamladı'", "async": true },
-  { "event": "OnResponse",
-    "command": "echo '[FETIH]' >> ~/pentest.log" }
-]
 ```
-
-### Cron (Zamanlanmış Görev)
-
-```bash
-# Her sabah CVE feed kontrolü
-fetih cron add cve-watch "0 8 * * *" "dün yayımlanan kritik CVE'leri kontrol et, ilgili olanları raporla"
-
-# Haftalık otomatik tarama
-fetih cron add weekly-scan "0 9 * * 1" "hedef.local haftalık ağ taraması — değişiklikleri raporla"
+sen: "captcha.png'deki kodu oku"      → bağlı modelin vision'ı → "X9K7AP"
+sen: "bu görselde gizli bir şey var mı?" → LSB + metadata + görsel analiz
 ```
-
-### Vision (Görsel Analiz)
-
-```bash
-# Captcha çöz:
-sen: "captcha.png'deki kodu oku"
-FETIH: Bağlı modelin vision kapasitesini kullanır → "X9K7AP"
-
-# Stego:
-sen: "bu görsel içinde gizlenmiş bir şey var mı?"
-FETIH: Görsel analizi + LSB kontrol + metadata tarama
-
-# Ekran görüntüsü:
-sen: "screenshot.png'deki kod güvenli mi?"
-FETIH: OCR → kod çıkarır → güvenlik analizi yapar
-```
+</details>
 
 ---
 
-## Komutlar
-
-### CLI Komutları
+## ⌨️ Komutlar
 
 ```bash
 fetih                          # İnteraktif mod
-fetih -p "görev açıkla"       # Tek seferlik (headless)
-fetih --auto -p "görev"       # Onaysız otonom mod
+fetih -p "görev açıkla"        # Tek seferlik (headless)
+fetih --auto -p "görev"        # Onaysız otonom mod
 fetih model                    # AI modeli/sağlayıcı değiştir
-fetih tools                    # Araç yapılandırması
-fetih config                   # Ayarlar
-fetih gateway                  # Gateway yönetimi
-fetih skills                   # Skill kataloğu
-fetih memory                   # Bellek yönetimi
-fetih cron                     # Zamanlanmış görevler
+fetih auth add <sağlayıcı>     # OAuth / kimlik ekle (gemini-cli, openai-codex...)
+fetih tools · config · gateway · skills · memory · cron
 fetih doctor                   # Ortam sağlık kontrolü
 fetih update                   # Sürüm güncelle
 ```
 
-### İnteraktif Mod Komutları
-
-| Komut | Açıklama |
+| İnteraktif Komut | Açıklama |
 |-------|----------|
-| `/help` | Tüm komutları listele |
-| `/model` | AI modeli değiştir |
-| `/tools` | Araç profilini değiştir (`ctf`, `pentest`, `code`, `all`) |
-| `/memory` | Kalıcı belleği görüntüle |
-| `/skills` | Skill listesi |
-| `/<skill-adı>` | Skill çalıştır |
-| `/checkpoint` | Konuşma anını kaydet |
-| `/compress` | Geçmişi özetle (token tasarrufu) |
-| `/export [md\|json\|pdf]` | Konuşmayı dışa aktar |
-| `/status` | Aktif görevler, token kullanımı |
-| `Ctrl+C` | İşlemi iptal et |
-| `Esc` | AI yanıtını durdur |
+| `/help` · `/model` · `/tools` | Yardım · model · araç profili (`ctf`, `pentest`, `code`, `all`) |
+| `/skills` · `/<skill-adı>` | Skill listesi / çalıştır |
+| `/memory` · `/checkpoint` · `/compress` | Bellek · kayıt · geçmiş özeti |
+| `/export [md\|json\|pdf]` · `/status` | Dışa aktar · durum |
+| `Ctrl+C` · `Esc` | İptal · yanıtı durdur |
 
 ---
 
-## Yapılandırma
-
-### Ortam Değişkenleri
-
-```bash
-# ~/.bashrc veya ~/.zshrc içine ekle:
-
-export ANTHROPIC_API_KEY=sk-ant-...
-export OPENAI_API_KEY=sk-...
-export GEMINI_API_KEY=AIza...
-export GROQ_API_KEY=gsk_...
-export DEEPSEEK_API_KEY=sk-...
-export OPENROUTER_API_KEY=sk-or-...
-export XAI_API_KEY=xai-...
-export MISTRAL_API_KEY=...
-
-# Gateway:
-export TELEGRAM_BOT_TOKEN=...
-export DISCORD_BOT_TOKEN=...
-export SLACK_BOT_TOKEN=...
-```
-
-### Proje Talimatları
-
-Çalışma dizininde `FETIH.md` veya `CLAUDE.md` dosyası varsa otomatik yüklenir:
-
-```markdown
-# FETIH.md
-Bu bir pentest projesidir. Hedef: 10.10.10.0/24 ağı.
-- Raporları Türkçe yaz
-- Flag formatı: THM{...} veya HTB{...}
-- Her adımı açıkla — öğrenme amaçlı
-```
-
----
-
-## Mimari
+## 🏗️ Mimari
 
 ```
 fetih/
-├── fetih_cli/
-│   ├── main.py               # CLI giriş noktası (fetih komutu)
-│   ├── commands.py           # Slash komutları
-│   ├── config.py             # Yapılandırma yönetimi
-│   ├── auth.py               # API anahtar yönetimi
-│   └── tui_dist/             # Terminal UI (ink/React)
-├── agent/
-│   ├── loop.py               # Ajan döngüsü
-│   ├── prompt_builder.py     # Sistem prompt oluşturma
-│   └── coordinator.py        # Multi-agent koordinatör
-├── tools/
-│   ├── bash_tool.py          # Shell erişimi
-│   ├── browser_tool.py       # Web otomasyon (Playwright)
-│   ├── file_tools.py         # Dosya okuma/yazma/düzenleme
-│   ├── web_tools.py          # Web fetch / arama
-│   ├── vision_tool.py        # Görsel analiz (VLM)
-│   └── ctf/                  # CTF araç köprüsü (MCP)
-│       ├── crypto_tools.py   # RSA, AES, hash, JWT, encoding
-│       ├── stego_tools.py    # PNG/WAV LSB, DTMF, spektogram
-│       ├── pwn_tools.py      # Cyclic, checksec, shellcode, ROP
-│       ├── forensics_tools.py# PCAP, memory dump, file carving
-│       └── web_tools.py      # SQLi, XSS, LFI, IDOR
-├── gateway/
-│   ├── telegram/             # Telegram bot
-│   ├── discord/              # Discord bot
-│   ├── slack/                # Slack app
-│   └── whatsapp/             # WhatsApp bridge
-├── skills/
-│   ├── security/             # Pentest, bug bounty, code audit
-│   ├── ctf/                  # CTF kategorileri
-│   ├── osint/                # OSINT iş akışları
-│   └── ...                   # 912+ skill
-└── plugins/                  # Eklenti sistemi
+├── apps/windows/Fetih.Desktop/   # 🖥️ WinUI 3 / .NET 10 modern masaüstü kabuğu
+│   ├── Views/                    #    Sohbet, Yetenekler, Bulgular, Ayarlar
+│   ├── Setup/                    #    Kurulum sihirbazı (adım/rollback/journal)
+│   └── Bridge/                   #    Masaüstü Köprüsü istemcisi (JSON-RPC)
+├── fetih_desktop_bridge/         # 🔌 JSON-RPC masaüstü köprü sunucusu (Python)
+├── packaging/windows/            # 📦 Inno Setup (.iss), build-installer.ps1, fetih.cmd
+├── fetih_cli/                    # CLI giriş noktası, komutlar, auth, config
+├── agent/                        # Ajan döngüsü, prompt, multi-agent koordinatör
+├── tools/                        # bash · browser · file · web · vision · ctf/ (MCP)
+├── gateway/                      # Telegram · Discord · Slack · WhatsApp
+├── skills/                       # 912+ skill (security · ctf · osint ...)
+└── plugins/                      # Eklenti sistemi
 ```
 
 ---
 
-## Gereksinimler
+## 📋 Gereksinimler
 
-- **Python** 3.11+
-- **Node.js** 18+ (TUI için)
-- **uv** (paket yöneticisi — installer otomatik kurar)
+- **Python** 3.11+ · **Node.js** 18+ (TUI) · **uv** (installer otomatik kurar)
+- Masaüstü uygulaması için: **.NET 10** (installer içerir)
 - En az bir AI sağlayıcısı (Ollama ile ücretsiz başlanabilir)
-- **Önerilen:** `ripgrep`, `git`
-- **CTF için:** `nmap`, `sqlmap`, `nuclei`, `ffuf`, `john`, `hashcat`, `binwalk`, `pwntools`
-- **Pentest için:** `nmap`, `sqlmap`, `nikto`, `nuclei`, `subfinder`, `gobuster`, `metasploit`
+- **CTF/Pentest için:** `nmap`, `sqlmap`, `nuclei`, `ffuf`, `john`, `hashcat`, `binwalk`, `pwntools`
 
 ```bash
-# Kali Linux'ta tüm güvenlik araçları zaten mevcut
-# Ubuntu/Debian için hızlı kurulum:
+# Ubuntu/Debian hızlı kurulum:
 sudo apt install nmap sqlmap nikto binwalk foremost ffmpeg tesseract-ocr
 pip install pwntools
 ```
 
 ---
 
-## Katkıda Bulun
+## 🤝 Katkıda Bulun
 
 ```bash
 git clone https://github.com/MustafaKemal0146/fetih.git
-cd fetih
-uv sync --extra all --extra dev
-source .venv/bin/activate
-
-# Test çalıştır:
+cd fetih && uv sync --extra all --extra dev && source .venv/bin/activate
 pytest tests/ -v
-
-# Yeni skill ekle:
-mkdir skills/security/my-skill
-# SKILL.md yaz (bkz. docs/skills.md)
 ```
 
 ---
 
-## Lisans
+## 📜 Lisans
 
-**GNU General Public License v3.0 (GPL-3.0)**
+**GNU General Public License v3.0 (GPL-3.0)** — Copyright © 2026 Mustafa Kemal Çıngıl
 
-Copyright (C) 2026 Mustafa Kemal Çıngıl
+Kaynağı inceleyebilir, değiştirebilir, dağıtabilirsin; değiştirip dağıtırsan/servis olarak sunarsan kaynağı açık paylaşmak zorundasın. Tam metin: [LICENSE](LICENSE)
 
-- Kaynak kodunu inceleyebilir, değiştirebilir ve dağıtabilirsin
-- Değiştirip dağıtırsan kaynak kodunu açık kaynak yapmak zorundasın
-- Ağ üzerinden servis olarak sunarsan kaynak kodunu paylaşmak zorundasın
-- Tam lisans metni: [LICENSE](LICENSE)
-
-> **Etik Kullanım:** FETIH yalnızca yetkili sistemlerde ve yasal sınırlar içinde kullanılmalıdır. Yetkisiz sistemlere erişim yasadışıdır.
+> ⚠️ **Etik Kullanım:** FETIH yalnızca **yetkili sistemlerde** ve yasal sınırlar içinde kullanılmalıdır. Yetkisiz sistemlere erişim yasadışıdır.
 
 ---
 
-<p align="center">
-  <a href="https://github.com/MustafaKemal0146/fetih">GitHub</a> ·
-  <a href="https://github.com/MustafaKemal0146/fetih/issues">Sorun Bildir</a> ·
-  <a href="https://github.com/MustafaKemal0146/fetih/discussions">Tartışma</a>
-</p>
+<div align="center">
+
+### ⚔️ FETİH — Terminalde ve masaüstünde, yanında.
+
+<a href="https://github.com/MustafaKemal0146/fetih"><img src="https://img.shields.io/badge/⭐_GitHub-Yıldız_Ver-181717?style=for-the-badge&logo=github"/></a>
+<a href="https://github.com/MustafaKemal0146/fetih/issues"><img src="https://img.shields.io/badge/🐛_Sorun-Bildir-b91c1c?style=for-the-badge"/></a>
+<a href="https://github.com/MustafaKemal0146/fetih/discussions"><img src="https://img.shields.io/badge/💬_Tartışma-Katıl-8b5cf6?style=for-the-badge"/></a>
+
+</div>
