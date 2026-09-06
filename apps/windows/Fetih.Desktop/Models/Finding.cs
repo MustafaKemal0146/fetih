@@ -1,4 +1,5 @@
 using System;
+using Fetih.Desktop.Services;
 
 namespace Fetih.Desktop.Models;
 
@@ -55,14 +56,14 @@ public sealed class Finding
 
     public DateTimeOffset DiscoveredAt { get; }
 
-    /// <summary>Rozette gösterilen Türkçe ciddiyet etiketi.</summary>
+    /// <summary>Rozette gösterilen ciddiyet etiketi.</summary>
     public string SeverityLabel => Severity switch
     {
-        FindingSeverity.Critical => "Kritik",
-        FindingSeverity.High => "Yüksek",
-        FindingSeverity.Medium => "Orta",
-        FindingSeverity.Low => "Düşük",
-        _ => "Bilgi",
+        FindingSeverity.Critical => Loc.T("findings.severity.critical"),
+        FindingSeverity.High => Loc.T("findings.severity.high"),
+        FindingSeverity.Medium => Loc.T("findings.severity.medium"),
+        FindingSeverity.Low => Loc.T("findings.severity.low"),
+        _ => Loc.T("findings.severity.info"),
     };
 
     /// <summary>Ciddiyete göre tema kaynağı adı (XAML tarafında çözümlenir).</summary>

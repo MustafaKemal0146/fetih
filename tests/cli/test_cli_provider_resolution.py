@@ -388,8 +388,9 @@ def test_cmd_model_falls_back_to_auto_on_invalid_provider(monkeypatch, capsys):
     fetih_main.cmd_model(SimpleNamespace())
     output = capsys.readouterr().out
 
-    assert "Warning:" in output
-    assert "falling back to auto provider detection" in output.lower()
+    assert "Warning:" in output or "Uyarı:" in output
+    assert ("falling back to auto provider detection" in output.lower() or
+            "otomatik sağlayıcı tespitine geçiliyor" in output.lower())
     assert "No change." in output
 
 

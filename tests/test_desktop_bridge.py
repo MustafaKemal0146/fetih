@@ -364,3 +364,23 @@ def test_providers_auth_status_is_presence_only():
     # Whatever the CLI's status dict carries, no credential material crosses.
     for key in res:
         assert not any(hint in key.lower() for hint in ("token", "secret", "api_key", "password"))
+
+
+def test_findings_list_and_scan():
+    server = BridgeServer(require_auth=False)
+    conn = FakeConn(authenticated=True)
+
+    # Initial list is empty
+    res = drive(server, conn, "findings.list")["result"]
+    assert res["total"] == 0
+    assert res["findings"] == []
+
+    # Run scan
+    scan_res = drive(server, conn, "findings.scan")["result"]
+    assert "scanned" in scan_res
+    assert "total_findings" in scan_res
+    assert isinstance(scan_res["findings"], list)
+
+    # Subsequent list returns findings
+    list_res = drive(server, conn, "findings.list")["result"]
+    assert list_res["total"] == scan_res["total_findings"]

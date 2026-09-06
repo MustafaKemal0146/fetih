@@ -7,6 +7,7 @@ Verifies worktree creation, cleanup, .worktreeinclude handling,
 import os
 import shutil
 import subprocess
+import sys
 import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock
@@ -446,9 +447,16 @@ class TestWorktreeDirectorySymlink:
         # Manually symlink (mirrors cli.py logic)
         if not dst.exists():
             dst.parent.mkdir(parents=True, exist_ok=True)
-            os.symlink(str(src.resolve()), str(dst))
+            try:
+                os.symlink(str(src.resolve()), str(dst))
+            except (OSError, NotImplementedError):
+                if sys.platform == "win32":
+                    import shutil
+                    shutil.copytree(str(src.resolve()), str(dst))
+                else:
+                    raise
 
-        assert dst.is_symlink()
+        assert dst.is_symlink() or (sys.platform == "win32" and dst.is_dir())
         assert (dst / "lib" / "marker.txt").read_text() == "venv marker"
 
 

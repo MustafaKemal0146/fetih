@@ -517,13 +517,13 @@ class TestCLIUsageReport:
         output = capsys.readouterr().out
 
         assert "Model:" in output
-        assert "Cost status:" in output
-        assert "Cost source:" in output
-        assert "Total cost:" in output
+        assert "Cost status:" in output or "Maliyet durumu:" in output
+        assert "Cost source:" in output or "Maliyet kaynağı:" in output
+        assert "Total cost:" in output or "Toplam maliyet:" in output
         assert "$" in output
         assert "0.064" in output
-        assert "Session duration:" in output
-        assert "Compressions:" in output
+        assert "Session duration:" in output or "Oturum süresi:" in output
+        assert "Compressions:" in output or "Sıkıştırma:" in output
 
     def test_show_usage_marks_unknown_pricing(self, capsys):
         cli_obj = _attach_agent(
@@ -540,9 +540,10 @@ class TestCLIUsageReport:
         cli_obj._show_usage()
         output = capsys.readouterr().out
 
-        assert "Total cost:" in output
-        assert "n/a" in output
-        assert "Pricing unknown for local/my-custom-model" in output
+        assert "Total cost:" in output or "Toplam maliyet:" in output
+        assert "n/a" in output or "yok" in output
+        assert ("Pricing unknown for local/my-custom-model" in output or
+                "local/my-custom-model için fiyatlandırma bilinmiyor" in output)
 
     def test_zero_priced_provider_models_stay_unknown(self, capsys):
         cli_obj = _attach_agent(
@@ -559,9 +560,10 @@ class TestCLIUsageReport:
         cli_obj._show_usage()
         output = capsys.readouterr().out
 
-        assert "Total cost:" in output
-        assert "n/a" in output
-        assert "Pricing unknown for glm-5" in output
+        assert "Total cost:" in output or "Toplam maliyet:" in output
+        assert "n/a" in output or "yok" in output
+        assert ("Pricing unknown for glm-5" in output or
+                "glm-5 için fiyatlandırma bilinmiyor" in output)
 
 
 class TestStatusBarWidthSource:

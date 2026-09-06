@@ -215,6 +215,8 @@ class TestEscapedSpaces:
         img.parent.mkdir(parents=True, exist_ok=True)
         img.write_bytes(b"\x89PNG\r\n\x1a\n")
         monkeypatch.setenv("HOME", str(home))
+        if os.name == "nt":
+            monkeypatch.setenv("USERPROFILE", str(home))
 
         result = _detect_file_drop("~/storage/shared/Pictures/cat.png what is this?")
 
@@ -227,6 +229,18 @@ class TestEscapedSpaces:
 # ---------------------------------------------------------------------------
 # Tests: edge cases
 # ---------------------------------------------------------------------------
+
+def _can_symlink() -> bool:
+    try:
+        with tempfile.TemporaryDirectory() as d:
+            src = Path(d) / "src"
+            src.write_text("x", encoding="utf-8")
+            lnk = Path(d) / "lnk"
+            lnk.symlink_to(src)
+            return True
+    except OSError:
+        return False
+
 
 class TestEdgeCases:
     def test_path_with_no_extension(self, tmp_path):
@@ -244,6 +258,7 @@ class TestEdgeCases:
         assert result is not None
         assert result["is_image"] is False
 
+    @pytest.mark.skipif(not _can_symlink(), reason="Symlink creation requires elevated privilege on Windows")
     def test_symlink_to_file(self, tmp_image, tmp_path):
         link = tmp_path / "link.png"
         link.symlink_to(tmp_image)

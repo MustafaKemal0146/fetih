@@ -242,13 +242,38 @@ public sealed partial class ChatPage : Page
         try
         {
             var state = InputKeyboardSource.GetKeyStateForCurrentThread(VirtualKey.Control);
-            return state.HasFlag(CoreVirtualKeyStates.Down);
+            if (state.HasFlag(CoreVirtualKeyStates.Down))
+            {
+                return true;
+            }
+        }
+        catch
+        {
+        }
+
+        try
+        {
+            if ((GetKeyState(0x11) & 0x8000) != 0) return true;
+        }
+        catch
+        {
+        }
+
+        try
+        {
+            return (GetAsyncKeyState(0x11) & 0x8000) != 0;
         }
         catch
         {
             return false;
         }
     }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern short GetKeyState(int vKey);
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern short GetAsyncKeyState(int vKey);
 
     /// <summary>
     /// Gönder butonunun etkinliğini ve etiketini bağlantı durumuna göre günceller.

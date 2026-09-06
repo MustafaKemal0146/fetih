@@ -12,7 +12,7 @@
                   VerticalScrollMode="Enabled">
         <StackPanel Padding="24,16,24,32" Spacing="16" MaxWidth="880" HorizontalAlignment="Left">
 
-            <TextBlock Text="Hakkında" Style="{StaticResource PageTitleTextStyle}" />
+            <TextBlock x:Name="PageTitleText" Style="{StaticResource PageTitleTextStyle}" />
 
             <!-- Marka -->
             <Border Style="{StaticResource CardBorderStyle}">
@@ -39,8 +39,7 @@
                     <StackPanel Grid.Column="1" Spacing="4">
                         <TextBlock x:Name="ProductText" FontSize="20" FontWeight="SemiBold" />
                         <TextBlock x:Name="TaglineText" Style="{StaticResource MutedTextStyle}" />
-                        <TextBlock Style="{StaticResource MutedTextStyle}"
-                                   Text="CTF çözümü, sızma testi, OSINT, adli bilişim ve kırmızı takım operasyonları için model-agnostik bir ajan. Masaüstü uygulaması kabuktur; ajan mantığı Python tarafında çalışır." />
+                        <TextBlock x:Name="DescriptionText" Style="{StaticResource MutedTextStyle}" />
                     </StackPanel>
                 </Grid>
             </Border>
@@ -48,7 +47,7 @@
             <!-- Uygulama bilgisi -->
             <Border Style="{StaticResource CardBorderStyle}">
                 <StackPanel>
-                    <TextBlock Text="Uygulama bilgisi" Style="{StaticResource SectionHeaderTextStyle}" />
+                    <TextBlock x:Name="AppInfoSectionHeader" Style="{StaticResource SectionHeaderTextStyle}" />
                     <ItemsControl x:Name="AppRows" ItemTemplate="{StaticResource SettingRowTemplate}" />
                 </StackPanel>
             </Border>
@@ -56,25 +55,22 @@
             <!-- Bağlantılar -->
             <Border Style="{StaticResource CardBorderStyle}">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Bağlantılar" Style="{StaticResource SectionHeaderTextStyle}" />
+                    <TextBlock x:Name="LinksSectionHeader" Style="{StaticResource SectionHeaderTextStyle}" />
                     <HyperlinkButton x:Name="RepoLink"
-                                     Content="Proje deposu — github.com/MustafaKemal0146/fetih"
                                      AutomationProperties.AutomationId="about_repo" />
                     <HyperlinkButton x:Name="ReleasesLink"
-                                     Content="Sürümler ve yayın notları"
                                      AutomationProperties.AutomationId="about_releases" />
-                    <TextBlock Style="{StaticResource MutedTextStyle}"
-                               Margin="12,4,0,0"
-                               Text="Masaüstü uygulaması tasarım belgesi: docs/windows-app-plani.md (depo içinde)" />
+                    <TextBlock x:Name="DesignDocText"
+                               Style="{StaticResource MutedTextStyle}"
+                               Margin="12,4,0,0" />
                 </StackPanel>
             </Border>
 
             <!-- Yasal / kapsam uyarısı -->
-            <InfoBar IsOpen="True"
+            <InfoBar x:Name="DisclaimerInfoBar"
+                     IsOpen="True"
                      IsClosable="False"
-                     Severity="Warning"
-                     Title="Kapsam uyarısı"
-                     Message="FETİH bir saldırı simülasyonu ve güvenlik testi aracıdır. Yalnızca sahibi olduğun ya da yazılı izin aldığın sistemlerde kullan." />
+                     Severity="Warning" />
         </StackPanel>
     </ScrollViewer>
 </Page>

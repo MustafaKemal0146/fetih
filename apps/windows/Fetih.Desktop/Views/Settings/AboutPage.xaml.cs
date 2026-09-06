@@ -16,13 +16,39 @@ public sealed partial class AboutPage : Page
     public AboutPage()
     {
         InitializeComponent();
+        ApplyLanguage();
         Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        Loaded -= OnLoaded;
+        Loc.LanguageChanged += OnLanguageChanged;
         Populate();
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        Loc.LanguageChanged -= OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        ApplyLanguage();
+        Populate();
+    }
+
+    private void ApplyLanguage()
+    {
+        PageTitleText.Text = Loc.T("about.title");
+        DescriptionText.Text = Loc.T("about.desc");
+        AppInfoSectionHeader.Text = Loc.T("about.section.app_info");
+        LinksSectionHeader.Text = Loc.T("about.section.links");
+        RepoLink.Content = Loc.T("about.repo_link");
+        ReleasesLink.Content = Loc.T("about.releases_link");
+        DesignDocText.Text = Loc.T("about.design_doc");
+        DisclaimerInfoBar.Title = Loc.T("about.disclaimer_title");
+        DisclaimerInfoBar.Message = Loc.T("about.disclaimer_message");
     }
 
     private void Populate()
@@ -30,20 +56,20 @@ public sealed partial class AboutPage : Page
         try
         {
             ProductText.Text = AppInfo.ProductName;
-            TaglineText.Text = AppInfo.Tagline;
+            TaglineText.Text = Loc.T("app.tagline");
 
             AppRows.ItemsSource = new List<SettingRow>
             {
-                new("Uygulama adı", AppInfo.ProductName),
-                new("Sürüm", AppInfo.Version),
-                new("Derleme tarihi", AppInfo.BuildDate),
-                new("Çalışma zamanı", $"{AppInfo.RuntimeDescription} · {AppInfo.UiFramework}"),
-                new("Hedef çatı", AppInfo.TargetFramework),
-                new("Mimari", AppInfo.Architecture),
-                new("Windows", AppInfo.OsDescription),
-                new("Kurulum tipi", AppInfo.InstallType,
-                    "MSIX paketleme Faz 4'te eklenecek; şu anki derleme paket kimliği olmadan çalışır."),
-                new("Uygulama klasörü", AppInfo.BaseDirectory),
+                new(Loc.T("about.row.app_name"), AppInfo.ProductName),
+                new(Loc.T("about.row.version"), AppInfo.Version),
+                new(Loc.T("about.row.build_date"), AppInfo.BuildDate),
+                new(Loc.T("about.row.runtime"), $"{AppInfo.RuntimeDescription} · {AppInfo.UiFramework}"),
+                new(Loc.T("about.row.target_framework"), AppInfo.TargetFramework),
+                new(Loc.T("about.row.architecture"), AppInfo.Architecture),
+                new(Loc.T("about.row.windows"), AppInfo.OsDescription),
+                new(Loc.T("about.row.install_type"), AppInfo.InstallType,
+                    Loc.T("about.row.install_desc")),
+                new(Loc.T("about.row.app_dir"), AppInfo.BaseDirectory),
             };
 
             SetLink(RepoLink, AppInfo.RepositoryUrl);

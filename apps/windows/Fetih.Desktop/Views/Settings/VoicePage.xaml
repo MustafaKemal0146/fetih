@@ -12,39 +12,36 @@
                   VerticalScrollMode="Enabled">
         <StackPanel Padding="24,16,24,32" Spacing="16" MaxWidth="920" HorizontalAlignment="Left">
 
-            <TextBlock Text="Ses" Style="{StaticResource PageTitleTextStyle}" />
-            <TextBlock Style="{StaticResource MutedTextStyle}"
-                       Text="FETİH'in ses yetenekleri: metin okuma (TTS), konuşma tanıma (STT) ve bas-konuş kaydı. Değerler ~/.fetih/config.yaml dosyasından okunur." />
+            <TextBlock x:Name="PageTitleText" Style="{StaticResource PageTitleTextStyle}" />
+            <TextBlock x:Name="SubtitleText" Style="{StaticResource MutedTextStyle}" />
 
             <Border Style="{StaticResource CardBorderStyle}">
                 <StackPanel>
-                    <TextBlock Text="Metin okuma (TTS)" Style="{StaticResource SectionHeaderTextStyle}" />
+                    <TextBlock x:Name="TtsHeader" Style="{StaticResource SectionHeaderTextStyle}" />
                     <ItemsControl x:Name="TtsRows" ItemTemplate="{StaticResource SettingRowTemplate}" />
                 </StackPanel>
             </Border>
 
             <Border Style="{StaticResource CardBorderStyle}">
                 <StackPanel>
-                    <TextBlock Text="Konuşma tanıma (STT)" Style="{StaticResource SectionHeaderTextStyle}" />
+                    <TextBlock x:Name="SttHeader" Style="{StaticResource SectionHeaderTextStyle}" />
                     <ItemsControl x:Name="SttRows" ItemTemplate="{StaticResource SettingRowTemplate}" />
                 </StackPanel>
             </Border>
 
             <Border Style="{StaticResource CardBorderStyle}">
                 <StackPanel>
-                    <TextBlock Text="Kayıt davranışı" Style="{StaticResource SectionHeaderTextStyle}" />
+                    <TextBlock x:Name="RecordingHeader" Style="{StaticResource SectionHeaderTextStyle}" />
                     <ItemsControl x:Name="RecordingRows" ItemTemplate="{StaticResource SettingRowTemplate}" />
                 </StackPanel>
             </Border>
 
-            <InfoBar IsOpen="True"
+            <InfoBar x:Name="PhaseInfo"
+                     IsOpen="True"
                      IsClosable="False"
-                     Severity="Informational"
-                     Title="Faz 3"
-                     Message="Bas-konuş girişi ve yanıt okuma masaüstü kabuğuna Faz 3'te bağlanacak. Bu sayfa şimdilik Python tarafındaki gerçek ses yapılandırmasını salt okunur gösterir." />
+                     Severity="Informational" />
 
             <Button x:Name="RefreshButton"
-                    Content="Yeniden oku"
                     AutomationProperties.AutomationId="voice_refresh"
                     Click="RefreshButton_Click" />
         </StackPanel>

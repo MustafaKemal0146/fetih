@@ -61,11 +61,12 @@ class TestCLIQuickCommands:
         cli.console.print.assert_called_once()
 
     def test_exec_command_no_output_shows_fallback(self):
-        cli = self._make_cli({"empty": {"type": "exec", "command": "true"}})
+        cmd = "rem" if os.name == "nt" else "true"
+        cli = self._make_cli({"empty": {"type": "exec", "command": cmd}})
         cli.process_command("/empty")
         cli.console.print.assert_called_once()
         args = cli.console.print.call_args[0][0]
-        assert "no output" in args.lower()
+        assert "no output" in self._printed_plain(args).lower()
 
     def test_alias_command_routes_to_target(self):
         """Alias quick commands rewrite to the target command."""

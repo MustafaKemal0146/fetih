@@ -29,12 +29,44 @@ public sealed partial class ProviderPage : Page
     public ProviderPage()
     {
         InitializeComponent();
+        ApplyLanguage();
         Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
+    }
+
+    private void ApplyLanguage()
+    {
+        PageTitleText.Text = Loc.T("provider.title");
+        SubtitleText.Text = Loc.T("provider.subtitle");
+        ActiveConfigHeader.Text = Loc.T("provider.active_config");
+        ChangeModelHeader.Text = Loc.T("provider.change_model");
+        ChangeModelDesc.Text = Loc.T("provider.change_model_desc");
+        ProviderLabel.Text = Loc.T("provider.label.provider");
+        ModelLabel.Text = Loc.T("provider.label.model");
+        ProviderSelectBox.PlaceholderText = Loc.T("provider.placeholder.provider");
+        ModelBox.PlaceholderText = Loc.T("provider.placeholder.model");
+        SaveModelButton.Content = Loc.T("provider.save");
+        SlotsTitle.Text = Loc.T("provider.slots_title");
+        SlotsIntro.Text = Loc.T("provider.slots_intro");
+        SearchBox.PlaceholderText = Loc.T("provider.search_placeholder");
+        OnlyConfiguredBox.Content = Loc.T("provider.only_configured");
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        Loaded -= OnLoaded;
+        Loc.LanguageChanged += OnLanguageChanged;
+        Populate();
+        _ = SeedSelectorAsync();
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        Loc.LanguageChanged -= OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        ApplyLanguage();
         Populate();
         _ = SeedSelectorAsync();
     }
@@ -524,33 +556,35 @@ public sealed partial class ProviderPage : Page
 
         var rows = new List<SettingRow>
         {
-            new("Etkin model", string.IsNullOrWhiteSpace(activeModel) ? "(tanımsız)" : activeModel,
+            new(SettingDescriptions.LabelFor("model.default"), string.IsNullOrWhiteSpace(activeModel) ? Loc.T("voice.undefined") : activeModel,
                 SettingDescriptions.For("model.default") ?? "", "model.default"),
-            new("Etkin sağlayıcı", string.IsNullOrWhiteSpace(activeProvider) ? "(tanımsız)" : activeProvider,
+            new(SettingDescriptions.LabelFor("model.provider"), string.IsNullOrWhiteSpace(activeProvider) ? Loc.T("voice.undefined") : activeProvider,
                 SettingDescriptions.For("model.provider") ?? "", "model.provider"),
-            new("Yedek model", config.GetDisplay("fallback_model.model", "(tanımsız)"),
+            new(SettingDescriptions.LabelFor("fallback_model"), config.GetDisplay("fallback_model.model", Loc.T("voice.undefined")),
                 SettingDescriptions.For("fallback_model")
-                    ?? "Birincil sağlayıcı 429/529/503 döndüğünde devreye girer.", "fallback_model"),
-            new("Bağlam motoru", config.GetDisplay("context.engine"),
+                    ?? (Loc.Current == UiLanguage.Turkish ? "Birincil sağlayıcı 429/529/503 döndüğünde devreye girer." : "Kicks in when the primary provider returns 429/529/503."), "fallback_model"),
+            new(SettingDescriptions.LabelFor("context.engine"), config.GetDisplay("context.engine"),
                 SettingDescriptions.For("context.engine") ?? "", "context.engine"),
-            new("Etkin araç kümeleri", config.GetDisplay("toolsets"),
+            new(SettingDescriptions.LabelFor("toolsets"), config.GetDisplay("toolsets"),
                 SettingDescriptions.For("toolsets") ?? "", "toolsets"),
         };
 
         var customProviders = config.Get("providers");
         rows.Add(new SettingRow(
-            "Kullanıcı tanımlı sağlayıcılar",
+            Loc.Current == UiLanguage.Turkish ? "Kullanıcı tanımlı sağlayıcılar" : "User-defined providers",
             customProviders is null || customProviders.Kind != YamlKind.Map || customProviders.Map.Count == 0
-                ? "(yok)"
+                ? (Loc.Current == UiLanguage.Turkish ? "(yok)" : "(none)")
                 : string.Join(", ", customProviders.Map.Keys),
-            "config.yaml içindeki providers: bölümüne eklenen özel OpenAI uyumlu uçlar.",
+            Loc.Current == UiLanguage.Turkish
+                ? "config.yaml içindeki providers: bölümüne eklenen özel OpenAI uyumlu uçlar."
+                : "Custom OpenAI-compatible endpoints added under the providers: section in config.yaml.",
             "providers"));
 
         rows.Add(new SettingRow(
-            "Yapılandırma dosyası",
-            service.ConfigExists ? FetihPaths.ConfigYamlPath : $"{FetihPaths.ConfigYamlPath} (yok)",
+            Loc.Current == UiLanguage.Turkish ? "Yapılandırma dosyası" : "Configuration file",
+            service.ConfigExists ? FetihPaths.ConfigYamlPath : $"{FetihPaths.ConfigYamlPath} ({Loc.T("diag.missing")})",
             service.ConfigError ?? (service.ConfigModified is { } modified
-                ? $"Son değişiklik: {modified:dd.MM.yyyy HH:mm}"
+                ? (Loc.Current == UiLanguage.Turkish ? $"Son değişiklik: {modified:dd.MM.yyyy HH:mm}" : $"Last modified: {modified:dd.MM.yyyy HH:mm}")
                 : string.Empty)));
 
         return rows;

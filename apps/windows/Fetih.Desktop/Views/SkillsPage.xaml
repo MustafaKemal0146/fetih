@@ -16,10 +16,9 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Spacing="4">
-            <TextBlock Text="Yetenekler" Style="{StaticResource PageTitleTextStyle}" />
+            <TextBlock x:Name="PageTitleText" Style="{StaticResource PageTitleTextStyle}" />
             <TextBlock x:Name="SummaryText"
-                       Style="{StaticResource MutedTextStyle}"
-                       Text="Yetenek kataloğu taranıyor…" />
+                       Style="{StaticResource MutedTextStyle}" />
         </StackPanel>
 
         <!-- Arama + kategori süzgeci -->

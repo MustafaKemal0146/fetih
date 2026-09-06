@@ -102,7 +102,7 @@ class TestToolsSlashDisableWithReset:
         cli_obj = _make_cli()
         cli_obj._handle_tools_command("/tools disable")
         out = capsys.readouterr().out
-        assert "Usage" in out
+        assert "Usage" in out or "Kullanım" in out
 
 
 # ── /tools enable (session reset) ───────────────────────────────────────────
@@ -127,4 +127,4 @@ class TestToolsSlashEnableWithReset:
         cli_obj = _make_cli()
         cli_obj._handle_tools_command("/tools enable")
         out = capsys.readouterr().out
-        assert "Usage" in out
+        assert "Usage" in out or "Kullanım" in out

@@ -77,6 +77,7 @@ public sealed class BridgeClient : IDisposable
     public event Action<BridgeToolResult>? SessionToolResult;
     public event Action<BridgeDone>? SessionDone;
     public event Action<BridgeErrorEvent>? SessionError;
+    public event Action<JsonElement>? FindingDiscovered;
     public event Action? ConnectionLost;
 
     // ── Bağlantı ────────────────────────────────────────────────────────────
@@ -306,6 +307,13 @@ public sealed class BridgeClient : IDisposable
                         Str(p, "session_id"), Str(p, "error"),
                         p.TryGetProperty("partial", out var pt) ? pt.ToString() : null));
                     break;
+
+                case "findings.discovered":
+                    if (p.TryGetProperty("finding", out var findingEl))
+                    {
+                        FindingDiscovered?.Invoke(findingEl);
+                    }
+                    break;
             }
         }
         catch
@@ -521,6 +529,24 @@ public sealed class BridgeClient : IDisposable
         if (!string.IsNullOrEmpty(distro)) p["distro"] = distro;
         if (!string.IsNullOrEmpty(user)) p["user"] = user;
         return await CallAsync("shell.ensure_user", p, ct).ConfigureAwait(false);
+    }
+
+    /// <summary><c>findings.list</c> — Kaydedilmiş güvenlik bulgularını listeler.</summary>
+    public async Task<JsonElement> FindingsListAsync(string? severity = null, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        var p = new Dictionary<string, object?>();
+        if (!string.IsNullOrEmpty(severity)) p["severity"] = severity;
+        return await CallAsync("findings.list", p, ct).ConfigureAwait(false);
+    }
+
+    /// <summary><c>findings.scan</c> — Yetenekleri veya hedef dizini güvenlik açıklarına karşı tarar.</summary>
+    public async Task<JsonElement> FindingsScanAsync(string? target = null, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        var p = new Dictionary<string, object?>();
+        if (!string.IsNullOrEmpty(target)) p["target"] = target;
+        return await CallAsync("findings.scan", p, ct).ConfigureAwait(false);
     }
 
     /// <summary>

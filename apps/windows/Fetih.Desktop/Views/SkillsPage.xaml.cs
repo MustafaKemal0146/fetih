@@ -16,8 +16,6 @@ namespace Fetih.Desktop.Views;
 /// </summary>
 public sealed partial class SkillsPage : Page
 {
-    private const string AllCategories = "Tüm kategoriler";
-
     private static SkillScanResult? _cache;
 
     private IReadOnlyList<SkillInfo> _all = Array.Empty<SkillInfo>();
@@ -26,13 +24,43 @@ public sealed partial class SkillsPage : Page
     public SkillsPage()
     {
         InitializeComponent();
+        ApplyLanguage();
         Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
+    }
+
+    private void ApplyLanguage()
+    {
+        PageTitleText.Text = Loc.T("skills.title");
+        SearchBox.PlaceholderText = Loc.T("skills.search_placeholder");
+        RefreshButton.Content = Loc.T("common.reload");
+        if (_cache is not null)
+        {
+            _categoryReady = false;
+            BuildCategoryList(_cache);
+            SummaryText.Text = BuildSummary(_cache);
+        }
+        else
+        {
+            SummaryText.Text = Loc.T("skills.scanning");
+        }
     }
 
     private async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        Loaded -= OnLoaded;
+        Loc.LanguageChanged += OnLanguageChanged;
         await LoadAsync(forceRefresh: false);
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        Loc.LanguageChanged -= OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        ApplyLanguage();
+        ApplyFilter();
     }
 
     private async void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -114,7 +142,7 @@ public sealed partial class SkillsPage : Page
             return;
         }
 
-        var items = new List<string> { AllCategories };
+        var items = new List<string> { Loc.T("skills.all_categories") };
         items.AddRange(result.Categories);
 
         CategoryBox.ItemsSource = items;
@@ -138,7 +166,7 @@ public sealed partial class SkillsPage : Page
         {
             IEnumerable<SkillInfo> query = _all;
 
-            if (CategoryBox.SelectedItem is string category && category != AllCategories)
+            if (CategoryBox.SelectedIndex > 0 && CategoryBox.SelectedItem is string category)
             {
                 query = query.Where(s => s.SubtitleLabel == category);
             }

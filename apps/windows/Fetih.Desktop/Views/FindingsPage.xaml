@@ -16,22 +16,34 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Spacing="4">
-            <TextBlock Text="Bulgular" Style="{StaticResource PageTitleTextStyle}" />
-            <TextBlock x:Name="SummaryText"
-                       Style="{StaticResource MutedTextStyle}"
-                       Text="Ajan tarafından üretilen güvenlik bulguları burada toplanır." />
+            <TextBlock x:Name="PageTitleText" Style="{StaticResource PageTitleTextStyle}" />
+            <TextBlock x:Name="SummaryText" Style="{StaticResource MutedTextStyle}" />
         </StackPanel>
 
-        <!-- Ciddiyet süzgeci — koleksiyon dolduğunda anlam kazanır -->
-        <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
-            <ComboBox x:Name="SeverityBox"
+        <!-- Ciddiyet süzgeci ve Güvenlik Taraması -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ComboBox Grid.Column="0"
+                      x:Name="SeverityBox"
                       MinWidth="200"
                       AutomationProperties.AutomationId="findings_severity"
                       SelectionChanged="SeverityBox_SelectionChanged" />
-            <TextBlock x:Name="CountText"
+            <TextBlock Grid.Column="1"
+                       x:Name="CountText"
+                       Margin="12,0,0,0"
                        VerticalAlignment="Center"
                        Style="{StaticResource MutedTextStyle}" />
-        </StackPanel>
+            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8">
+                <ProgressRing x:Name="ScanRing" Width="16" Height="16" IsActive="False" Visibility="Collapsed" />
+                <Button x:Name="ScanButton"
+                        Click="ScanButton_Click" />
+            </StackPanel>
+        </Grid>
 
         <Grid Grid.Row="2">
             <!-- Boş durum -->
@@ -45,18 +57,18 @@
                               FontSize="28"
                               HorizontalAlignment="Center"
                               Opacity="0.5" />
-                    <TextBlock Text="Henüz bulgu yok"
+                    <TextBlock x:Name="EmptyTitleText"
                                FontWeight="SemiBold"
                                FontSize="16"
                                HorizontalAlignment="Center" />
-                    <TextBlock TextAlignment="Center"
-                               Style="{StaticResource MutedTextStyle}"
-                               Text="Bir tarama veya görev tamamlandığında bulgular burada listelenecek. Faz 1'de Masaüstü Köprüsü henüz bağlı olmadığı için ajandan veri akmıyor; sayfa yapısı hazır ve köprü bağlandığında doldurulacak." />
-                    <TextBlock TextAlignment="Center"
+                    <TextBlock x:Name="EmptyDescText"
+                               TextAlignment="Center"
+                               Style="{StaticResource MutedTextStyle}" />
+                    <TextBlock x:Name="EmptyDisclaimerText"
+                               TextAlignment="Center"
                                FontSize="12"
                                Opacity="0.55"
-                               TextWrapping="Wrap"
-                               Text="Yalnızca yetkili olduğun sistemlerde test yap." />
+                               TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
 

@@ -89,3 +89,4 @@ apps/windows/**/Generated Files/
 apps/windows/**/.vs/
 *.user
 *.suo
+dist/

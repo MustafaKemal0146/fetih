@@ -105,7 +105,7 @@ class TestHandleBusyCommand(unittest.TestCase):
 
         mock_save.assert_not_called()
         printed = " ".join(str(c) for c in mock_cprint.call_args_list)
-        self.assertIn("Usage: /busy", printed)
+        self.assertTrue("Usage: /busy" in printed or "Kullanım: /busy" in printed)
 
 
 class TestBusyCommandRegistry(unittest.TestCase):
@@ -120,4 +120,4 @@ class TestBusyCommandRegistry(unittest.TestCase):
 
         busy = next(c for c in COMMAND_REGISTRY if c.name == "busy")
         assert busy.args_hint == "[queue|steer|interrupt|status]"
-        assert busy.category == "Configuration"
+        assert busy.category in {"Configuration", "Yapılandırma"}

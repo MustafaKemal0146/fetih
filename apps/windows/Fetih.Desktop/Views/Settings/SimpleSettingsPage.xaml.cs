@@ -49,13 +49,31 @@ public sealed partial class SimpleSettingsPage : Page
         var id = e.Parameter as string ?? string.Empty;
         _spec = SimpleSettingsCatalog.Get(id);
 
+        Loc.LanguageChanged += OnLanguageChanged;
+        ApplyLanguage(id);
+
+        _ = LoadAsync();
+    }
+
+    protected override void OnNavigatedFrom(NavigationEventArgs e)
+    {
+        base.OnNavigatedFrom(e);
+        Loc.LanguageChanged -= OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        ApplyLanguage(_spec?.Id ?? string.Empty);
+        _ = LoadAsync();
+    }
+
+    private void ApplyLanguage(string id)
+    {
         TitleText.Text = _spec?.Title.Value ?? id;
         IntroText.Text = _spec?.Intro.Value ?? string.Empty;
         ReloadButton.Content = Loc.T("simple.reload");
         AdvancedLink.Content = Loc.T("simple.open_advanced");
         AutomationProperties.SetAutomationId(this, "simple_page_" + id);
-
-        _ = LoadAsync();
     }
 
     private void ReloadButton_Click(object sender, RoutedEventArgs e) => _ = LoadAsync();

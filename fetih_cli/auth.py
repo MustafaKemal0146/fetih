@@ -6416,6 +6416,11 @@ def _codex_device_code_login() -> Dict[str, Any]:
     print(f"     \033[94m{issuer}/codex/device\033[0m\n")
     print("  2. Enter this code:")
     print(f"     \033[94m{user_code}\033[0m\n")
+    try:
+        import webbrowser
+        webbrowser.open(f"{issuer}/codex/device")
+    except Exception:
+        pass
     print("Waiting for sign-in... (press Ctrl+C to cancel)")
 
     # Step 3: Poll for authorization code

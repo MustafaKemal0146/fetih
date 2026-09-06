@@ -189,9 +189,16 @@ class TestEdgeCases:
         assert result is not None
         assert result["is_image"] is False
 
+    @pytest.mark.skipif(
+        not hasattr(os, "symlink") or (os.name == "nt" and not getattr(pytest, "_can_symlink", lambda: False)()),
+        reason="Symlink creation requires elevated privilege on Windows",
+    )
     def test_symlink_to_file(self, tmp_image, tmp_path):
-        link = tmp_path / "link.png"
-        link.symlink_to(tmp_image)
+        try:
+            link = tmp_path / "link.png"
+            link.symlink_to(tmp_image)
+        except OSError:
+            pytest.skip("Symlink creation failed due to lack of privileges")
         result = _detect_file_drop(str(link))
         assert result is not None
         assert result["is_image"] is True

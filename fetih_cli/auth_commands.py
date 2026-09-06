@@ -79,6 +79,12 @@ def _normalize_provider(provider: str) -> str:
         return "openrouter"
     if normalized in {"grok-oauth", "xai-oauth", "x-ai-oauth", "xai-grok-oauth"}:
         return "xai-oauth"
+    if normalized in {"gemini-cli", "gemini-oauth", "google-gemini"}:
+        return "google-gemini-cli"
+    if normalized in {"codex", "chatgpt", "codex-oauth"}:
+        return "openai-codex"
+    if normalized in {"qwen"}:
+        return "qwen-oauth"
     # Check if it matches a custom provider name
     custom_key = _resolve_custom_provider_input(normalized)
     if custom_key:

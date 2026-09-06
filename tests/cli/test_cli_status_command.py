@@ -74,13 +74,13 @@ def test_show_session_status_prints_gateway_style_summary():
         cli_obj._show_session_status()
 
     printed = "\n".join(str(call.args[0]) for call in cli_obj.console.print.call_args_list)
-    assert "FETIH CLI Status" in printed
-    assert "Session ID: session-123" in printed
-    assert "Path: ~/.fetih" in printed
-    assert "Title: My titled session" in printed
+    assert "FETIH CLI Status" in printed or "FETIH CLI Durum" in printed
+    assert "Session ID: session-123" in printed or "Oturum ID: session-123" in printed
+    assert "Path: ~/.fetih" in printed or "Dizin: ~/.fetih" in printed
+    assert "Title: My titled session" in printed or "Başlık: My titled session" in printed
     assert "Model: openai/gpt-5.4 (openai)" in printed
-    assert "Tokens: 321" in printed
-    assert "Agent Running: No" in printed
+    assert "Tokens: 321" in printed or "Token: 321" in printed
+    assert "Agent Running: No" in printed or "Ajan Çalışıyor: Hayır" in printed
     _, kwargs = cli_obj.console.print.call_args
     assert kwargs.get("highlight") is False
     assert kwargs.get("markup") is False

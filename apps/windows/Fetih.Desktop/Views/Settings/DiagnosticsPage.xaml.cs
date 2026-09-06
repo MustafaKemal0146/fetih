@@ -23,13 +23,38 @@ public sealed partial class DiagnosticsPage : Page
     public DiagnosticsPage()
     {
         InitializeComponent();
+        ApplyLanguage();
         Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        Loaded -= OnLoaded;
+        Loc.LanguageChanged += OnLanguageChanged;
         Populate();
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        Loc.LanguageChanged -= OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        ApplyLanguage();
+        Populate();
+    }
+
+    private void ApplyLanguage()
+    {
+        PageTitleText.Text = Loc.T("diag.title");
+        SubtitleText.Text = Loc.T("diag.subtitle");
+        SystemHeader.Text = Loc.T("diag.section.system");
+        PathsHeader.Text = Loc.T("diag.section.paths");
+        CrashLogHeader.Text = Loc.T("diag.section.crash_log");
+        RefreshButton.Content = Loc.T("diag.refresh");
+        CopyButton.Content = Loc.T("diag.copy");
+        ClearButton.Content = Loc.T("diag.clear");
     }
 
     private void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -45,12 +70,12 @@ public sealed partial class DiagnosticsPage : Page
             var package = new DataPackage { RequestedOperation = DataPackageOperation.Copy };
             package.SetText(BuildSupportReport());
             Clipboard.SetContent(package);
-            ShowInfo("Tanılama raporu panoya kopyalandı.", InfoBarSeverity.Success);
+            ShowInfo(Loc.T("diag.copied"), InfoBarSeverity.Success);
         }
         catch (Exception ex)
         {
             App.LogCrash("DiagnosticsPage.Copy", ex, ex.Message);
-            ShowInfo($"Panoya kopyalanamadı: {ex.Message}", InfoBarSeverity.Error);
+            ShowInfo(Loc.T("diag.copy_failed") + ex.Message, InfoBarSeverity.Error);
         }
     }
 
@@ -61,11 +86,11 @@ public sealed partial class DiagnosticsPage : Page
             if (File.Exists(FetihPaths.CrashLogPath))
             {
                 File.WriteAllText(FetihPaths.CrashLogPath, string.Empty);
-                ShowInfo("Çökme günlüğü temizlendi.", InfoBarSeverity.Success);
+                ShowInfo(Loc.T("diag.cleared"), InfoBarSeverity.Success);
             }
             else
             {
-                ShowInfo("Temizlenecek günlük yok.", InfoBarSeverity.Informational);
+                ShowInfo(Loc.T("diag.no_log"), InfoBarSeverity.Informational);
             }
 
             Populate();
@@ -73,7 +98,7 @@ public sealed partial class DiagnosticsPage : Page
         catch (Exception ex)
         {
             App.LogCrash("DiagnosticsPage.Clear", ex, ex.Message);
-            ShowInfo($"Günlük temizlenemedi: {ex.Message}", InfoBarSeverity.Error);
+            ShowInfo(Loc.T("diag.clear_failed") + ex.Message, InfoBarSeverity.Error);
         }
     }
 
@@ -100,16 +125,16 @@ public sealed partial class DiagnosticsPage : Page
 
     private static List<SettingRow> BuildSystemRows() => new()
     {
-        new("Uygulama", $"{AppInfo.ProductName} {AppInfo.Version}"),
-        new("Derleme tarihi", AppInfo.BuildDate),
-        new("Çalışma zamanı", AppInfo.RuntimeDescription),
-        new("Hedef çatı", AppInfo.TargetFramework),
-        new("Arayüz", AppInfo.UiFramework),
-        new("Süreç mimarisi", AppInfo.Architecture),
-        new("İşletim sistemi mimarisi", AppInfo.OsArchitecture),
-        new("Windows", AppInfo.OsDescription),
-        new("Kurulum tipi", AppInfo.InstallType),
-        new("Makine", SafeMachineName()),
+        new(Loc.T("diag.row.app"), $"{AppInfo.ProductName} {AppInfo.Version}"),
+        new(Loc.T("diag.row.build_date"), AppInfo.BuildDate),
+        new(Loc.T("diag.row.runtime"), AppInfo.RuntimeDescription),
+        new(Loc.T("diag.row.target_framework"), AppInfo.TargetFramework),
+        new(Loc.T("diag.row.ui"), AppInfo.UiFramework),
+        new(Loc.T("diag.row.proc_arch"), AppInfo.Architecture),
+        new(Loc.T("diag.row.os_arch"), AppInfo.OsArchitecture),
+        new(Loc.T("diag.row.windows"), AppInfo.OsDescription),
+        new(Loc.T("diag.row.install_type"), AppInfo.InstallType),
+        new(Loc.T("diag.row.machine"), SafeMachineName()),
     };
 
     private static List<SettingRow> BuildPathRows()
@@ -118,28 +143,28 @@ public sealed partial class DiagnosticsPage : Page
 
         return new List<SettingRow>
         {
-            new("Uygulama klasörü", AppInfo.BaseDirectory),
+            new(Loc.T("diag.row.app_dir"), AppInfo.BaseDirectory),
             new("FETIH_HOME", FetihPaths.FetihHome, State(FetihPaths.FetihHome)),
             new("config.yaml", FetihPaths.ConfigYamlPath,
                 service.ConfigError ?? (service.ConfigExists
-                    ? $"{service.Config.Map.Count} kök anahtar okundu" + ModifiedNote(service)
-                    : "Dosya yok")),
+                    ? $"{service.Config.Map.Count} " + Loc.T("diag.keys_read") + ModifiedNote(service)
+                    : Loc.T("diag.file_missing"))),
             new(".env", FetihPaths.EnvFilePath,
                 service.EnvFileExists
-                    ? $"{service.EnvFileKeys.Count} anahtar tanımlı (değerler okunmaz)"
-                    : "Dosya yok"),
-            new("Günlükler", FetihPaths.LogsDir, State(FetihPaths.LogsDir)),
-            new("Sandbox klasörü", FetihPaths.SandboxesDir, State(FetihPaths.SandboxesDir)),
-            new("Depo kökü", FetihPaths.RepositoryRoot ?? "(bulunamadı)",
-                FetihPaths.RepositoryRoot is null ? "Yetenek kataloğu okunamaz" : "Mevcut"),
-            new("Çökme günlüğü", FetihPaths.CrashLogPath, State(FetihPaths.CrashLogPath)),
+                    ? $"{service.EnvFileKeys.Count} " + Loc.T("diag.keys_defined")
+                    : Loc.T("diag.file_missing")),
+            new(Loc.T("diag.row.logs"), FetihPaths.LogsDir, State(FetihPaths.LogsDir)),
+            new(Loc.T("diag.row.sandbox"), FetihPaths.SandboxesDir, State(FetihPaths.SandboxesDir)),
+            new(Loc.T("diag.row.repo"), FetihPaths.RepositoryRoot ?? "(bulunamadı)",
+                FetihPaths.RepositoryRoot is null ? Loc.T("diag.catalog_unreadable") : Loc.T("diag.present")),
+            new(Loc.T("diag.row.crash_log"), FetihPaths.CrashLogPath, State(FetihPaths.CrashLogPath)),
         };
     }
 
     private static string ModifiedNote(FetihConfigService service)
-        => service.ConfigModified is { } modified ? $" · son değişiklik {modified:dd.MM.yyyy HH:mm}" : string.Empty;
+        => service.ConfigModified is { } modified ? $" · {modified:dd.MM.yyyy HH:mm}" : string.Empty;
 
-    private static string State(string path) => FetihPaths.SafeExists(path) ? "Mevcut" : "Yok";
+    private static string State(string path) => FetihPaths.SafeExists(path) ? Loc.T("diag.present") : Loc.T("diag.missing");
 
     private static string SafeMachineName()
     {

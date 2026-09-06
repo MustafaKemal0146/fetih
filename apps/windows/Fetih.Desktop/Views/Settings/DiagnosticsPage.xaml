@@ -27,9 +27,8 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0" Spacing="4">
-                <TextBlock Text="Tanılama" Style="{StaticResource PageTitleTextStyle}" />
-                <TextBlock Style="{StaticResource MutedTextStyle}"
-                           Text="Destek istenirken ilk bakılacak yer: çalışma zamanı bilgisi, çözümlenen yollar ve çökme günlüğü." />
+                <TextBlock x:Name="PageTitleText" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock x:Name="SubtitleText" Style="{StaticResource MutedTextStyle}" />
             </StackPanel>
 
             <!--
@@ -41,14 +40,14 @@
             <StackPanel Grid.Row="1" Spacing="12">
                 <Border Style="{StaticResource CardBorderStyle}">
                     <StackPanel>
-                        <TextBlock Text="Sistem bilgisi" Style="{StaticResource SectionHeaderTextStyle}" />
+                        <TextBlock x:Name="SystemHeader" Style="{StaticResource SectionHeaderTextStyle}" />
                         <ItemsControl x:Name="SystemRows" ItemTemplate="{StaticResource SettingRowTemplate}" />
                     </StackPanel>
                 </Border>
 
                 <Border Style="{StaticResource CardBorderStyle}">
                     <StackPanel>
-                        <TextBlock Text="Çözümlenen yollar" Style="{StaticResource SectionHeaderTextStyle}" />
+                        <TextBlock x:Name="PathsHeader" Style="{StaticResource SectionHeaderTextStyle}" />
                         <ItemsControl x:Name="PathRows" ItemTemplate="{StaticResource SettingRowTemplate}" />
                     </StackPanel>
                 </Border>
@@ -67,25 +66,25 @@
                         </Grid.ColumnDefinitions>
 
                         <StackPanel Grid.Column="0" Spacing="2">
-                            <TextBlock Text="Çökme günlüğü" Style="{StaticResource SectionHeaderTextStyle}" />
+                            <TextBlock x:Name="CrashLogHeader" Style="{StaticResource SectionHeaderTextStyle}" />
                             <TextBlock x:Name="CrashLogMeta"
                                        FontSize="12"
                                        Opacity="0.6"
                                        TextWrapping="Wrap" />
                         </StackPanel>
 
-                        <Button Grid.Column="1"
-                                Content="Yenile"
+                        <Button x:Name="RefreshButton"
+                                Grid.Column="1"
                                 VerticalAlignment="Center"
                                 AutomationProperties.AutomationId="diagnostics_refresh"
                                 Click="RefreshButton_Click" />
-                        <Button Grid.Column="2"
-                                Content="Panoya kopyala"
+                        <Button x:Name="CopyButton"
+                                Grid.Column="2"
                                 VerticalAlignment="Center"
                                 AutomationProperties.AutomationId="diagnostics_copy"
                                 Click="CopyButton_Click" />
-                        <Button Grid.Column="3"
-                                Content="Günlüğü temizle"
+                        <Button x:Name="ClearButton"
+                                Grid.Column="3"
                                 VerticalAlignment="Center"
                                 AutomationProperties.AutomationId="diagnostics_clear"
                                 Click="ClearButton_Click" />

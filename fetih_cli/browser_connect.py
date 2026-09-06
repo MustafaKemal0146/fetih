@@ -56,7 +56,11 @@ def get_chrome_debug_candidates(system: str) -> list[str]:
     def add_install_paths(bases: tuple[str | None, ...]) -> None:
         for base in filter(None, bases):
             for parts in _WINDOWS_INSTALL_PARTS:
-                add(os.path.join(base, *parts))
+                if base.startswith("/"):
+                    import posixpath
+                    add(posixpath.join(base, *parts))
+                else:
+                    add(os.path.join(base, *parts))
 
     if system == "Darwin":
         for app in _DARWIN_APPS:

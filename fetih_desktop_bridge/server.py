@@ -112,6 +112,7 @@ class BridgeServer:
         self._connections: Dict[int, asyncio.AbstractEventLoop] = {}
         self._conn_objs: List[Any] = []
         self._methods: Dict[str, Callable[..., Any]] = {}
+        self._findings: List[Dict[str, Any]] = []
         self._started = time.time()
         self._register_methods()
 
@@ -220,6 +221,8 @@ class BridgeServer:
                 "providers.probe_local": self._m_providers_probe_local,
                 "providers.auth_status": self._m_providers_auth_status,
                 "skills.list": self._m_skills_list,
+                "findings.list": self._m_findings_list,
+                "findings.scan": self._m_findings_scan,
                 "diagnostics.info": self._m_diagnostics_info,
                 "shell.status": self._m_shell_status,
                 "shell.ensure_user": self._m_shell_ensure_user,
@@ -343,6 +346,27 @@ class BridgeServer:
                     },
                 ),
             )
+            # Scan tool outputs for security findings and captured CTF flags
+            res_str = str(result)
+            import re
+            flag_match = re.search(r"(?:CTF|FLAG|fetih)\{[A-Za-z0-9_\-!@#$%^&*+=]+\}", res_str, re.IGNORECASE)
+            if flag_match:
+                flag = flag_match.group(0)
+                finding_dict = {
+                    "id": str(uuid.uuid4().hex[:8]),
+                    "title": f"CTF Flag Yakalandı: {flag}",
+                    "target": f"tool:{name}",
+                    "severity": "Critical",
+                    "evidence": flag,
+                    "recommendation": "Ajan oturumunda yakalanan bayrak. Rapor ve bulgulara kaydedildi.",
+                    "reference": "CTF-FLAG",
+                    "discovered_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                }
+                self._findings.append(finding_dict)
+                conn.emit_threadsafe(
+                    loop,
+                    event("findings.discovered", {"finding": finding_dict}),
+                )
 
         agent = session.agent
         agent.stream_delta_callback = on_delta if stream else None
@@ -787,6 +811,73 @@ class BridgeServer:
             "limit": limit,
             "categories": dict(sorted(categories.items(), key=lambda kv: -kv[1])),
             "skills": skills[offset : offset + limit],
+        }
+
+    # ── findings.* ──────────────────────────────────────────────────────
+
+    def _m_findings_list(self, conn, params):
+        severity = (params.get("severity") or "").strip().lower()
+        findings = list(self._findings)
+        if severity and severity not in {"all", "tüm", "tüm ciddiyet seviyeleri"}:
+            findings = [f for f in findings if (f.get("severity") or "").lower() == severity]
+        return {
+            "total": len(self._findings),
+            "filtered": len(findings),
+            "findings": findings,
+        }
+
+    def _m_findings_scan(self, conn, params):
+        """Scan skills or workspace for security findings using tools.skills_guard."""
+        target = params.get("target")
+        from tools.skills_guard import scan_skill
+        from fetih_constants import get_fetih_home
+
+        dirs_to_scan: List[Path] = []
+        if target:
+            p = Path(str(target)).expanduser().resolve()
+            if p.is_dir():
+                dirs_to_scan.append(p)
+        else:
+            fetih_home = Path(get_fetih_home())
+            skills_dir = fetih_home / "skills"
+            if skills_dir.exists():
+                dirs_to_scan.extend([d for d in skills_dir.iterdir() if d.is_dir()])
+            repo_skills = Path(__file__).resolve().parents[1] / "skills"
+            if repo_skills.exists():
+                for cat in repo_skills.iterdir():
+                    if cat.is_dir():
+                        dirs_to_scan.extend([d for d in cat.iterdir() if d.is_dir()])
+
+        new_findings: List[Dict[str, Any]] = []
+        loop = self.loop_for(conn) or asyncio.get_running_loop()
+        for d in dirs_to_scan[:30]:
+            try:
+                result = scan_skill(d, source="community")
+                for f in result.findings:
+                    finding_dict = {
+                        "id": str(uuid.uuid4().hex[:8]),
+                        "title": f"{f.category.capitalize()}: {f.description}",
+                        "target": f"{f.file}:{f.line}" if f.line else f.file,
+                        "severity": f.severity.capitalize(),
+                        "evidence": f.match,
+                        "recommendation": f"Inspect pattern {f.pattern_id} in {f.file} and remediate.",
+                        "reference": f.pattern_id,
+                        "discovered_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                    }
+                    new_findings.append(finding_dict)
+                    self._findings.append(finding_dict)
+                    conn.emit_threadsafe(
+                        loop,
+                        event("findings.discovered", {"finding": finding_dict}),
+                    )
+            except Exception:
+                continue
+
+        return {
+            "scanned": len(dirs_to_scan),
+            "new_findings": len(new_findings),
+            "total_findings": len(self._findings),
+            "findings": self._findings,
         }
 
     # ── shell.* (Windows: Git Bash / WSL kabuk seçimi) ──────────────────

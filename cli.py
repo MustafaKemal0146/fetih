@@ -1761,6 +1761,18 @@ def _replay_output_history() -> None:
         _OUTPUT_HISTORY_REPLAYING = False
 
 
+def _safe_pt_print(formatted_text):
+    try:
+        _pt_print(formatted_text)
+    except Exception:
+        import sys
+        if hasattr(formatted_text, "value"):
+            sys.stdout.write(str(formatted_text.value) + "\n")
+        else:
+            sys.stdout.write(str(formatted_text) + "\n")
+        sys.stdout.flush()
+
+
 def _cprint(text: str):
     """Print ANSI-colored text through prompt_toolkit's native renderer.
 
@@ -1782,7 +1794,7 @@ def _cprint(text: str):
     try:
         from prompt_toolkit.application import get_app_or_none, run_in_terminal
     except Exception:
-        _pt_print(_PT_ANSI(text))
+        _safe_pt_print(_PT_ANSI(text))
         return
 
     app = None
@@ -1795,7 +1807,7 @@ def _cprint(text: str):
     # direct prompt_toolkit print is safe and matches existing behavior
     # (spinner frames, streamed tokens, tool activity prefixes, …).
     if app is None or not getattr(app, "_is_running", False):
-        _pt_print(_PT_ANSI(text))
+        _safe_pt_print(_PT_ANSI(text))
         return
 
     try:
@@ -1803,7 +1815,7 @@ def _cprint(text: str):
     except Exception:
         loop = None
     if loop is None:
-        _pt_print(_PT_ANSI(text))
+        _safe_pt_print(_PT_ANSI(text))
         return
 
     import asyncio as _asyncio
@@ -1819,7 +1831,7 @@ def _cprint(text: str):
         current_loop = None
     # Same thread as the app's loop → safe to print directly.
     if current_loop is loop and loop.is_running():
-        _pt_print(_PT_ANSI(text))
+        _safe_pt_print(_PT_ANSI(text))
         return
 
     # Cross-thread emission: ask the app's event loop to schedule a
@@ -1828,20 +1840,14 @@ def _cprint(text: str):
     # fails we fall back to a direct print so the line isn't lost.
     def _schedule():
         try:
-            run_in_terminal(lambda: _pt_print(_PT_ANSI(text)))
+            run_in_terminal(lambda: _safe_pt_print(_PT_ANSI(text)))
         except Exception:
-            try:
-                _pt_print(_PT_ANSI(text))
-            except Exception:
-                pass
+            _safe_pt_print(_PT_ANSI(text))
 
     try:
         loop.call_soon_threadsafe(_schedule)
     except Exception:
-        try:
-            _pt_print(_PT_ANSI(text))
-        except Exception:
-            pass
+        _safe_pt_print(_PT_ANSI(text))
 
 
 # ---------------------------------------------------------------------------
@@ -1867,8 +1873,11 @@ def _termux_example_image_path(filename: str = "cat.png") -> str:
     ]
     for root in candidates:
         if os.path.isdir(root):
+            if root.startswith("/"):
+                import posixpath
+                return posixpath.join(root, "Pictures", filename)
             return os.path.join(root, "Pictures", filename)
-    return os.path.join("~/storage/shared", "Pictures", filename)
+    return "~/storage/shared/Pictures/" + filename
 
 
 def _split_path_input(raw: str) -> tuple[str, str]:
@@ -1937,7 +1946,9 @@ def _resolve_attachment_path(raw_path: str) -> Path | None:
             parsed = urlparse(token)
             if parsed.scheme == "file":
                 expanded = unquote(parsed.path or "")
-                if parsed.netloc and os.name == "nt":
+                if os.name == "nt" and len(expanded) >= 3 and expanded[0] == "/" and expanded[2] == ":":
+                    expanded = expanded[1:]
+                elif parsed.netloc and os.name == "nt":
                     expanded = f"//{parsed.netloc}{expanded}"
         except Exception:
             expanded = token
@@ -8165,7 +8176,7 @@ class FETIHCLI:
                 # Prefix matching: if input uniquely identifies one command, execute it.
                 # Matches against both built-in COMMANDS and installed skill commands so
                 # that execution-time resolution agrees with tab-completion.
-                from fetih_cli.commands import COMMANDS
+                from fetih_cli.commands import COMMANDS, COMMAND_REGISTRY
                 typed_base = cmd_lower.split()[0]
                 all_known = set(COMMANDS) | set(_skill_commands)
                 matches = [c for c in all_known if c.startswith(typed_base)]

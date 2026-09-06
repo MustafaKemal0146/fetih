@@ -17,13 +17,38 @@ public sealed partial class VoicePage : Page
     public VoicePage()
     {
         InitializeComponent();
+        ApplyLanguage();
         Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        Loaded -= OnLoaded;
+        Loc.LanguageChanged += OnLanguageChanged;
         Populate();
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        Loc.LanguageChanged -= OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        ApplyLanguage();
+        Populate();
+    }
+
+    private void ApplyLanguage()
+    {
+        PageTitleText.Text = Loc.T("voice.title");
+        SubtitleText.Text = Loc.T("voice.subtitle");
+        TtsHeader.Text = Loc.T("voice.section.tts");
+        SttHeader.Text = Loc.T("voice.section.stt");
+        RecordingHeader.Text = Loc.T("voice.section.recording");
+        PhaseInfo.Title = Loc.T("voice.phase_title");
+        PhaseInfo.Message = Loc.T("voice.phase_desc");
+        RefreshButton.Content = Loc.T("common.reload");
     }
 
     private void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -42,7 +67,7 @@ public sealed partial class VoicePage : Page
 
             var ttsRows = new List<SettingRow>
             {
-                new("Sağlayıcı", string.IsNullOrWhiteSpace(ttsProvider) ? "(tanımsız)" : ttsProvider,
+                new(Loc.T("voice.provider"), string.IsNullOrWhiteSpace(ttsProvider) ? Loc.T("voice.undefined") : ttsProvider,
                     "Seçenekler: edge (ücretsiz), elevenlabs, openai, xai, minimax, mistral, gemini, " +
                     "neutts / kittentts / piper (yerel).",
                     "tts.provider"),
@@ -53,30 +78,30 @@ public sealed partial class VoicePage : Page
             switch (ttsProvider)
             {
                 case "edge":
-                    ttsRows.Add(new SettingRow("Ses", config.GetDisplay("tts.edge.voice"), configKey: "tts.edge.voice"));
+                    ttsRows.Add(new SettingRow(Loc.T("voice.voice"), config.GetDisplay("tts.edge.voice"), configKey: "tts.edge.voice"));
                     break;
                 case "elevenlabs":
-                    ttsRows.Add(new SettingRow("Ses kimliği", config.GetDisplay("tts.elevenlabs.voice_id"), configKey: "tts.elevenlabs.voice_id"));
-                    ttsRows.Add(new SettingRow("Model", config.GetDisplay("tts.elevenlabs.model_id"), configKey: "tts.elevenlabs.model_id"));
+                    ttsRows.Add(new SettingRow(Loc.T("voice.voice_id"), config.GetDisplay("tts.elevenlabs.voice_id"), configKey: "tts.elevenlabs.voice_id"));
+                    ttsRows.Add(new SettingRow(Loc.T("voice.model"), config.GetDisplay("tts.elevenlabs.model_id"), configKey: "tts.elevenlabs.model_id"));
                     break;
                 case "openai":
-                    ttsRows.Add(new SettingRow("Model", config.GetDisplay("tts.openai.model"), configKey: "tts.openai.model"));
-                    ttsRows.Add(new SettingRow("Ses", config.GetDisplay("tts.openai.voice"), configKey: "tts.openai.voice"));
+                    ttsRows.Add(new SettingRow(Loc.T("voice.model"), config.GetDisplay("tts.openai.model"), configKey: "tts.openai.model"));
+                    ttsRows.Add(new SettingRow(Loc.T("voice.voice"), config.GetDisplay("tts.openai.voice"), configKey: "tts.openai.voice"));
                     break;
                 case "xai":
-                    ttsRows.Add(new SettingRow("Ses kimliği", config.GetDisplay("tts.xai.voice_id"), configKey: "tts.xai.voice_id"));
-                    ttsRows.Add(new SettingRow("Dil", config.GetDisplay("tts.xai.language"), configKey: "tts.xai.language"));
+                    ttsRows.Add(new SettingRow(Loc.T("voice.voice_id"), config.GetDisplay("tts.xai.voice_id"), configKey: "tts.xai.voice_id"));
+                    ttsRows.Add(new SettingRow(Loc.T("voice.language"), config.GetDisplay("tts.xai.language"), configKey: "tts.xai.language"));
                     break;
                 case "mistral":
-                    ttsRows.Add(new SettingRow("Model", config.GetDisplay("tts.mistral.model"), configKey: "tts.mistral.model"));
-                    ttsRows.Add(new SettingRow("Ses kimliği", config.GetDisplay("tts.mistral.voice_id"), configKey: "tts.mistral.voice_id"));
+                    ttsRows.Add(new SettingRow(Loc.T("voice.model"), config.GetDisplay("tts.mistral.model"), configKey: "tts.mistral.model"));
+                    ttsRows.Add(new SettingRow(Loc.T("voice.voice_id"), config.GetDisplay("tts.mistral.voice_id"), configKey: "tts.mistral.voice_id"));
                     break;
                 case "neutts":
-                    ttsRows.Add(new SettingRow("Model", config.GetDisplay("tts.neutts.model"), configKey: "tts.neutts.model"));
-                    ttsRows.Add(new SettingRow("Aygıt", config.GetDisplay("tts.neutts.device"), "cpu / cuda / mps", "tts.neutts.device"));
+                    ttsRows.Add(new SettingRow(Loc.T("voice.model"), config.GetDisplay("tts.neutts.model"), configKey: "tts.neutts.model"));
+                    ttsRows.Add(new SettingRow(Loc.T("voice.device"), config.GetDisplay("tts.neutts.device"), "cpu / cuda / mps", "tts.neutts.device"));
                     break;
                 case "piper":
-                    ttsRows.Add(new SettingRow("Ses", config.GetDisplay("tts.piper.voice"), configKey: "tts.piper.voice"));
+                    ttsRows.Add(new SettingRow(Loc.T("voice.voice"), config.GetDisplay("tts.piper.voice"), configKey: "tts.piper.voice"));
                     break;
             }
 
@@ -84,8 +109,8 @@ public sealed partial class VoicePage : Page
 
             var sttRows = new List<SettingRow>
             {
-                new("Etkin", Bool(config.GetBool("stt.enabled")), configKey: "stt.enabled"),
-                new("Sağlayıcı", string.IsNullOrWhiteSpace(sttProvider) ? "(tanımsız)" : sttProvider,
+                new(Loc.T("voice.enabled"), Bool(config.GetBool("stt.enabled")), configKey: "stt.enabled"),
+                new(Loc.T("voice.provider"), string.IsNullOrWhiteSpace(sttProvider) ? Loc.T("voice.undefined") : sttProvider,
                     "Seçenekler: local (faster-whisper, ücretsiz), groq, openai (Whisper API), mistral (Voxtral).",
                     "stt.provider"),
             };
@@ -93,16 +118,16 @@ public sealed partial class VoicePage : Page
             switch (sttProvider)
             {
                 case "local":
-                    sttRows.Add(new SettingRow("Model", config.GetDisplay("stt.local.model"),
+                    sttRows.Add(new SettingRow(Loc.T("voice.model"), config.GetDisplay("stt.local.model"),
                         "tiny / base / small / medium / large-v3", "stt.local.model"));
-                    sttRows.Add(new SettingRow("Dil", config.GetDisplay("stt.local.language", "(otomatik algıla)"),
+                    sttRows.Add(new SettingRow(Loc.T("voice.language"), config.GetDisplay("stt.local.language", "(otomatik algıla)"),
                         configKey: "stt.local.language"));
                     break;
                 case "openai":
-                    sttRows.Add(new SettingRow("Model", config.GetDisplay("stt.openai.model"), configKey: "stt.openai.model"));
+                    sttRows.Add(new SettingRow(Loc.T("voice.model"), config.GetDisplay("stt.openai.model"), configKey: "stt.openai.model"));
                     break;
                 case "mistral":
-                    sttRows.Add(new SettingRow("Model", config.GetDisplay("stt.mistral.model"), configKey: "stt.mistral.model"));
+                    sttRows.Add(new SettingRow(Loc.T("voice.model"), config.GetDisplay("stt.mistral.model"), configKey: "stt.mistral.model"));
                     break;
             }
 
@@ -132,10 +157,10 @@ public sealed partial class VoicePage : Page
 
     private static string Bool(bool? value) => value switch
     {
-        true => "Açık",
-        false => "Kapalı",
-        _ => "(tanımsız)",
+        true => Loc.T("common.on"),
+        false => Loc.T("common.off"),
+        _ => Loc.T("voice.undefined"),
     };
 
-    private static string Seconds(string value) => value is "—" or "" ? "(tanımsız)" : $"{value} sn";
+    private static string Seconds(string value) => value is "—" or "" ? Loc.T("voice.undefined") : $"{value} sn";
 }

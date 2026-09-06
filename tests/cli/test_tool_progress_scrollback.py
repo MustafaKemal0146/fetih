@@ -129,7 +129,7 @@ class TestToolProgressScrollback:
             cli._on_tool_progress("tool.completed", "terminal", None, None, duration=0.5, is_error=True)
 
         line = mock_print.call_args[0][0]
-        assert "[error]" in line
+        assert "[error]" in line or "[hata]" in line
 
     def test_spinner_still_updates_on_started(self):
         """tool.started still updates the spinner text for live display."""

@@ -12,9 +12,8 @@
                   VerticalScrollMode="Enabled">
         <StackPanel Padding="24,16,24,32" Spacing="16" MaxWidth="920" HorizontalAlignment="Left">
 
-            <TextBlock Text="Masaüstü Köprüsü" Style="{StaticResource PageTitleTextStyle}" />
-            <TextBlock Style="{StaticResource MutedTextStyle}"
-                       Text="Masaüstü uygulaması ile Python ajanı arasındaki taşıma katmanı. Mesajlaşma köprüsünden (Telegram/Discord/WhatsApp) tamamen ayrıdır — o katman yönetimi bu sayfada yer almaz." />
+            <TextBlock x:Name="PageTitleText" Style="{StaticResource PageTitleTextStyle}" />
+            <TextBlock x:Name="IntroText" Style="{StaticResource MutedTextStyle}" />
 
             <!-- Canlı durum -->
             <Border Style="{StaticResource CardBorderStyle}">
@@ -50,7 +49,7 @@
             <!-- Taşıma yapılandırması -->
             <Border Style="{StaticResource CardBorderStyle}">
                 <StackPanel>
-                    <TextBlock Text="Taşıma yapılandırması" Style="{StaticResource SectionHeaderTextStyle}" />
+                    <TextBlock x:Name="TransportHeader" Style="{StaticResource SectionHeaderTextStyle}" />
                     <ItemsControl x:Name="TransportRows" ItemTemplate="{StaticResource SettingRowTemplate}" />
                 </StackPanel>
             </Border>
@@ -58,10 +57,10 @@
             <!-- Çözümlenen yollar -->
             <Border Style="{StaticResource CardBorderStyle}">
                 <StackPanel>
-                    <TextBlock Text="Çözümlenen yollar" Style="{StaticResource SectionHeaderTextStyle}" />
-                    <TextBlock Style="{StaticResource MutedTextStyle}"
-                               Margin="0,0,0,6"
-                               Text="Uygulama kullanıcının PATH'ine güvenmez; Python süreci mutlak yollarla başlatılacaktır." />
+                    <TextBlock x:Name="PathsHeader" Style="{StaticResource SectionHeaderTextStyle}" />
+                    <TextBlock x:Name="PathsNoteText"
+                               Style="{StaticResource MutedTextStyle}"
+                               Margin="0,0,0,6" />
                     <ItemsControl x:Name="PathRows" ItemTemplate="{StaticResource SettingRowTemplate}" />
                 </StackPanel>
             </Border>
@@ -70,12 +69,9 @@
             <InfoBar x:Name="PhaseInfo"
                      IsOpen="True"
                      IsClosable="False"
-                     Severity="Informational"
-                     Title="Faz 1"
-                     Message="Bu sürümde köprüye bağlanılmaz; ayarlar diskteki yapılandırma dosyalarından salt okunur biçimde gösterilir." />
+                     Severity="Informational" />
 
             <Button x:Name="RefreshButton"
-                    Content="Yeniden oku"
                     AutomationProperties.AutomationId="bridge_refresh"
                     Click="RefreshButton_Click" />
         </StackPanel>
