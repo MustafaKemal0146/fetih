@@ -64,11 +64,44 @@ public sealed partial class SetupWindow : Window
         // konumlandırmayı kısmen eziyordu (pencere ekranın solunda kalıyordu).
         Activated += OnFirstActivated;
 
+        // Sihirbaz köprüyü BAŞLATIR (bkz. StartDesktopBridgeStep →
+        // BridgeClient.Shared.EnsureConnectedAsync). Pencere kapanınca bu alt
+        // süreç sonlandırılmazsa arkada yetim python süreci kalıyordu; her
+        // aç-kapa döngüsü kalıcı bir sızıntı bırakıyordu.
+        Closed += OnWindowClosed;
+
         RenderStepDots();
         PopulateProviders(ProviderRegistry.All);
 
         // Köprü ayağa kalktığında listeyi KANONİK katalogla değiştir.
         _ = RefreshCatalogAsync();
+    }
+
+    /// <summary>
+    /// Pencere kapanışı: abonelikleri geri çıkar ve Masaüstü Köprüsü alt
+    /// sürecini sonlandır. <see cref="MainWindow"/> ile aynı desen; kapanış
+    /// yolunda hata yutsun ki kapanma engellenmesin (süreç zaten sonlanıyor).
+    /// </summary>
+    private void OnWindowClosed(object sender, WindowEventArgs args)
+    {
+        try
+        {
+            Activated -= OnFirstActivated;
+            Closed -= OnWindowClosed;
+            _cts?.Cancel();
+
+            // "Sohbete geç" akışında köprüyü YENİ pencere devralır
+            // (bkz. GoToChat_Click); bu durumda kapatma işi ona aittir, aksi
+            // hâlde yeni açılan sohbet penceresi köprüsüz kalırdı.
+            if (ReferenceEquals(App.MainAppWindow, this))
+            {
+                Bridge.BridgeClient.Shared.Dispose();
+            }
+        }
+        catch
+        {
+            // Kapanış sırasında hata yut.
+        }
     }
 
     /// <summary>

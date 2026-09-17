@@ -32,10 +32,16 @@ public partial class App : Application
         // sahte bir "iyi" durumda tutmak yanıltıcı olur) — sadece loglayıp
         // asıl davranışın (kapanma) neden olduğunu görünür kılıyoruz.
         UnhandledException += (_, e) =>
+        {
+            CleanupBridge();
             LogCrash("Application.UnhandledException", e.Exception, e.Message);
+        };
 
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            CleanupBridge();
             LogCrash("AppDomain.UnhandledException", e.ExceptionObject as Exception, e.ExceptionObject?.ToString());
+        };
 
         System.Threading.Tasks.TaskScheduler.UnobservedTaskException += (_, e) =>
         {
@@ -44,11 +50,38 @@ public partial class App : Application
         };
     }
 
+    /// <summary>
+    /// Çökme yolunda en iyi çaba temizlik: Masaüstü Köprüsü alt sürecini
+    /// sonlandırır. Bu yol her zaman çalışmayabilir (işletim sistemi süreci
+    /// doğrudan öldürebilir), bu yüzden asıl güvence köprü sürecinin bir iş
+    /// nesnesine alınmasıdır (bkz. <c>Bridge/BridgeProcess.cs</c>).
+    ///
+    /// <para>Burada fırlatılan bir istisna orijinal çökmeyi gizleyeceği için
+    /// her şey yutulur; loglama da bozulmaz.</para>
+    /// </summary>
+    private static void CleanupBridge()
+    {
+        try
+        {
+            Bridge.BridgeClient.Shared.Dispose();
+        }
+        catch
+        {
+            // Çökme yolunda ikinci bir istisna fırlatmak yasak.
+        }
+    }
+
     /// <summary>Uygulamanın şu anda açık olan ana penceresi.</summary>
     public static Window? MainAppWindow { get; internal set; }
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        // Açılışta, ÖNCEKİ oturumlardan (çökme, Görev Yöneticisi'nden
+        // sonlandırma) yetim kalmış köprü süreçlerini topla. Arka planda ve
+        // hatasız çalışır; açılışı hiçbir koşulda durdurmaz. Bu oturumun
+        // başlattığı köprü, ebeveyni (biz) yaşadığı için zaten korunur.
+        Fetih.Desktop.Services.OrphanBridgeSweeper.SweepInBackground();
+
         // Taze kullanıcı (config/anahtar yok) → ilk kurulum sihirbazı.
         // Zaten yapılandırılmışsa (bizim durumumuz: Groq ayarlı) → doğrudan Sohbet.
         var needsSetup = false;
