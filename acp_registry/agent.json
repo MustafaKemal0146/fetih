@@ -6,7 +6,7 @@
   "repository": "https://github.com/MustafaKemal0146/fetih",
   "website": "https://github.com/MustafaKemal0146/fetih/#readme",
   "authors": ["FETIH"],
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "distribution": {
     "uvx": {
       "package": "fetih[acp]==1.0.2",

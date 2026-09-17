@@ -35,7 +35,7 @@ def test_agent_json_matches_official_registry_required_fields():
     assert data["repository"] == "https://github.com/MustafaKemal0146/fetih"
     assert data["website"].startswith("https://github.com/MustafaKemal0146/fetih/")
     assert data["authors"] == ["FETIH"]
-    assert data["license"] == "MIT"
+    assert data["license"] == "GPL-3.0-only"
     assert set(data["distribution"]) <= ALLOWED_DISTRIBUTIONS
 
 

@@ -3,7 +3,7 @@ Name: fetih
 Version: 1.0.2
 Summary: FETIH — CTF/OSINT siber operasyon ajanlık sistemi. HİÇBİR SİSTEM GÜVENLİ DEĞİLDİR.
 Author: FETIH
-License: MIT
+License: GPL-3.0-only
 Requires-Python: >=3.11
 Description-Content-Type: text/markdown
 License-File: LICENSE

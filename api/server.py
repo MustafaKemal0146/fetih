@@ -70,7 +70,7 @@ app = FastAPI(
     docs_url="/api/docs",
     redoc_url="/api/redoc",
     contact={"name": "FETIH", "url": "https://github.com/MustafaKemal0146/fetih"},
-    license_info={"name": "MIT"},
+    license_info={"name": "GPL-3.0-only"},
 )
 
 # CORS — varsayılan tüm origin'lere açık; FETIH_API_CORS_ORIGINS ile kısıtlanabilir.

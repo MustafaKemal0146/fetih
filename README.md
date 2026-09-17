@@ -619,7 +619,7 @@ pytest tests/ -v
 
 **GNU General Public License v3.0 (GPL-3.0)** — Copyright © 2026 Mustafa Kemal Çıngıl
 
-Kaynağı inceleyebilir, değiştirebilir, dağıtabilirsin; değiştirip dağıtırsan/servis olarak sunarsan kaynağı açık paylaşmak zorundasın. Tam metin: [LICENSE](LICENSE)
+Kaynağı inceleyebilir, değiştirebilir, dağıtabilirsin. Değiştirilmiş bir sürümü **dağıtırsan** (ikili dosya ya da kaynak olarak), aynı lisans altında kaynak kodunu da vermek zorundasın — kapalı kaynaklı bir ürüne gömüp dağıtamazsın. Yalnızca kendin ya da kendi kuruluşun içinde kullanırsan kaynak açma yükümlülüğü doğmaz. Tam metin: [LICENSE](LICENSE)
 
 > ⚠️ **Etik Kullanım:** FETIH yalnızca **yetkili sistemlerde** ve yasal sınırlar içinde kullanılmalıdır. Yetkisiz sistemlere erişim yasadışıdır.
 
