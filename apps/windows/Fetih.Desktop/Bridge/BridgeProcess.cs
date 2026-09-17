@@ -92,13 +92,14 @@ public sealed class BridgeProcess : IDisposable
         {
             if (!proc.Start())
             {
-                throw new InvalidOperationException($"Köprü süreci başlatılamadı: {exe}");
+                throw new InvalidOperationException(
+                    string.Format(Loc.T("bridge.proc.start_failed"), exe));
             }
         }
         catch (Exception ex)
         {
             throw new InvalidOperationException(
-                $"Köprü süreci başlatılamadı ({exe}): {ex.Message}", ex);
+                string.Format(Loc.T("bridge.proc.start_failed_ex"), exe, ex.Message), ex);
         }
 
         _process = proc;
@@ -121,8 +122,8 @@ public sealed class BridgeProcess : IDisposable
             var err = _lastStderr;
             Stop();
             throw new InvalidOperationException(
-                "Köprü el sıkışma satırı alınamadı (süreç beklenmedik şekilde sonlandı). " +
-                (string.IsNullOrWhiteSpace(err) ? "" : "Ayrıntı: " + err));
+                Loc.T("bridge.proc.handshake_read") +
+                (string.IsNullOrWhiteSpace(err) ? "" : Loc.T("bridge.proc.detail") + err));
         }
 
         Handshake parsed;
@@ -134,7 +135,7 @@ public sealed class BridgeProcess : IDisposable
         {
             Stop();
             throw new InvalidOperationException(
-                "Köprü el sıkışma satırı çözümlenemedi: " + ex.Message, ex);
+                Loc.T("bridge.proc.handshake_parse") + ex.Message, ex);
         }
 
         // Kalan stdout'u arka planda tüket; sunucu artık her şeyi WS üzerinden
@@ -193,12 +194,14 @@ public sealed class BridgeProcess : IDisposable
         var ev = root.TryGetProperty("event", out var e) ? e.GetString() : null;
         if (ev != "bridge.listening")
         {
-            throw new FormatException($"beklenen 'bridge.listening', gelen: {ev ?? "(yok)"}");
+            throw new FormatException(string.Format(
+                Loc.T("bridge.proc.unexpected_event"),
+                ev ?? Loc.T("bridge.proc.no_value")));
         }
         var url = root.GetProperty("url").GetString()
-                  ?? throw new FormatException("url yok");
+                  ?? throw new FormatException(Loc.T("bridge.proc.no_url"));
         var token = root.GetProperty("token").GetString()
-                    ?? throw new FormatException("token yok");
+                    ?? throw new FormatException(Loc.T("bridge.proc.no_token"));
         var proto = root.TryGetProperty("protocol_version", out var p) ? p.GetInt32() : 1;
         var pid = root.TryGetProperty("pid", out var pd) ? pd.GetInt32() : 0;
         return new Handshake(url, token, proto, pid);

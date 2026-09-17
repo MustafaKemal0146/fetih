@@ -5,9 +5,8 @@ using Microsoft.UI.Xaml;
 namespace Fetih.Desktop;
 
 /// <summary>
-/// FETİH masaüstü kabuğunun uygulama giriş noktası.
-/// Faz 1: yalnızca ana pencereyi açar. Süreç yöneticisi ve Masaüstü Köprüsü
-/// bağlantısı (bkz. docs/windows-app-plani.md, Faz 1) sonraki adımda eklenir.
+/// FETİH masaüstü kabuğunun uygulama giriş noktası: dil tercihini yükler,
+/// ilk kurulum gerekiyorsa sihirbazı, aksi hâlde ana pencereyi açar.
 /// </summary>
 public partial class App : Application
 {
@@ -15,7 +14,7 @@ public partial class App : Application
 
     /// <summary>
     /// %LOCALAPPDATA%\Fetih\Desktop\crash.log — yakalanmamış istisnalar buraya yazılır.
-    /// Faz 1'de pencere sessizce kapanıyorsa (WinUI3 unpackaged uygulamalarda
+    /// Pencere sessizce kapanıyorsa (WinUI3 unpackaged uygulamalarda
     /// varsayılan davranış budur, WER genelde bir diyalog göstermez) kök nedeni
     /// bu dosyadan okuyabiliriz.
     /// </summary>

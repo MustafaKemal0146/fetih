@@ -12,11 +12,8 @@ namespace Fetih.Desktop.Services;
 /// </summary>
 public static class AppInfo
 {
-    /// <summary>Ürün adı.</summary>
-    public const string ProductName = "FETİH Masaüstü";
-
-    /// <summary>Kısa tanım.</summary>
-    public const string Tagline = "Siber Güvenlik Operasyon Konsolu";
+    /// <summary>Ürün adı (etkin dile göre — "Masaüstü"/"Desktop" sözcüğü çevrilir).</summary>
+    public static string ProductName => Loc.T("app.product_name");
 
     /// <summary>Proje deposu.</summary>
     public const string RepositoryUrl = "https://github.com/MustafaKemal0146/fetih";
@@ -28,43 +25,43 @@ public static class AppInfo
     public const string PlanDocumentPath = "docs/windows-app-plani.md";
 
     /// <summary>Uygulama sürümü (csproj'daki <c>Version</c>).</summary>
-    public static string Version { get; } = ReadInformationalVersion();
+    public static string Version => ReadInformationalVersion();
 
     /// <summary>Windows App SDK paket sürümü (csproj'dan gömülür).</summary>
-    public static string WindowsAppSdkVersion { get; } = ReadMetadata("WindowsAppSdkVersion", "bilinmiyor");
+    public static string WindowsAppSdkVersion => ReadMetadata("WindowsAppSdkVersion", Loc.T("about.unknown"));
 
     /// <summary>Hedef çatı (TFM).</summary>
-    public static string TargetFramework { get; } = ReadMetadata("TargetFramework", "bilinmiyor");
+    public static string TargetFramework => ReadMetadata("TargetFramework", Loc.T("about.unknown"));
 
     /// <summary>Çalışan .NET sürümü.</summary>
-    public static string RuntimeDescription { get; } = SafeGet(() => RuntimeInformation.FrameworkDescription, "bilinmiyor");
+    public static string RuntimeDescription => SafeGet(() => RuntimeInformation.FrameworkDescription, Loc.T("about.unknown"));
 
     /// <summary>Süreç mimarisi (x64 / arm64 …).</summary>
-    public static string Architecture { get; } = SafeGet(
-        () => RuntimeInformation.ProcessArchitecture.ToString(), "bilinmiyor");
+    public static string Architecture => SafeGet(
+        () => RuntimeInformation.ProcessArchitecture.ToString(), Loc.T("about.unknown"));
 
     /// <summary>İşletim sistemi mimarisi.</summary>
-    public static string OsArchitecture { get; } = SafeGet(
-        () => RuntimeInformation.OSArchitecture.ToString(), "bilinmiyor");
+    public static string OsArchitecture => SafeGet(
+        () => RuntimeInformation.OSArchitecture.ToString(), Loc.T("about.unknown"));
 
     /// <summary>Windows sürümü.</summary>
-    public static string OsDescription { get; } = SafeGet(
-        () => $"{RuntimeInformation.OSDescription} ({Environment.OSVersion.Version})", "bilinmiyor");
+    public static string OsDescription => SafeGet(
+        () => $"{RuntimeInformation.OSDescription} ({Environment.OSVersion.Version})", Loc.T("about.unknown"));
 
     /// <summary>
-    /// Kurulum tipi. Faz 1 derlemesi MSIX kimliği olmadan çalışır
+    /// Kurulum tipi. Derleme MSIX kimliği olmadan çalışır
     /// (<c>WindowsPackageType=None</c>), yani "paketlenmemiş / geliştirici".
     /// </summary>
-    public static string InstallType { get; } = DetectInstallType();
+    public static string InstallType => DetectInstallType();
 
     /// <summary>UI çatısı etiketi.</summary>
     public static string UiFramework => $"WinUI 3 · Windows App SDK {WindowsAppSdkVersion}";
 
     /// <summary>Uygulamanın çalıştığı klasör.</summary>
-    public static string BaseDirectory { get; } = SafeGet(() => AppContext.BaseDirectory, "bilinmiyor");
+    public static string BaseDirectory => SafeGet(() => AppContext.BaseDirectory, Loc.T("about.unknown"));
 
     /// <summary>Derleme tarihi — çalıştırılabilir dosyanın son yazılma zamanı.</summary>
-    public static string BuildDate { get; } = ReadBuildDate();
+    public static string BuildDate => ReadBuildDate();
 
     private static string DetectInstallType()
     {
@@ -75,7 +72,7 @@ public static class AppInfo
             var packagePath = Environment.GetEnvironmentVariable("MSIX_PACKAGE_FAMILY_NAME");
             if (!string.IsNullOrWhiteSpace(packagePath))
             {
-                return "Paketli (MSIX)";
+                return Loc.T("about.install.packaged");
             }
         }
         catch
@@ -83,7 +80,7 @@ public static class AppInfo
             // Yoksayılır — aşağıdaki varsayılan doğru cevaptır.
         }
 
-        return "Paketlenmemiş (geliştirici)";
+        return Loc.T("about.install.unpackaged");
     }
 
     private static string ReadBuildDate()
@@ -102,7 +99,7 @@ public static class AppInfo
             // Tek dosya / erişim kısıtı durumunda bilinmiyor döner.
         }
 
-        return "bilinmiyor";
+        return Loc.T("about.unknown");
     }
 
     private static string ReadInformationalVersion()
@@ -119,11 +116,11 @@ public static class AppInfo
                 return plus > 0 ? informational[..plus] : informational;
             }
 
-            return assembly.GetName().Version?.ToString() ?? "bilinmiyor";
+            return assembly.GetName().Version?.ToString() ?? Loc.T("about.unknown");
         }
         catch
         {
-            return "bilinmiyor";
+            return Loc.T("about.unknown");
         }
     }
 

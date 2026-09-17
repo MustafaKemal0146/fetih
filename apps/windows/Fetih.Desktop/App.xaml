@@ -7,6 +7,34 @@
     xmlns:converters="using:Fetih.Desktop.Converters">
     <Application.Resources>
         <ResourceDictionary>
+            <!--
+                Odak halkası (klavye erişilebilirliği).
+
+                Varsayılan halka tek renkli ve soluk; marka kırmızısı zeminli
+                kartların üzerinde kayboluyordu. İki tonlu ve daha kalın bir
+                halka tanımlanır: dış ton marka kırmızısı, iç ton sayfanın
+                zeminiyle karşıt, böylece halka hem açık hem koyu temada ve hem
+                düz hem kırmızı zemin üzerinde okunur kalır.
+
+                Tek yerde tanımlanır: bütün düğmeler, liste öğeleri ve
+                sekmeler aynı halkayı kullanır. Yüksek karşıtlık temasına
+                dokunulmaz — orada renkleri işletim sistemi seçer.
+            -->
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Default">
+                    <SolidColorBrush x:Key="FocusVisualPrimaryBrush" Color="#FFD81E23" />
+                    <SolidColorBrush x:Key="FocusVisualSecondaryBrush" Color="#FFFFFFFF" />
+                    <Thickness x:Key="FocusVisualPrimaryThickness">2</Thickness>
+                    <Thickness x:Key="FocusVisualSecondaryThickness">2</Thickness>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="FocusVisualPrimaryBrush" Color="#FFD81E23" />
+                    <SolidColorBrush x:Key="FocusVisualSecondaryBrush" Color="#FF1B1B1B" />
+                    <Thickness x:Key="FocusVisualPrimaryThickness">2</Thickness>
+                    <Thickness x:Key="FocusVisualSecondaryThickness">2</Thickness>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
                 <!-- Marka işaretleri (vektör; bkz. assets/Branding.xaml) -->

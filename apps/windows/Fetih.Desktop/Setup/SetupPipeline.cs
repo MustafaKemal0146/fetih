@@ -1,7 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Fetih.Desktop.Services;
 
 namespace Fetih.Desktop.Setup;
 
@@ -41,8 +42,7 @@ public sealed class SetupContext
 }
 
 /// <summary>
-/// Kurulum adımı soyutlaması — OpenClaw'ın <c>SetupStep</c> desenine karşılık
-/// (bkz. docs/openclaw-inceleme-notlari.md §5.1). Her adım atlanabilir
+/// Kurulum adımı soyutlaması. Her adım atlanabilir
 /// (<see cref="CanSkipAsync"/>), yürütülebilir ve geri alınabilir
 /// (<see cref="RollbackAsync"/>).
 /// </summary>
@@ -76,7 +76,7 @@ public sealed record StepProgress(int Index, int Total, string StepId, string Di
 /// <summary>
 /// Adım listesini sırayla çalıştırır; her olayı <see cref="TransactionJournal"/>'a
 /// yazar. Bir adım başarısız olursa tamamlanan adımları ters sırayla geri alır —
-/// yarım kurulum bırakmaz (OpenClaw §5.2).
+/// yarım kurulum bırakmaz.
 /// </summary>
 public sealed class SetupPipeline
 {
@@ -103,10 +103,10 @@ public sealed class SetupPipeline
             {
                 await RollbackAsync(ctx, completed).ConfigureAwait(false);
                 _journal.Write("pipeline_cancelled", new() { ["at"] = step.Id });
-                return new PipelineResult(PipelineOutcome.Cancelled, step.Id, "İptal edildi.");
+                return new PipelineResult(PipelineOutcome.Cancelled, step.Id, Loc.T("setup.pipeline.cancelled"));
             }
 
-            Report(i, step, null, "başlıyor…");
+            Report(i, step, null, Loc.T("setup.pipeline.starting"));
             _journal.Write("step_started", new() { ["id"] = step.Id });
 
             try
@@ -114,7 +114,7 @@ public sealed class SetupPipeline
                 if (await step.CanSkipAsync(ctx).ConfigureAwait(false))
                 {
                     _journal.Write("step_skipped", new() { ["id"] = step.Id, ["reason"] = "precondition met" });
-                    Report(i, step, StepOutcome.Skipped, "zaten sağlanmış — atlandı");
+                    Report(i, step, StepOutcome.Skipped, Loc.T("setup.pipeline.skipped"));
                     continue;
                 }
 
@@ -140,7 +140,7 @@ public sealed class SetupPipeline
             {
                 await RollbackAsync(ctx, completed).ConfigureAwait(false);
                 _journal.Write("pipeline_cancelled", new() { ["at"] = step.Id });
-                return new PipelineResult(PipelineOutcome.Cancelled, step.Id, "İptal edildi.");
+                return new PipelineResult(PipelineOutcome.Cancelled, step.Id, Loc.T("setup.pipeline.cancelled"));
             }
             catch (Exception ex)
             {
@@ -153,7 +153,7 @@ public sealed class SetupPipeline
         }
 
         _journal.Write("pipeline_completed", new());
-        return new PipelineResult(PipelineOutcome.Success, null, "Kurulum tamamlandı.");
+        return new PipelineResult(PipelineOutcome.Success, null, Loc.T("setup.pipeline.done"));
     }
 
     private async Task RollbackAsync(SetupContext ctx, List<SetupStep> completed)

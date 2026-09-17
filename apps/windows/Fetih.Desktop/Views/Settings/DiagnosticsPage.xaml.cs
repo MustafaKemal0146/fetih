@@ -55,6 +55,10 @@ public sealed partial class DiagnosticsPage : Page
         RefreshButton.Content = Loc.T("diag.refresh");
         CopyButton.Content = Loc.T("diag.copy");
         ClearButton.Content = Loc.T("diag.clear");
+
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(RefreshButton, Loc.T("diag.refresh"));
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(CopyButton, Loc.T("diag.copy"));
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(ClearButton, Loc.T("diag.clear"));
     }
 
     private void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -155,7 +159,7 @@ public sealed partial class DiagnosticsPage : Page
                     : Loc.T("diag.file_missing")),
             new(Loc.T("diag.row.logs"), FetihPaths.LogsDir, State(FetihPaths.LogsDir)),
             new(Loc.T("diag.row.sandbox"), FetihPaths.SandboxesDir, State(FetihPaths.SandboxesDir)),
-            new(Loc.T("diag.row.repo"), FetihPaths.RepositoryRoot ?? "(bulunamadı)",
+            new(Loc.T("diag.row.repo"), FetihPaths.RepositoryRoot ?? Loc.T("diag.none"),
                 FetihPaths.RepositoryRoot is null ? Loc.T("diag.catalog_unreadable") : Loc.T("diag.present")),
             new(Loc.T("diag.row.crash_log"), FetihPaths.CrashLogPath, State(FetihPaths.CrashLogPath)),
         };
@@ -174,7 +178,7 @@ public sealed partial class DiagnosticsPage : Page
         }
         catch
         {
-            return "bilinmiyor";
+            return Loc.T("diag.unknown");
         }
     }
 
@@ -184,23 +188,23 @@ public sealed partial class DiagnosticsPage : Page
         {
             if (!File.Exists(FetihPaths.CrashLogPath))
             {
-                CrashLogMeta.Text = $"{FetihPaths.CrashLogPath} — dosya yok (hiç çökme kaydedilmemiş).";
-                CrashLogText.Text = "Kayıtlı çökme yok.";
+                CrashLogMeta.Text = FetihPaths.CrashLogPath + Loc.T("diag.log_absent");
+                CrashLogText.Text = Loc.T("diag.log_none");
                 return;
             }
 
             var info = new FileInfo(FetihPaths.CrashLogPath);
             CrashLogMeta.Text =
-                $"{FetihPaths.CrashLogPath} — {info.Length:N0} bayt · " +
-                $"son yazma {info.LastWriteTime:dd.MM.yyyy HH:mm:ss}";
+                $"{FetihPaths.CrashLogPath} — {info.Length:N0}" + Loc.T("diag.log_bytes") +
+                info.LastWriteTime.ToString("dd.MM.yyyy HH:mm:ss");
 
             var content = ReadTail(FetihPaths.CrashLogPath, MaxLogBytes);
-            CrashLogText.Text = content.Length == 0 ? "Günlük boş." : content;
+            CrashLogText.Text = content.Length == 0 ? Loc.T("diag.log_empty") : content;
         }
         catch (Exception ex)
         {
             CrashLogMeta.Text = FetihPaths.CrashLogPath;
-            CrashLogText.Text = $"Günlük okunamadı: {ex.Message}";
+            CrashLogText.Text = Loc.T("diag.log_read_failed") + ex.Message;
         }
     }
 
@@ -216,7 +220,7 @@ public sealed partial class DiagnosticsPage : Page
         using var reader = new StreamReader(stream);
         var text = reader.ReadToEnd();
         return stream.Length > maxBytes
-            ? "… (günlüğün yalnızca son bölümü gösteriliyor) …\n" + text
+            ? Loc.T("diag.log_tail_notice") + text
             : text;
     }
 
@@ -224,8 +228,8 @@ public sealed partial class DiagnosticsPage : Page
     private string BuildSupportReport()
     {
         var builder = new StringBuilder();
-        builder.AppendLine("FETİH Masaüstü — tanılama raporu");
-        builder.AppendLine($"Oluşturma: {DateTimeOffset.Now:yyyy-MM-dd HH:mm:ss zzz}");
+        builder.AppendLine(Loc.T("diag.report_title"));
+        builder.AppendLine(Loc.T("diag.report_created") + DateTimeOffset.Now.ToString("yyyy-MM-dd HH:mm:ss zzz"));
         builder.AppendLine(new string('-', 60));
 
         foreach (var row in BuildSystemRows())
@@ -240,7 +244,7 @@ public sealed partial class DiagnosticsPage : Page
         }
 
         builder.AppendLine(new string('-', 60));
-        builder.AppendLine("Çökme günlüğü:");
+        builder.AppendLine(Loc.T("diag.report_crash_log"));
         builder.AppendLine(CrashLogText.Text);
         return builder.ToString();
     }

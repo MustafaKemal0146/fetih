@@ -11,7 +11,8 @@ namespace Fetih.Desktop.Views.Settings;
 
 /// <summary>
 /// Masaüstü Köprüsü ayar sayfası: bağlantı durumu, taşıma yapılandırması ve
-/// çözümlenen yollar. Faz 1'de salt okunur.
+/// çözümlenen yollar. Bu sayfa bilgi amaçlıdır — köprüyü buradan başlatmaz,
+/// yalnızca gerçek durumu gösterir.
 /// </summary>
 public sealed partial class BridgePage : Page
 {
@@ -50,9 +51,11 @@ public sealed partial class BridgePage : Page
         TransportHeader.Text = Loc.T("bridge.section.transport");
         PathsHeader.Text = Loc.T("bridge.section.paths");
         PathsNoteText.Text = Loc.T("bridge.paths_note");
-        PhaseInfo.Title = Loc.T("bridge.phase_title");
-        PhaseInfo.Message = Loc.T("bridge.phase_desc");
+        LiveInfo.Title = Loc.T("bridge.live_title");
+        LiveInfo.Message = Loc.T("bridge.live_desc");
         RefreshButton.Content = Loc.T("bridge.refresh");
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(
+            RefreshButton, Loc.T("bridge.refresh"));
     }
 
     private void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -95,7 +98,7 @@ public sealed partial class BridgePage : Page
                 new("FETIH_HOME", FetihPaths.FetihHome, DirectoryNote(FetihPaths.FetihHome)),
                 new(Loc.T("bridge.path.config"), FetihPaths.ConfigYamlPath, FileNote(FetihPaths.ConfigYamlPath)),
                 new(Loc.T("bridge.path.env"), FetihPaths.EnvFilePath, FileNote(FetihPaths.EnvFilePath)),
-                new(Loc.T("bridge.path.repo"), FetihPaths.RepositoryRoot ?? "(bulunamadı)",
+                new(Loc.T("bridge.path.repo"), FetihPaths.RepositoryRoot ?? Loc.T("diag.none"),
                     FetihPaths.RepositoryRoot is null
                         ? Loc.T("bridge.repo.outside")
                         : Loc.T("bridge.repo.catalog")),

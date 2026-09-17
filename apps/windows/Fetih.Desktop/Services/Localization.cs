@@ -23,9 +23,9 @@ public enum UiLanguage
 ///
 /// <para>Bilinçli olarak basit tutuldu: XAML kaynak sözlüğü (.resw) tabanlı
 /// tam yerelleştirme yerine, kod arkasında <see cref="T"/> ile çözülen bir
-/// anahtar-değer tablosu kullanılır. Ana navigasyon, sohbet ve temel Ayarlar
-/// başlıkları kapsanır; kalan sayfaların tam çevirisi ilerideki bir adıma
-/// bırakılmıştır (bkz. rapor).</para>
+/// anahtar-değer tablosu kullanılır. Gezinme, sohbet, ilk kurulum sihirbazı
+/// ve bütün ayar sayfalarının kullanıcıya görünen metinleri bu tablodadır;
+/// XAML içinde sabit metin bırakılmaz (bkz. <c>Loc.T</c> çağrıları).</para>
 /// </summary>
 public static class Loc
 {
@@ -112,15 +112,43 @@ public static class Loc
     };
 
     /// <summary>
-    /// "auto" tercihinin çözümü. FETİH Türkçe-öncelikli bir üründür: küratörlü
-    /// sayfaların (Tanılama, Sandbox, Ses, İzinler, Sağlayıcı) sabit metinleri
-    /// Türkçe yazılmıştır. Sistem dili İngilizceyken "auto"yu İngilizceye
-    /// çözmek, gezinme ve ayar açıklamaları İngilizce, sayfa gövdeleri Türkçe
-    /// olan KARIŞIK bir arayüz üretiyordu (kullanıcının bildirdiği sorun).
-    /// Bu yüzden "auto" her zaman Türkçedir; İngilizce açık bir tercihtir ve
-    /// Görünüm sayfasındaki dil seçicisinden seçilir.
+    /// "auto" tercihinin çözümü: sistemin arayüz dili neyse o.
+    ///
+    /// <para>Türkçe kültürler (<c>tr</c>, <c>tr-TR</c> ve türevleri) Türkçeye
+    /// çözülür; diğer bütün kültürler İngilizceye. Karşılaştırma kültür adının
+    /// köküne göre yapılır, çünkü <c>TwoLetterISOLanguageName</c> sabit
+    /// kültürlerde boş dönebiliyor.</para>
+    ///
+    /// <para>Kültür bilgisi okunamazsa (bozuk kullanıcı profili, kısıtlı
+    /// ortam) güvenli varsayılan Türkçedir: ürünün küratörlü içeriği Türkçe
+    /// yazıldığı için bu, boş bir ekran yerine okunabilir bir arayüz verir.</para>
     /// </summary>
-    private static UiLanguage DetectFromSystem() => UiLanguage.Turkish;
+    private static UiLanguage DetectFromSystem()
+    {
+        try
+        {
+            var culture = System.Globalization.CultureInfo.CurrentUICulture;
+            if (culture is null)
+            {
+                return UiLanguage.Turkish;
+            }
+
+            var tag = culture.TwoLetterISOLanguageName;
+            if (string.IsNullOrWhiteSpace(tag))
+            {
+                tag = culture.Name;
+            }
+
+            return tag.StartsWith("tr", StringComparison.OrdinalIgnoreCase)
+                ? UiLanguage.Turkish
+                : UiLanguage.English;
+        }
+        catch
+        {
+            // Kültür API'si her ortamda güvenilir değil; Türkçe güvenli seçim.
+            return UiLanguage.Turkish;
+        }
+    }
 
     private static void EnsureLoaded()
     {
@@ -288,10 +316,12 @@ public static class Loc
         ["bridge.paths_note"] = new(
             "Uygulama kullanıcının PATH'ine güvenmez; Python süreci mutlak yollarla başlatılacaktır.",
             "The app does not trust the user's PATH; the Python process will be started using absolute paths."),
-        ["bridge.phase_title"] = new("Faz 1", "Phase 1"),
-        ["bridge.phase_desc"] = new(
-            "Bu sürümde köprüye bağlanılmaz; ayarlar diskteki yapılandırma dosyalarından salt okunur biçimde gösterilir.",
-            "In this version the bridge is not connected; settings are shown read-only from on-disk configuration files."),
+        ["bridge.live_title"] = new(
+            "Köprü bu sürümde etkin",
+            "The bridge is active in this build"),
+        ["bridge.live_desc"] = new(
+            "Uygulama Python köprüsünü kendisi başlatır ve ilk mesajda bağlanır. Yukarıdaki değerler canlı durumu yansıtır; hepsi salt okunur bilgidir.",
+            "The app starts the Python bridge itself and connects on the first message. The values above reflect live state; all of them are read-only information."),
         ["bridge.refresh"] = new("Yeniden oku", "Reload"),
         ["bridge.transport.default"] = new("Varsayılan taşıma", "Default transport"),
         ["bridge.transport.default_note"] = new(
@@ -312,9 +342,11 @@ public static class Loc
             " Value is never displayed or written to file; passed to Python process solely via environment variable."),
         ["bridge.transport.python_mod"] = new("Python modülü", "Python module"),
         ["bridge.transport.mod_avail"] = new("fetih_desktop_bridge (mevcut)", "fetih_desktop_bridge (available)"),
-        ["bridge.transport.mod_missing"] = new("fetih_desktop_bridge (henüz yok)", "fetih_desktop_bridge (not yet available)"),
+        ["bridge.transport.mod_missing"] = new("fetih_desktop_bridge (bulunamadı)", "fetih_desktop_bridge (not found)"),
         ["bridge.transport.mod_avail_note"] = new("python -m fetih_desktop_bridge ile başlatılır.", "Started via python -m fetih_desktop_bridge."),
-        ["bridge.transport.mod_missing_note"] = new("Faz 1'in Python tarafı henüz eklenmedi; bağlantı bu yüzden kurulmuyor.", "Python side not yet added; connection cannot be established."),
+        ["bridge.transport.mod_missing_note"] = new(
+            "Python modülü depo kökünde görünmüyor. Uygulamayı depo ağacının içinden çalıştır; köprü kurulana kadar bağlantı kurulamaz.",
+            "The Python module is not visible in the repository root. Run the app from inside the repository tree; the bridge cannot connect until it is there."),
         ["bridge.path.config"] = new("Yapılandırma", "Configuration"),
         ["bridge.path.env"] = new("Ortam dosyası", "Environment file"),
         ["bridge.path.repo"] = new("Depo kökü", "Repository root"),
@@ -352,9 +384,12 @@ public static class Loc
         ["about.row.windows"] = new("Windows", "Windows"),
         ["about.row.install_type"] = new("Kurulum tipi", "Installation type"),
         ["about.row.install_desc"] = new(
-            "MSIX paketleme Faz 4'te eklenecek; şu anki derleme paket kimliği olmadan çalışır.",
-            "Packaging added in Phase 4; current build runs without package identity."),
+            "Bu derleme paketlenmemiş (paket kimliği olmadan) çalışır; güncelleme dağıtımı depodan elle yapılır.",
+            "This build runs unpackaged (without package identity); updates are distributed manually from the repository."),
         ["about.row.app_dir"] = new("Uygulama klasörü", "Application directory"),
+        ["about.unknown"] = new("bilinmiyor", "unknown"),
+        ["about.install.packaged"] = new("Paketli (MSIX)", "Packaged (MSIX)"),
+        ["about.install.unpackaged"] = new("Paketlenmemiş (geliştirici)", "Unpackaged (developer)"),
 
         // ── Tanılama sayfası ─────────────────────────────────────────────
         ["diag.title"] = new("Tanılama", "Diagnostics"),
@@ -364,8 +399,22 @@ public static class Loc
         ["diag.section.system"] = new("Sistem bilgisi", "System Information"),
         ["diag.section.paths"] = new("Çözümlenen yollar", "Resolved Paths"),
         ["diag.section.crash_log"] = new("Çökme günlüğü", "Crash Log"),
+        ["diag.refresh"] = new("Yenile", "Reload"),
         ["diag.copy"] = new("Panoya kopyala", "Copy to clipboard"),
         ["diag.clear"] = new("Günlüğü temizle", "Clear log"),
+        ["diag.none"] = new("(bulunamadı)", "(not found)"),
+        ["diag.unknown"] = new("bilinmiyor", "unknown"),
+        ["diag.log_absent"] = new(" — dosya yok (hiç çökme kaydedilmemiş).", " — file missing (no crash has ever been recorded)."),
+        ["diag.log_empty"] = new("Günlük boş.", "The log is empty."),
+        ["diag.log_none"] = new("Kayıtlı çökme yok.", "No crash recorded."),
+        ["diag.log_bytes"] = new(" bayt · son yazma ", " bytes · last written "),
+        ["diag.log_read_failed"] = new("Günlük okunamadı: ", "Could not read the log: "),
+        ["diag.log_tail_notice"] = new(
+            "… (günlüğün yalnızca son bölümü gösteriliyor) …\n",
+            "… (only the tail of the log is shown) …\n"),
+        ["diag.report_title"] = new("FETİH Masaüstü — tanılama raporu", "FETİH Desktop — diagnostics report"),
+        ["diag.report_created"] = new("Oluşturma: ", "Created: "),
+        ["diag.report_crash_log"] = new("Çökme günlüğü:", "Crash log:"),
         ["diag.copied"] = new("Tanılama raporu panoya kopyalandı.", "Diagnostics report copied to clipboard."),
         ["diag.cleared"] = new("Çökme günlüğü temizlendi.", "Crash log cleared."),
         ["diag.no_log"] = new("Temizlenecek günlük yok.", "No log to clear."),
@@ -401,10 +450,10 @@ public static class Loc
         ["voice.section.tts"] = new("Metin okuma (TTS)", "Text-to-Speech (TTS)"),
         ["voice.section.stt"] = new("Konuşma tanıma (STT)", "Speech-to-Text (STT)"),
         ["voice.section.recording"] = new("Kayıt davranışı", "Recording Behavior"),
-        ["voice.phase_title"] = new("Faz 3", "Phase 3"),
-        ["voice.phase_desc"] = new(
-            "Bas-konuş girişi ve yanıt okuma masaüstü kabuğuna Faz 3'te bağlanacak. Bu sayfa şimdilik Python tarafındaki gerçek ses yapılandırmasını salt okunur gösterir.",
-            "Push-to-talk input and response readout will connect to the desktop shell in Phase 3. For now, this page shows the Python side's actual voice configuration read-only."),
+        ["voice.live_title"] = new("Bu sayfa yalnızca bilgi gösterir", "This page is read-only"),
+        ["voice.live_desc"] = new(
+            "Bas-konuş kaydı ve yanıt okuma Python tarafında yürütülür; masaüstü kabuğunda kayıt düğmesi yoktur. Bu sayfa, diskteki gerçek ses yapılandırmasını değiştirmeden gösterir — düzenlemek için Ayarlar › Detaylı Mod'u kullan.",
+            "Push-to-talk recording and response readout run on the Python side; the desktop shell has no record button. This page shows the real on-disk voice configuration without changing it — use Settings › Advanced Mode to edit it."),
         ["voice.provider"] = new("Sağlayıcı", "Provider"),
         ["voice.voice"] = new("Ses", "Voice"),
         ["voice.voice_id"] = new("Ses kimliği", "Voice ID"),
@@ -455,6 +504,7 @@ public static class Loc
             "Findings will be listed here once a scan or task completes. Skill and workspace security scanning can be performed via the Desktop Bridge."),
         ["findings.empty_disclaimer"] = new("Yalnızca yetkili olduğun sistemlerde test yap.", "Only test on systems you are authorized to test."),
         ["findings.severity.all"] = new("Tüm ciddiyet seviyeleri", "All severity levels"),
+        ["findings.severity_label"] = new("Ciddiyet süzgeci", "Severity filter"),
         ["findings.severity.critical"] = new("Kritik", "Critical"),
         ["findings.severity.high"] = new("Yüksek", "High"),
         ["findings.severity.medium"] = new("Orta", "Medium"),
@@ -490,6 +540,9 @@ public static class Loc
             "Bu bölüm için düzenlenebilir alan bulunamadı.",
             "No editable field was found for this section."),
         ["config.read_failed"] = new("Yapılandırma okunamadı.", "Could not read the configuration."),
+        ["config.error.no_keys"] = new(
+            "config.yaml okundu ancak hiçbir anahtar ayrıştırılamadı.",
+            "config.yaml was read but no key could be parsed."),
         ["config.load_failed"] = new("Yapılandırma yüklenemedi: ", "Could not load the configuration: "),
         ["config.bridge_error"] = new("Köprü hatası", "Bridge error"),
         ["config.secret"] = new(
@@ -571,5 +624,496 @@ public static class Loc
             "Bazı dosyalar kullanımda olduğu için silinemedi: ",
             "Some files could not be deleted because they are in use: "),
         ["danger.failed"] = new("İşlem başarısız: ", "The action failed: "),
+
+        // ── Sohbet: köprü hataları ve bağlantı ───────────────────────────
+        ["chat.error.session_unknown"] = new(
+            "Köprü bu oturumu tanımıyor; yeni bir oturum açılacak.",
+            "The bridge does not recognize this session; a new one will be opened."),
+        ["chat.error.busy"] = new(
+            "Bu oturumda zaten bir tur çalışıyor; bitmesini bekle.",
+            "A turn is already running in this session; wait for it to finish."),
+        ["chat.error.agent_failed"] = new("Ajan çalıştı ama başarısız oldu: ", "The agent ran but failed: "),
+        ["chat.error.auth"] = new("Köprü kimlik doğrulaması reddedildi.", "The bridge refused authentication."),
+        ["chat.error.cancel_failed"] = new("Tur durdurulamadı: ", "The turn could not be stopped: "),
+        ["chat.error.bridge"] = new("Köprü hatası (", "Bridge error ("),
+        ["chat.warmup_failed"] = new(
+            "Masaüstü Köprüsü'ne bağlanılamadı: ",
+            "Could not connect to the Desktop Bridge: "),
+        ["chat.warmup_retry"] = new(
+            " · İlk mesajı gönderdiğinde tekrar denenecek.",
+            " · It will be retried when you send your first message."),
+
+        // ── Sohbet: mesaj ve araç kartı etiketleri ───────────────────────
+        ["chat.role.tool"] = new("🔧 Araç", "🔧 Tool"),
+        ["chat.thought.thinking"] = new("🧠 Düşünülüyor…", "🧠 Thinking…"),
+        ["chat.thought.header"] = new("🧠 Düşünce Süreci", "🧠 Reasoning"),
+        ["chat.tool.running"] = new("çalışıyor…", "running…"),
+        ["chat.tool.done"] = new("tamamlandı", "done"),
+
+        // ── Sohbet: mesaj eylemi düğmeleri ───────────────────────────────
+        ["chat.action.copy"] = new("Kopyala", "Copy"),
+        ["chat.action.copy.hint"] = new(
+            "Bu mesajı panoya kopyala", "Copy this message to the clipboard"),
+        ["chat.action.edit"] = new("Düzenle", "Edit"),
+        ["chat.action.edit.hint"] = new(
+            "Bu mesajı giriş kutusuna yükler; düzeltilmiş hâlini gönderirsin",
+            "Load this message into the input box, then send the corrected version"),
+        ["chat.action.retry"] = new("Yeniden dene", "Retry"),
+        ["chat.action.retry.hint"] = new("Bu turu yeniden gönder", "Send this turn again"),
+        ["chat.action.stop"] = new("Durdur", "Stop"),
+        ["chat.action.copied"] = new("Mesaj panoya kopyalandı.", "Message copied to the clipboard."),
+        ["chat.action.copy_failed"] = new("Panoya kopyalanamadı.", "Could not copy to the clipboard."),
+        ["chat.action.busy"] = new(
+            "Bir tur zaten çalışıyor. Önce durdur.",
+            "A turn is already running. Stop it first."),
+        ["chat.action.no_turn"] = new(
+            "Yinelenecek bir kullanıcı mesajı yok.",
+            "No preceding user message to repeat."),
+        ["chat.action.cancelling"] = new("Tur durduruluyor…", "Stopping the turn…"),
+        ["chat.action.cancelled"] = new(
+            "Tur durduruldu. O ana kadar gelen çıktı yukarıda duruyor.",
+            "Turn stopped. Partial output is kept above."),
+        ["chat.action.send_failed"] = new("Mesaj gönderilemedi: ", "Message could not be sent: "),
+        ["chat.action.edit_restarted"] = new(
+            "Mesaj düzenlendi; sonrasındaki turlar kaldırıldı ve yeni bir köprü oturumu başlatıldı.",
+            "The message was edited; everything after it was removed and a new bridge session started."),
+        ["chat.action.session_gone"] = new(
+            "Önceki köprü oturumu artık yok; yeni bir oturum başlatıldı.",
+            "The previous bridge session no longer exists; a new one was started."),
+
+        // ── Ses sayfası: satır etiketleri ve notları ─────────────────────
+        ["voice.recording.key"] = new("Kayıt kısayolu", "Recording shortcut"),
+        ["voice.recording.key.desc"] = new(
+            "Bas-konuş kaydını başlatır/durdurur.", "Starts and stops push-to-talk recording."),
+        ["voice.recording.max"] = new("Azami kayıt süresi", "Maximum recording length"),
+        ["voice.recording.auto_tts"] = new("Yanıtı otomatik seslendir", "Read responses aloud automatically"),
+        ["voice.recording.beep"] = new("Kayıt bip sesleri", "Recording beeps"),
+        ["voice.recording.beep.desc"] = new(
+            "Kayıt başlangıç/bitiş sinyali.", "Start/stop signal for recording."),
+        ["voice.recording.silence_threshold"] = new("Sessizlik eşiği", "Silence threshold"),
+        ["voice.recording.silence_threshold.desc"] = new(
+            "RMS bu değerin altındaysa sessizlik sayılır (0–32767).",
+            "Audio below this RMS level counts as silence (0–32767)."),
+        ["voice.recording.silence_duration"] = new("Sessizlik süresi", "Silence duration"),
+        ["voice.recording.silence_duration.desc"] = new(
+            "Sürekli (VAD) modda otomatik durdurma eşiği.",
+            "Automatic stop threshold in continuous (VAD) mode."),
+        ["voice.tts.options"] = new(
+            "Seçenekler: edge (ücretsiz), elevenlabs, openai, xai, minimax, mistral, gemini, " +
+            "neutts / kittentts / piper (yerel).",
+            "Options: edge (free), elevenlabs, openai, xai, minimax, mistral, gemini, " +
+            "neutts / kittentts / piper (local)."),
+        ["voice.stt.options"] = new(
+            "Seçenekler: local (faster-whisper, ücretsiz), groq, openai (Whisper API), mistral (Voxtral).",
+            "Options: local (faster-whisper, free), groq, openai (Whisper API), mistral (Voxtral)."),
+        ["voice.stt.model.options"] = new(
+            "tiny / base / small / medium / large-v3", "tiny / base / small / medium / large-v3"),
+        ["voice.seconds"] = new("{0} sn", "{0} s"),
+        ["voice.auto_detect"] = new("(otomatik algıla)", "(detect automatically)"),
+
+        // ── Yetenekler sayfası: özet ve boş durum ────────────────────────
+        ["skills.summary.repo_missing"] = new(
+            "FETİH deposu bulunamadı — yetenekler yalnızca {0} altından okundu ({1} kayıt).",
+            "FETİH repository not found — skills were read only from {0} ({1} entries)."),
+        ["skills.summary.counts"] = new(
+            "{0} yetenek · skills/ {1} · optional-skills/ {2} · yalnızca kullanıcıda {3} ({4} ms)",
+            "{0} skills · skills/ {1} · optional-skills/ {2} · user-only {3} ({4} ms)"),
+        ["skills.summary.duplicates"] = new(
+            " · {0} kurulu kopya atlandı", " · {0} installed duplicate(s) skipped"),
+        ["skills.summary.warning"] = new("{0} — uyarı: {1}", "{0} — warning: {1}"),
+        ["skills.empty.none"] = new(
+            "Hiç SKILL.md bulunamadı. Depo kökü çözümlenemediyse uygulamayı depo içindeki apps/windows/Fetih.Desktop klasöründen çalıştırın.",
+            "No SKILL.md was found. If the repository root could not be resolved, run the app from the apps/windows/Fetih.Desktop folder inside the repository."),
+        ["skills.empty.filter"] = new(
+            "Bu arama/kategori için sonuç yok.", "No results for this search/category."),
+
+        // ── Kabuk sayfası: durum satırları ───────────────────────────────
+        ["shell.bridge_error"] = new("Köprü hatası ({0}): {1}", "Bridge error ({0}): {1}"),
+        ["shell.windows_only"] = new(
+            "Kabuk seçimi yalnızca Windows'ta geçerlidir.",
+            "Shell selection only applies on Windows."),
+
+        // ── Model ve Sağlayıcı: yuvalar ve kaydetme ──────────────────────
+        ["provider.config_unreadable"] = new(
+            "Yapılandırma okunamadı; köprü bağlı değil.",
+            "Could not read the configuration; the bridge is not connected."),
+        ["provider.config_error"] = new("Yapılandırma okunamadı: ", "Could not read the configuration: "),
+        ["provider.slots.fallback_title"] = new("Yedek model", "Fallback model"),
+        ["provider.slots.fallback_desc"] = new(
+            "Birincil sağlayıcı 429/503/529 döndüğünde bu model devreye girer. Boş bırakılırsa yedek yoktur.",
+            "This model takes over when the primary provider returns 429/503/529. Left empty, there is no fallback."),
+        ["provider.slots.chain_note"] = new(
+            "Şu anda {0} basamaklı bir yedek zinciri tanımlı; buradan kaydetmek zinciri tek bir yedeğe indirir.",
+            "A {0}-step fallback chain is currently configured; saving here reduces the chain to a single fallback."),
+        ["provider.slots.aux_header"] = new(
+            "Yardımcı modeller — yan görev başına ayrı model ({0} yuva)",
+            "Auxiliary models — a separate model per side task ({0} slots)"),
+        ["provider.slots.aux_name"] = new("Yardımcı modeller", "Auxiliary models"),
+        ["provider.slots.auto"] = new("Otomatik (auto)", "Automatic (auto)"),
+        ["provider.slots.none"] = new("(yok)", "(none)"),
+        ["provider.slots.model_placeholder"] = new(
+            "Model kimliği (boş = sağlayıcının varsayılanı)",
+            "Model ID (empty = the provider's default)"),
+        ["provider.slots.save"] = new("Kaydet", "Save"),
+        ["provider.slots.save_name"] = new("{0} kaydet", "Save {0}"),
+        ["provider.slots.saving"] = new("kaydediliyor…", "saving…"),
+        ["provider.slots.saved"] = new("✓ kaydedildi", "✓ saved"),
+        ["provider.slots.rejected"] = new(
+            "reddedildi (yönetilen kurulum)", "refused (managed installation)"),
+        ["provider.models.curated"] = new("{0} model listelendi.", "{0} models listed."),
+        ["provider.models.live"] = new(
+            "{0} model sağlayıcıdan canlı alındı.", "{0} models fetched live from the provider."),
+        ["provider.models.ready"] = new("{0} model hazır.", "{0} models ready."),
+        ["provider.models.failed"] = new(
+            "Model listesi alınamadı; model adını doğrudan yazabilirsin.",
+            "Could not fetch the model list; you can type the model ID directly."),
+        ["provider.save.need_input"] = new("Sağlayıcı veya model gir.", "Enter a provider or a model."),
+        ["provider.save.saving"] = new("kaydediliyor…", "saving…"),
+        ["provider.save.model_and_key"] = new(
+            "✓ Model ve API anahtarı kaydedildi — bir sonraki mesajda etkili olacak",
+            "✓ Model and API key saved — it takes effect on the next message"),
+        ["provider.save.model_only"] = new(
+            "✓ Model kaydedildi — bir sonraki mesajda etkili olacak",
+            "✓ Model saved — it takes effect on the next message"),
+        ["provider.save.no_key_yet"] = new(
+            " ⚠ API anahtarı henüz girilmedi.", " ⚠ No API key has been entered yet."),
+        ["provider.save.rejected"] = new(
+            "reddedildi (yönetilen kurulum)", "refused (managed installation)"),
+        ["provider.key.defined"] = new("Tanımlı", "Configured"),
+        ["provider.key.undefined"] = new("Tanımsız", "Not configured"),
+        ["provider.source.environment"] = new("süreç ortam değişkeni", "process environment variable"),
+        ["provider.source.env_file"] = new("~/.fetih/.env", "~/.fetih/.env"),
+        ["provider.source.none"] = new("hiçbir kaynakta yok", "not found in any source"),
+        ["provider.baseurl.overridden"] = new("uç adresi geçersiz kılınmış", "endpoint overridden"),
+        ["provider.baseurl.default"] = new("varsayılan uç adresi kullanılır", "default endpoint in use"),
+        ["provider.badge.aggregator"] = new("toplayıcı", "aggregator"),
+        ["provider.badge.local"] = new("yerel — veri makineden çıkmaz", "local — data never leaves the machine"),
+        ["provider.badge.active"] = new("Etkin", "Active"),
+        ["provider.badge.not_configured"] = new("Kimlik bilgisi yok", "No credentials"),
+        ["provider.badge.configured"] = new("Kimlik bilgisi tanımlı", "Credentials configured"),
+        ["provider.count"] = new("{0} / {1} sağlayıcı", "{0} / {1} providers"),
+        ["provider.active.custom"] = new("Kullanıcı tanımlı sağlayıcılar", "User-defined providers"),
+        ["provider.active.custom_none"] = new("(yok)", "(none)"),
+        ["provider.active.custom_note"] = new(
+            "config.yaml içindeki providers: bölümüne eklenen özel OpenAI uyumlu uçlar.",
+            "Custom OpenAI-compatible endpoints added under the providers: section in config.yaml."),
+        ["provider.active.config_file"] = new("Yapılandırma dosyası", "Configuration file"),
+        ["provider.active.last_modified"] = new("Son değişiklik: {0}", "Last modified: {0}"),
+        ["provider.active.fallback_note"] = new(
+            "Birincil sağlayıcı 429/529/503 döndüğünde devreye girer.",
+            "Kicks in when the primary provider returns 429/529/503."),
+
+        // ── Model ve Sağlayıcı: yardımcı model yuvaları ──────────────────
+        ["provider.aux.vision.title"] = new("Görüntü çözümleme", "Image analysis"),
+        ["provider.aux.vision.desc"] = new(
+            "Ekran görüntüsü ve resim analizi (vision_analyze, tarayıcı görüntüleri). Çok kipli (multimodal) bir model gerekir.",
+            "Screenshot and image analysis (vision_analyze, browser captures). Requires a multimodal model."),
+        ["provider.aux.web_extract.title"] = new("Web sayfası özetleme", "Web page summarization"),
+        ["provider.aux.web_extract.desc"] = new(
+            "Bir sayfayı okuyup özetleyen yan görev.", "The side task that reads and summarizes a page."),
+        ["provider.aux.compression.title"] = new("Bağlam sıkıştırma", "Context compression"),
+        ["provider.aux.compression.desc"] = new(
+            "Sohbet uzayınca eski turları özetleyip yer açar.",
+            "Summarizes older turns to free room once the conversation grows."),
+        ["provider.aux.skills_hub.title"] = new("Yetenek merkezi", "Skills hub"),
+        ["provider.aux.skills_hub.desc"] = new(
+            "Yetenek (skill) arama ve eşleştirme çağrıları.", "Skill search and matching calls."),
+        ["provider.aux.approval.title"] = new("Onay kararı", "Approval decision"),
+        ["provider.aux.approval.desc"] = new(
+            "Tehlikeli bir komutun otomatik onaylanıp onaylanmayacağına karar verir. Ucuz ve hızlı bir model önerilir.",
+            "Decides whether a dangerous command is approved automatically. A cheap, fast model is recommended."),
+        ["provider.aux.mcp.title"] = new("MCP yardımcısı", "MCP helper"),
+        ["provider.aux.mcp.desc"] = new(
+            "MCP sunucularıyla ilgili kısa çağrılar.", "Short calls related to MCP servers."),
+        ["provider.aux.title_generation.title"] = new("Sohbet başlığı üretme", "Chat title generation"),
+        ["provider.aux.title_generation.desc"] = new(
+            "Bir oturuma kısa bir başlık yazar.", "Writes a short title for a session."),
+        ["provider.aux.triage_specifier.title"] = new("Görev ayrıntılandırma", "Task detailing"),
+        ["provider.aux.triage_specifier.desc"] = new(
+            "Kanban 'triage' sütunundaki tek satırlık bir işi somut bir tarife dönüştürür.",
+            "Turns a one-line item in the Kanban 'triage' column into a concrete spec."),
+        ["provider.aux.kanban_decomposer.title"] = new("Görev parçalama", "Task decomposition"),
+        ["provider.aux.kanban_decomposer.desc"] = new(
+            "Bir işi alt görev grafiğine böler; diğerlerinden daha çok token harcar.",
+            "Splits a task into a subtask graph; it spends more tokens than the others."),
+        ["provider.aux.profile_describer.title"] = new("Profil açıklaması", "Profile description"),
+        ["provider.aux.profile_describer.desc"] = new(
+            "Bir profilin ne işe yaradığını bir iki cümleyle yazar.",
+            "Describes what a profile does in a sentence or two."),
+        ["provider.aux.curator.title"] = new("Küratör (yetenek incelemesi)", "Curator (skill review)"),
+        ["provider.aux.curator.desc"] = new(
+            "Yetenek kullanımını gözden geçiren fork. Uzun sürebilir.",
+            "A fork that reviews skill usage. It can take a while."),
+
+        // ── İlk kurulum sihirbazı ────────────────────────────────────────
+        ["setup.window_title"] = new("FETİH — İlk Kurulum", "FETİH — First-Time Setup"),
+        ["setup.heading"] = new("İlk Kurulum", "First-Time Setup"),
+        ["setup.welcome.title"] = new("FETİH'e hoş geldin", "Welcome to FETİH"),
+        ["setup.dot.name"] = new("Adım {0}/{1}", "Step {0}/{1}"),
+        ["setup.dot.done"] = new(" (tamam)", " (done)"),
+        ["setup.model.unavailable"] = new(
+            "Model listesi alınamadı. Kurulumu tamamlayıp Ayarlar › Model'den seçebilirsin.",
+            "Could not fetch the model list. Finish setup and pick one from Settings › Model."),
+        ["setup.model.loading"] = new("Model listesi alınıyor…", "Fetching the model list…"),
+        ["setup.model.live"] = new("{0} model sağlayıcıdan CANLI alındı.", "{0} models fetched LIVE from the provider."),
+        ["setup.model.offline"] = new("{0} model (çevrimdışı yedek liste).", "{0} models (offline fallback list)."),
+        ["setup.model.failed"] = new("Model listesi alınamadı: ", "Could not fetch the model list: "),
+        ["setup.provider.local"] = new(" · yerel", " · local"),
+        ["setup.provider.aggregator"] = new(" · toplayıcı", " · aggregator"),
+        ["setup.brandmark"] = new(
+            "FETİH — terminalde çalışan otonom yapay zekâ güvenlik ajanı",
+            "FETİH — autonomous AI security agent running in the terminal"),
+        ["setup.welcome.body"] = new(
+            "Bu sihirbaz bir model sağlayıcısı seçmene, kimlik bilgilerini güvenle kaydetmene ve Masaüstü Köprüsü'nü başlatmana yardımcı olur. Üç adım sürer.",
+            "This wizard helps you pick a model provider, store your credentials safely and start the Desktop Bridge. It takes three steps."),
+        ["setup.security.title"] = new("Güvenlik notu", "Security note"),
+        ["setup.security.body"] = new(
+            "API anahtarın yalnızca bu bilgisayardaki ~/.fetih/.env dosyasına yazılır. Değeri hiçbir zaman ekranda gösterilmez, günlüğe yazılmaz veya ağ üzerinden gönderilmez. Yerel sağlayıcı seçersen hiç anahtar istenmez.",
+            "Your API key is written only to ~/.fetih/.env on this machine. Its value is never shown on screen, never logged and never sent over the network. If you pick a local provider, no key is asked for at all."),
+        ["setup.continue"] = new("Devam", "Continue"),
+        ["setup.provider.title"] = new("Model sağlayıcısı", "Model provider"),
+        ["setup.provider.header"] = new("Sağlayıcı", "Provider"),
+        ["setup.api_key.header"] = new("API anahtarı", "API key"),
+        ["setup.provider.body"] = new(
+            "FETİH model-agnostiktir. Ücretsiz başlamak için Groq, verinin makineden çıkmasını istemiyorsan Ollama iyi bir seçim.",
+            "FETİH is model-agnostic. Groq is a good free starting point; if you do not want your data to leave the machine, Ollama is a good pick."),
+        ["setup.api_key.placeholder"] = new("sk-… / gsk_…", "sk-… / gsk_…"),
+        ["setup.signup_link"] = new("Anahtar al", "Get a key"),
+        ["setup.signup_link.url"] = new("Anahtar al — {0}", "Get a key — {0}"),
+        ["setup.reprobe"] = new("Yeniden yokla", "Probe again"),
+        ["setup.local_install_link"] = new("Kurulum sayfasını aç", "Open the installation page"),
+        ["setup.local_install_link.url"] = new("Kurulum sayfası — {0}", "Installation page — {0}"),
+        ["setup.cli_login"] = new("Oturum aç", "Sign in"),
+        ["setup.cli_check"] = new("Durumu denetle", "Check status"),
+        ["setup.aws.title"] = new("AWS kimlik zinciri", "AWS credential chain"),
+        ["setup.aws.message"] = new(
+            "Bu sağlayıcı anahtar istemez; AWS_PROFILE / IAM rolü gibi ortam kimlik bilgilerini kullanır.",
+            "This provider does not ask for a key; it uses environment credentials such as AWS_PROFILE or an IAM role."),
+        ["setup.model.header"] = new("Varsayılan model", "Default model"),
+        ["setup.back"] = new("Geri", "Back"),
+        ["setup.install"] = new("Kur ve başlat", "Install and start"),
+        ["setup.progress.title"] = new("Kuruluyor", "Installing"),
+        ["setup.retry"] = new("Yeniden dene", "Retry"),
+        ["setup.back_to_provider"] = new("Sağlayıcıya dön", "Back to the provider"),
+        ["setup.go_to_chat"] = new("Sohbete geç", "Go to chat"),
+
+        // ── İlk kurulum: çalışma zamanı metinleri ────────────────────────
+        ["setup.provider.local.hint"] = new(
+            "Bu sağlayıcı bu makinede çalışır; API anahtarı istemez. Veriler bilgisayardan çıkmaz.",
+            "This provider runs on this machine; it needs no API key and your data never leaves the computer."),
+        ["setup.cli.title"] = new("Tarayıcı oturumu gerekiyor", "A browser session is required"),
+        ["setup.cli.message"] = new(
+            "{0} bir API anahtarı değil, hesabınla açtığın bir oturum kullanır. \"Oturum aç\" düğmesi FETİH'in GERÇEK giriş akışını bir konsol penceresinde başlatır; tarayıcıda onayladıktan sonra buraya dön.",
+            "{0} does not use an API key; it uses a session you open with your account. The \"Sign in\" button starts FETİH's REAL login flow in a console window; come back here after approving it in the browser."),
+        ["setup.key.hint.env"] = new(
+            "Anahtar {0} adıyla ~/.fetih/.env dosyasına kaydedilir.",
+            "The key is saved to ~/.fetih/.env under the name {0}."),
+        ["setup.key.hint.none"] = new(
+            "Bu sağlayıcı için ortam değişkeni tanımlı değil.",
+            "No environment variable is defined for this provider."),
+        ["setup.key.required"] = new(
+            "Bu sağlayıcı bir API anahtarı gerektirir; lütfen anahtarı gir.",
+            "This provider requires an API key; please enter it."),
+        ["setup.probing"] = new("Yoklanıyor…", "Probing…"),
+        ["setup.local.not_found"] = new("{0} bulunamadı", "{0} not found"),
+        ["setup.local.not_found.msg"] = new(
+            "{0} adresinde çalışan bir sunucu yok. Sunucuyu başlat, sonra \"Yeniden yokla\"ya bas.",
+            "No server is running at {0}. Start it, then press \"Probe again\"."),
+        ["setup.local.no_models.hint"] = new(
+            "Sunucu ayağa kalkınca modeller burada listelenir.",
+            "Models will be listed here once the server is up."),
+        ["setup.local.running_no_models"] = new(
+            "{0} çalışıyor, ama hiç model inmemiş",
+            "{0} is running, but no model has been pulled"),
+        ["setup.local.running_no_models.msg"] = new(
+            "{0} yanıt veriyor. Önce bir model indir (ör. `ollama pull`).",
+            "{0} is responding. Pull a model first (e.g. `ollama pull`)."),
+        ["setup.local.running"] = new("{0} çalışıyor", "{0} is running"),
+        ["setup.local.found"] = new("{0} model bulundu · {1}", "{0} models found · {1}"),
+        ["setup.local.installed_models"] = new(
+            "Bu makinede İNDİRİLMİŞ modeller listelendi.",
+            "The models PULLED on this machine are listed."),
+        ["setup.probe_failed"] = new("Yoklama yapılamadı", "The probe failed"),
+        ["setup.python_missing.title"] = new("Python bulunamadı", "Python not found"),
+        ["setup.python_missing.msg"] = new(
+            "Giriş akışı FETİH CLI üzerinden çalışır; Python 3.11+ gerekiyor.",
+            "The login flow runs through the FETİH CLI; Python 3.11+ is required."),
+        ["setup.login.opened.title"] = new("Giriş penceresi açıldı", "The login window is open"),
+        ["setup.login.opened.msg"] = new(
+            "Konsol penceresindeki yönergeleri izle; bitince buraya dön.",
+            "Follow the instructions in the console window, then come back here."),
+        ["setup.login.failed.title"] = new("Giriş akışı başlatılamadı", "The login flow could not be started"),
+        ["setup.login.ok.title"] = new("Oturum açık", "Signed in"),
+        ["setup.login.ok.msg"] = new(
+            "{0} kimlik bilgileri FETİH kimlik deposunda bulundu.",
+            "{0} credentials were found in the FETİH credential store."),
+        ["setup.login.pending.title"] = new("Henüz oturum açılmadı", "Not signed in yet"),
+        ["setup.login.pending.msg"] = new(
+            "Giriş akışı tamamlanmamış görünüyor. \"Oturum aç\"ı yeniden dene.",
+            "The login flow looks incomplete. Try \"Sign in\" again."),
+        ["setup.needs_login.title"] = new("Oturum açılması gerekiyor", "You need to sign in"),
+        ["setup.needs_login.msg"] = new(
+            "{0} ile devam etmek için lütfen 'Oturum aç' ile tarayıcıda girişi tamamla.",
+            "To continue with {0}, please complete the login in your browser using 'Sign in'."),
+        ["setup.step.waiting"] = new("bekliyor", "waiting"),
+        ["setup.done.title"] = new("Kurulum tamamlandı", "Setup complete"),
+        ["setup.done.msg"] = new(
+            "Masaüstü Köprüsü hazır ve model gerçek bir yanıt döndürdü. Sohbete geçebilirsin.",
+            "The Desktop Bridge is ready and the model returned a real response. You can go to the chat."),
+        ["setup.cancelled"] = new("İptal edildi", "Cancelled"),
+        ["setup.failed"] = new("Kurulum başarısız", "Setup failed"),
+        ["setup.log_suffix"] = new("  ·  Günlük: ", "  ·  Log: "),
+
+        // ── İlk kurulum: adım adları ve adım sonuçları ───────────────────
+        ["setup.step.os.name"] = new("İşletim sistemi denetimi", "Checking the operating system"),
+        ["setup.step.os.ok"] = new("Windows algılandı.", "Windows detected."),
+        ["setup.step.os.fail"] = new(
+            "Bu masaüstü kabuğu yalnızca Windows'ta çalışır.",
+            "This desktop shell runs on Windows only."),
+        ["setup.step.python.name"] = new("Python bulunuyor", "Looking for Python"),
+        ["setup.step.python.ok"] = new("Python bulundu: {0}", "Python found: {0}"),
+        ["setup.step.python.fail"] = new(
+            "Python bulunamadı. FETİH'i çalıştırmak için Python 3.11+ kurun veya FETIH_PYTHON ortam değişkenini ayarlayın.",
+            "Python was not found. Install Python 3.11+ to run FETİH, or set the FETIH_PYTHON environment variable."),
+        ["setup.step.home.name"] = new("Durum dizini hazırlanıyor", "Preparing the state directory"),
+        ["setup.step.home.ok"] = new("{0} oluşturuldu.", "{0} created."),
+        ["setup.step.key.name"] = new("API anahtarı kaydediliyor", "Saving the API key"),
+        ["setup.step.key.ok"] = new("{0} .env dosyasına yazıldı.", "{0} written to the .env file."),
+        ["setup.step.key.fail"] = new("API anahtarı yazılamadı: ", "Could not write the API key: "),
+        ["setup.step.config.name"] = new("Yapılandırma yazılıyor", "Writing the configuration"),
+        ["setup.step.config.ok"] = new(
+            "model.provider / model.default kaydedildi.",
+            "model.provider / model.default saved."),
+        ["setup.step.config.fail_managed"] = new(
+            "Yapılandırma yazılamadı (yönetilen kurulum): ",
+            "Could not write the configuration (managed setup): "),
+        ["setup.step.config.fail"] = new(
+            "Yapılandırma yazılamadı: ", "Could not write the configuration: "),
+        ["setup.step.bridge.name"] = new("Masaüstü Köprüsü başlatılıyor", "Starting the Desktop Bridge"),
+        ["setup.step.bridge.ok"] = new("Köprü bağlı (protokol v{0}).", "Bridge connected (protocol v{0})."),
+        ["setup.step.auth.name"] = new("Sağlayıcı oturumu denetleniyor", "Checking the provider session"),
+        ["setup.step.auth.noprovider"] = new("Sağlayıcı kimliği belirtilmedi.", "No provider id was given."),
+        ["setup.step.auth.confirmed"] = new("Oturum doğrulandı{0}.", "Session verified{0}."),
+        ["setup.step.auth.nopython"] = new(
+            "Giriş akışını çalıştırmak için Python bulunamadı.",
+            "Python was not found, so the login flow cannot run."),
+        ["setup.step.auth.spawn_failed"] = new(
+            "Giriş süreci başlatılamadı ({0} -m fetih_cli auth add {1}).",
+            "The login process could not be started ({0} -m fetih_cli auth add {1})."),
+        ["setup.step.auth.cancelled"] = new("Giriş işlemi iptal edildi.", "The login process was cancelled."),
+        ["setup.step.auth.error"] = new("Giriş akışı sırasında hata: ", "Error during the login flow: "),
+        ["setup.step.auth.opened"] = new("Oturum başarıyla açıldı{0}.", "Session opened successfully{0}."),
+        ["setup.step.auth.verify_failed"] = new("Giriş doğrulanamadı: ", "The login could not be verified: "),
+        ["setup.step.auth.incomplete"] = new(
+            "{0} için oturum açma akışı tamamlanmadı. Lütfen açılan tarayıcıda veya konsolda oturum açma işlemini tamamlayıp yeniden deneyin.",
+            "The login flow for {0} was not completed. Please finish signing in in the browser or console window, then try again."),
+        ["setup.step.verify.name"] = new("Gerçek mesajla doğrulama", "Verifying with a real message"),
+        ["setup.step.verify.prompt"] = new(
+            "Bu bir kurulum denetimidir. Yalnızca şu kelimeyle yanıt ver: TAMAM",
+            "This is a setup check. Reply with only this word: TAMAM"),
+        ["setup.step.verify.empty"] = new(
+            "Model yanıt verdi (boş metin) — kurulum tamam.",
+            "The model responded (empty text) — setup is complete."),
+        ["setup.step.verify.ok"] = new("Model yanıt verdi: ", "The model responded: "),
+        ["setup.step.verify.fail"] = new(
+            "Model yanıt vermedi ({0}): {1}  Sağlayıcıya dönüp anahtarı ya da modeli düzelt.",
+            "The model did not respond ({0}): {1}  Go back to the provider and fix the key or the model."),
+        ["setup.step.verify.timeout"] = new(
+            "Model 90 saniyede yanıt vermedi. Ağ/uç nokta erişilebilir mi?",
+            "The model did not respond within 90 seconds. Is the network or endpoint reachable?"),
+
+        // ── Köprü durumu (çalışma zamanı metinleri) ──────────────────────
+        ["bridge.detail.idle"] = new(
+            "Masaüstü Köprüsü henüz başlatılmadı.", "The Desktop Bridge has not been started yet."),
+        ["bridge.detail.connecting"] = new(
+            "Masaüstü Köprüsü başlatılıyor…", "Starting the Desktop Bridge…"),
+        ["bridge.detail.protocol_mismatch"] = new(
+            "Protokol uyumsuz: istemci {0}, sunucu {1}–{2}.",
+            "Protocol mismatch: client {0}, server {1}–{2}."),
+        ["bridge.detail.protocol_mismatch_ex"] = new(
+            "Köprü protokol sürümü uyumsuz (istemci 1, sunucu {0}–{1}).",
+            "The bridge protocol version is incompatible (client 1, server {0}–{1})."),
+        ["bridge.detail.auth_rejected"] = new(
+            "Kimlik doğrulama reddedildi.", "Authentication was rejected."),
+        ["bridge.detail.auth_failed"] = new(
+            "Köprü kimlik doğrulaması başarısız.", "Bridge authentication failed."),
+        ["bridge.detail.connected"] = new(
+            "Bağlı · protokol v{0} · pid {1}", "Connected · protocol v{0} · pid {1}"),
+        ["bridge.detail.connect_failed"] = new(
+            "Köprüye bağlanılamadı: ", "Could not connect to the bridge: "),
+        ["bridge.detail.server_closed"] = new(
+            "sunucu bağlantıyı kapattı", "the server closed the connection"),
+        ["bridge.detail.dropped"] = new(
+            "Köprü bağlantısı koptu.", "The bridge connection dropped."),
+        ["bridge.detail.reconnecting"] = new(
+            "Bağlantı koptu; sonraki istekte yeniden bağlanılacak.",
+            "The connection dropped; it will reconnect on the next request."),
+        ["bridge.detail.not_connected"] = new(
+            "Köprü bağlı değil.", "The bridge is not connected."),
+        ["bridge.detail.send_failed"] = new(
+            "Köprüye istek gönderilemedi: ", "Could not send the request to the bridge: "),
+        ["bridge.proc.start_failed"] = new(
+            "Köprü süreci başlatılamadı: {0}", "The bridge process could not be started: {0}"),
+        ["bridge.proc.start_failed_ex"] = new(
+            "Köprü süreci başlatılamadı ({0}): {1}",
+            "The bridge process could not be started ({0}): {1}"),
+        ["bridge.proc.handshake_read"] = new(
+            "Köprü el sıkışma satırı alınamadı (süreç beklenmedik şekilde sonlandı). ",
+            "The bridge handshake line could not be read (the process ended unexpectedly). "),
+        ["bridge.proc.detail"] = new("Ayrıntı: ", "Details: "),
+        ["bridge.proc.handshake_parse"] = new(
+            "Köprü el sıkışma satırı çözümlenemedi: ",
+            "The bridge handshake line could not be parsed: "),
+        ["bridge.proc.unexpected_event"] = new(
+            "beklenen 'bridge.listening', gelen: {0}",
+            "expected 'bridge.listening', got: {0}"),
+        ["bridge.proc.no_value"] = new("(yok)", "(none)"),
+        ["bridge.proc.no_url"] = new(
+            "El sıkışma satırında url alanı yok.", "The handshake line has no url field."),
+        ["bridge.proc.no_token"] = new(
+            "El sıkışma satırında token alanı yok.", "The handshake line has no token field."),
+        ["provider.transport.openai_chat"] = new("OpenAI uyumlu sohbet", "OpenAI-compatible chat"),
+        ["provider.auth.api_key"] = new("API anahtarı", "API key"),
+        ["provider.auth.oauth_device_code"] = new("OAuth (cihaz kodu)", "OAuth (device code)"),
+        ["provider.auth.oauth_external"] = new("OAuth (harici akış)", "OAuth (external flow)"),
+        ["provider.auth.external_process"] = new("Harici süreç", "External process"),
+        ["provider.auth.aws_sdk"] = new("AWS kimlik bilgileri", "AWS credentials"),
+        ["provider.auth.none"] = new("Kimlik doğrulama yok", "No authentication"),
+        ["chat.md.copy"] = new("Kopyala", "Copy"),
+        ["chat.md.copied"] = new("Kopyalandı", "Copied"),
+
+        // ── Ürün adı ─────────────────────────────────────────────────────
+        ["app.product_name"] = new("FETİH Masaüstü", "FETİH Desktop"),
+
+        // ── Kurulum hattı (adım listesi) ─────────────────────────────────
+        ["setup.pipeline.starting"] = new("başlıyor…", "starting…"),
+        ["setup.pipeline.cancelled"] = new("İptal edildi.", "Cancelled."),
+        ["setup.pipeline.skipped"] = new("zaten sağlanmış — atlandı", "already satisfied — skipped"),
+        ["setup.pipeline.done"] = new("Kurulum tamamlandı.", "Setup completed."),
+
+        // ── Yetenekler: kaynak ağaç adları ve geri düşüşler ──────────────
+        ["skills.source.repo"] = new("depo", "repository"),
+        ["skills.source.optional"] = new("isteğe bağlı", "optional"),
+        ["skills.source.user"] = new("kullanıcı", "user"),
+        ["skills.root_segment"] = new("(kök)", "(root)"),
+        ["skills.unnamed"] = new("(adsız)", "(unnamed)"),
+        ["skills.no_description"] = new("(açıklama yok)", "(no description)"),
+
+        // ── YAML gösterim yardımcıları ───────────────────────────────────
+        ["yaml.empty_list"] = new("(boş liste)", "(empty list)"),
+        ["yaml.empty_map"] = new("(boş)", "(empty)"),
+        ["yaml.nested"] = new("(…)", "(…)"),
+        ["yaml.child_keys"] = new("({0} alt anahtar)", "({0} nested keys)"),
+
+        // ── Sağlayıcı adları (marka adı olmayanlar) ──────────────────────
+        ["provider.name.codex"] = new("OpenAI Codex (ChatGPT girişi)", "OpenAI Codex (ChatGPT sign-in)"),
+        ["provider.name.kimi_cn"] = new("Kimi (Çin)", "Kimi (China)"),
+        ["provider.name.minimax_cn"] = new("MiniMax (Çin)", "MiniMax (China)"),
+        ["provider.name.ai_gateway"] = new("Vercel AI (model yönlendirici)", "Vercel AI (model router)"),
+        ["provider.name.ollama"] = new("Ollama (yerel)", "Ollama (local)"),
+        ["provider.name.lmstudio"] = new("LM Studio (yerel)", "LM Studio (local)"),
+        ["provider.name.custom"] = new("Özel yerel uç (vLLM / llama.cpp)", "Custom local endpoint (vLLM / llama.cpp)"),
+        ["provider.list_name"] = new("Sağlayıcı listesi", "Provider list"),
+        ["provider.search_name"] = new("Sağlayıcı ara", "Search providers"),
     };
 }

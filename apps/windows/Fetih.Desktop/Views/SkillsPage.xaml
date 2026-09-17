@@ -32,7 +32,6 @@
             <TextBox x:Name="SearchBox"
                      Grid.Column="0"
                      AutomationProperties.AutomationId="skills_search"
-                     PlaceholderText="Ara: ör. SQL injection, pcap, ATT&amp;CK, osint…"
                      TextChanged="SearchBox_TextChanged" />
 
             <ComboBox x:Name="CategoryBox"
@@ -43,7 +42,6 @@
 
             <Button x:Name="RefreshButton"
                     Grid.Column="2"
-                    Content="Yenile"
                     AutomationProperties.AutomationId="skills_refresh"
                     Click="RefreshButton_Click" />
         </Grid>
@@ -53,6 +51,7 @@
                           Width="36"
                           Height="36"
                           IsActive="True"
+                          AutomationProperties.AccessibilityView="Raw"
                           HorizontalAlignment="Center"
                           VerticalAlignment="Center" />
 

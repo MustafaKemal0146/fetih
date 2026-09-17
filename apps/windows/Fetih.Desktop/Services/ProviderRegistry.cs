@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Fetih.Desktop.Services;
 
@@ -48,7 +48,18 @@ public sealed record ProviderEntry(
     ProviderKind Kind = ProviderKind.CloudApiKey,
     string DefaultBaseUrl = "",
     string SignupUrl = "",
-    string CliCommand = "");
+    string CliCommand = "",
+    string DisplayNameKey = "")
+{
+    /// <summary>
+    /// Arayüzde gösterilecek ad. <see cref="DisplayName"/> her zaman kanonik
+    /// (marka) addır — katalogdaki adların çoğu çevrilmez. Yalnızca Türkçe/
+    /// İngilizce ayrımı olan adlar <see cref="DisplayNameKey"/> taşır ve
+    /// kullanıcıya dönük her yer bu özelliği okur, böylece dil değişince
+    /// liste kendiliğinden güncellenir.
+    /// </summary>
+    public string Label => DisplayNameKey.Length > 0 ? Loc.T(DisplayNameKey) : DisplayName;
+}
 
 /// <summary>
 /// FETİH'in gerçekten desteklediği sağlayıcı kataloğu.
@@ -62,27 +73,27 @@ public sealed record ProviderEntry(
 /// </summary>
 public static class ProviderRegistry
 {
-    /// <summary>Taşıma katmanının Türkçe etiketi.</summary>
+    /// <summary>Taşıma katmanının etiketi (etkin dile göre).</summary>
     public static string TransportLabel(string transport) => transport switch
     {
-        "openai_chat" => "OpenAI uyumlu sohbet",
-        "chat_completions" => "OpenAI uyumlu sohbet",
+        "openai_chat" => Loc.T("provider.transport.openai_chat"),
+        "chat_completions" => Loc.T("provider.transport.openai_chat"),
         "anthropic_messages" => "Anthropic Messages",
         "codex_responses" => "Codex Responses",
         "bedrock_converse" => "Bedrock Converse",
         _ => transport,
     };
 
-    /// <summary>Kimlik doğrulama türünün Türkçe etiketi.</summary>
+    /// <summary>Kimlik doğrulama türünün etiketi (etkin dile göre).</summary>
     public static string AuthLabel(string authType) => authType switch
     {
-        "api_key" => "API anahtarı",
-        "oauth_device_code" => "OAuth (cihaz kodu)",
-        "oauth_external" => "OAuth (harici akış)",
-        "oauth_minimax" => "OAuth (harici akış)",
-        "external_process" => "Harici süreç",
-        "aws_sdk" => "AWS kimlik bilgileri",
-        "none" => "Kimlik doğrulama yok",
+        "api_key" => Loc.T("provider.auth.api_key"),
+        "oauth_device_code" => Loc.T("provider.auth.oauth_device_code"),
+        "oauth_external" => Loc.T("provider.auth.oauth_external"),
+        "oauth_minimax" => Loc.T("provider.auth.oauth_external"),
+        "external_process" => Loc.T("provider.auth.external_process"),
+        "aws_sdk" => Loc.T("provider.auth.aws_sdk"),
+        "none" => Loc.T("provider.auth.none"),
         _ => authType,
     };
 
@@ -111,8 +122,8 @@ public static class ProviderRegistry
         new("google-gemini-cli", "Gemini CLI (Code Assist)", "openai_chat", "oauth_external",
             new string[0], Kind: ProviderKind.CliLogin, CliCommand: "gemini"),
 
-        new("openai-codex", "OpenAI Codex (ChatGPT girişi)", "codex_responses", "oauth_external",
-            new string[0], Kind: ProviderKind.CliLogin, CliCommand: "codex"),
+        new("openai-codex", "OpenAI Codex", "codex_responses", "oauth_external",
+            new string[0], Kind: ProviderKind.CliLogin, CliCommand: "codex", DisplayNameKey: "provider.name.codex"),
 
         // CLI kanonik kimliği "copilot" — "github-copilot" DEĞİL.
         new("copilot", "GitHub Copilot", "openai_chat", "api_key",
@@ -145,14 +156,15 @@ public static class ProviderRegistry
         new("kimi-coding", "Kimi (Moonshot)", "openai_chat", "api_key",
             new[] { "KIMI_API_KEY", "KIMI_CODING_API_KEY" }, "KIMI_BASE_URL"),
 
-        new("kimi-coding-cn", "Kimi (Çin)", "openai_chat", "api_key",
-            new[] { "KIMI_CN_API_KEY" }),
+        new("kimi-coding-cn", "Kimi CN", "openai_chat", "api_key",
+            new[] { "KIMI_CN_API_KEY" }, DisplayNameKey: "provider.name.kimi_cn"),
 
         new("minimax", "MiniMax", "anthropic_messages", "api_key",
             new[] { "MINIMAX_API_KEY" }, "MINIMAX_BASE_URL"),
 
-        new("minimax-cn", "MiniMax (Çin)", "anthropic_messages", "api_key",
-            new[] { "MINIMAX_CN_API_KEY" }, "MINIMAX_CN_BASE_URL"),
+        new("minimax-cn", "MiniMax CN", "anthropic_messages", "api_key",
+            new[] { "MINIMAX_CN_API_KEY" }, "MINIMAX_CN_BASE_URL",
+            DisplayNameKey: "provider.name.minimax_cn"),
 
         new("alibaba", "Alibaba DashScope (Qwen)", "openai_chat", "api_key",
             new[] { "DASHSCOPE_API_KEY" }, "DASHSCOPE_BASE_URL"),
@@ -179,8 +191,9 @@ public static class ProviderRegistry
         // mesajlaşma köprüsüne ayrılmıştır (bkz. docs/windows-app-plani.md, (b)),
         // bu yüzden arayüzde model yönlendirici olarak adlandırılır.
         // CLI kanonik kimliği "ai-gateway".
-        new("ai-gateway", "Vercel AI (model yönlendirici)", "openai_chat", "api_key",
-            new[] { "AI_GATEWAY_API_KEY" }, "AI_GATEWAY_BASE_URL", IsAggregator: true),
+        new("ai-gateway", "Vercel AI", "openai_chat", "api_key",
+            new[] { "AI_GATEWAY_API_KEY" }, "AI_GATEWAY_BASE_URL", IsAggregator: true,
+            DisplayNameKey: "provider.name.ai_gateway"),
 
         // CLI kanonik kimliği "opencode-zen".
         new("opencode-zen", "OpenCode Zen", "openai_chat", "api_key",
@@ -217,26 +230,29 @@ public static class ProviderRegistry
         //
         // Bunlar API anahtarı İSTEMEZ: sihirbaz uç noktayı yoklar ve o
         // makinede İNDİRİLMİŞ modelleri listeler.
-        new("ollama", "Ollama (yerel)", "openai_chat", "none",
+        new("ollama", "Ollama", "openai_chat", "none",
             new string[0], "OLLAMA_BASE_URL", IsLocal: true,
             Kind: ProviderKind.LocalServer,
             DefaultBaseUrl: "http://localhost:11434/v1",
-            SignupUrl: "https://ollama.com/download"),
+            SignupUrl: "https://ollama.com/download",
+            DisplayNameKey: "provider.name.ollama"),
 
-        new("lmstudio", "LM Studio (yerel)", "openai_chat", "api_key",
+        new("lmstudio", "LM Studio", "openai_chat", "api_key",
             new[] { "LM_API_KEY" }, "LM_BASE_URL", IsLocal: true,
             Kind: ProviderKind.LocalServer,
             DefaultBaseUrl: "http://127.0.0.1:1234/v1",
-            SignupUrl: "https://lmstudio.ai/"),
+            SignupUrl: "https://lmstudio.ai/",
+            DisplayNameKey: "provider.name.lmstudio"),
 
         // Ollama Cloud yerel DEĞİL — barındırılan servis, anahtar ister.
         new("ollama-cloud", "Ollama Cloud", "openai_chat", "api_key",
             new[] { "OLLAMA_API_KEY" }, "OLLAMA_BASE_URL",
             SignupUrl: "https://ollama.com/settings/keys"),
 
-        new("custom", "Özel yerel uç (vLLM / llama.cpp)", "openai_chat", "none",
+        new("custom", "Custom Local Endpoint", "openai_chat", "none",
             new string[0], IsLocal: true, Kind: ProviderKind.LocalServer,
-            DefaultBaseUrl: "http://localhost:8000/v1"),
+            DefaultBaseUrl: "http://localhost:8000/v1",
+            DisplayNameKey: "provider.name.custom"),
     };
 
     /// <summary>Kimliğe göre katalog kaydını döndürür (yoksa <c>null</c>).</summary>

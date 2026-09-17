@@ -34,6 +34,10 @@ public sealed partial class SkillsPage : Page
         PageTitleText.Text = Loc.T("skills.title");
         SearchBox.PlaceholderText = Loc.T("skills.search_placeholder");
         RefreshButton.Content = Loc.T("common.reload");
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(SearchBox, Loc.T("skills.search_placeholder"));
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(RefreshButton, Loc.T("common.reload"));
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(CategoryBox, Loc.T("skills.all_categories"));
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(SkillList, Loc.T("skills.title"));
         if (_cache is not null)
         {
             _categoryReady = false;
@@ -96,8 +100,8 @@ public sealed partial class SkillsPage : Page
         catch (Exception ex)
         {
             App.LogCrash("SkillsPage.LoadAsync", ex, ex.Message);
-            SummaryText.Text = "Yetenek kataloğu okunamadı.";
-            EmptyText.Text = $"Katalog taranırken hata oluştu:\n{ex.Message}";
+            SummaryText.Text = Loc.T("skills.failed");
+            EmptyText.Text = Loc.T("skills.error") + ex.Message;
             EmptyText.Visibility = Visibility.Visible;
             SkillList.Visibility = Visibility.Collapsed;
         }
@@ -113,26 +117,30 @@ public sealed partial class SkillsPage : Page
     {
         if (FetihPaths.RepositoryRoot is null)
         {
-            return "FETİH deposu bulunamadı — yetenekler yalnızca " +
-                   $"{FetihPaths.UserSkillsDir} altından okundu ({result.Skills.Count} kayıt).";
+            return string.Format(
+                Loc.T("skills.summary.repo_missing"),
+                FetihPaths.UserSkillsDir,
+                result.Skills.Count);
         }
 
         var repoCount = result.Skills.Count(s => s.Source == "skills");
         var optionalCount = result.Skills.Count(s => s.Source == "optional-skills");
-        var userCount = result.Skills.Count(s => s.Source == "kullanıcı");
+        var userCount = result.Skills.Count(s => s.Source == "user");
 
-        var text = $"{result.Skills.Count} yetenek · skills/ {repoCount} · " +
-                   $"optional-skills/ {optionalCount} · yalnızca kullanıcıda {userCount} " +
-                   $"({result.ElapsedMilliseconds} ms)";
+        var text = string.Format(
+            Loc.T("skills.summary.counts"),
+            result.Skills.Count, repoCount, optionalCount, userCount, result.ElapsedMilliseconds);
 
         if (result.DuplicatesSkipped > 0)
         {
             // Kurulum depo ağacını ~/.fetih/skills/ altına kopyaladığı için
             // aynı yetenek iki kez görünmesin diye kopyalar atlanır.
-            text += $" · {result.DuplicatesSkipped} kurulu kopya atlandı";
+            text += string.Format(Loc.T("skills.summary.duplicates"), result.DuplicatesSkipped);
         }
 
-        return result.Error is null ? text : $"{text} — uyarı: {result.Error}";
+        return result.Error is null
+            ? text
+            : string.Format(Loc.T("skills.summary.warning"), text, result.Error);
     }
 
     private void BuildCategoryList(SkillScanResult result)
@@ -186,9 +194,8 @@ public sealed partial class SkillsPage : Page
             {
                 SkillList.Visibility = Visibility.Collapsed;
                 EmptyText.Text = _all.Count == 0
-                    ? "Hiç SKILL.md bulunamadı. Depo kökü çözümlenemediyse uygulamayı " +
-                      "depo içindeki apps/windows/Fetih.Desktop klasöründen çalıştırın."
-                    : "Bu arama/kategori için sonuç yok.";
+                    ? Loc.T("skills.empty.none")
+                    : Loc.T("skills.empty.filter");
                 EmptyText.Visibility = Visibility.Visible;
             }
             else

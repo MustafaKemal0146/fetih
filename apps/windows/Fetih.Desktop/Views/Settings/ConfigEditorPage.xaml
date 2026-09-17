@@ -17,9 +17,9 @@
                   VerticalScrollMode="Enabled">
         <StackPanel Spacing="12" MaxWidth="1000" HorizontalAlignment="Left">
 
+            <!-- Başlık, gezinme parametresinden gelir (bkz. ConfigEditorPage.xaml.cs). -->
             <TextBlock x:Name="TitleText"
-                       Style="{StaticResource PageTitleTextStyle}"
-                       Text="Ayarlar" />
+                       Style="{StaticResource PageTitleTextStyle}" />
 
             <TextBlock x:Name="SubtitleText"
                        Style="{StaticResource MutedTextStyle}"
@@ -51,7 +51,8 @@
                 <ProgressRing x:Name="BusyRing"
                               Width="18" Height="18"
                               IsActive="False"
-                              VerticalAlignment="Center" />
+                              VerticalAlignment="Center"
+                              AutomationProperties.AccessibilityView="Raw" />
             </StackPanel>
 
             <!-- Alanlar burada kod arkasında oluşturulur -->

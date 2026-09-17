@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -8,6 +8,7 @@ using Fetih.Desktop.Models;
 using Fetih.Desktop.Services;
 using Fetih.Desktop.Setup;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 
 namespace Fetih.Desktop.Views.Settings;
@@ -53,6 +54,19 @@ public sealed partial class ProviderPage : Page
         SlotsIntro.Text = Loc.T("provider.slots_intro");
         SearchBox.PlaceholderText = Loc.T("provider.search_placeholder");
         OnlyConfiguredBox.Content = Loc.T("provider.only_configured");
+
+        // Ekran okuyucu adları: yukarıdaki etiketler ayrı TextBlock'lar olduğu
+        // için UIA bunları denetimlerle kendiliğinden eşleştiremiyor; adları
+        // açıkça kurmazsak alanlar adsız kalıyordu.
+        AutomationProperties.SetName(ProviderSelectBox, ProviderLabel.Text);
+        AutomationProperties.SetName(ModelCombo, ModelLabel.Text);
+        AutomationProperties.SetName(ApiKeyBox, ApiKeyLabel.Text);
+        AutomationProperties.SetName(SaveModelButton, SaveModelButton.Content?.ToString() ?? "");
+        AutomationProperties.SetName(SearchBox, Loc.T("provider.search_name"));
+        AutomationProperties.SetName(OnlyConfiguredBox, OnlyConfiguredBox.Content?.ToString() ?? "");
+        AutomationProperties.SetName(ApiKeySignupLink, ApiKeySignupLink.Content?.ToString() ?? "");
+        AutomationProperties.SetName(
+            ProviderList, Loc.T("provider.list_name"));
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -83,7 +97,7 @@ public sealed partial class ProviderPage : Page
     {
         // Statik katalog her zaman mevcuttur; seçici en azından bununla dolar.
         _providerChoices = ProviderRegistry.All
-            .Select(p => ($"{p.DisplayName}  ({p.Id})", p.Id))
+            .Select(p => ($"{p.Label}  ({p.Id})", p.Id))
             .ToList();
 
         try
@@ -163,33 +177,26 @@ public sealed partial class ProviderPage : Page
     // Buraya UYDURMA yuva EKLENMEZ: her satırın karşılığı config.yaml'da
     // gerçekten bulunan bir anahtardır (fetih_cli/config.py DEFAULT_CONFIG).
 
-    /// <summary>Bir yardımcı model yuvasının tanımı.</summary>
-    private sealed record AuxSlot(string Task, string Title, string Description);
+    /// <summary>
+    /// Bir yardımcı model yuvasının tanımı. Başlık ve açıklama yerelleştirme
+    /// anahtarı olarak tutulur; metin <see cref="Loc.T"/> ile çözülür ki dil
+    /// değişince yuva da yeni dilde kurulsun.
+    /// </summary>
+    private sealed record AuxSlot(string Task, string TitleKey, string DescriptionKey);
 
     private static readonly AuxSlot[] AuxSlots =
     {
-        new("vision", "Görüntü çözümleme",
-            "Ekran görüntüsü ve resim analizi (vision_analyze, tarayıcı görüntüleri). Çok kipli (multimodal) bir model gerekir."),
-        new("web_extract", "Web sayfası özetleme",
-            "Bir sayfayı okuyup özetleyen yan görev."),
-        new("compression", "Bağlam sıkıştırma",
-            "Sohbet uzayınca eski turları özetleyip yer açar."),
-        new("skills_hub", "Yetenek merkezi",
-            "Yetenek (skill) arama ve eşleştirme çağrıları."),
-        new("approval", "Onay kararı",
-            "Tehlikeli bir komutun otomatik onaylanıp onaylanmayacağına karar verir. Ucuz ve hızlı bir model önerilir."),
-        new("mcp", "MCP yardımcısı",
-            "MCP sunucularıyla ilgili kısa çağrılar."),
-        new("title_generation", "Sohbet başlığı üretme",
-            "Bir oturuma kısa bir başlık yazar."),
-        new("triage_specifier", "Görev ayrıntılandırma",
-            "Kanban 'triage' sütunundaki tek satırlık bir işi somut bir tarife dönüştürür."),
-        new("kanban_decomposer", "Görev parçalama",
-            "Bir işi alt görev grafiğine böler; diğerlerinden daha çok token harcar."),
-        new("profile_describer", "Profil açıklaması",
-            "Bir profilin ne işe yaradığını bir iki cümleyle yazar."),
-        new("curator", "Küratör (yetenek incelemesi)",
-            "Yetenek kullanımını gözden geçiren fork. Uzun sürebilir."),
+        new("vision", "provider.aux.vision.title", "provider.aux.vision.desc"),
+        new("web_extract", "provider.aux.web_extract.title", "provider.aux.web_extract.desc"),
+        new("compression", "provider.aux.compression.title", "provider.aux.compression.desc"),
+        new("skills_hub", "provider.aux.skills_hub.title", "provider.aux.skills_hub.desc"),
+        new("approval", "provider.aux.approval.title", "provider.aux.approval.desc"),
+        new("mcp", "provider.aux.mcp.title", "provider.aux.mcp.desc"),
+        new("title_generation", "provider.aux.title_generation.title", "provider.aux.title_generation.desc"),
+        new("triage_specifier", "provider.aux.triage_specifier.title", "provider.aux.triage_specifier.desc"),
+        new("kanban_decomposer", "provider.aux.kanban_decomposer.title", "provider.aux.kanban_decomposer.desc"),
+        new("profile_describer", "provider.aux.profile_describer.title", "provider.aux.profile_describer.desc"),
+        new("curator", "provider.aux.curator.title", "provider.aux.curator.desc"),
     };
 
     /// <summary>
@@ -210,7 +217,7 @@ public sealed partial class ProviderPage : Page
             {
                 SlotsHost.Children.Add(new TextBlock
                 {
-                    Text = "Yapılandırma okunamadı; köprü bağlı değil.",
+                    Text = Loc.T("provider.config_unreadable"),
                     Opacity = 0.7,
                     FontSize = 12,
                 });
@@ -221,7 +228,7 @@ public sealed partial class ProviderPage : Page
         {
             SlotsHost.Children.Add(new TextBlock
             {
-                Text = "Yapılandırma okunamadı: " + ex.Message,
+                Text = Loc.T("provider.config_error") + ex.Message,
                 Opacity = 0.7,
                 FontSize = 12,
                 TextWrapping = TextWrapping.Wrap,
@@ -232,12 +239,12 @@ public sealed partial class ProviderPage : Page
         // ── Yedek model ─────────────────────────────────────────────────────
         var (fbProvider, fbModel, fbChainLength) = ReadFallback(config);
         var fallbackNote = fbChainLength > 1
-            ? $"Şu anda {fbChainLength} basamaklı bir yedek zinciri tanımlı; buradan kaydetmek zinciri tek bir yedeğe indirir."
-            : "Birincil sağlayıcı 429/503/529 döndüğünde bu model devreye girer. Boş bırakılırsa yedek yoktur.";
+            ? string.Format(Loc.T("provider.slots.chain_note"), fbChainLength)
+            : Loc.T("provider.slots.fallback_desc");
 
         SlotsHost.Children.Add(SlotRow(
             "slot_fallback",
-            "Yedek model",
+            Loc.T("provider.slots.fallback_title"),
             fallbackNote,
             fbProvider,
             fbModel,
@@ -265,8 +272,8 @@ public sealed partial class ProviderPage : Page
             var task = slot.Task;
             auxHost.Children.Add(SlotRow(
                 "slot_aux_" + task,
-                slot.Title,
-                slot.Description,
+                Loc.T(slot.TitleKey),
+                Loc.T(slot.DescriptionKey),
                 string.IsNullOrEmpty(provider) ? "auto" : provider,
                 model,
                 includeAuto: true,
@@ -282,7 +289,7 @@ public sealed partial class ProviderPage : Page
         {
             Header = new TextBlock
             {
-                Text = $"Yardımcı modeller — yan görev başına ayrı model ({AuxSlots.Length} yuva)",
+                Text = string.Format(Loc.T("provider.slots.aux_header"), AuxSlots.Length),
                 FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
                 FontSize = 13,
             },
@@ -292,7 +299,7 @@ public sealed partial class ProviderPage : Page
             Margin = new Thickness(0, 8, 0, 0),
         };
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(expander, "slot_aux_group");
-        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(expander, "Yardımcı modeller");
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(expander, Loc.T("provider.slots.aux_name"));
         SlotsHost.Children.Add(expander);
     }
 
@@ -325,13 +332,14 @@ public sealed partial class ProviderPage : Page
 
         var combo = new ComboBox { MinWidth = 220, IsEditable = false };
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(combo, id + "_provider");
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(combo, title);
         if (includeAuto)
         {
-            combo.Items.Add(new ComboBoxItem { Content = "Otomatik (auto)", Tag = "auto" });
+            combo.Items.Add(new ComboBoxItem { Content = Loc.T("provider.slots.auto"), Tag = "auto" });
         }
         else
         {
-            combo.Items.Add(new ComboBoxItem { Content = "(yok)", Tag = "" });
+            combo.Items.Add(new ComboBoxItem { Content = Loc.T("provider.slots.none"), Tag = "" });
         }
         foreach (var choice in _providerChoices)
         {
@@ -360,29 +368,32 @@ public sealed partial class ProviderPage : Page
         {
             Text = currentModel,
             MinWidth = 240,
-            PlaceholderText = "Model kimliği (boş = sağlayıcının varsayılanı)",
+            PlaceholderText = Loc.T("provider.slots.model_placeholder"),
         };
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(modelBox, id + "_model");
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(
+            modelBox, title + " — " + Loc.T("provider.label.model"));
 
         var status = new TextBlock { FontSize = 12, Opacity = 0.8, VerticalAlignment = VerticalAlignment.Center };
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(status, id + "_status");
 
-        var saveButton = new Button { Content = "Kaydet" };
+        var saveButton = new Button { Content = Loc.T("provider.slots.save") };
         Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(saveButton, id + "_save");
-        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(saveButton, title + " kaydet");
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(
+            saveButton, string.Format(Loc.T("provider.slots.save_name"), title));
         saveButton.Click += async (_, _) =>
         {
             saveButton.IsEnabled = false;
-            status.Text = "kaydediliyor…";
+            status.Text = Loc.T("provider.slots.saving");
             try
             {
                 var provider = combo.SelectedItem is ComboBoxItem { Tag: string t } ? t : "";
                 await save(provider, modelBox.Text?.Trim() ?? "", status);
-                status.Text = "✓ kaydedildi";
+                status.Text = Loc.T("provider.slots.saved");
             }
             catch (BridgeRpcException rpc)
             {
-                status.Text = "✗ " + (rpc.Code == -32004 ? "reddedildi (yönetilen kurulum)" : rpc.Message);
+                status.Text = "✗ " + (rpc.Code == -32004 ? Loc.T("provider.slots.rejected") : rpc.Message);
             }
             catch (Exception ex)
             {
@@ -549,7 +560,7 @@ public sealed partial class ProviderPage : Page
             ApiKeyStatusText.Text = "";
             ApiKeyEnvVarText.Text = "";
             ProviderKindInfoBar.Severity = InfoBarSeverity.Informational;
-            ProviderKindInfoBar.Title = entry.DisplayName;
+            ProviderKindInfoBar.Title = entry.Label;
             ProviderKindInfoBar.Message = Loc.T("provider.local_no_key");
             ProviderKindInfoBar.IsOpen = true;
 
@@ -570,7 +581,7 @@ public sealed partial class ProviderPage : Page
             ApiKeyStatusText.Text = "";
             ApiKeyEnvVarText.Text = "";
             ProviderKindInfoBar.Severity = InfoBarSeverity.Informational;
-            ProviderKindInfoBar.Title = entry.DisplayName;
+            ProviderKindInfoBar.Title = entry.Label;
             ProviderKindInfoBar.Message = Loc.T("provider.cli_auth_required");
             ProviderKindInfoBar.IsOpen = true;
             ApiKeySignupLink.Visibility = Visibility.Collapsed;
@@ -625,7 +636,7 @@ public sealed partial class ProviderPage : Page
 
         if (curated.Count > 0)
         {
-            ModelHintText.Text = $"{curated.Count} model listelendi.";
+            ModelHintText.Text = string.Format(Loc.T("provider.models.curated"), curated.Count);
             PopulateModelCombo(curated, currentSelection);
         }
         else
@@ -663,9 +674,9 @@ public sealed partial class ProviderPage : Page
                     }
                     var rec = res.TryGetProperty("recommended", out var rc) ? rc.GetString() ?? "" : "";
                     var source = res.TryGetProperty("source", out var sv) ? sv.GetString() ?? "" : "";
-                    ModelHintText.Text = source == "live"
-                        ? $"{combined.Count} model sağlayıcıdan canlı alındı."
-                        : $"{combined.Count} model hazır.";
+                    ModelHintText.Text = string.Format(
+                        Loc.T(source == "live" ? "provider.models.live" : "provider.models.ready"),
+                        combined.Count);
 
                     var targetModel = !string.IsNullOrEmpty(currentSelection) ? currentSelection : rec;
                     PopulateModelCombo(combined, targetModel);
@@ -676,7 +687,7 @@ public sealed partial class ProviderPage : Page
         {
             if (curated.Count == 0)
             {
-                ModelHintText.Text = "Model listesi alınamadı; model adını doğrudan yazabilirsin.";
+                ModelHintText.Text = Loc.T("provider.models.failed");
             }
         }
     }
@@ -719,12 +730,12 @@ public sealed partial class ProviderPage : Page
 
         if (string.IsNullOrEmpty(provider) && string.IsNullOrEmpty(model))
         {
-            SaveModelStatus.Text = "Sağlayıcı veya model gir.";
+            SaveModelStatus.Text = Loc.T("provider.save.need_input");
             return;
         }
 
         SaveModelButton.IsEnabled = false;
-        SaveModelStatus.Text = "kaydediliyor…";
+        SaveModelStatus.Text = Loc.T("provider.save.saving");
         try
         {
             if (!string.IsNullOrEmpty(provider))
@@ -752,14 +763,14 @@ public sealed partial class ProviderPage : Page
 
             // Yazıldığını doğrula: config.get ile geri oku.
             var check = await _bridge.ConfigGetAsync("model").ConfigureAwait(true);
-            SaveModelStatus.Text = keySaved
-                ? "✓ Model ve API anahtarı kaydedildi — bir sonraki mesajda etkili olacak"
-                : "✓ Model kaydedildi — bir sonraki mesajda etkili olacak";
+            SaveModelStatus.Text = Loc.T(keySaved
+                ? "provider.save.model_and_key"
+                : "provider.save.model_only");
 
             if (entry != null && entry.Kind == ProviderKind.CloudApiKey && !string.IsNullOrEmpty(envVar) &&
                 FetihConfigService.Current.GetKeyPresence(envVar) == EnvKeyPresence.Missing && !keySaved)
             {
-                SaveModelStatus.Text += " ⚠ API anahtarı henüz girilmedi.";
+                SaveModelStatus.Text += Loc.T("provider.save.no_key_yet");
             }
 
             // Diskten okuyan salt-okunur listeyi de tazele.
@@ -769,7 +780,7 @@ public sealed partial class ProviderPage : Page
         catch (BridgeRpcException rpc)
         {
             SaveModelStatus.Text = "✗ " + (rpc.Code == -32004
-                ? "reddedildi (yönetilen kurulum)"
+                ? Loc.T("provider.save.rejected")
                 : rpc.Message);
         }
         catch (Exception ex)
@@ -819,8 +830,7 @@ public sealed partial class ProviderPage : Page
             new(SettingDescriptions.LabelFor("model.provider"), string.IsNullOrWhiteSpace(activeProvider) ? Loc.T("voice.undefined") : activeProvider,
                 SettingDescriptions.For("model.provider") ?? "", "model.provider"),
             new(SettingDescriptions.LabelFor("fallback_model"), config.GetDisplay("fallback_model.model", Loc.T("voice.undefined")),
-                SettingDescriptions.For("fallback_model")
-                    ?? (Loc.Current == UiLanguage.Turkish ? "Birincil sağlayıcı 429/529/503 döndüğünde devreye girer." : "Kicks in when the primary provider returns 429/529/503."), "fallback_model"),
+                SettingDescriptions.For("fallback_model") ?? Loc.T("provider.active.fallback_note"), "fallback_model"),
             new(SettingDescriptions.LabelFor("context.engine"), config.GetDisplay("context.engine"),
                 SettingDescriptions.For("context.engine") ?? "", "context.engine"),
             new(SettingDescriptions.LabelFor("toolsets"), config.GetDisplay("toolsets"),
@@ -829,20 +839,18 @@ public sealed partial class ProviderPage : Page
 
         var customProviders = config.Get("providers");
         rows.Add(new SettingRow(
-            Loc.Current == UiLanguage.Turkish ? "Kullanıcı tanımlı sağlayıcılar" : "User-defined providers",
+            Loc.T("provider.active.custom"),
             customProviders is null || customProviders.Kind != YamlKind.Map || customProviders.Map.Count == 0
-                ? (Loc.Current == UiLanguage.Turkish ? "(yok)" : "(none)")
+                ? Loc.T("provider.active.custom_none")
                 : string.Join(", ", customProviders.Map.Keys),
-            Loc.Current == UiLanguage.Turkish
-                ? "config.yaml içindeki providers: bölümüne eklenen özel OpenAI uyumlu uçlar."
-                : "Custom OpenAI-compatible endpoints added under the providers: section in config.yaml.",
+            Loc.T("provider.active.custom_note"),
             "providers"));
 
         rows.Add(new SettingRow(
-            Loc.Current == UiLanguage.Turkish ? "Yapılandırma dosyası" : "Configuration file",
+            Loc.T("provider.active.config_file"),
             service.ConfigExists ? FetihPaths.ConfigYamlPath : $"{FetihPaths.ConfigYamlPath} ({Loc.T("diag.missing")})",
             service.ConfigError ?? (service.ConfigModified is { } modified
-                ? (Loc.Current == UiLanguage.Turkish ? $"Son değişiklik: {modified:dd.MM.yyyy HH:mm}" : $"Last modified: {modified:dd.MM.yyyy HH:mm}")
+                ? string.Format(Loc.T("provider.active.last_modified"), modified.ToString("dd.MM.yyyy HH:mm"))
                 : string.Empty)));
 
         return rows;
@@ -861,13 +869,13 @@ public sealed partial class ProviderPage : Page
 
             keys.Add(new EnvKeyRow(
                 variable,
-                defined ? "Tanımlı" : "Tanımsız",
+                Loc.T(defined ? "provider.key.defined" : "provider.key.undefined"),
                 defined,
                 presence switch
                 {
-                    EnvKeyPresence.Environment => "süreç ortam değişkeni",
-                    EnvKeyPresence.EnvFile => "~/.fetih/.env",
-                    _ => "hiçbir kaynakta yok",
+                    EnvKeyPresence.Environment => Loc.T("provider.source.environment"),
+                    EnvKeyPresence.EnvFile => Loc.T("provider.source.env_file"),
+                    _ => Loc.T("provider.source.none"),
                 }));
         }
 
@@ -877,9 +885,9 @@ public sealed partial class ProviderPage : Page
             var defined = presence != EnvKeyPresence.Missing;
             keys.Add(new EnvKeyRow(
                 entry.BaseUrlEnvVar,
-                defined ? "Tanımlı" : "Tanımsız",
+                Loc.T(defined ? "provider.key.defined" : "provider.key.undefined"),
                 defined,
-                defined ? "uç adresi geçersiz kılınmış" : "varsayılan uç adresi kullanılır"));
+                Loc.T(defined ? "provider.baseurl.overridden" : "provider.baseurl.default")));
         }
 
         // OAuth / harici süreç ile kimliklenen sağlayıcılarda API anahtarı
@@ -891,12 +899,12 @@ public sealed partial class ProviderPage : Page
         var badges = new List<string>();
         if (entry.IsAggregator)
         {
-            badges.Add("toplayıcı");
+            badges.Add(Loc.T("provider.badge.aggregator"));
         }
 
         if (entry.IsLocal)
         {
-            badges.Add("yerel — veri makineden çıkmaz");
+            badges.Add(Loc.T("provider.badge.local"));
         }
 
         if (entry.AuthType != "api_key")
@@ -905,7 +913,7 @@ public sealed partial class ProviderPage : Page
         }
 
         return new ProviderRow(
-            entry.DisplayName,
+            entry.Label,
             entry.Id,
             ProviderRegistry.TransportLabel(entry.Transport),
             ProviderRegistry.AuthLabel(entry.AuthType),
@@ -974,7 +982,7 @@ public sealed partial class ProviderPage : Page
 
             var filtered = query.ToList();
             ProviderList.ItemsSource = filtered;
-            CountText.Text = $"{filtered.Count} / {_all.Count} sağlayıcı";
+            CountText.Text = string.Format(Loc.T("provider.count"), filtered.Count, _all.Count);
         }
         catch (Exception ex)
         {

@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Fetih.Desktop.Services;
 
 namespace Fetih.Desktop.Bridge;
 
@@ -102,7 +103,7 @@ public sealed class BridgeClient : IDisposable
                 return;
             }
 
-            Status.Update(BridgeConnectionState.Connecting, "Masaüstü Köprüsü başlatılıyor…");
+            Status.Update(BridgeConnectionState.Connecting, Loc.T("bridge.detail.connecting"));
 
             var handshake = await _bridgeProcess.StartAsync(ct).ConfigureAwait(false);
             _protocolVersion = handshake.ProtocolVersion;
@@ -126,9 +127,9 @@ public sealed class BridgeClient : IDisposable
                 if (clientVersion < min || clientVersion > max)
                 {
                     Status.Update(BridgeConnectionState.Faulted,
-                        $"Protokol uyumsuz: istemci {clientVersion}, sunucu {min}–{max}.");
+                        string.Format(Loc.T("bridge.detail.protocol_mismatch"), clientVersion, min, max));
                     throw new InvalidOperationException(
-                        $"Köprü protokol sürümü uyumsuz (istemci 1, sunucu {min}–{max}).");
+                        string.Format(Loc.T("bridge.detail.protocol_mismatch_ex"), min, max));
                 }
             }
 
@@ -139,18 +140,18 @@ public sealed class BridgeClient : IDisposable
 
             if (!_authenticated)
             {
-                Status.Update(BridgeConnectionState.Faulted, "Kimlik doğrulama reddedildi.");
-                throw new InvalidOperationException("Köprü kimlik doğrulaması başarısız.");
+                Status.Update(BridgeConnectionState.Faulted, Loc.T("bridge.detail.auth_rejected"));
+                throw new InvalidOperationException(Loc.T("bridge.detail.auth_failed"));
             }
 
             Status.Update(BridgeConnectionState.Ready,
-                $"Bağlı · protokol v{_protocolVersion} · pid {handshake.Pid}");
+                string.Format(Loc.T("bridge.detail.connected"), _protocolVersion, handshake.Pid));
         }
         catch (Exception ex)
         {
             if (Status.State != BridgeConnectionState.Faulted)
             {
-                Status.Update(BridgeConnectionState.Faulted, "Köprüye bağlanılamadı: " + ex.Message);
+                Status.Update(BridgeConnectionState.Faulted, Loc.T("bridge.detail.connect_failed") + ex.Message);
             }
             CleanupSocket();
             throw;
@@ -177,7 +178,7 @@ public sealed class BridgeClient : IDisposable
                         .ConfigureAwait(false);
                     if (result.MessageType == WebSocketMessageType.Close)
                     {
-                        throw new WebSocketException("sunucu bağlantıyı kapattı");
+                        throw new WebSocketException(Loc.T("bridge.detail.server_closed"));
                     }
                     sb.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
                 }
@@ -210,11 +211,11 @@ public sealed class BridgeClient : IDisposable
         // Bekleyen tüm çağrıları serbest bırak.
         foreach (var kv in _pending)
         {
-            kv.Value.TrySetException(new InvalidOperationException("Köprü bağlantısı koptu."));
+            kv.Value.TrySetException(new InvalidOperationException(Loc.T("bridge.detail.dropped")));
         }
         _pending.Clear();
         Status.Update(BridgeConnectionState.Reconnecting,
-            "Bağlantı koptu; sonraki istekte yeniden bağlanılacak.");
+            Loc.T("bridge.detail.reconnecting"));
         try { ConnectionLost?.Invoke(); } catch { }
     }
 
@@ -338,7 +339,7 @@ public sealed class BridgeClient : IDisposable
         var ws = _ws;
         if (ws is null || ws.State != WebSocketState.Open)
         {
-            throw new InvalidOperationException("Köprü bağlı değil.");
+            throw new InvalidOperationException(Loc.T("bridge.detail.not_connected"));
         }
 
         var id = Interlocked.Increment(ref _nextId);
@@ -365,7 +366,7 @@ public sealed class BridgeClient : IDisposable
         catch (Exception ex)
         {
             _pending.TryRemove(id, out _);
-            throw new InvalidOperationException("Köprüye istek gönderilemedi: " + ex.Message, ex);
+            throw new InvalidOperationException(Loc.T("bridge.detail.send_failed") + ex.Message, ex);
         }
         finally
         {

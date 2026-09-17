@@ -1,9 +1,13 @@
+using Fetih.Desktop.Services;
+
 namespace Fetih.Desktop.Models;
 
 /// <summary>
 /// Ayarlar sayfalarındaki tek bir "anahtar → değer" satırı.
-/// Faz 1'de tüm ayar sayfaları salt okunurdur: değerler
-/// <c>~/.fetih/config.yaml</c>'dan okunur, geri yazılmaz.
+/// Bu satır türü yalnızca <b>okuma</b> amaçlıdır: değerler
+/// <c>~/.fetih/config.yaml</c>'dan okunur ve buradan geri yazılmaz.
+/// Yazma gerektiren ayarlar Detaylı Mod'un (ConfigEditorPage) düzenlenebilir
+/// kontrollerini ya da kendi sayfalarındaki açık kaydetme akışını kullanır.
 /// </summary>
 public sealed class SettingRow
 {
@@ -49,7 +53,7 @@ public sealed class EnvKeyRow
     /// <summary>Ortam değişkeninin adı.</summary>
     public string VariableName { get; }
 
-    /// <summary>"Tanımlı" / "Tanımsız".</summary>
+    /// <summary>Tanımlı/atanımsız durumunun yerelleştirilmiş etiketi.</summary>
     public string StatusLabel { get; }
 
     public bool IsDefined { get; }
@@ -108,7 +112,19 @@ public sealed class ProviderRow
 
     public bool HasBadges => !string.IsNullOrWhiteSpace(Badges);
 
-    public string StatusLabel => IsConfigured ? "Kimlik bilgisi tanımlı" : "Kimlik bilgisi yok";
+    public string StatusLabel => Loc.T(IsConfigured ? "provider.badge.configured" : "provider.badge.not_configured");
+
+    /// <summary>Etkin sağlayıcı rozetinin etiketi.</summary>
+    public string ActiveLabel => Loc.T("provider.badge.active");
+
+    /// <summary>"Bu sağlayıcıyı seç" düğmesinin etiketi.</summary>
+    public string SelectLabel => Loc.T("provider.select_button");
+
+    /// <summary>Düğmenin erişilebilirlik adı — hangi sağlayıcı olduğunu söyler.</summary>
+    public string SelectAutomationName => $"{SelectLabel}: {DisplayName}";
+
+    /// <summary>Düğmenin kararlı kimliği (UI Automation testleri için).</summary>
+    public string SelectAutomationId => "provider_select_" + Id;
 
     public string StatusBrushKey => IsConfigured
         ? "SystemFillColorSuccessBrush"

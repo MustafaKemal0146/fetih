@@ -98,13 +98,17 @@
                                          PasswordRevealMode="Peek" />
                             <HyperlinkButton Grid.Column="1"
                                              x:Name="ApiKeySignupLink"
-                                             Content="Anahtar al ↗"
                                              Padding="4,2"
                                              VerticalAlignment="Center"
                                              Click="ApiKeySignupLink_Click" />
                         </Grid>
                         <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                            <Ellipse x:Name="ApiKeyStatusDot" Width="8" Height="8" VerticalAlignment="Center" />
+                            <!-- Durum noktası süs: aynı bilgiyi ApiKeyStatusText taşıyor. -->
+                            <Ellipse x:Name="ApiKeyStatusDot"
+                                     Width="8"
+                                     Height="8"
+                                     VerticalAlignment="Center"
+                                     AutomationProperties.AccessibilityView="Raw" />
                             <TextBlock x:Name="ApiKeyStatusText" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
                             <TextBlock x:Name="ApiKeyEnvVarText" FontSize="11" FontFamily="Consolas" Opacity="0.7" VerticalAlignment="Center" />
                         </StackPanel>
@@ -191,6 +195,7 @@
                                     <Ellipse Width="10"
                                              Height="10"
                                              VerticalAlignment="Center"
+                                             AutomationProperties.AccessibilityView="Raw"
                                              Fill="{x:Bind StatusBrushKey, Converter={StaticResource ThemeBrushConverter}}" />
                                     <TextBlock Text="{x:Bind DisplayName}"
                                                FontWeight="SemiBold"
@@ -200,7 +205,7 @@
                                             VerticalAlignment="Center"
                                             Background="{ThemeResource AccentFillColorDefaultBrush}"
                                             Visibility="{x:Bind IsActive, Converter={StaticResource BoolToVisibilityConverter}}">
-                                        <TextBlock Text="Etkin"
+                                        <TextBlock Text="{x:Bind ActiveLabel}"
                                                    FontSize="11"
                                                    Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
                                     </Border>
@@ -211,7 +216,9 @@
                                                Visibility="{x:Bind HasBadges, Converter={StaticResource BoolToVisibilityConverter}}" />
                                 </StackPanel>
                                 <Button Grid.Column="1"
-                                        Content="Bu Sağlayıcıyı Seç"
+                                        Content="{x:Bind SelectLabel}"
+                                        AutomationProperties.Name="{x:Bind SelectAutomationName}"
+                                        AutomationProperties.AutomationId="{x:Bind SelectAutomationId}"
                                         Tag="{x:Bind Id}"
                                         Click="SelectProviderFromList_Click"
                                         Padding="10,4"

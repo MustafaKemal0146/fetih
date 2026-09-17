@@ -40,8 +40,8 @@ public enum BridgeConnectionState
 
 /// <summary>
 /// Kabuk üstündeki bağlantı rozetini besleyen gözlemlenebilir durum nesnesi.
-/// Faz 1'de yalnızca durum taşır; NDJSON JSON-RPC istemcisi (BridgeClient)
-/// ve süreç yöneticisi bir sonraki adımda bu durumu güncelleyecek.
+/// Durumu NDJSON JSON-RPC istemcisi (<see cref="BridgeClient"/>) günceller;
+/// bu sınıf yalnızca taşır ve UI iş parçacığına yönlendirir.
 /// </summary>
 public sealed class BridgeStatus : INotifyPropertyChanged
 {
@@ -52,7 +52,7 @@ public sealed class BridgeStatus : INotifyPropertyChanged
     public static BridgeStatus Shared { get; } = new();
 
     private BridgeConnectionState _state = BridgeConnectionState.Idle;
-    private string _detail = "Masaüstü Köprüsü henüz başlatılmadı.";
+    private string _detail = Services.Loc.T("bridge.detail.idle");
 
     /// <summary>
     /// UI iş parçacığının kuyruğu. Köprü istemcisi durum güncellemelerini arka

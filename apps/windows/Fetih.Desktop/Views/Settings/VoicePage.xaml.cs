@@ -46,9 +46,11 @@ public sealed partial class VoicePage : Page
         TtsHeader.Text = Loc.T("voice.section.tts");
         SttHeader.Text = Loc.T("voice.section.stt");
         RecordingHeader.Text = Loc.T("voice.section.recording");
-        PhaseInfo.Title = Loc.T("voice.phase_title");
-        PhaseInfo.Message = Loc.T("voice.phase_desc");
+        LiveInfo.Title = Loc.T("voice.live_title");
+        LiveInfo.Message = Loc.T("voice.live_desc");
         RefreshButton.Content = Loc.T("common.reload");
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(
+            RefreshButton, Loc.T("common.reload"));
     }
 
     private void RefreshButton_Click(object sender, RoutedEventArgs e)
@@ -68,8 +70,7 @@ public sealed partial class VoicePage : Page
             var ttsRows = new List<SettingRow>
             {
                 new(Loc.T("voice.provider"), string.IsNullOrWhiteSpace(ttsProvider) ? Loc.T("voice.undefined") : ttsProvider,
-                    "Seçenekler: edge (ücretsiz), elevenlabs, openai, xai, minimax, mistral, gemini, " +
-                    "neutts / kittentts / piper (yerel).",
+                    Loc.T("voice.tts.options"),
                     "tts.provider"),
             };
 
@@ -111,7 +112,7 @@ public sealed partial class VoicePage : Page
             {
                 new(Loc.T("voice.enabled"), Bool(config.GetBool("stt.enabled")), configKey: "stt.enabled"),
                 new(Loc.T("voice.provider"), string.IsNullOrWhiteSpace(sttProvider) ? Loc.T("voice.undefined") : sttProvider,
-                    "Seçenekler: local (faster-whisper, ücretsiz), groq, openai (Whisper API), mistral (Voxtral).",
+                    Loc.T("voice.stt.options"),
                     "stt.provider"),
             };
 
@@ -119,8 +120,9 @@ public sealed partial class VoicePage : Page
             {
                 case "local":
                     sttRows.Add(new SettingRow(Loc.T("voice.model"), config.GetDisplay("stt.local.model"),
-                        "tiny / base / small / medium / large-v3", "stt.local.model"));
-                    sttRows.Add(new SettingRow(Loc.T("voice.language"), config.GetDisplay("stt.local.language", "(otomatik algıla)"),
+                        Loc.T("voice.stt.model.options"), "stt.local.model"));
+                    sttRows.Add(new SettingRow(Loc.T("voice.language"),
+                        config.GetDisplay("stt.local.language", Loc.T("voice.auto_detect")),
                         configKey: "stt.local.language"));
                     break;
                 case "openai":
@@ -135,18 +137,18 @@ public sealed partial class VoicePage : Page
 
             RecordingRows.ItemsSource = new List<SettingRow>
             {
-                new("Kayıt kısayolu", config.GetDisplay("voice.record_key"),
-                    "Bas-konuş kaydını başlatır/durdurur.", "voice.record_key"),
-                new("Azami kayıt süresi", Seconds(config.GetDisplay("voice.max_recording_seconds")),
+                new(Loc.T("voice.recording.key"), config.GetDisplay("voice.record_key"),
+                    Loc.T("voice.recording.key.desc"), "voice.record_key"),
+                new(Loc.T("voice.recording.max"), Seconds(config.GetDisplay("voice.max_recording_seconds")),
                     configKey: "voice.max_recording_seconds"),
-                new("Yanıtı otomatik seslendir", Bool(config.GetBool("voice.auto_tts")),
+                new(Loc.T("voice.recording.auto_tts"), Bool(config.GetBool("voice.auto_tts")),
                     configKey: "voice.auto_tts"),
-                new("Kayıt bip sesleri", Bool(config.GetBool("voice.beep_enabled")),
-                    "Kayıt başlangıç/bitiş sinyali.", "voice.beep_enabled"),
-                new("Sessizlik eşiği", config.GetDisplay("voice.silence_threshold"),
-                    "RMS bu değerin altındaysa sessizlik sayılır (0–32767).", "voice.silence_threshold"),
-                new("Sessizlik süresi", Seconds(config.GetDisplay("voice.silence_duration")),
-                    "Sürekli (VAD) modda otomatik durdurma eşiği.", "voice.silence_duration"),
+                new(Loc.T("voice.recording.beep"), Bool(config.GetBool("voice.beep_enabled")),
+                    Loc.T("voice.recording.beep.desc"), "voice.beep_enabled"),
+                new(Loc.T("voice.recording.silence_threshold"), config.GetDisplay("voice.silence_threshold"),
+                    Loc.T("voice.recording.silence_threshold.desc"), "voice.silence_threshold"),
+                new(Loc.T("voice.recording.silence_duration"), Seconds(config.GetDisplay("voice.silence_duration")),
+                    Loc.T("voice.recording.silence_duration.desc"), "voice.silence_duration"),
             };
         }
         catch (Exception ex)
@@ -162,5 +164,8 @@ public sealed partial class VoicePage : Page
         _ => Loc.T("voice.undefined"),
     };
 
-    private static string Seconds(string value) => value is "—" or "" ? Loc.T("voice.undefined") : $"{value} sn";
+    private static string Seconds(string value)
+        => value is "—" or ""
+            ? Loc.T("voice.undefined")
+            : string.Format(Loc.T("voice.seconds"), value);
 }

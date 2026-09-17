@@ -5,9 +5,13 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Title="FETİH — İlk Kurulum">
+    mc:Ignorable="d">
 
+    <!--
+        Sihirbazdaki TÜM görünür metin Services/Localization.cs'ten gelir
+        (bkz. SetupWindow.ApplyLanguage). Burada sabit metin bırakılmaz;
+        aksi hâlde dil değişince iki kaynak birbiriyle çelişir.
+    -->
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -26,9 +30,10 @@
                                 Height="26"
                                 VerticalAlignment="Center"
                                 IsTabStop="False"
+                                AutomationProperties.AccessibilityView="Raw"
                                 Template="{StaticResource FetihWordmarkTemplate}" />
                 <TextBlock Grid.Column="1"
-                           Text="İlk Kurulum"
+                           x:Name="HeadingText"
                            VerticalAlignment="Center"
                            Opacity="0.6"
                            FontSize="12" />
@@ -54,29 +59,29 @@
 
                 <!-- 1) Karşılama -->
                 <StackPanel x:Name="WelcomePanel" Spacing="18">
-                    <ContentControl HorizontalAlignment="Center"
+                    <ContentControl x:Name="Brandmark"
+                                    HorizontalAlignment="Center"
                                     Margin="0,8,0,0"
                                     Width="480"
                                     IsTabStop="False"
                                     AutomationProperties.AutomationId="setup_brandmark"
-                                    AutomationProperties.Name="FETİH — terminalde çalışan otonom yapay zekâ güvenlik ajanı"
                                     AutomationProperties.AccessibilityView="Content"
                                     Template="{StaticResource FetihBrandmarkTemplate}" />
 
-                    <TextBlock Text="FETİH'e hoş geldin"
+                    <TextBlock x:Name="WelcomeTitle"
                                HorizontalAlignment="Center"
                                Style="{StaticResource PageTitleTextStyle}" />
-                    <TextBlock Style="{StaticResource MutedTextStyle}"
-                               TextAlignment="Center"
-                               Text="Bu sihirbaz bir model sağlayıcısı seçmene, kimlik bilgilerini güvenle kaydetmene ve Masaüstü Köprüsü'nü başlatmana yardımcı olur. Üç adım sürer." />
+                    <TextBlock x:Name="WelcomeBody"
+                               Style="{StaticResource MutedTextStyle}"
+                               TextAlignment="Center" />
                     <Border Style="{StaticResource CardBorderStyle}">
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Güvenlik notu" FontWeight="SemiBold" />
-                            <TextBlock Style="{StaticResource MutedTextStyle}"
-                                       Text="API anahtarın yalnızca bu bilgisayardaki ~/.fetih/.env dosyasına yazılır. Değeri hiçbir zaman ekranda gösterilmez, günlüğe yazılmaz veya ağ üzerinden gönderilmez. Yerel sağlayıcı (Ollama, LM Studio) seçersen hiç anahtar istenmez." />
+                            <TextBlock x:Name="SecurityTitle" FontWeight="SemiBold" />
+                            <TextBlock x:Name="SecurityBody"
+                                       Style="{StaticResource MutedTextStyle}" />
                         </StackPanel>
                     </Border>
-                    <Button Content="Devam"
+                    <Button x:Name="WelcomeContinueButton"
                             HorizontalAlignment="Center"
                             Style="{StaticResource AccentButtonStyle}"
                             AutomationProperties.AutomationId="setup_welcome_continue"
@@ -85,12 +90,10 @@
 
                 <!-- 2) Sağlayıcı — içerik sağlayıcının TÜRÜNE göre değişir -->
                 <StackPanel x:Name="ProviderPanel" Spacing="14" Visibility="Collapsed">
-                    <TextBlock Text="Model sağlayıcısı" Style="{StaticResource PageTitleTextStyle}" />
-                    <TextBlock Style="{StaticResource MutedTextStyle}"
-                               Text="FETİH model-agnostiktir. Ücretsiz başlamak için Groq, verinin makineden çıkmasını istemiyorsan Ollama iyi bir seçim." />
+                    <TextBlock x:Name="ProviderTitle" Style="{StaticResource PageTitleTextStyle}" />
+                    <TextBlock x:Name="ProviderBody" Style="{StaticResource MutedTextStyle}" />
 
                     <ComboBox x:Name="ProviderCombo"
-                              Header="Sağlayıcı"
                               Width="380"
                               HorizontalAlignment="Left"
                               AutomationProperties.AutomationId="setup_provider_combo"
@@ -99,13 +102,10 @@
                     <!-- (a) Bulut sağlayıcı: API anahtarı -->
                     <StackPanel x:Name="ApiKeySection" Spacing="8" Visibility="Collapsed">
                         <PasswordBox x:Name="KeyBox"
-                                     Header="API anahtarı"
                                      Width="380"
                                      HorizontalAlignment="Left"
-                                     AutomationProperties.AutomationId="setup_api_key"
-                                     PlaceholderText="sk-… / gsk_…" />
+                                     AutomationProperties.AutomationId="setup_api_key" />
                         <HyperlinkButton x:Name="SignupLink"
-                                         Content="Anahtar al"
                                          Padding="0"
                                          AutomationProperties.AutomationId="setup_signup_link"
                                          Visibility="Collapsed" />
@@ -118,11 +118,10 @@
                                  IsClosable="False"
                                  AutomationProperties.AutomationId="setup_local_status" />
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button Content="Yeniden yokla"
+                            <Button x:Name="LocalReprobeButton"
                                     AutomationProperties.AutomationId="setup_local_reprobe"
                                     Click="LocalReprobe_Click" />
                             <HyperlinkButton x:Name="LocalInstallLink"
-                                             Content="Kurulum sayfasını aç"
                                              AutomationProperties.AutomationId="setup_local_install_link"
                                              Visibility="Collapsed" />
                         </StackPanel>
@@ -136,11 +135,10 @@
                                  AutomationProperties.AutomationId="setup_cli_login_status" />
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <Button x:Name="CliLoginButton"
-                                    Content="Oturum aç"
                                     Style="{StaticResource AccentButtonStyle}"
                                     AutomationProperties.AutomationId="setup_cli_login"
                                     Click="CliLogin_Click" />
-                            <Button Content="Durumu denetle"
+                            <Button x:Name="CliLoginCheckButton"
                                     AutomationProperties.AutomationId="setup_cli_login_check"
                                     Click="CliLoginCheck_Click" />
                         </StackPanel>
@@ -148,15 +146,15 @@
 
                     <!-- (d) AWS kimlik zinciri -->
                     <StackPanel x:Name="AwsSection" Spacing="8" Visibility="Collapsed">
-                        <InfoBar IsOpen="True" IsClosable="False" Severity="Informational"
-                                 Title="AWS kimlik zinciri"
-                                 Message="Bu sağlayıcı anahtar istemez; AWS_PROFILE / IAM rolü gibi ortam kimlik bilgilerini kullanır."
+                        <InfoBar x:Name="AwsBar"
+                                 IsOpen="True"
+                                 IsClosable="False"
+                                 Severity="Informational"
                                  AutomationProperties.AutomationId="setup_aws_note" />
                     </StackPanel>
 
                     <!-- Model seçimi — canlı katalogdan -->
                     <ComboBox x:Name="ModelCombo"
-                              Header="Varsayılan model"
                               Width="380"
                               IsEditable="False"
                               HorizontalAlignment="Left"
@@ -167,8 +165,8 @@
                     <TextBlock x:Name="KeyHint" Style="{StaticResource MutedTextStyle}" />
 
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button Content="Geri" Click="BackToWelcome_Click" />
-                        <Button Content="Kur ve başlat"
+                        <Button x:Name="BackButton" Click="BackToWelcome_Click" />
+                        <Button x:Name="InstallButton"
                                 Style="{StaticResource AccentButtonStyle}"
                                 AutomationProperties.AutomationId="setup_install"
                                 Click="ProviderInstall_Click" />
@@ -177,9 +175,10 @@
 
                 <!-- 3) Kurulum ilerlemesi -->
                 <StackPanel x:Name="ProgressPanel" Spacing="14" Visibility="Collapsed">
-                    <TextBlock Text="Kuruluyor" Style="{StaticResource PageTitleTextStyle}" />
+                    <TextBlock x:Name="ProgressTitle" Style="{StaticResource PageTitleTextStyle}" />
                     <ProgressBar x:Name="OverallProgress" Minimum="0" Maximum="1" Value="0"
-                                 HorizontalAlignment="Stretch" />
+                                 HorizontalAlignment="Stretch"
+                                 AutomationProperties.AccessibilityView="Raw" />
 
                     <ItemsControl x:Name="StepList"
                                   AutomationProperties.AutomationId="setup_steps">
@@ -199,7 +198,8 @@
                                         <TextBlock Grid.Column="0"
                                                    Text="{Binding Glyph}"
                                                    FontSize="14"
-                                                   VerticalAlignment="Center" />
+                                                   VerticalAlignment="Center"
+                                                   AutomationProperties.AccessibilityView="Raw" />
                                         <TextBlock Grid.Column="1"
                                                    Text="{Binding DisplayName}"
                                                    FontWeight="SemiBold"
@@ -220,13 +220,13 @@
                              AutomationProperties.AutomationId="setup_result" />
 
                     <StackPanel Orientation="Horizontal" Spacing="8">
-                        <Button x:Name="RetryButton" Content="Yeniden dene" Visibility="Collapsed"
+                        <Button x:Name="RetryButton" Visibility="Collapsed"
                                 AutomationProperties.AutomationId="setup_retry"
                                 Click="Retry_Click" />
-                        <Button x:Name="BackToProviderButton" Content="Sağlayıcıya dön" Visibility="Collapsed"
+                        <Button x:Name="BackToProviderButton" Visibility="Collapsed"
                                 AutomationProperties.AutomationId="setup_back_provider"
                                 Click="BackToProvider_Click" />
-                        <Button x:Name="GoToChatButton" Content="Sohbete geç"
+                        <Button x:Name="GoToChatButton"
                                 Style="{StaticResource AccentButtonStyle}"
                                 Visibility="Collapsed"
                                 AutomationProperties.AutomationId="setup_finish"

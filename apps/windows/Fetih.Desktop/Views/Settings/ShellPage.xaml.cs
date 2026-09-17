@@ -44,6 +44,15 @@ public sealed partial class ShellPage : Page
         DistroLabel.Text = Loc.T("shell.distro");
         CreateUserDesc.Text = Loc.T("shell.create_user.desc");
         CreateUserButton.Content = Loc.T("shell.create_user");
+
+        // Ekran okuyucu, radyo düğmesinin yalnızca adını değil ne seçtiğini de
+        // duyurmalı: Name, açıklama metniyle birlikte kurulur.
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(
+            GitBashRadio, Loc.T("shell.git_bash") + " — " + Loc.T("shell.git_bash.desc"));
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(
+            WslRadio, Loc.T("shell.wsl") + " — " + Loc.T("shell.wsl.desc"));
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(DistroCombo, Loc.T("shell.distro"));
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(CreateUserButton, Loc.T("shell.create_user"));
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -62,7 +71,7 @@ public sealed partial class ShellPage : Page
         }
         catch (BridgeRpcException rpc)
         {
-            ShowStatus($"Köprü hatası ({rpc.Code}): {rpc.Message}", InfoBarSeverity.Error);
+            ShowStatus(string.Format(Loc.T("shell.bridge_error"), rpc.Code, rpc.Message), InfoBarSeverity.Error);
         }
         catch (Exception ex)
         {
@@ -89,7 +98,7 @@ public sealed partial class ShellPage : Page
             if (!available)
             {
                 var detail = res.TryGetProperty("detail", out var d) ? d.GetString() : null;
-                ShowStatus(detail ?? "Kabuk seçimi yalnızca Windows'ta geçerlidir.", InfoBarSeverity.Informational);
+                ShowStatus(detail ?? Loc.T("shell.windows_only"), InfoBarSeverity.Informational);
                 GitBashRadio.IsEnabled = false;
                 WslRadio.IsEnabled = false;
                 return;

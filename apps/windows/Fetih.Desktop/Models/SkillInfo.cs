@@ -25,7 +25,7 @@ public sealed class SkillInfo
     /// <summary>Üst klasör adı (ör. <c>cybersecurity</c>, <c>ctf</c>, <c>red-teaming</c>).</summary>
     public string Category { get; }
 
-    /// <summary>Kaynak ağaç: <c>skills</c>, <c>optional-skills</c> ya da <c>kullanıcı</c>.</summary>
+    /// <summary>Kaynak ağaç: <c>skills</c>, <c>optional-skills</c> ya da <c>user</c>.</summary>
     public string Source { get; }
 
     /// <summary>Kaynak ağacın köküne göre yol.</summary>
@@ -38,5 +38,6 @@ public sealed class SkillInfo
     public string SearchBlob { get; }
 
     /// <summary>Liste öğesinin altında gösterilen ikincil satır.</summary>
-    public string SubtitleLabel => $"{Source} · {Category}";
+    public string SubtitleLabel =>
+        $"{Services.SkillCatalog.SourceLabel(Source)} · {Category}";
 }

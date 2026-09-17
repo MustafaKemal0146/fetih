@@ -1381,10 +1381,10 @@ public sealed class ChatMarkdownView : Grid
     }
 
     private static string CopyLabel
-        => Loc.Current == UiLanguage.Turkish ? "Kopyala" : "Copy";
+        => Loc.T("chat.md.copy");
 
     private static string CopiedLabel
-        => Loc.Current == UiLanguage.Turkish ? "Kopyalandı" : "Copied";
+        => Loc.T("chat.md.copied");
 
     // ── Satır içi çizim ─────────────────────────────────────────────────────
 

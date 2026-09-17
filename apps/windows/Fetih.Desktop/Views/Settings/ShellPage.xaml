@@ -13,7 +13,7 @@
                   VerticalScrollMode="Enabled">
         <StackPanel Spacing="16" MaxWidth="720" HorizontalAlignment="Left">
             <StackPanel Spacing="4">
-                <TextBlock x:Name="TitleText" Text="Kabuk (Windows)" Style="{StaticResource PageTitleTextStyle}" />
+                <TextBlock x:Name="TitleText" Style="{StaticResource PageTitleTextStyle}" />
                 <TextBlock x:Name="IntroText" Style="{StaticResource MutedTextStyle}" />
             </StackPanel>
 
@@ -21,7 +21,11 @@
                      IsOpen="False"
                      IsClosable="True" />
 
-            <ProgressRing x:Name="BusyRing" IsActive="False" HorizontalAlignment="Left" />
+            <!-- Süs öğesi: ekran okuyucu ağacına girmemeli (durum metni StatusBar'da). -->
+            <ProgressRing x:Name="BusyRing"
+                          IsActive="False"
+                          HorizontalAlignment="Left"
+                          AutomationProperties.AccessibilityView="Raw" />
 
             <!-- Kabuk seçici -->
             <Border Style="{StaticResource CardBorderStyle}">
@@ -31,7 +35,7 @@
                                  GroupName="ShellBackend"
                                  Checked="Backend_Checked">
                         <StackPanel Spacing="2">
-                            <TextBlock x:Name="GitBashTitle" FontWeight="SemiBold" Text="Git Bash" />
+                            <TextBlock x:Name="GitBashTitle" FontWeight="SemiBold" />
                             <TextBlock x:Name="GitBashDesc"
                                        FontSize="12"
                                        Opacity="0.7"
@@ -49,7 +53,7 @@
                                  GroupName="ShellBackend"
                                  Checked="Backend_Checked">
                         <StackPanel Spacing="2">
-                            <TextBlock x:Name="WslTitle" FontWeight="SemiBold" Text="WSL" />
+                            <TextBlock x:Name="WslTitle" FontWeight="SemiBold" />
                             <TextBlock x:Name="WslDesc"
                                        FontSize="12"
                                        Opacity="0.7"
@@ -60,7 +64,6 @@
                     <StackPanel x:Name="WslDetailPanel" Spacing="10" Margin="28,0,0,0">
                         <StackPanel Orientation="Horizontal" Spacing="10">
                             <TextBlock x:Name="DistroLabel"
-                                       Text="Dağıtım"
                                        VerticalAlignment="Center"
                                        FontSize="13" />
                             <ComboBox x:Name="DistroCombo"

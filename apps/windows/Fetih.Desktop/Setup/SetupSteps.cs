@@ -9,11 +9,14 @@ using Fetih.Desktop.Services;
 namespace Fetih.Desktop.Setup;
 
 /// <summary>
-/// FETİH'in gerçek ön koşullarına uyarlanmış kurulum adımları (OpenClaw'ın
-/// 36 adımlık listesinin *iskeleti*, bkz. docs/openclaw-inceleme-notlari.md
-/// §5.3 sonundaki uyarlama önerisi). Bizim ön koşulumuz yalnızca Python +
-/// bir sağlayıcı anahtarı olduğu için liste kısadır ama aynı soyutlamayı
-/// kullanır: <c>CanSkip</c> ikinci çalıştırmayı onarım moduna çevirir.
+/// FETİH'in gerçek ön koşullarına uyarlanmış kurulum adımları. Bizim
+/// ön koşulumuz yalnızca Python + bir sağlayıcı anahtarı olduğu için liste
+/// kısadır ama aynı soyutlamayı kullanır: <c>CanSkip</c> ikinci çalıştırmayı
+/// onarım moduna çevirir.
+///
+/// <para>Adım adları ve sonuç metinleri <see cref="Loc"/> üzerinden gelir:
+/// ilerleme listesi kullanıcıya görünen tek yerdir ve orada sabit metin
+/// kalırsa İngilizce arayüzde Türkçe satırlar kalırdı.</para>
 /// </summary>
 public static class SetupStepFactory
 {
@@ -34,30 +37,29 @@ public static class SetupStepFactory
 public sealed class PreflightOsStep : SetupStep
 {
     public override string Id => "preflight_os";
-    public override string DisplayName => "İşletim sistemi denetimi";
+    public override string DisplayName => Loc.T("setup.step.os.name");
 
     public override Task<StepResult> ExecuteAsync(SetupContext ctx, CancellationToken ct)
         => Task.FromResult(OperatingSystem.IsWindows()
-            ? StepResult.Ok("Windows algılandı.")
-            : StepResult.Fail("Bu masaüstü kabuğu yalnızca Windows'ta çalışır."));
+            ? StepResult.Ok(Loc.T("setup.step.os.ok"))
+            : StepResult.Fail(Loc.T("setup.step.os.fail")));
 }
 
 /// <summary>Köprüyü başlatabilecek bir Python var mı?</summary>
 public sealed class DetectPythonStep : SetupStep
 {
     public override string Id => "detect_python";
-    public override string DisplayName => "Python bulunuyor";
+    public override string DisplayName => Loc.T("setup.step.python.name");
 
     public override Task<StepResult> ExecuteAsync(SetupContext ctx, CancellationToken ct)
     {
         if (BridgeLauncherProbe.HasUsablePython(out var where))
         {
             ctx.Notes.Add("Python: " + where);
-            return Task.FromResult(StepResult.Ok("Python bulundu: " + where));
+            return Task.FromResult(StepResult.Ok(
+                string.Format(Loc.T("setup.step.python.ok"), where)));
         }
-        return Task.FromResult(StepResult.Fail(
-            "Python bulunamadı. FETİH'i çalıştırmak için Python 3.11+ kurun " +
-            "veya FETIH_PYTHON ortam değişkenini ayarlayın."));
+        return Task.FromResult(StepResult.Fail(Loc.T("setup.step.python.fail")));
     }
 }
 
@@ -65,7 +67,7 @@ public sealed class DetectPythonStep : SetupStep
 public sealed class EnsureFetihHomeStep : SetupStep
 {
     public override string Id => "ensure_fetih_home";
-    public override string DisplayName => "Durum dizini hazırlanıyor";
+    public override string DisplayName => Loc.T("setup.step.home.name");
 
     private bool _created;
 
@@ -76,7 +78,8 @@ public sealed class EnsureFetihHomeStep : SetupStep
     {
         Directory.CreateDirectory(FetihPaths.FetihHome);
         _created = true;
-        return Task.FromResult(StepResult.Ok(FetihPaths.FetihHome + " oluşturuldu."));
+        return Task.FromResult(StepResult.Ok(
+            string.Format(Loc.T("setup.step.home.ok"), FetihPaths.FetihHome)));
     }
 
     public override Task RollbackAsync(SetupContext ctx, CancellationToken ct)
@@ -106,7 +109,7 @@ public sealed class EnsureFetihHomeStep : SetupStep
 public sealed class WriteEnvKeyStep : SetupStep
 {
     public override string Id => "write_env_key";
-    public override string DisplayName => "API anahtarı kaydediliyor";
+    public override string DisplayName => Loc.T("setup.step.key.name");
 
     private bool _wrote;
 
@@ -124,11 +127,12 @@ public sealed class WriteEnvKeyStep : SetupStep
             EnvFileWriter.SetValue(FetihPaths.EnvFilePath, ctx.KeyEnvVar, ctx.ApiKey);
             _wrote = true;
             // Yalnızca anahtar ADI bildirilir, DEĞERİ değil.
-            return Task.FromResult(StepResult.Ok(ctx.KeyEnvVar + " .env dosyasına yazıldı."));
+            return Task.FromResult(StepResult.Ok(
+                string.Format(Loc.T("setup.step.key.ok"), ctx.KeyEnvVar)));
         }
         catch (Exception ex)
         {
-            return Task.FromResult(StepResult.Fail("API anahtarı yazılamadı: " + ex.Message));
+            return Task.FromResult(StepResult.Fail(Loc.T("setup.step.key.fail") + ex.Message));
         }
     }
 
@@ -156,7 +160,7 @@ public sealed class WriteEnvKeyStep : SetupStep
 public sealed class WriteConfigStep : SetupStep
 {
     public override string Id => "write_config";
-    public override string DisplayName => "Yapılandırma yazılıyor";
+    public override string DisplayName => Loc.T("setup.step.config.name");
 
     public override async Task<StepResult> ExecuteAsync(SetupContext ctx, CancellationToken ct)
     {
@@ -171,15 +175,15 @@ public sealed class WriteConfigStep : SetupStep
             {
                 await BridgeClient.Shared.ConfigSetAsync("model.default", ctx.Model, ct).ConfigureAwait(false);
             }
-            return StepResult.Ok("model.provider / model.default kaydedildi.");
+            return StepResult.Ok(Loc.T("setup.step.config.ok"));
         }
         catch (BridgeRpcException rpc) when (rpc.Code == -32004)
         {
-            return StepResult.Fail("Yapılandırma yazılamadı (yönetilen kurulum): " + rpc.Message);
+            return StepResult.Fail(Loc.T("setup.step.config.fail_managed") + rpc.Message);
         }
         catch (Exception ex)
         {
-            return StepResult.Fail("Yapılandırma yazılamadı: " + ex.Message);
+            return StepResult.Fail(Loc.T("setup.step.config.fail") + ex.Message);
         }
     }
 }
@@ -188,12 +192,13 @@ public sealed class WriteConfigStep : SetupStep
 public sealed class StartDesktopBridgeStep : SetupStep
 {
     public override string Id => "start_bridge";
-    public override string DisplayName => "Masaüstü Köprüsü başlatılıyor";
+    public override string DisplayName => Loc.T("setup.step.bridge.name");
 
     public override async Task<StepResult> ExecuteAsync(SetupContext ctx, CancellationToken ct)
     {
         await BridgeClient.Shared.EnsureConnectedAsync(ct).ConfigureAwait(false);
-        return StepResult.Ok("Köprü bağlı (protokol v" + BridgeClient.Shared.ProtocolVersion + ").");
+        return StepResult.Ok(string.Format(
+            Loc.T("setup.step.bridge.ok"), BridgeClient.Shared.ProtocolVersion));
     }
 }
 
@@ -205,7 +210,7 @@ public sealed class StartDesktopBridgeStep : SetupStep
 public sealed class EnsureProviderAuthStep : SetupStep
 {
     public override string Id => "ensure_provider_auth";
-    public override string DisplayName => "Sağlayıcı oturumu denetleniyor";
+    public override string DisplayName => Loc.T("setup.step.auth.name");
 
     public override Task<bool> CanSkipAsync(SetupContext ctx)
     {
@@ -236,7 +241,7 @@ public sealed class EnsureProviderAuthStep : SetupStep
         var provider = ctx.ProviderId;
         if (string.IsNullOrWhiteSpace(provider))
         {
-            return StepResult.Fail("Sağlayıcı kimliği belirtilmedi.");
+            return StepResult.Fail(Loc.T("setup.step.auth.noprovider"));
         }
 
         // 1. Köprü üzerinden oturum durumunu denetle (zaten giriş yapılmış mı?)
@@ -248,7 +253,7 @@ public sealed class EnsureProviderAuthStep : SetupStep
             {
                 var email = status.TryGetProperty("email", out var em) ? em.GetString() : null;
                 var accountInfo = string.IsNullOrWhiteSpace(email) ? "" : $" ({email})";
-                return StepResult.Ok($"Oturum doğrulandı{accountInfo}.");
+                return StepResult.Ok(string.Format(Loc.T("setup.step.auth.confirmed"), accountInfo));
             }
         }
         catch (Exception ex)
@@ -259,7 +264,7 @@ public sealed class EnsureProviderAuthStep : SetupStep
         // 2. Henüz oturum açılmamışsa, kullanıcı için gerçek OAuth / CLI giriş sürecini başlat
         if (!BridgeLauncherProbe.HasUsablePython(out var python))
         {
-            return StepResult.Fail("Giriş akışını çalıştırmak için Python bulunamadı.");
+            return StepResult.Fail(Loc.T("setup.step.auth.nopython"));
         }
 
         try
@@ -279,18 +284,19 @@ public sealed class EnsureProviderAuthStep : SetupStep
             var proc = System.Diagnostics.Process.Start(psi);
             if (proc is null)
             {
-                return StepResult.Fail($"Giriş süreci başlatılamadı ({python} -m fetih_cli auth add {provider}).");
+                return StepResult.Fail(string.Format(
+                    Loc.T("setup.step.auth.spawn_failed"), python, provider));
             }
 
             await proc.WaitForExitAsync(ct).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
-            return StepResult.Fail("Giriş işlemi iptal edildi.");
+            return StepResult.Fail(Loc.T("setup.step.auth.cancelled"));
         }
         catch (Exception ex)
         {
-            return StepResult.Fail($"Giriş akışı sırasında hata: {ex.Message}");
+            return StepResult.Fail(Loc.T("setup.step.auth.error") + ex.Message);
         }
 
         // 3. Giriş süreci bittikten sonra oturumun gerçekten açıldığını doğrula
@@ -302,17 +308,15 @@ public sealed class EnsureProviderAuthStep : SetupStep
             {
                 var email = status.TryGetProperty("email", out var em) ? em.GetString() : null;
                 var accountInfo = string.IsNullOrWhiteSpace(email) ? "" : $" ({email})";
-                return StepResult.Ok($"Oturum başarıyla açıldı{accountInfo}.");
+                return StepResult.Ok(string.Format(Loc.T("setup.step.auth.opened"), accountInfo));
             }
         }
         catch (Exception ex)
         {
-            return StepResult.Fail($"Giriş doğrulanamadı: {ex.Message}");
+            return StepResult.Fail(Loc.T("setup.step.auth.verify_failed") + ex.Message);
         }
 
-        return StepResult.Fail(
-            $"{provider} için oturum açma akışı tamamlanmadı. " +
-            "Lütfen açılan tarayıcıda veya konsolda oturum açma işlemini tamamlayıp yeniden deneyin.");
+        return StepResult.Fail(string.Format(Loc.T("setup.step.auth.incomplete"), provider));
     }
 }
 
@@ -334,7 +338,7 @@ public sealed class EnsureProviderAuthStep : SetupStep
 public sealed class VerifyEndToEndStep : SetupStep
 {
     public override string Id => "verify_end_to_end";
-    public override string DisplayName => "Gerçek mesajla doğrulama";
+    public override string DisplayName => Loc.T("setup.step.verify.name");
 
     public override async Task<StepResult> ExecuteAsync(SetupContext ctx, CancellationToken ct)
     {
@@ -346,7 +350,7 @@ public sealed class VerifyEndToEndStep : SetupStep
         try
         {
             var res = await BridgeClient.Shared.SendMessageAsync(
-                "Bu bir kurulum denetimidir. Yalnızca şu kelimeyle yanıt ver: TAMAM",
+                Loc.T("setup.step.verify.prompt"),
                 stream: false,
                 toolsets: new[] { "file" },
                 skipContextFiles: true,
@@ -359,20 +363,19 @@ public sealed class VerifyEndToEndStep : SetupStep
                 : "";
 
             return string.IsNullOrWhiteSpace(text)
-                ? StepResult.Ok("Model yanıt verdi (boş metin) — kurulum tamam.")
-                : StepResult.Ok("Model yanıt verdi: " + Shorten(text));
+                ? StepResult.Ok(Loc.T("setup.step.verify.empty"))
+                : StepResult.Ok(Loc.T("setup.step.verify.ok") + Shorten(text));
         }
         catch (BridgeRpcException rpc)
         {
             // Sağlayıcı/model hatasını BURADA yakala: kullanıcı sihirbazdan
             // çıkmadan düzeltebilsin, ilk mesajında sürprizle karşılaşmasın.
-            return StepResult.Fail(
-                $"Model yanıt vermedi ({rpc.Code}): {Shorten(rpc.Message, 260)}  " +
-                "Sağlayıcıya dönüp anahtarı ya da modeli düzelt.");
+            return StepResult.Fail(string.Format(
+                Loc.T("setup.step.verify.fail"), rpc.Code, Shorten(rpc.Message, 260)));
         }
         catch (OperationCanceledException) when (!ct.IsCancellationRequested)
         {
-            return StepResult.Fail("Model 90 saniyede yanıt vermedi. Ağ/uç nokta erişilebilir mi?");
+            return StepResult.Fail(Loc.T("setup.step.verify.timeout"));
         }
     }
 

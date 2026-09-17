@@ -36,10 +36,11 @@
                 </StackPanel>
             </Border>
 
-            <InfoBar x:Name="PhaseInfo"
+            <InfoBar x:Name="LiveInfo"
                      IsOpen="True"
                      IsClosable="False"
-                     Severity="Informational" />
+                     Severity="Informational"
+                     AutomationProperties.AutomationId="voice_live_info" />
 
             <Button x:Name="RefreshButton"
                     AutomationProperties.AutomationId="voice_refresh"

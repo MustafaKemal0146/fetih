@@ -14,8 +14,8 @@ using Microsoft.UI.Xaml.Navigation;
 namespace Fetih.Desktop.Views.Settings;
 
 /// <summary>
-/// Şema güdümlü jenerik yapılandırma editörü (OpenClaw'ın Config sayfası
-/// desenine karşılık). <c>config.get</c> ile tüm config'i okur; bir
+/// Şema güdümlü jenerik yapılandırma editörü (Detaylı Mod).
+/// <c>config.get</c> ile tüm config'i okur; bir
 /// gezinme parametresiyle verilen kök anahtarın (ör. <c>agent</c>) altındaki
 /// yaprakları TÜR'e göre (bool → ToggleSwitch, sayı → NumberBox, metin →
 /// TextBox) düzenlenebilir satırlar olarak çizer ve her değişikliği
@@ -37,11 +37,14 @@ public sealed partial class ConfigEditorPage : Page
 
     /// <summary>Yalnızca bu kök anahtar(lar)ı göster. Boşsa tümü.</summary>
     private string[] _rootFilter = Array.Empty<string>();
-    private string _title = "Ayarlar";
+
+    /// <summary>Sayfa başlığı; gezinme parametresi vermezse genel Ayarlar adı.</summary>
+    private string _title = Loc.T("settings.all");
 
     public ConfigEditorPage()
     {
         InitializeComponent();
+        ReloadButton.Content = Loc.T("config.reload");
     }
 
     protected override void OnNavigatedTo(NavigationEventArgs e)

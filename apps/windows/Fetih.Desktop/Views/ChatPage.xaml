@@ -53,6 +53,7 @@
                          Height="10"
                          VerticalAlignment="Center"
                          AutomationProperties.AutomationId="chat_status_dot"
+                         AutomationProperties.AccessibilityView="Raw"
                          Fill="{x:Bind Status.BadgeBrush, Mode=OneWay}" />
 
                 <TextBlock Grid.Column="1"
@@ -69,6 +70,7 @@
                 <ProgressRing Grid.Column="3"
                               Width="16"
                               Height="16"
+                              AutomationProperties.AccessibilityView="Raw"
                               IsActive="{x:Bind Status.IsBusy, Mode=OneWay}" />
             </Grid>
         </Border>
@@ -124,6 +126,7 @@
                                         <StackPanel Orientation="Horizontal" Spacing="8">
                                             <ProgressRing Width="14" Height="14"
                                                           IsActive="{x:Bind IsThinking, Mode=OneWay}"
+                                                          AutomationProperties.AccessibilityView="Raw"
                                                           Visibility="{x:Bind IsThinking, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                                             <TextBlock Text="{x:Bind ThoughtHeader, Mode=OneWay}"
                                                        FontSize="12"
@@ -174,8 +177,10 @@
                                             FontSize="11"
                                             Background="Transparent"
                                             BorderThickness="0"
+                                            UseSystemFocusVisuals="True"
                                             Foreground="{x:Bind MetaBrushKey, Converter={StaticResource ThemeBrushConverter}}"
                                             AutomationProperties.AutomationId="chat_action_copy"
+                                            AutomationProperties.Name="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy}"
                                             Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy}"
                                             ToolTipService.ToolTip="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy.hint}"
                                             Visibility="{x:Bind Role, Converter={StaticResource ChatActionVisibilityConverter}, ConverterParameter=User|Agent|System}" />
@@ -185,8 +190,10 @@
                                             FontSize="11"
                                             Background="Transparent"
                                             BorderThickness="0"
+                                            UseSystemFocusVisuals="True"
                                             Foreground="{x:Bind MetaBrushKey, Converter={StaticResource ThemeBrushConverter}}"
                                             AutomationProperties.AutomationId="chat_action_edit"
+                                            AutomationProperties.Name="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=edit}"
                                             Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=edit}"
                                             ToolTipService.ToolTip="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=edit.hint}"
                                             Visibility="{x:Bind Role, Converter={StaticResource ChatActionVisibilityConverter}, ConverterParameter=User}" />
@@ -196,8 +203,10 @@
                                             FontSize="11"
                                             Background="Transparent"
                                             BorderThickness="0"
+                                            UseSystemFocusVisuals="True"
                                             Foreground="{x:Bind MetaBrushKey, Converter={StaticResource ThemeBrushConverter}}"
                                             AutomationProperties.AutomationId="chat_action_retry"
+                                            AutomationProperties.Name="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=retry}"
                                             Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=retry}"
                                             ToolTipService.ToolTip="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=retry.hint}"
                                             Visibility="{x:Bind Role, Converter={StaticResource ChatActionVisibilityConverter}, ConverterParameter=User|Agent}" />
@@ -215,7 +224,8 @@
                             <StackPanel Spacing="6">
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <ProgressRing Width="14" Height="14"
-                                                  IsActive="{x:Bind IsRunning, Mode=OneWay}" />
+                                                  IsActive="{x:Bind IsRunning, Mode=OneWay}"
+                                                  AutomationProperties.AccessibilityView="Raw" />
                                     <TextBlock Text="{x:Bind ToolHeader, Mode=OneWay}"
                                                FontWeight="SemiBold"
                                                FontSize="13" />
@@ -245,7 +255,9 @@
                                         Background="Transparent"
                                         BorderThickness="0"
                                         HorizontalAlignment="Right"
+                                        UseSystemFocusVisuals="True"
                                         AutomationProperties.AutomationId="chat_tool_copy"
+                                        AutomationProperties.Name="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy}"
                                         Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy}"
                                         ToolTipService.ToolTip="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy.hint}"
                                         Visibility="{x:Bind Role, Converter={StaticResource ChatActionVisibilityConverter}, ConverterParameter=Tool}" />

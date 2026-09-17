@@ -35,6 +35,22 @@ public static class SkillCatalog
     /// <summary>Ön bilgi ararken okunacak azami satır sayısı.</summary>
     private const int MaxFrontMatterLines = 80;
 
+    /// <summary>
+    /// Kaynak ağacın kimliği (<c>skills</c>, <c>optional-skills</c>,
+    /// <c>user</c>) → etkin dildeki görünen ad.
+    ///
+    /// <para>Kimlikler <see cref="SkillInfo.Source"/> içinde sabit kalır;
+    /// yalnızca ekrana çıkan ad çevrilir. Süzgeç seçenekleri ile liste
+    /// alt satırı aynı işlevi kullandığı için ikisi asla ayrışmaz.</para>
+    /// </summary>
+    public static string SourceLabel(string source) => source switch
+    {
+        "skills" => Loc.T("skills.source.repo"),
+        "optional-skills" => Loc.T("skills.source.optional"),
+        "user" => Loc.T("skills.source.user"),
+        _ => source,
+    };
+
     /// <summary>Kataloğu arka planda tarar. Hiçbir koşulda istisna fırlatmaz.</summary>
     public static Task<SkillScanResult> LoadAsync(CancellationToken cancellationToken = default)
         => Task.Run(() => Scan(cancellationToken), cancellationToken);
@@ -59,7 +75,7 @@ public static class SkillCatalog
             roots.Add((optionalRoot, "optional-skills"));
         }
 
-        roots.Add((FetihPaths.UserSkillsDir, "kullanıcı"));
+        roots.Add((FetihPaths.UserSkillsDir, "user"));
 
         foreach (var (root, source) in roots)
         {
@@ -104,7 +120,7 @@ public static class SkillCatalog
                     if (skill is not null)
                     {
                         skills.Add(skill);
-                        categories.Add($"{source} · {category}");
+                        categories.Add($"{SourceLabel(source)} · {category}");
                     }
                 }
             }
@@ -151,7 +167,7 @@ public static class SkillCatalog
     private static string FirstSegment(string relativePath)
     {
         var slash = relativePath.IndexOf('/');
-        return slash > 0 ? relativePath[..slash] : "(kök)";
+        return slash > 0 ? relativePath[..slash] : Loc.T("skills.root_segment");
     }
 
     private static SkillInfo? ReadSkill(string file, string relativePath, string category, string source)
@@ -238,8 +254,10 @@ public static class SkillCatalog
     {
         var fallbackName = Path.GetFileName(Path.GetDirectoryName(file) ?? string.Empty);
         return new SkillInfo(
-            string.IsNullOrWhiteSpace(name) ? (fallbackName.Length > 0 ? fallbackName : "(adsız)") : name!.Trim(),
-            string.IsNullOrWhiteSpace(description) ? "(açıklama yok)" : Collapse(description!),
+            string.IsNullOrWhiteSpace(name)
+                ? (fallbackName.Length > 0 ? fallbackName : Loc.T("skills.unnamed"))
+                : name!.Trim(),
+            string.IsNullOrWhiteSpace(description) ? Loc.T("skills.no_description") : Collapse(description!),
             category,
             source,
             relativePath,

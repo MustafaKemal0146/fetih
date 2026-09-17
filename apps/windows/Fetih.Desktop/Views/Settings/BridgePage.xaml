@@ -24,10 +24,12 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
+                    <!-- Süs öğesi: ekran okuyucu ağacına girmemeli. -->
                     <Ellipse Grid.Column="0"
                              Width="12"
                              Height="12"
                              VerticalAlignment="Center"
+                             AutomationProperties.AccessibilityView="Raw"
                              Fill="{ThemeResource SystemFillColorCautionBrush}" />
 
                     <StackPanel Grid.Column="1" Spacing="2">
@@ -42,6 +44,7 @@
                     <ProgressRing Grid.Column="2"
                                   Width="20"
                                   Height="20"
+                                  AutomationProperties.AccessibilityView="Raw"
                                   IsActive="{x:Bind Status.IsBusy, Mode=OneWay}" />
                 </Grid>
             </Border>
@@ -65,11 +68,12 @@
                 </StackPanel>
             </Border>
 
-            <!-- Faz notu -->
-            <InfoBar x:Name="PhaseInfo"
+            <!-- Bu sürümün gerçek durumunu anlatan bilgi şeridi -->
+            <InfoBar x:Name="LiveInfo"
                      IsOpen="True"
                      IsClosable="False"
-                     Severity="Informational" />
+                     Severity="Informational"
+                     AutomationProperties.AutomationId="bridge_live_info" />
 
             <Button x:Name="RefreshButton"
                     AutomationProperties.AutomationId="bridge_refresh"

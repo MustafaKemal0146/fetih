@@ -126,8 +126,8 @@ public sealed class ChatMessage : INotifyPropertyChanged
     /// <summary>Düşünce paneli gösterilmeli mi (düşünüyorsa veya düşünce metni varsa)?</summary>
     public bool ShowThoughtSection => Role == ChatRole.Agent && (HasThought || IsThinking);
 
-    /// <summary>Düşünce paneli başlığı.</summary>
-    public string ThoughtHeader => IsThinking ? "🧠 Düşünülüyor…" : "🧠 Düşünce Süreci";
+    /// <summary>Düşünce paneli başlığı (etkin dile göre).</summary>
+    public string ThoughtHeader => Loc.T(IsThinking ? "chat.thought.thinking" : "chat.thought.header");
 
     /// <summary>Düşünce metnine parça ekler ve olayları tetikler.</summary>
     public void AppendThought(string delta)
@@ -186,7 +186,7 @@ public sealed class ChatMessage : INotifyPropertyChanged
 
     public bool HasToolResult => !string.IsNullOrWhiteSpace(ToolResult);
 
-    public string ToolStatusLabel => IsRunning ? "çalışıyor…" : "tamamlandı";
+    public string ToolStatusLabel => Loc.T(IsRunning ? "chat.tool.running" : "chat.tool.done");
 
     // ── Görünüm yardımcıları ─────────────────────────────────────────────────
 
@@ -195,7 +195,7 @@ public sealed class ChatMessage : INotifyPropertyChanged
     {
         ChatRole.User => Loc.T("chat.role.user"),
         ChatRole.Agent => Loc.T("chat.role.agent"),
-        ChatRole.Tool => "🔧 Araç",
+        ChatRole.Tool => Loc.T("chat.role.tool"),
         _ => Loc.T("chat.role.system"),
     };
 

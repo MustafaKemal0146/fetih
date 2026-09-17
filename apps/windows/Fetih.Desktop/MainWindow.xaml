@@ -22,8 +22,8 @@
 
         <!--
             Özel başlık çubuğu: marka + Masaüstü Köprüsü durum rozeti.
-            Faz 3'te buraya aktif model seçici de gelecek
-            (bkz. docs/windows-app-plani.md, (f) bölümü).
+            Aktif model seçici Ayarlar › Model sayfasındadır; başlık çubuğu
+            yalnızca durumu gösterir.
         -->
         <Grid x:Name="AppTitleBar"
               Grid.Row="0"

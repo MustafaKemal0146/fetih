@@ -128,6 +128,15 @@ public sealed partial class ChatPage : Page
     {
         PromptBox.PlaceholderText = Loc.T("chat.placeholder");
 
+        // Ekran okuyucu için adlar: düğmelerin içeriği kod ile yazıldığından
+        // Name açıkça kurulmazsa denetimler adsız kalıyordu.
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(
+            PromptBox, Loc.T("chat.placeholder"));
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(
+            SendButton, Loc.T("chat.send"));
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(
+            StopButton, ChatActionText.Stop);
+
         var language = Loc.Current;
         var changed = _lastLanguage is { } previous && previous != language;
         _lastLanguage = language;
@@ -173,8 +182,7 @@ public sealed partial class ChatPage : Page
         {
             App.LogCrash("ChatPage.WarmUp", ex, ex.Message);
             RunOnUi(() => AddSystem(
-                "Masaüstü Köprüsü'ne bağlanılamadı: " + DescribeException(ex) +
-                " · İlk mesajı gönderdiğinde tekrar denenecek."));
+                Loc.T("chat.warmup_failed") + DescribeException(ex) + Loc.T("chat.warmup_retry")));
         }
     }
 
@@ -837,12 +845,12 @@ public sealed partial class ChatPage : Page
         }
         return rpc.Code switch
         {
-            -32001 => "Köprü bu oturumu tanımıyor; yeni bir oturum açılacak.",
-            -32002 => "Bu oturumda zaten bir tur çalışıyor; bitmesini bekle.",
-            -32003 => "Ajan çalıştı ama başarısız oldu: " + detail,
-            -32000 => "Köprü kimlik doğrulaması reddedildi.",
-            -32005 => "Tur durdurulamadı: " + detail,
-            _ => "Köprü hatası (" + rpc.Code + "): " + detail,
+            -32001 => Loc.T("chat.error.session_unknown"),
+            -32002 => Loc.T("chat.error.busy"),
+            -32003 => Loc.T("chat.error.agent_failed") + detail,
+            -32000 => Loc.T("chat.error.auth"),
+            -32005 => Loc.T("chat.error.cancel_failed") + detail,
+            _ => Loc.T("chat.error.bridge") + rpc.Code + "): " + detail,
         };
     }
 
@@ -1254,57 +1262,43 @@ internal sealed class StoredChatHistory
 }
 
 /// <summary>
-/// Sohbet eylemi düğmelerinin etiket ve ipuçları. Metinler <see cref="Loc"/>
-/// tablosuna anahtar eklemeyi gerektirmesin diye burada, etkin dile göre çözülür;
-/// sohbet sayfasının kendi kapsamı içinde kalır.
+/// Sohbet eylemi düğmelerinin etiket ve ipuçları. Bütün metinler
+/// <see cref="Loc"/> tablosundadır; bu sınıf yalnızca çağrı yerlerinin
+/// okunabilir kalması için anahtar adlarını sarmalar.
 /// </summary>
 internal static class ChatActionText
 {
-    private static bool En => Loc.Current == UiLanguage.English;
+    public static string Copy => Loc.T("chat.action.copy");
 
-    public static string Copy => En ? "Copy" : "Kopyala";
+    public static string CopyHint => Loc.T("chat.action.copy.hint");
 
-    public static string CopyHint => En ? "Copy this message to the clipboard" : "Bu mesajı panoya kopyala";
+    public static string Edit => Loc.T("chat.action.edit");
 
-    public static string Edit => En ? "Edit" : "Düzenle";
+    public static string EditHint => Loc.T("chat.action.edit.hint");
 
-    public static string EditHint => En
-        ? "Load this message into the input box, then send the corrected version"
-        : "Bu mesajı giriş kutusuna yükler; düzeltilmiş hâlini gönderirsin";
+    public static string Retry => Loc.T("chat.action.retry");
 
-    public static string Retry => En ? "Retry" : "Yeniden dene";
+    public static string RetryHint => Loc.T("chat.action.retry.hint");
 
-    public static string RetryHint => En ? "Send this turn again" : "Bu turu yeniden gönder";
+    public static string Stop => Loc.T("chat.action.stop");
 
-    public static string Stop => En ? "Stop" : "Durdur";
+    public static string Copied => Loc.T("chat.action.copied");
 
-    public static string Copied => En ? "Message copied to the clipboard." : "Mesaj panoya kopyalandı.";
+    public static string CopyFailed => Loc.T("chat.action.copy_failed");
 
-    public static string CopyFailed => En ? "Could not copy to the clipboard." : "Panoya kopyalanamadı.";
+    public static string Busy => Loc.T("chat.action.busy");
 
-    public static string Busy => En
-        ? "A turn is already running. Stop it first."
-        : "Bir tur zaten çalışıyor. Önce durdur.";
+    public static string NoTurnToRepeat => Loc.T("chat.action.no_turn");
 
-    public static string NoTurnToRepeat => En
-        ? "No preceding user message to repeat."
-        : "Yinelenecek bir kullanıcı mesajı yok.";
+    public static string Cancelling => Loc.T("chat.action.cancelling");
 
-    public static string Cancelling => En ? "Stopping the turn…" : "Tur durduruluyor…";
+    public static string Cancelled => Loc.T("chat.action.cancelled");
 
-    public static string Cancelled => En
-        ? "Turn stopped. Partial output is kept above."
-        : "Tur durduruldu. O ana kadar gelen çıktı yukarıda duruyor.";
+    public static string SendFailed => Loc.T("chat.action.send_failed");
 
-    public static string SendFailed => En ? "Message could not be sent: " : "Mesaj gönderilemedi: ";
+    public static string EditRestartedSession => Loc.T("chat.action.edit_restarted");
 
-    public static string EditRestartedSession => En
-        ? "The message was edited; everything after it was removed and a new bridge session started."
-        : "Mesaj düzenlendi; sonrasındaki turlar kaldırıldı ve yeni bir köprü oturumu başlatıldı.";
-
-    public static string SessionGone => En
-        ? "The previous bridge session no longer exists; a new one was started."
-        : "Önceki köprü oturumu artık yok; yeni bir oturum başlatıldı.";
+    public static string SessionGone => Loc.T("chat.action.session_gone");
 }
 
 /// <summary>

@@ -6,8 +6,8 @@ namespace Fetih.Desktop.Services;
 
 /// <summary>
 /// <c>~/.fetih/config.yaml</c> ve <c>~/.fetih/.env</c> dosyalarını okur.
-/// Faz 1'de canlı Python sürecine bağlanmıyoruz; yapılandırmayı doğrudan
-/// diskten okuyup gösteriyoruz. <b>Salt okunur</b> — hiçbir sayfa geri yazmaz.
+/// Yapılandırma doğrudan diskten okunup gösterilir. <b>Salt okunur</b> —
+/// hiçbir sayfa geri yazmaz.
 /// </summary>
 public sealed class FetihConfigService
 {
@@ -53,7 +53,7 @@ public sealed class FetihConfigService
                 : null;
             Config = YamlLite.LoadFile(FetihPaths.ConfigYamlPath);
             ConfigError = ConfigExists && Config.Map.Count == 0
-                ? "config.yaml okundu ancak hiçbir anahtar ayrıştırılamadı."
+                ? Loc.T("config.error.no_keys")
                 : null;
         }
         catch (Exception ex)

@@ -9,6 +9,7 @@ using Fetih.Desktop.Bridge;
 using Fetih.Desktop.Models;
 using Fetih.Desktop.Services;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 
 namespace Fetih.Desktop.Views;
@@ -40,6 +41,9 @@ public sealed partial class FindingsPage : Page
         PageTitleText.Text = Loc.T("findings.title");
         SummaryText.Text = Loc.T("findings.summary");
         ScanButton.Content = Loc.T("findings.scan_button");
+        AutomationProperties.SetName(ScanButton, Loc.T("findings.scan_button"));
+        AutomationProperties.SetName(SeverityBox, Loc.T("findings.severity_label"));
+        AutomationProperties.SetName(FindingList, Loc.T("findings.title"));
         EmptyTitleText.Text = Loc.T("findings.empty_title");
         EmptyDescText.Text = Loc.T("findings.empty_desc");
         EmptyDisclaimerText.Text = Loc.T("findings.empty_disclaimer");

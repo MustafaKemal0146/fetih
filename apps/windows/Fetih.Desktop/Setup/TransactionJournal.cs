@@ -6,8 +6,7 @@ using System.Text.Json;
 namespace Fetih.Desktop.Setup;
 
 /// <summary>
-/// Append-only <c>.jsonl</c> kurulum günlüğü (OpenClaw'ın <c>TransactionJournal</c>
-/// deseni, bkz. docs/openclaw-inceleme-notlari.md §5.2). Her olay tek satır bir
+/// Append-only <c>.jsonl</c> kurulum günlüğü. Her olay tek satır bir
 /// JSON nesnesidir; kurulum çökerse var olan girdiler yeniden okunabilir
 /// (<see cref="LoadExisting"/>) → çökme sonrası kurtarma ve adli inceleme.
 ///

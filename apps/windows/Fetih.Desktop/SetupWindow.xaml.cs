@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -59,6 +59,9 @@ public sealed partial class SetupWindow : Window
 
         StepList.ItemsSource = _rows;
 
+        // Bütün sabit metinler tek yerden gelir; XAML'de metin yok.
+        ApplyLanguage();
+
         // Ortalamayı kurucuda DEĞİL, ilk etkinleşmede yap: WinUI pencereyi
         // gösterirken kendi varsayılan yerleşimini uyguluyor ve kurucudaki
         // konumlandırmayı kısmen eziyordu (pencere ekranın solunda kalıyordu).
@@ -75,6 +78,75 @@ public sealed partial class SetupWindow : Window
 
         // Köprü ayağa kalktığında listeyi KANONİK katalogla değiştir.
         _ = RefreshCatalogAsync();
+    }
+
+    // ── Yerelleştirme ────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Penceredeki bütün görünür metni etkin dile göre yeniden yazar.
+    ///
+    /// <para>XAML'de sabit metin bırakılmadı: aynı cümle iki yerde durunca dil
+    /// değişiminde biri güncellenip diğeri eski kalıyordu. Etiketlerin yanı sıra
+    /// erişilebilirlik adları da burada kurulur, çünkü ekran okuyucu düğmeyi
+    /// içeriğinden değil <c>AutomationProperties.Name</c>'den okur.</para>
+    /// </summary>
+    private void ApplyLanguage()
+    {
+        Title = Loc.T("setup.window_title");
+        HeadingText.Text = Loc.T("setup.heading");
+
+        // 1) Karşılama
+        // Marka işareti görsel bir logodur; ekran okuyucuya ne olduğunu yazıyla
+        // söyle, çünkü içindeki vektör metni okunamaz.
+        AutomationProperties.SetName(Brandmark, Loc.T("setup.brandmark"));
+        WelcomeTitle.Text = Loc.T("setup.welcome.title");
+        WelcomeBody.Text = Loc.T("setup.welcome.body");
+        SecurityTitle.Text = Loc.T("setup.security.title");
+        SecurityBody.Text = Loc.T("setup.security.body");
+        SetButton(WelcomeContinueButton, "setup.continue");
+
+        // 2) Sağlayıcı
+        ProviderTitle.Text = Loc.T("setup.provider.title");
+        ProviderBody.Text = Loc.T("setup.provider.body");
+        ProviderCombo.Header = Loc.T("setup.provider.header");
+        AutomationProperties.SetName(ProviderCombo, Loc.T("setup.provider.header"));
+
+        KeyBox.Header = Loc.T("setup.api_key.header");
+        KeyBox.PlaceholderText = Loc.T("setup.api_key.placeholder");
+        AutomationProperties.SetName(KeyBox, Loc.T("setup.api_key.header"));
+
+        SignupLink.Content = Loc.T("setup.signup_link");
+
+        SetButton(LocalReprobeButton, "setup.reprobe");
+        LocalInstallLink.Content = Loc.T("setup.local_install_link");
+
+        SetButton(CliLoginButton, "setup.cli_login");
+        SetButton(CliLoginCheckButton, "setup.cli_check");
+
+        AwsBar.Title = Loc.T("setup.aws.title");
+        AwsBar.Message = Loc.T("setup.aws.message");
+
+        ModelCombo.Header = Loc.T("setup.model.header");
+        AutomationProperties.SetName(ModelCombo, Loc.T("setup.model.header"));
+
+        SetButton(BackButton, "setup.back");
+        SetButton(InstallButton, "setup.install");
+
+        // 3) Kurulum ilerlemesi
+        ProgressTitle.Text = Loc.T("setup.progress.title");
+        SetButton(RetryButton, "setup.retry");
+        SetButton(BackToProviderButton, "setup.back_to_provider");
+        SetButton(GoToChatButton, "setup.go_to_chat");
+
+        RenderStepDots();
+    }
+
+    /// <summary>Düğmenin hem görünen metnini hem erişilebilirlik adını tek anahtardan kurar.</summary>
+    private static void SetButton(Button button, string key)
+    {
+        var text = Loc.T(key);
+        button.Content = text;
+        AutomationProperties.SetName(button, text);
     }
 
     /// <summary>
@@ -185,7 +257,10 @@ public sealed partial class SetupWindow : Window
                     : Brush("ControlStrongFillColorDisabledBrush"),
             };
             AutomationProperties.SetAutomationId(dot, "setup_dot_" + i);
-            AutomationProperties.SetName(dot, $"Adım {i}/{TotalPhases}" + (filled ? " (tamam)" : ""));
+            AutomationProperties.SetName(
+                dot,
+                string.Format(Loc.T("setup.dot.name"), i, TotalPhases)
+                    + (filled ? Loc.T("setup.dot.done") : ""));
             StepDots.Children.Add(dot);
         }
     }
@@ -236,8 +311,10 @@ public sealed partial class SetupWindow : Window
         ProviderCombo.Items.Clear();
         foreach (var p in providers)
         {
-            var suffix = p.IsLocal ? " · yerel" : p.IsAggregator ? " · toplayıcı" : "";
-            ProviderCombo.Items.Add(new ComboBoxItem { Content = p.DisplayName + suffix, Tag = p.Id });
+            var suffix = p.IsLocal
+                ? Loc.T("setup.provider.local")
+                : p.IsAggregator ? Loc.T("setup.provider.aggregator") : "";
+            ProviderCombo.Items.Add(new ComboBoxItem { Content = p.Label + suffix, Tag = p.Id });
         }
 
         // Varsayılan: kullanıcının zaten seçtiği, yoksa Groq (ücretsiz başlangıç).
@@ -283,8 +360,7 @@ public sealed partial class SetupWindow : Window
         {
             case ProviderKind.LocalServer:
                 LocalSection.Visibility = Visibility.Visible;
-                KeyHint.Text = "Bu sağlayıcı bu makinede çalışır; API anahtarı istemez. " +
-                               "Veriler bilgisayardan çıkmaz.";
+                KeyHint.Text = Loc.T("setup.provider.local.hint");
                 _ = ProbeLocalAsync(p);
                 break;
 
@@ -292,11 +368,8 @@ public sealed partial class SetupWindow : Window
             case ProviderKind.OAuthBrowser:
                 CliLoginSection.Visibility = Visibility.Visible;
                 CliLoginBar.Severity = InfoBarSeverity.Informational;
-                CliLoginBar.Title = "Tarayıcı oturumu gerekiyor";
-                CliLoginBar.Message =
-                    $"{p.DisplayName} bir API anahtarı değil, hesabınla açtığınız bir oturum kullanır. " +
-                    "\"Oturum aç\" düğmesi FETİH'in GERÇEK giriş akışını bir konsol penceresinde başlatır; " +
-                    "tarayıcıda onayladıktan sonra buraya dön.";
+                CliLoginBar.Title = Loc.T("setup.cli.title");
+                CliLoginBar.Message = string.Format(Loc.T("setup.cli.message"), p.Label);
                 KeyHint.Text = "";
                 _ = CheckCliLoginAsync(p, announceOnly: true);
                 break;
@@ -309,12 +382,12 @@ public sealed partial class SetupWindow : Window
             default:
                 ApiKeySection.Visibility = Visibility.Visible;
                 KeyHint.Text = p.ApiKeyEnvVars.Count > 0
-                    ? $"Anahtar {p.ApiKeyEnvVars[0]} adıyla ~/.fetih/.env dosyasına kaydedilir."
-                    : "Bu sağlayıcı için ortam değişkeni tanımlı değil.";
+                    ? string.Format(Loc.T("setup.key.hint.env"), p.ApiKeyEnvVars[0])
+                    : Loc.T("setup.key.hint.none");
                 if (!string.IsNullOrWhiteSpace(p.SignupUrl))
                 {
                     SignupLink.NavigateUri = new Uri(p.SignupUrl);
-                    SignupLink.Content = "Anahtar al — " + p.SignupUrl;
+                    SignupLink.Content = string.Format(Loc.T("setup.signup_link.url"), p.SignupUrl);
                     SignupLink.Visibility = Visibility.Visible;
                 }
                 break;
@@ -332,7 +405,7 @@ public sealed partial class SetupWindow : Window
     private async Task ProbeLocalAsync(ProviderEntry p)
     {
         LocalStatusBar.Severity = InfoBarSeverity.Informational;
-        LocalStatusBar.Title = "Yoklanıyor…";
+        LocalStatusBar.Title = Loc.T("setup.probing");
         LocalStatusBar.Message = p.DefaultBaseUrl;
 
         try
@@ -360,36 +433,37 @@ public sealed partial class SetupWindow : Window
                 if (!running)
                 {
                     LocalStatusBar.Severity = InfoBarSeverity.Error;
-                    LocalStatusBar.Title = p.DisplayName + " bulunamadı";
-                    LocalStatusBar.Message =
-                        $"{endpoint} adresinde çalışan bir sunucu yok. Kur ve başlat, sonra \"Yeniden yokla\"ya bas.";
+                    LocalStatusBar.Title = string.Format(Loc.T("setup.local.not_found"), p.Label);
+                    LocalStatusBar.Message = string.Format(Loc.T("setup.local.not_found.msg"), endpoint);
                     if (!string.IsNullOrWhiteSpace(p.SignupUrl))
                     {
                         LocalInstallLink.NavigateUri = new Uri(p.SignupUrl);
-                        LocalInstallLink.Content = "Kurulum sayfası — " + p.SignupUrl;
+                        LocalInstallLink.Content =
+                            string.Format(Loc.T("setup.local_install_link.url"), p.SignupUrl);
                         LocalInstallLink.Visibility = Visibility.Visible;
                     }
                     SetModels(new List<string>(), "");
-                    ModelHint.Text = "Sunucu ayağa kalkınca modeller burada listelenir.";
+                    ModelHint.Text = Loc.T("setup.local.no_models.hint");
                     return;
                 }
 
                 if (models.Count == 0)
                 {
                     LocalStatusBar.Severity = InfoBarSeverity.Warning;
-                    LocalStatusBar.Title = p.DisplayName + " çalışıyor, ama hiç model inik değil";
-                    LocalStatusBar.Message = $"{endpoint} yanıt veriyor. Önce bir model indir (ör. `ollama pull`).";
+                    LocalStatusBar.Title = string.Format(
+                        Loc.T("setup.local.running_no_models"), p.Label);
+                    LocalStatusBar.Message = string.Format(
+                        Loc.T("setup.local.running_no_models.msg"), endpoint);
                 }
                 else
                 {
                     LocalStatusBar.Severity = InfoBarSeverity.Success;
-                    LocalStatusBar.Title = p.DisplayName + " çalışıyor";
-                    LocalStatusBar.Message = $"{models.Count} model bulundu · {endpoint}";
+                    LocalStatusBar.Title = string.Format(Loc.T("setup.local.running"), p.Label);
+                    LocalStatusBar.Message = string.Format(
+                        Loc.T("setup.local.found"), models.Count, endpoint);
                 }
                 SetModels(models, models.Count > 0 ? models[0] : "");
-                ModelHint.Text = models.Count > 0
-                    ? "Bu makinede İNDİRİLMİŞ modeller listelendi."
-                    : "";
+                ModelHint.Text = models.Count > 0 ? Loc.T("setup.local.installed_models") : "";
             });
         }
         catch (Exception ex)
@@ -397,7 +471,7 @@ public sealed partial class SetupWindow : Window
             DispatcherQueue.TryEnqueue(() =>
             {
                 LocalStatusBar.Severity = InfoBarSeverity.Error;
-                LocalStatusBar.Title = "Yoklama yapılamadı";
+                LocalStatusBar.Title = Loc.T("setup.probe_failed");
                 LocalStatusBar.Message = ex.Message;
             });
         }
@@ -435,15 +509,15 @@ public sealed partial class SetupWindow : Window
         if (!BridgeLauncherProbe.HasUsablePython(out var python))
         {
             CliLoginBar.Severity = InfoBarSeverity.Error;
-            CliLoginBar.Title = "Python bulunamadı";
-            CliLoginBar.Message = "Giriş akışı FETİH CLI üzerinden çalışır; Python 3.11+ gerekiyor.";
+            CliLoginBar.Title = Loc.T("setup.python_missing.title");
+            CliLoginBar.Message = Loc.T("setup.python_missing.msg");
             return;
         }
 
         CliLoginButton.IsEnabled = false;
         CliLoginBar.Severity = InfoBarSeverity.Informational;
-        CliLoginBar.Title = "Giriş penceresi açıldı";
-        CliLoginBar.Message = "Konsol penceresindeki yönergeleri izle; bitince buraya dön.";
+        CliLoginBar.Title = Loc.T("setup.login.opened.title");
+        CliLoginBar.Message = Loc.T("setup.login.opened.msg");
 
         try
         {
@@ -470,7 +544,7 @@ public sealed partial class SetupWindow : Window
             DispatcherQueue.TryEnqueue(() =>
             {
                 CliLoginBar.Severity = InfoBarSeverity.Error;
-                CliLoginBar.Title = "Giriş akışı başlatılamadı";
+                CliLoginBar.Title = Loc.T("setup.login.failed.title");
                 CliLoginBar.Message = ex.Message;
             });
         }
@@ -501,14 +575,14 @@ public sealed partial class SetupWindow : Window
                 if (loggedIn)
                 {
                     CliLoginBar.Severity = InfoBarSeverity.Success;
-                    CliLoginBar.Title = "Oturum açık";
-                    CliLoginBar.Message = p.DisplayName + " kimlik bilgileri FETİH kimlik deposunda bulundu.";
+                    CliLoginBar.Title = Loc.T("setup.login.ok.title");
+                    CliLoginBar.Message = string.Format(Loc.T("setup.login.ok.msg"), p.Label);
                 }
                 else if (!announceOnly)
                 {
                     CliLoginBar.Severity = InfoBarSeverity.Warning;
-                    CliLoginBar.Title = "Henüz oturum açılmadı";
-                    CliLoginBar.Message = "Giriş akışı tamamlanmamış görünüyor. \"Oturum aç\"ı yeniden dene.";
+                    CliLoginBar.Title = Loc.T("setup.login.pending.title");
+                    CliLoginBar.Message = Loc.T("setup.login.pending.msg");
                 }
             });
         }
@@ -535,7 +609,7 @@ public sealed partial class SetupWindow : Window
             return;   // ProbeLocalAsync zaten inik modelleri dolduruyor
         }
 
-        DispatcherQueue.TryEnqueue(() => ModelHint.Text = "Model listesi alınıyor…");
+        DispatcherQueue.TryEnqueue(() => ModelHint.Text = Loc.T("setup.model.loading"));
 
         try
         {
@@ -559,10 +633,10 @@ public sealed partial class SetupWindow : Window
             {
                 SetModels(models, recommended);
                 ModelHint.Text = models.Count == 0
-                    ? "Model listesi alınamadı. Kurulumu tamamlayıp Ayarlar › Model'den seçebilirsin."
+                    ? Loc.T("setup.model.unavailable")
                     : source == "live"
-                        ? $"{models.Count} model sağlayıcıdan CANLI alındı."
-                        : $"{models.Count} model (çevrimdışı yedek liste).";
+                        ? string.Format(Loc.T("setup.model.live"), models.Count)
+                        : string.Format(Loc.T("setup.model.offline"), models.Count);
             });
         }
         catch (Exception ex)
@@ -570,7 +644,7 @@ public sealed partial class SetupWindow : Window
             DispatcherQueue.TryEnqueue(() =>
             {
                 SetModels(new List<string>(), "");
-                ModelHint.Text = "Model listesi alınamadı: " + ex.Message;
+                ModelHint.Text = Loc.T("setup.model.failed") + ex.Message;
             });
         }
     }
@@ -624,7 +698,7 @@ public sealed partial class SetupWindow : Window
         // Yalnızca gerçekten anahtar isteyen sağlayıcıda anahtar zorunlu.
         if (p.Kind == ProviderKind.CloudApiKey && string.IsNullOrWhiteSpace(_ctx.ApiKey))
         {
-            KeyHint.Text = "Bu sağlayıcı bir API anahtarı gerektirir; lütfen anahtarı gir.";
+            KeyHint.Text = Loc.T("setup.key.required");
             return;
         }
 
@@ -638,8 +712,8 @@ public sealed partial class SetupWindow : Window
                 if (!loggedIn)
                 {
                     CliLoginBar.Severity = InfoBarSeverity.Warning;
-                    CliLoginBar.Title = "Oturum açılması gerekiyor";
-                    CliLoginBar.Message = $"{p.DisplayName} ile devam etmek için lütfen 'Oturum aç' ile tarayıcıda girişi tamamlayın.";
+                    CliLoginBar.Title = Loc.T("setup.needs_login.title");
+                    CliLoginBar.Message = string.Format(Loc.T("setup.needs_login.msg"), p.Label);
                     CliLogin_Click(sender, e);
                     return;
                 }
@@ -666,7 +740,13 @@ public sealed partial class SetupWindow : Window
         var steps = SetupStepFactory.BuildDefaultSteps();
         foreach (var s in steps)
         {
-            _rows.Add(new StepRow { Id = s.Id, DisplayName = s.DisplayName, Message = "bekliyor", Glyph = "•" });
+            _rows.Add(new StepRow
+            {
+                Id = s.Id,
+                DisplayName = s.DisplayName,
+                Message = Loc.T("setup.step.waiting"),
+                Glyph = "•",
+            });
         }
 
         var journal = new TransactionJournal(JournalPath);
@@ -690,16 +770,18 @@ public sealed partial class SetupWindow : Window
         if (result.Outcome == PipelineOutcome.Success)
         {
             ResultBar.Severity = InfoBarSeverity.Success;
-            ResultBar.Title = "Kurulum tamamlandı";
-            ResultBar.Message = "Masaüstü Köprüsü hazır ve model gerçek bir yanıt döndürdü. Sohbete geçebilirsin.";
+            ResultBar.Title = Loc.T("setup.done.title");
+            ResultBar.Message = Loc.T("setup.done.msg");
             ResultBar.IsOpen = true;
             GoToChatButton.Visibility = Visibility.Visible;
         }
         else
         {
             ResultBar.Severity = InfoBarSeverity.Error;
-            ResultBar.Title = result.Outcome == PipelineOutcome.Cancelled ? "İptal edildi" : "Kurulum başarısız";
-            ResultBar.Message = result.Message + "  ·  Günlük: " + JournalPath;
+            ResultBar.Title = result.Outcome == PipelineOutcome.Cancelled
+                ? Loc.T("setup.cancelled")
+                : Loc.T("setup.failed");
+            ResultBar.Message = result.Message + Loc.T("setup.log_suffix") + JournalPath;
             ResultBar.IsOpen = true;
             RetryButton.Visibility = Visibility.Visible;
             BackToProviderButton.Visibility = Visibility.Visible;

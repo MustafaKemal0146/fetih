@@ -94,18 +94,22 @@ public sealed class YamlNode
             case YamlKind.List:
                 if (node.Items.Count == 0)
                 {
-                    return "(boş liste)";
+                    return Loc.T("yaml.empty_list");
                 }
 
                 var parts = new List<string>(node.Items.Count);
                 foreach (var item in node.Items)
                 {
-                    parts.Add(item.Kind == YamlKind.Scalar ? item.Scalar ?? "" : "(…)");
+                    parts.Add(item.Kind == YamlKind.Scalar
+                        ? item.Scalar ?? ""
+                        : Loc.T("yaml.nested"));
                 }
 
                 return string.Join(", ", parts);
             case YamlKind.Map:
-                return node.Map.Count == 0 ? "(boş)" : $"({node.Map.Count} alt anahtar)";
+                return node.Map.Count == 0
+                    ? Loc.T("yaml.empty_map")
+                    : string.Format(Loc.T("yaml.child_keys"), node.Map.Count);
             default:
                 return fallback;
         }

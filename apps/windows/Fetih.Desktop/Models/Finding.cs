@@ -15,8 +15,8 @@ public enum FindingSeverity
 
 /// <summary>
 /// Bir tarama/görev sonucunda ortaya çıkan tek bir güvenlik bulgusu.
-/// Faz 1'de koleksiyon boştur; Masaüstü Köprüsü bağlandığında ajan olayları
-/// buraya akacak (bkz. docs/windows-app-plani.md, (f) bölümü).
+/// Koleksiyon Masaüstü Köprüsü bağlandığında ajan olaylarıyla dolar
+/// (bkz. docs/windows-app-plani.md, (f) bölümü).
 /// </summary>
 public sealed class Finding
 {
