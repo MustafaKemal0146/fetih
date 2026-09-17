@@ -549,7 +549,9 @@ def _install_script(tool: Tool) -> bool:
     """Metasploit gibi özel installer'lar."""
     if tool.name == "metasploit":
         print("    Metasploit kurulumu başlatılıyor (uzun sürebilir)...")
-        with tempfile.NamedTemporaryFile(suffix=".sh", delete=False, mode="w") as f:
+        with tempfile.NamedTemporaryFile(
+            suffix=".sh", delete=False, mode="w", encoding="utf-8"
+        ) as f:
             tmp = f.name
         try:
             urllib.request.urlretrieve(

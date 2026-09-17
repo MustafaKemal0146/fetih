@@ -23,7 +23,7 @@ def _load_sessions_from_disk():
             meta_file = d / "meta.json"
             if meta_file.exists():
                 try:
-                    with open(meta_file) as f:
+                    with open(meta_file, encoding="utf-8") as f:
                         meta = json.load(f)
                     _sessions[d.name] = {
                         "id": d.name,
@@ -94,7 +94,7 @@ async def get_history(session_id: str, limit: int = Query(100)):
         history_file = session_dir / "messages.jsonl"
         if history_file.exists():
             try:
-                with open(history_file) as f:
+                with open(history_file, encoding="utf-8") as f:
                     for line in f:
                         if len(messages) >= limit:
                             break

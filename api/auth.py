@@ -17,7 +17,7 @@ def get_api_key() -> str:
     # .env dosyasından
     env_path = os.path.expanduser("~/.fetih/.env")
     try:
-        with open(env_path) as f:
+        with open(env_path, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line.startswith("FETIH_API_KEY="):
