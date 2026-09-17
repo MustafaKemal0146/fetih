@@ -5,9 +5,19 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:models="using:Fetih.Desktop.Models"
     xmlns:services="using:Fetih.Desktop.Services"
+    xmlns:views="using:Fetih.Desktop.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
+
+    <Page.Resources>
+        <!--
+            Mesaj eylemi düğmeleri: görünürlük mesajın ROLÜNE, etiket ve ipucu
+            ise eylemin adına göre çözülür (bkz. ChatPage.xaml.cs).
+        -->
+        <views:ChatActionVisibilityConverter x:Key="ChatActionVisibilityConverter" />
+        <views:ChatActionLabelConverter x:Key="ChatActionLabelConverter" />
+    </Page.Resources>
 
     <Grid Padding="20,12,20,16" RowSpacing="12">
         <Grid.RowDefinitions>
@@ -148,6 +158,50 @@
                                            IsTextSelectionEnabled="True"
                                            Foreground="{x:Bind TextBrushKey, Converter={StaticResource ThemeBrushConverter}}"
                                            Visibility="{x:Bind IsUser, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                                <!--
+                                    Mesaj eylemleri. Rol başına görünürlük:
+                                    · Kopyala  → kullanıcı, ajan, sistem
+                                    · Düzenle  → yalnızca kullanıcı
+                                    · Yeniden dene → kullanıcı, ajan
+                                -->
+                                <StackPanel Orientation="Horizontal"
+                                            Spacing="2"
+                                            Margin="0,2,-4,-4"
+                                            HorizontalAlignment="Right">
+                                    <Button Click="CopyMessage_Click"
+                                            Padding="6,2"
+                                            FontSize="11"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Foreground="{x:Bind MetaBrushKey, Converter={StaticResource ThemeBrushConverter}}"
+                                            AutomationProperties.AutomationId="chat_action_copy"
+                                            Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy}"
+                                            ToolTipService.ToolTip="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy.hint}"
+                                            Visibility="{x:Bind Role, Converter={StaticResource ChatActionVisibilityConverter}, ConverterParameter=User|Agent|System}" />
+
+                                    <Button Click="EditMessage_Click"
+                                            Padding="6,2"
+                                            FontSize="11"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Foreground="{x:Bind MetaBrushKey, Converter={StaticResource ThemeBrushConverter}}"
+                                            AutomationProperties.AutomationId="chat_action_edit"
+                                            Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=edit}"
+                                            ToolTipService.ToolTip="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=edit.hint}"
+                                            Visibility="{x:Bind Role, Converter={StaticResource ChatActionVisibilityConverter}, ConverterParameter=User}" />
+
+                                    <Button Click="RetryMessage_Click"
+                                            Padding="6,2"
+                                            FontSize="11"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Foreground="{x:Bind MetaBrushKey, Converter={StaticResource ThemeBrushConverter}}"
+                                            AutomationProperties.AutomationId="chat_action_retry"
+                                            Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=retry}"
+                                            ToolTipService.ToolTip="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=retry.hint}"
+                                            Visibility="{x:Bind Role, Converter={StaticResource ChatActionVisibilityConverter}, ConverterParameter=User|Agent}" />
+                                </StackPanel>
                             </StackPanel>
                         </Border>
 
@@ -183,6 +237,18 @@
                                            TextWrapping="Wrap"
                                            IsTextSelectionEnabled="True"
                                            Visibility="{x:Bind HasToolResult, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+
+                                <!-- Araç kartı da panoya kopyalanabilir (ad + argüman + sonuç). -->
+                                <Button Click="CopyMessage_Click"
+                                        Padding="6,2"
+                                        FontSize="11"
+                                        Background="Transparent"
+                                        BorderThickness="0"
+                                        HorizontalAlignment="Right"
+                                        AutomationProperties.AutomationId="chat_tool_copy"
+                                        Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy}"
+                                        ToolTipService.ToolTip="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy.hint}"
+                                        Visibility="{x:Bind Role, Converter={StaticResource ChatActionVisibilityConverter}, ConverterParameter=Tool}" />
                             </StackPanel>
                         </Border>
                     </Grid>
@@ -222,6 +288,20 @@
                     AutomationProperties.AutomationId="chat_send"
                     Style="{StaticResource AccentButtonStyle}"
                     Click="SendButton_Click" />
+
+            <!--
+                Tur sürerken Gönder'in YERİNE geçer (aynı hücre): üretim
+                iptal edilebilir olsun diye. Görünürlüğü UpdateSendButton
+                yönetir.
+            -->
+            <Button x:Name="StopButton"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    MinWidth="96"
+                    VerticalAlignment="Bottom"
+                    Visibility="Collapsed"
+                    AutomationProperties.AutomationId="chat_stop"
+                    Click="StopButton_Click" />
 
             <TextBlock x:Name="HintText"
                        Grid.Row="1"
