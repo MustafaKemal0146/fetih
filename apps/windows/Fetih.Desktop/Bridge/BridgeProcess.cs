@@ -26,6 +26,14 @@ public sealed class BridgeProcess : IDisposable
     private Process? _process;
     private bool _ownsProcess;
 
+    /// <summary>
+    /// Alt süreci kapsayan iş nesnesi. Tutamacı kapandığında (ebeveyn nasıl
+    /// ölürse ölsün) işletim sistemi köprü sürecini de sonlandırır. Kurulamazsa
+    /// <c>null</c> olur; o durumda <see cref="Stop"/> içindeki
+    /// <c>Kill(entireProcessTree: true)</c> tek başına yürürlüktedir.
+    /// </summary>
+    private ChildProcessGuard? _guard;
+
     public Handshake? Info { get; private set; }
 
     /// <summary>Süreç şu an çalışıyor mu?</summary>
@@ -95,6 +103,13 @@ public sealed class BridgeProcess : IDisposable
 
         _process = proc;
         _ownsProcess = true;
+
+        // Süreç DOĞAR DOĞMAZ iş nesnesine al: bu andan sonra ebeveyn çökse,
+        // Görev Yöneticisi'nden öldürülse ya da kapanış yolu hiç çalışmasa
+        // bile çekirdek köprüyü de sonlandırır. Kurulum başarısız olursa
+        // sessizce devam edilir (aşağıdaki Kill yolu yedek güvencedir).
+        _guard = ChildProcessGuard.TryCreate();
+        _guard?.TryAssign(proc);
 
         // stderr'i arka planda topla (tampon dolup süreci kilitlemesin).
         _ = Task.Run(() => DrainAsync(proc.StandardError));
@@ -267,6 +282,7 @@ public sealed class BridgeProcess : IDisposable
         if (!_ownsProcess)
         {
             _process = null;
+            ReleaseGuard();
             return;
         }
 
@@ -274,6 +290,7 @@ public sealed class BridgeProcess : IDisposable
         _process = null;
         if (proc is null)
         {
+            ReleaseGuard();
             return;
         }
 
@@ -291,7 +308,18 @@ public sealed class BridgeProcess : IDisposable
         finally
         {
             try { proc.Dispose(); } catch { }
+            // İş nesnesini EN SON bırak: tutamaç kapanınca çekirdek, Kill'in
+            // kaçırdığı torun süreçleri de (varsa) sonlandırır.
+            ReleaseGuard();
         }
+    }
+
+    /// <summary>İş nesnesi tutamacını bırakır; ikinci çağrıda etkisizdir.</summary>
+    private void ReleaseGuard()
+    {
+        var guard = _guard;
+        _guard = null;
+        try { guard?.Dispose(); } catch { }
     }
 
     public void Dispose() => Stop();
