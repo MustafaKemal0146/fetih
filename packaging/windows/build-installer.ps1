@@ -64,7 +64,14 @@ if (-not $SkipPublish) {
         New-Item -ItemType Directory -Path $PublishDir -Force | Out-Null
     }
 
-    & dotnet publish $ProjectPath -c $Configuration -r $Runtime --no-self-contained -o $PublishDir
+    # WinUI 3 XAML/PRI kaynak paketlemesi, `dotnet publish` sirasinda
+    # EnableMsixTooling kapaliyken atlaniyor: uretilen ciktida .xbf dosyalari ve
+    # Fetih.Desktop.pri bulunmuyor, uygulama acilista
+    # "Cannot locate resource from 'ms-appx:///MainWindow.xaml'" ile cokuyor.
+    # `dotnet build` ayni hedefleri calistirdigi icin sorun yalnizca publish
+    # yolunda goruluyor. Asagidaki ozellik MSIX kimligini AÇMAZ
+    # (WindowsPackageType=None kalir), yalnizca XAML kaynak paketlemesini calistirir.
+    & dotnet publish $ProjectPath -c $Configuration -r $Runtime --no-self-contained -o $PublishDir -p:EnableMsixTooling=true
     if ($LASTEXITCODE -ne 0) {
         throw "dotnet publish failed with exit code $LASTEXITCODE"
     }
