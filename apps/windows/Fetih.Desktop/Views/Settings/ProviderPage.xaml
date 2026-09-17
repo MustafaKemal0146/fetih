@@ -46,7 +46,7 @@
                            Style="{StaticResource MutedTextStyle}"
                            FontSize="12" />
 
-                <Grid ColumnSpacing="10" RowSpacing="8" Margin="0,8,0,0">
+                <Grid ColumnSpacing="10" RowSpacing="10" Margin="0,8,0,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
@@ -55,12 +55,13 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0"
                                x:Name="ProviderLabel"
                                VerticalAlignment="Center"
-                               Width="80" />
+                               Width="85" />
                     <AutoSuggestBox Grid.Row="0" Grid.Column="1"
                                     x:Name="ProviderSelectBox"
                                     AutomationProperties.AutomationId="provider_select"
@@ -70,12 +71,50 @@
                     <TextBlock Grid.Row="1" Grid.Column="0"
                                x:Name="ModelLabel"
                                VerticalAlignment="Center"
-                               Width="80" />
-                    <TextBox Grid.Row="1" Grid.Column="1"
-                             x:Name="ModelBox"
-                             AutomationProperties.AutomationId="provider_model" />
+                               Width="85" />
+                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4">
+                        <ComboBox x:Name="ModelCombo"
+                                  IsEditable="True"
+                                  HorizontalAlignment="Stretch"
+                                  AutomationProperties.AutomationId="provider_model" />
+                        <TextBlock x:Name="ModelHintText"
+                                   Style="{StaticResource MutedTextStyle}"
+                                   FontSize="11" />
+                    </StackPanel>
 
-                    <StackPanel Grid.Row="2" Grid.Column="1"
+                    <TextBlock Grid.Row="2" Grid.Column="0"
+                               x:Name="ApiKeyLabel"
+                               VerticalAlignment="Center"
+                               Width="85" />
+                    <StackPanel Grid.Row="2" Grid.Column="1" Spacing="4">
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <PasswordBox Grid.Column="0"
+                                         x:Name="ApiKeyBox"
+                                         AutomationProperties.AutomationId="provider_api_key"
+                                         PasswordRevealMode="Peek" />
+                            <HyperlinkButton Grid.Column="1"
+                                             x:Name="ApiKeySignupLink"
+                                             Content="Anahtar al ↗"
+                                             Padding="4,2"
+                                             VerticalAlignment="Center"
+                                             Click="ApiKeySignupLink_Click" />
+                        </Grid>
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Ellipse x:Name="ApiKeyStatusDot" Width="8" Height="8" VerticalAlignment="Center" />
+                            <TextBlock x:Name="ApiKeyStatusText" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock x:Name="ApiKeyEnvVarText" FontSize="11" FontFamily="Consolas" Opacity="0.7" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <InfoBar x:Name="ProviderKindInfoBar"
+                                 IsOpen="False"
+                                 IsClosable="False"
+                                 Margin="0,2,0,0" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="3" Grid.Column="1"
                                 Orientation="Horizontal"
                                 Spacing="10">
                         <Button x:Name="SaveModelButton"
@@ -143,29 +182,42 @@
                             BorderThickness="1"
                             BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
                         <StackPanel Spacing="6">
-                            <StackPanel Orientation="Horizontal" Spacing="10">
-                                <Ellipse Width="10"
-                                         Height="10"
-                                         VerticalAlignment="Center"
-                                         Fill="{x:Bind StatusBrushKey, Converter={StaticResource ThemeBrushConverter}}" />
-                                <TextBlock Text="{x:Bind DisplayName}"
-                                           FontWeight="SemiBold"
-                                           VerticalAlignment="Center" />
-                                <Border Padding="6,1"
-                                        CornerRadius="4"
-                                        VerticalAlignment="Center"
-                                        Background="{ThemeResource AccentFillColorDefaultBrush}"
-                                        Visibility="{x:Bind IsActive, Converter={StaticResource BoolToVisibilityConverter}}">
-                                    <TextBlock Text="Etkin"
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+                                    <Ellipse Width="10"
+                                             Height="10"
+                                             VerticalAlignment="Center"
+                                             Fill="{x:Bind StatusBrushKey, Converter={StaticResource ThemeBrushConverter}}" />
+                                    <TextBlock Text="{x:Bind DisplayName}"
+                                               FontWeight="SemiBold"
+                                               VerticalAlignment="Center" />
+                                    <Border Padding="6,1"
+                                            CornerRadius="4"
+                                            VerticalAlignment="Center"
+                                            Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                            Visibility="{x:Bind IsActive, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <TextBlock Text="Etkin"
+                                                   FontSize="11"
+                                                   Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                                    </Border>
+                                    <TextBlock Text="{x:Bind Badges}"
                                                FontSize="11"
-                                               Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
-                                </Border>
-                                <TextBlock Text="{x:Bind Badges}"
-                                           FontSize="11"
-                                           Opacity="0.6"
-                                           VerticalAlignment="Center"
-                                           Visibility="{x:Bind HasBadges, Converter={StaticResource BoolToVisibilityConverter}}" />
-                            </StackPanel>
+                                               Opacity="0.6"
+                                               VerticalAlignment="Center"
+                                               Visibility="{x:Bind HasBadges, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                </StackPanel>
+                                <Button Grid.Column="1"
+                                        Content="Bu Sağlayıcıyı Seç"
+                                        Tag="{x:Bind Id}"
+                                        Click="SelectProviderFromList_Click"
+                                        Padding="10,4"
+                                        FontSize="11"
+                                        VerticalAlignment="Center" />
+                            </Grid>
 
                             <TextBlock Text="{x:Bind MetaLine}"
                                        FontSize="12"

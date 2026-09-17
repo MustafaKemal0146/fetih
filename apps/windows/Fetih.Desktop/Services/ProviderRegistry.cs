@@ -128,8 +128,15 @@ public static class ProviderRegistry
         new("xai-oauth", "xAI (OAuth)", "codex_responses", "oauth_external",
             new string[0], "XAI_BASE_URL", Kind: ProviderKind.OAuthBrowser),
 
+        new("openai", "OpenAI", "openai_chat", "api_key",
+            new[] { "OPENAI_API_KEY" }, "OPENAI_BASE_URL",
+            DefaultBaseUrl: "https://api.openai.com/v1",
+            SignupUrl: "https://platform.openai.com/api-keys"),
+
         new("deepseek", "DeepSeek", "openai_chat", "api_key",
-            new[] { "DEEPSEEK_API_KEY" }, "DEEPSEEK_BASE_URL"),
+            new[] { "DEEPSEEK_API_KEY" }, "DEEPSEEK_BASE_URL",
+            DefaultBaseUrl: "https://api.deepseek.com/v1",
+            SignupUrl: "https://platform.deepseek.com/api_keys"),
 
         new("zai", "Z.AI / GLM", "openai_chat", "api_key",
             new[] { "GLM_API_KEY", "ZAI_API_KEY", "Z_AI_API_KEY" }, "GLM_BASE_URL"),
@@ -243,5 +250,243 @@ public static class ProviderRegistry
             }
         }
         return null;
+    }
+
+    private static readonly IReadOnlyDictionary<string, IReadOnlyList<string>> CuratedModelsMap =
+        new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["deepseek"] = new[]
+            {
+                "deepseek-chat",
+                "deepseek-reasoner",
+                "deepseek-v4-pro",
+                "deepseek-v4-flash",
+            },
+            ["groq"] = new[]
+            {
+                "openai/gpt-oss-120b",
+                "openai/gpt-oss-20b",
+                "qwen/qwen3.8-27b",
+                "qwen/qwen3.6-27b",
+            },
+            ["openai"] = new[]
+            {
+                "gpt-5.4",
+                "gpt-5.4-mini",
+                "gpt-5-mini",
+                "gpt-5.3-codex",
+                "gpt-5.2-codex",
+                "gpt-4.1",
+                "gpt-4o",
+                "gpt-4o-mini",
+            },
+            ["openai-codex"] = new[]
+            {
+                "gpt-5.4",
+                "gpt-5.4-mini",
+                "gpt-5.3-codex",
+                "gpt-5.2-codex",
+            },
+            ["anthropic"] = new[]
+            {
+                "claude-opus-4-7",
+                "claude-opus-4-6",
+                "claude-sonnet-4-6",
+                "claude-opus-4-5-20251101",
+                "claude-sonnet-4-5-20250929",
+                "claude-haiku-4-5-20251001",
+            },
+            ["gemini"] = new[]
+            {
+                "gemini-3.1-pro-preview",
+                "gemini-3-pro-preview",
+                "gemini-3-flash-preview",
+                "gemini-3.1-flash-lite-preview",
+            },
+            ["google-gemini-cli"] = new[]
+            {
+                "gemini-3.1-pro-preview",
+                "gemini-3-pro-preview",
+                "gemini-3-flash-preview",
+            },
+            ["openrouter"] = new[]
+            {
+                "anthropic/claude-opus-4.7",
+                "anthropic/claude-sonnet-4.6",
+                "moonshotai/kimi-k2.6",
+                "deepseek/deepseek-v4-pro",
+                "openai/gpt-5.4",
+                "google/gemini-3-flash-preview",
+            },
+            ["copilot"] = new[]
+            {
+                "gpt-5.4",
+                "gpt-5.4-mini",
+                "claude-sonnet-4.6",
+                "gemini-3.1-pro-preview",
+            },
+            ["copilot-acp"] = new[]
+            {
+                "copilot-acp",
+            },
+            ["xai"] = new[]
+            {
+                "grok-4.3",
+                "grok-4.20-0309-reasoning",
+                "grok-4.20-0309-non-reasoning",
+                "grok-4.20-multi-agent-0309",
+            },
+            ["xai-oauth"] = new[]
+            {
+                "grok-4.3",
+                "grok-4.20-0309-reasoning",
+                "grok-4.20-0309-non-reasoning",
+            },
+            ["zai"] = new[]
+            {
+                "glm-5.1",
+                "glm-5",
+                "glm-5v-turbo",
+                "glm-5-turbo",
+                "glm-4.7",
+                "glm-4.5",
+                "glm-4.5-flash",
+            },
+            ["kimi-coding"] = new[]
+            {
+                "kimi-k2.6",
+                "kimi-k2.5",
+                "kimi-for-coding",
+                "kimi-k2-thinking",
+                "kimi-k2-turbo-preview",
+            },
+            ["kimi-coding-cn"] = new[]
+            {
+                "kimi-k2.6",
+                "kimi-k2.5",
+                "kimi-k2-thinking",
+            },
+            ["minimax"] = new[]
+            {
+                "MiniMax-M2.7",
+                "MiniMax-M2.5",
+                "MiniMax-M2.1",
+                "MiniMax-M2",
+            },
+            ["minimax-cn"] = new[]
+            {
+                "MiniMax-M2.7",
+                "MiniMax-M2.5",
+                "MiniMax-M2.1",
+            },
+            ["alibaba"] = new[]
+            {
+                "qwen3.6-plus",
+                "kimi-k2.5",
+                "qwen3.5-plus",
+                "qwen3-coder-plus",
+                "glm-5",
+            },
+            ["qwen-oauth"] = new[]
+            {
+                "qwen3.6-plus",
+                "qwen3.5-plus",
+                "qwen3-coder-plus",
+            },
+            ["nvidia"] = new[]
+            {
+                "nvidia/nemotron-3-super-120b-a12b",
+                "nvidia/nemotron-3-nano-30b-a3b",
+                "qwen/qwen3.5-397b-a17b",
+                "deepseek-ai/deepseek-v3.2",
+            },
+            ["ollama"] = new[]
+            {
+                "llama3.3",
+                "qwen2.5-coder",
+                "deepseek-r1",
+                "mistral",
+                "phi4",
+            },
+            ["lmstudio"] = new[]
+            {
+                "local-model",
+            },
+            ["custom"] = new[]
+            {
+                "default",
+            },
+            ["ai-gateway"] = new[]
+            {
+                "moonshotai/kimi-k2.6",
+                "alibaba/qwen3.6-plus",
+                "zai/glm-5.1",
+                "anthropic/claude-sonnet-4.6",
+                "openai/gpt-5.4",
+            },
+            ["opencode-zen"] = new[]
+            {
+                "kimi-k2.5",
+                "gpt-5.4-pro",
+                "gpt-5.4",
+                "claude-sonnet-4.6",
+                "gemini-3.1-pro",
+            },
+            ["opencode-go"] = new[]
+            {
+                "kimi-k2.6",
+                "kimi-k2.5",
+                "glm-5.1",
+                "qwen3.6-plus",
+            },
+            ["kilocode"] = new[]
+            {
+                "anthropic/claude-sonnet-4.6",
+                "openai/gpt-5.4",
+                "google/gemini-3-flash-preview",
+            },
+            ["huggingface"] = new[]
+            {
+                "moonshotai/Kimi-K2.5",
+                "Qwen/Qwen3.5-397B-A17B",
+                "deepseek-ai/DeepSeek-V3.2",
+            },
+            ["novita"] = new[]
+            {
+                "moonshotai/kimi-k2.5",
+                "minimax/minimax-m2.7",
+                "deepseek/deepseek-v3-0324",
+                "deepseek/deepseek-r1-0528",
+            },
+            ["bedrock"] = new[]
+            {
+                "us.anthropic.claude-sonnet-4-6",
+                "us.anthropic.claude-opus-4-6-v1",
+                "deepseek.v3.2",
+            },
+            ["stepfun"] = new[]
+            {
+                "step-3.5-flash",
+                "step-3.5-flash-2603",
+            },
+        };
+
+    /// <summary>
+    /// Bir sağlayıcının çevrimdışı / statik model listesini döndürür.
+    /// Köprü çevrimdışıyken veya canlı sorgu yanıt vermediğinde bu liste sunulur.
+    /// </summary>
+    public static IReadOnlyList<string> GetCuratedModels(string providerId)
+    {
+        if (string.IsNullOrWhiteSpace(providerId))
+        {
+            return Array.Empty<string>();
+        }
+
+        if (CuratedModelsMap.TryGetValue(providerId.Trim(), out var models))
+        {
+            return models;
+        }
+
+        return Array.Empty<string>();
     }
 }

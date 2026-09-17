@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Fetih.Desktop.Bridge;
 using Fetih.Desktop.Models;
 using Fetih.Desktop.Services;
+using Fetih.Desktop.Setup;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
@@ -43,8 +44,10 @@ public sealed partial class ProviderPage : Page
         ChangeModelDesc.Text = Loc.T("provider.change_model_desc");
         ProviderLabel.Text = Loc.T("provider.label.provider");
         ModelLabel.Text = Loc.T("provider.label.model");
+        ApiKeyLabel.Text = Loc.T("provider.label.api_key");
         ProviderSelectBox.PlaceholderText = Loc.T("provider.placeholder.provider");
-        ModelBox.PlaceholderText = Loc.T("provider.placeholder.model");
+        ModelCombo.PlaceholderText = Loc.T("provider.placeholder.model");
+        ApiKeySignupLink.Content = Loc.T("provider.get_key");
         SaveModelButton.Content = Loc.T("provider.save");
         SlotsTitle.Text = Loc.T("provider.slots_title");
         SlotsIntro.Text = Loc.T("provider.slots_intro");
@@ -104,24 +107,40 @@ public sealed partial class ProviderPage : Page
                 }
 
                 // Etkin değerleri düzenleyiciye ön-doldur.
+                string activeProv = "";
+                string activeModel = "";
                 if (res.TryGetProperty("active", out var active) && active.ValueKind == JsonValueKind.Object)
                 {
-                    var prov = active.TryGetProperty("provider", out var pv) ? pv.GetString() ?? "" : "";
-                    var model = active.TryGetProperty("model", out var mv) ? mv.GetString() ?? "" : "";
-                    if (!string.IsNullOrEmpty(prov) && string.IsNullOrEmpty(ProviderSelectBox.Text))
-                    {
-                        ProviderSelectBox.Text = prov;
-                    }
-                    if (!string.IsNullOrEmpty(model) && string.IsNullOrEmpty(ModelBox.Text))
-                    {
-                        ModelBox.Text = model;
-                    }
+                    activeProv = active.TryGetProperty("provider", out var pv) ? pv.GetString() ?? "" : "";
+                    activeModel = active.TryGetProperty("model", out var mv) ? mv.GetString() ?? "" : "";
+                }
+                if (string.IsNullOrEmpty(activeProv))
+                {
+                    activeProv = FetihConfigService.Current.Config.GetString("model.provider") ?? "";
+                    activeModel = FetihConfigService.Current.Config.GetString("model.default") ?? "";
+                }
+
+                if (!string.IsNullOrEmpty(activeProv))
+                {
+                    ProviderSelectBox.Text = activeProv;
+                    await UpdateSelectedProviderStateAsync(activeProv, activeModel).ConfigureAwait(true);
                 }
             }
         }
         catch (Exception ex)
         {
             App.LogCrash("ProviderPage.SeedSelector", ex, ex.Message);
+        }
+
+        if (string.IsNullOrEmpty(ProviderSelectBox.Text))
+        {
+            var fallbackProv = FetihConfigService.Current.Config.GetString("model.provider") ?? "";
+            var fallbackModel = FetihConfigService.Current.Config.GetString("model.default") ?? "";
+            if (!string.IsNullOrEmpty(fallbackProv))
+            {
+                ProviderSelectBox.Text = fallbackProv;
+                await UpdateSelectedProviderStateAsync(fallbackProv, fallbackModel).ConfigureAwait(true);
+            }
         }
 
         // Yuva satırları sağlayıcı adaylarını kullanır; bu yüzden ADAYLAR
@@ -443,7 +462,7 @@ public sealed partial class ProviderPage : Page
         return current.ValueKind == JsonValueKind.String ? current.GetString() ?? "" : "";
     }
 
-    private void ProviderSelectBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+    private async void ProviderSelectBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
     {
         if (args.Reason != AutoSuggestionBoxTextChangeReason.UserInput)
         {
@@ -458,18 +477,233 @@ public sealed partial class ProviderPage : Page
             .Take(12)
             .ToList();
         sender.ItemsSource = matches;
+
+        // Tam eşleşen bir sağlayıcı id'si veya etiketi yazıldıysa durumunu güncelle
+        var exact = _providerChoices.FirstOrDefault(c =>
+            string.Equals(c.Id, needle, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(c.Label, needle, StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrEmpty(exact.Id))
+        {
+            await UpdateSelectedProviderStateAsync(exact.Id).ConfigureAwait(true);
+        }
     }
 
-    private void ProviderSelectBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+    private async void ProviderSelectBox_SuggestionChosen(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
     {
         // Seçilen etiketten id'yi çöz ve kutuya id'yi yaz (config.set id bekler).
         if (args.SelectedItem is string label)
         {
             var match = _providerChoices.FirstOrDefault(c => c.Label == label);
-            if (!string.IsNullOrEmpty(match.Id))
+            var pid = !string.IsNullOrEmpty(match.Id) ? match.Id : label;
+            sender.Text = pid;
+            await UpdateSelectedProviderStateAsync(pid).ConfigureAwait(true);
+        }
+    }
+
+    private async void SelectProviderFromList_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: string providerId } && !string.IsNullOrWhiteSpace(providerId))
+        {
+            ProviderSelectBox.Text = providerId;
+            await UpdateSelectedProviderStateAsync(providerId).ConfigureAwait(true);
+            ProviderSelectBox.Focus(FocusState.Programmatic);
+        }
+    }
+
+    private async void ApiKeySignupLink_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is HyperlinkButton { Tag: string url } && Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            await Windows.System.Launcher.LaunchUriAsync(uri);
+        }
+    }
+
+    private async Task UpdateSelectedProviderStateAsync(string providerId, string? preferredModel = null)
+    {
+        if (string.IsNullOrWhiteSpace(providerId))
+        {
+            return;
+        }
+
+        var resolved = _providerChoices.FirstOrDefault(c =>
+            string.Equals(c.Label, providerId, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(c.Id, providerId, StringComparison.OrdinalIgnoreCase));
+        var pid = !string.IsNullOrEmpty(resolved.Id) ? resolved.Id : providerId.Trim();
+
+        var entry = ProviderRegistry.ById(pid);
+
+        // ── 1. API Anahtarı Durumu ve Arayüzü ──────────────────────────────
+        if (entry == null)
+        {
+            ApiKeyBox.Visibility = Visibility.Visible;
+            ApiKeySignupLink.Visibility = Visibility.Collapsed;
+            ApiKeyStatusDot.Visibility = Visibility.Collapsed;
+            ApiKeyStatusText.Text = "";
+            ApiKeyEnvVarText.Text = "";
+            ProviderKindInfoBar.IsOpen = false;
+        }
+        else if (entry.Kind == ProviderKind.LocalServer)
+        {
+            ApiKeyBox.Visibility = Visibility.Collapsed;
+            ApiKeyStatusDot.Visibility = Visibility.Collapsed;
+            ApiKeyStatusText.Text = "";
+            ApiKeyEnvVarText.Text = "";
+            ProviderKindInfoBar.Severity = InfoBarSeverity.Informational;
+            ProviderKindInfoBar.Title = entry.DisplayName;
+            ProviderKindInfoBar.Message = Loc.T("provider.local_no_key");
+            ProviderKindInfoBar.IsOpen = true;
+
+            if (!string.IsNullOrWhiteSpace(entry.SignupUrl))
             {
-                sender.Text = match.Id;
+                ApiKeySignupLink.Visibility = Visibility.Visible;
+                ApiKeySignupLink.Tag = entry.SignupUrl;
             }
+            else
+            {
+                ApiKeySignupLink.Visibility = Visibility.Collapsed;
+            }
+        }
+        else if (entry.Kind is ProviderKind.CliLogin or ProviderKind.OAuthBrowser or ProviderKind.AwsSdk)
+        {
+            ApiKeyBox.Visibility = Visibility.Collapsed;
+            ApiKeyStatusDot.Visibility = Visibility.Collapsed;
+            ApiKeyStatusText.Text = "";
+            ApiKeyEnvVarText.Text = "";
+            ProviderKindInfoBar.Severity = InfoBarSeverity.Informational;
+            ProviderKindInfoBar.Title = entry.DisplayName;
+            ProviderKindInfoBar.Message = Loc.T("provider.cli_auth_required");
+            ProviderKindInfoBar.IsOpen = true;
+            ApiKeySignupLink.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+            ProviderKindInfoBar.IsOpen = false;
+            ApiKeyBox.Visibility = Visibility.Visible;
+            var envVar = entry.ApiKeyEnvVars.Count > 0 ? entry.ApiKeyEnvVars[0] : "";
+            ApiKeyEnvVarText.Text = string.IsNullOrEmpty(envVar) ? "" : $"({envVar})";
+
+            var presence = !string.IsNullOrEmpty(envVar)
+                ? FetihConfigService.Current.GetKeyPresence(envVar)
+                : EnvKeyPresence.Missing;
+
+            ApiKeyStatusDot.Visibility = Visibility.Visible;
+            if (presence != EnvKeyPresence.Missing)
+            {
+                if (Application.Current.Resources.TryGetValue("SystemFillColorSuccessBrush", out var successBrush))
+                {
+                    ApiKeyStatusDot.Fill = (Microsoft.UI.Xaml.Media.Brush)successBrush;
+                    ApiKeyStatusText.Foreground = (Microsoft.UI.Xaml.Media.Brush)successBrush;
+                }
+                ApiKeyStatusText.Text = Loc.T("provider.status.key_configured");
+                ApiKeyBox.PlaceholderText = Loc.T("provider.placeholder.api_key_configured");
+            }
+            else
+            {
+                if (Application.Current.Resources.TryGetValue("SystemFillColorCautionBrush", out var cautionBrush))
+                {
+                    ApiKeyStatusDot.Fill = (Microsoft.UI.Xaml.Media.Brush)cautionBrush;
+                    ApiKeyStatusText.Foreground = (Microsoft.UI.Xaml.Media.Brush)cautionBrush;
+                }
+                ApiKeyStatusText.Text = Loc.T("provider.status.key_missing");
+                ApiKeyBox.PlaceholderText = Loc.T("provider.placeholder.api_key_missing");
+            }
+
+            if (!string.IsNullOrWhiteSpace(entry.SignupUrl))
+            {
+                ApiKeySignupLink.Visibility = Visibility.Visible;
+                ApiKeySignupLink.Tag = entry.SignupUrl;
+            }
+            else
+            {
+                ApiKeySignupLink.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        // ── 2. Model Listesi (Canlı + Çevrimdışı Katalog) ─────────────────────
+        var curated = ProviderRegistry.GetCuratedModels(pid);
+        var currentSelection = preferredModel ?? (ModelCombo.SelectedItem as string ?? ModelCombo.Text ?? "");
+
+        if (curated.Count > 0)
+        {
+            ModelHintText.Text = $"{curated.Count} model listelendi.";
+            PopulateModelCombo(curated, currentSelection);
+        }
+        else
+        {
+            ModelHintText.Text = "";
+            PopulateModelCombo(Array.Empty<string>(), currentSelection);
+        }
+
+        try
+        {
+            var res = await _bridge.ProvidersModelsAsync(pid).ConfigureAwait(true);
+            if (res.ValueKind == JsonValueKind.Object &&
+                res.TryGetProperty("models", out var ms) &&
+                ms.ValueKind == JsonValueKind.Array)
+            {
+                var liveModels = new List<string>();
+                foreach (var m in ms.EnumerateArray())
+                {
+                    if (m.ValueKind == JsonValueKind.String)
+                    {
+                        var str = m.GetString() ?? "";
+                        if (!string.IsNullOrWhiteSpace(str) && !liveModels.Contains(str))
+                        {
+                            liveModels.Add(str);
+                        }
+                    }
+                }
+
+                if (liveModels.Count > 0)
+                {
+                    var combined = new List<string>(curated.Where(c => liveModels.Contains(c)));
+                    foreach (var m in liveModels)
+                    {
+                        if (!combined.Contains(m)) combined.Add(m);
+                    }
+                    var rec = res.TryGetProperty("recommended", out var rc) ? rc.GetString() ?? "" : "";
+                    var source = res.TryGetProperty("source", out var sv) ? sv.GetString() ?? "" : "";
+                    ModelHintText.Text = source == "live"
+                        ? $"{combined.Count} model sağlayıcıdan canlı alındı."
+                        : $"{combined.Count} model hazır.";
+
+                    var targetModel = !string.IsNullOrEmpty(currentSelection) ? currentSelection : rec;
+                    PopulateModelCombo(combined, targetModel);
+                }
+            }
+        }
+        catch
+        {
+            if (curated.Count == 0)
+            {
+                ModelHintText.Text = "Model listesi alınamadı; model adını doğrudan yazabilirsin.";
+            }
+        }
+    }
+
+    private void PopulateModelCombo(IReadOnlyList<string> models, string? preferred)
+    {
+        ModelCombo.Items.Clear();
+        foreach (var m in models)
+        {
+            ModelCombo.Items.Add(m);
+        }
+
+        if (!string.IsNullOrWhiteSpace(preferred))
+        {
+            var matched = models.FirstOrDefault(m => string.Equals(m, preferred, StringComparison.OrdinalIgnoreCase));
+            if (matched != null)
+            {
+                ModelCombo.SelectedItem = matched;
+            }
+            else
+            {
+                ModelCombo.Text = preferred;
+            }
+        }
+        else if (models.Count > 0 && string.IsNullOrEmpty(ModelCombo.Text))
+        {
+            ModelCombo.SelectedIndex = 0;
         }
     }
 
@@ -480,7 +714,8 @@ public sealed partial class ProviderPage : Page
         var resolved = _providerChoices.FirstOrDefault(c =>
             c.Label == providerInput || c.Id == providerInput);
         var provider = string.IsNullOrEmpty(resolved.Id) ? providerInput : resolved.Id;
-        var model = ModelBox.Text?.Trim() ?? "";
+        var model = (ModelCombo.SelectedItem as string ?? ModelCombo.Text ?? "").Trim();
+        var newKey = ApiKeyBox.Password?.Trim() ?? "";
 
         if (string.IsNullOrEmpty(provider) && string.IsNullOrEmpty(model))
         {
@@ -501,12 +736,35 @@ public sealed partial class ProviderPage : Page
                 await _bridge.ConfigSetAsync("model.default", model).ConfigureAwait(true);
             }
 
+            var keySaved = false;
+            var entry = ProviderRegistry.ById(provider);
+            var envVar = entry?.ApiKeyEnvVars.Count > 0 ? entry.ApiKeyEnvVars[0] : "";
+            if (!string.IsNullOrEmpty(newKey))
+            {
+                if (!string.IsNullOrEmpty(envVar))
+                {
+                    EnvFileWriter.SetValue(FetihPaths.EnvFilePath, envVar, newKey);
+                    Environment.SetEnvironmentVariable(envVar, newKey);
+                    keySaved = true;
+                }
+                ApiKeyBox.Password = "";
+            }
+
             // Yazıldığını doğrula: config.get ile geri oku.
             var check = await _bridge.ConfigGetAsync("model").ConfigureAwait(true);
-            SaveModelStatus.Text = "✓ kaydedildi — bir sonraki mesajda etkili olacak";
+            SaveModelStatus.Text = keySaved
+                ? "✓ Model ve API anahtarı kaydedildi — bir sonraki mesajda etkili olacak"
+                : "✓ Model kaydedildi — bir sonraki mesajda etkili olacak";
+
+            if (entry != null && entry.Kind == ProviderKind.CloudApiKey && !string.IsNullOrEmpty(envVar) &&
+                FetihConfigService.Current.GetKeyPresence(envVar) == EnvKeyPresence.Missing && !keySaved)
+            {
+                SaveModelStatus.Text += " ⚠ API anahtarı henüz girilmedi.";
+            }
 
             // Diskten okuyan salt-okunur listeyi de tazele.
             Populate();
+            await UpdateSelectedProviderStateAsync(provider, model).ConfigureAwait(true);
         }
         catch (BridgeRpcException rpc)
         {
