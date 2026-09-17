@@ -318,6 +318,12 @@ class BridgeServer:
                     loop, event("session.delta", {"session_id": session.id, "text": text})
                 )
 
+        def on_thought(text: str) -> None:
+            if stream and text:
+                conn.emit_threadsafe(
+                    loop, event("session.thought", {"session_id": session.id, "text": text})
+                )
+
         def on_tool_start(call_id, name, args) -> None:
             tool_calls.append({"id": str(call_id), "name": name})
             conn.emit_threadsafe(
@@ -370,6 +376,8 @@ class BridgeServer:
 
         agent = session.agent
         agent.stream_delta_callback = on_delta if stream else None
+        agent.reasoning_callback = on_thought if stream else None
+        agent.thinking_callback = on_thought if stream else None
         agent.tool_start_callback = on_tool_start
         agent.tool_complete_callback = on_tool_complete
 
@@ -398,6 +406,8 @@ class BridgeServer:
             session.busy = False
             session.thread_id = None
             agent.stream_delta_callback = None
+            agent.reasoning_callback = None
+            agent.thinking_callback = None
             agent.tool_start_callback = None
             agent.tool_complete_callback = None
 
@@ -420,6 +430,7 @@ class BridgeServer:
         done = {
             "session_id": session.id,
             "text": outcome.get("final_response") or "",
+            "thought": outcome.get("reasoning") or outcome.get("reasoning_text") or "",
             "elapsed_ms": elapsed_ms,
             "api_calls": outcome.get("api_calls"),
             "tool_calls": tool_calls,

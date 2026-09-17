@@ -30,6 +30,9 @@ public enum ChatRole
 public sealed class ChatMessage : INotifyPropertyChanged
 {
     private string _text;
+    private string _thought = "";
+    private bool _isThinking;
+    private bool _isThoughtExpanded = true;
     private string _toolResult = "";
     private bool _isRunning;
 
@@ -56,10 +59,89 @@ public sealed class ChatMessage : INotifyPropertyChanged
             }
             _text = value;
             Notify();
+            Notify(nameof(HasText));
         }
     }
 
+    /// <summary>Mesaj gövdesi dolu mu?</summary>
+    public bool HasText => !string.IsNullOrEmpty(_text);
+
     public DateTimeOffset Timestamp { get; }
+
+    // ── Düşünce / Akıl Yürütme (Reasoning) alanları (Role=Agent) ────────────
+
+    /// <summary>Modelin akıl yürütme / düşünce metni (ör. DeepSeek reasoner, OpenAI o1, Groq thinking).</summary>
+    public string Thought
+    {
+        get => _thought;
+        set
+        {
+            if (_thought == value)
+            {
+                return;
+            }
+            _thought = value;
+            Notify();
+            Notify(nameof(HasThought));
+            Notify(nameof(ShowThoughtSection));
+            Notify(nameof(ThoughtHeader));
+        }
+    }
+
+    /// <summary>Düşünce metni var mı?</summary>
+    public bool HasThought => !string.IsNullOrWhiteSpace(_thought);
+
+    /// <summary>Model şu anda düşünüyor mu?</summary>
+    public bool IsThinking
+    {
+        get => _isThinking;
+        set
+        {
+            if (_isThinking == value)
+            {
+                return;
+            }
+            _isThinking = value;
+            Notify();
+            Notify(nameof(ShowThoughtSection));
+            Notify(nameof(ThoughtHeader));
+        }
+    }
+
+    /// <summary>Düşünce paneli açık mı (Expander)?</summary>
+    public bool IsThoughtExpanded
+    {
+        get => _isThoughtExpanded;
+        set
+        {
+            if (_isThoughtExpanded == value)
+            {
+                return;
+            }
+            _isThoughtExpanded = value;
+            Notify();
+        }
+    }
+
+    /// <summary>Düşünce paneli gösterilmeli mi (düşünüyorsa veya düşünce metni varsa)?</summary>
+    public bool ShowThoughtSection => Role == ChatRole.Agent && (HasThought || IsThinking);
+
+    /// <summary>Düşünce paneli başlığı.</summary>
+    public string ThoughtHeader => IsThinking ? "🧠 Düşünülüyor…" : "🧠 Düşünce Süreci";
+
+    /// <summary>Düşünce metnine parça ekler ve olayları tetikler.</summary>
+    public void AppendThought(string delta)
+    {
+        if (string.IsNullOrEmpty(delta))
+        {
+            return;
+        }
+        _thought += delta;
+        Notify(nameof(Thought));
+        Notify(nameof(HasThought));
+        Notify(nameof(ShowThoughtSection));
+        Notify(nameof(ThoughtHeader));
+    }
 
     // ── Araç kartı alanları (Role=Tool) ──────────────────────────────────────
 

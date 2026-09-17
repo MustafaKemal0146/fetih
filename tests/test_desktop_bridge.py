@@ -384,3 +384,45 @@ def test_findings_list_and_scan():
     # Subsequent list returns findings
     list_res = drive(server, conn, "findings.list")["result"]
     assert list_res["total"] == scan_res["total_findings"]
+
+
+def test_session_thought_event_emitted():
+    server = BridgeServer(require_auth=False)
+    conn = FakeConn(authenticated=True)
+
+    class MockAgent:
+        def __init__(self):
+            self.reasoning_callback = None
+            self.stream_delta_callback = None
+            self.thinking_callback = None
+            self.tool_start_callback = None
+            self.tool_complete_callback = None
+
+        def run_conversation(self, message):
+            if self.reasoning_callback:
+                self.reasoning_callback("Thinking step 1...")
+            if self.stream_delta_callback:
+                self.stream_delta_callback("Answer text.")
+            return {"final_response": "Answer text."}
+
+    from fetih_desktop_bridge.server import BridgeSession
+    session = BridgeSession("test-session-123", MockAgent(), model="mock", provider="mock", cwd=".")
+    server.sessions[session.id] = session
+
+    res = drive(server, conn, "session.send", {
+        "session_id": session.id,
+        "message": "hello",
+        "stream": True,
+    })
+
+    # Verify that session.thought event was emitted to the connection
+    thought_events = [f for f in conn.sent if f.get("method") == "session.thought"]
+    assert len(thought_events) == 1
+    assert thought_events[0]["params"]["text"] == "Thinking step 1..."
+    assert thought_events[0]["params"]["session_id"] == session.id
+
+    # Verify that session.delta event was also emitted
+    delta_events = [f for f in conn.sent if f.get("method") == "session.delta"]
+    assert len(delta_events) == 1
+    assert delta_events[0]["params"]["text"] == "Answer text."
+

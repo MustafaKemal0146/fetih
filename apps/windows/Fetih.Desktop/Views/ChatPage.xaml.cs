@@ -135,6 +135,7 @@ public sealed partial class ChatPage : Page
             return;
         }
         _bridge.SessionDelta += OnSessionDelta;
+        _bridge.SessionThought += OnSessionThought;
         _bridge.SessionToolCall += OnToolCall;
         _bridge.SessionToolResult += OnToolResult;
         _bridge.SessionError += OnSessionError;
@@ -148,10 +149,37 @@ public sealed partial class ChatPage : Page
             return;
         }
         _bridge.SessionDelta -= OnSessionDelta;
+        _bridge.SessionThought -= OnSessionThought;
         _bridge.SessionToolCall -= OnToolCall;
         _bridge.SessionToolResult -= OnToolResult;
         _bridge.SessionError -= OnSessionError;
         _handlersHooked = false;
+    }
+
+    private void OnSessionThought(string sessionId, string text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return;
+        }
+        RunOnUi(() =>
+        {
+            if (_streamingMessage is null)
+            {
+                _streamingMessage = new ChatMessage(ChatRole.Agent, "")
+                {
+                    IsThinking = true,
+                    IsThoughtExpanded = true,
+                };
+                Messages.Add(_streamingMessage);
+            }
+            else
+            {
+                _streamingMessage.IsThinking = true;
+            }
+            _streamingMessage.AppendThought(text);
+            RequestScrollToEnd();
+        });
     }
 
     private void OnSessionDelta(string sessionId, string text)
@@ -169,9 +197,13 @@ public sealed partial class ChatPage : Page
             }
             else
             {
+                if (_streamingMessage.IsThinking)
+                {
+                    _streamingMessage.IsThinking = false;
+                }
                 _streamingMessage.Text += text;
             }
-            ScrollToEnd();
+            RequestScrollToEnd();
         });
     }
 
@@ -179,6 +211,10 @@ public sealed partial class ChatPage : Page
     {
         RunOnUi(() =>
         {
+            if (_streamingMessage is not null && _streamingMessage.IsThinking)
+            {
+                _streamingMessage.IsThinking = false;
+            }
             var card = new ChatMessage(ChatRole.Tool, "")
             {
                 ToolName = call.Name,
@@ -187,7 +223,7 @@ public sealed partial class ChatPage : Page
             };
             _toolCards[call.Id] = card;
             Messages.Add(card);
-            ScrollToEnd();
+            RequestScrollToEnd();
         });
     }
 
@@ -200,7 +236,7 @@ public sealed partial class ChatPage : Page
                 card.IsRunning = false;
                 card.ToolResult = Shorten(result.ResultText, 1200);
             }
-            ScrollToEnd();
+            RequestScrollToEnd();
         });
     }
 
@@ -319,9 +355,14 @@ public sealed partial class ChatPage : Page
         UpdateSendButton();
 
         Messages.Add(new ChatMessage(ChatRole.User, text));
-        _streamingMessage = null;
+        _streamingMessage = new ChatMessage(ChatRole.Agent, "")
+        {
+            IsThinking = true,
+            IsThoughtExpanded = true,
+        };
+        Messages.Add(_streamingMessage);
         _toolCards.Clear();
-        ScrollToEnd();
+        RequestScrollToEnd(force: true);
 
         try
         {
@@ -355,24 +396,40 @@ public sealed partial class ChatPage : Page
                                 result.TryGetProperty("text", out var t)
                     ? t.GetString() ?? ""
                     : "";
+                var thoughtText = result.ValueKind == System.Text.Json.JsonValueKind.Object &&
+                                 result.TryGetProperty("thought", out var th)
+                    ? th.GetString() ?? ""
+                    : "";
 
                 if (_streamingMessage is null)
                 {
                     // Akış gelmedi (stream kapalı veya kısa yanıt): sonucu bir kez ekle.
-                    if (!string.IsNullOrWhiteSpace(finalText))
+                    if (!string.IsNullOrWhiteSpace(finalText) || !string.IsNullOrWhiteSpace(thoughtText))
                     {
-                        Messages.Add(new ChatMessage(ChatRole.Agent, finalText));
+                        var msg = new ChatMessage(ChatRole.Agent, finalText);
+                        if (!string.IsNullOrWhiteSpace(thoughtText))
+                        {
+                            msg.Thought = thoughtText;
+                            msg.IsThoughtExpanded = false;
+                        }
+                        Messages.Add(msg);
                     }
                 }
-                else if (!string.IsNullOrWhiteSpace(finalText) &&
-                         _streamingMessage.Text != finalText)
+                else
                 {
-                    // Nihai metin akıştan farklıysa (nadiren) düzelt.
-                    _streamingMessage.Text = finalText;
+                    _streamingMessage.IsThinking = false;
+                    if (!string.IsNullOrWhiteSpace(thoughtText) && string.IsNullOrEmpty(_streamingMessage.Thought))
+                    {
+                        _streamingMessage.Thought = thoughtText;
+                    }
+                    if (!string.IsNullOrWhiteSpace(finalText))
+                    {
+                        _streamingMessage.Text = finalText;
+                    }
                 }
 
                 FinishStreaming();
-                ScrollToEnd();
+                RequestScrollToEnd(force: true);
             });
         }
         catch (BridgeRpcException rpc)
@@ -426,7 +483,17 @@ public sealed partial class ChatPage : Page
 
     private void FinishStreaming()
     {
-        _streamingMessage = null;
+        if (_streamingMessage is not null)
+        {
+            _streamingMessage.IsThinking = false;
+            // Eğer hiçbir metin ve düşünce gelmemişse boş kartı listeden kaldır
+            if (string.IsNullOrWhiteSpace(_streamingMessage.Text) && !_streamingMessage.HasThought)
+            {
+                Messages.Remove(_streamingMessage);
+            }
+            _streamingMessage = null;
+        }
+
         // Yarım kalmış araç kartları varsa "tamamlandı" olarak mühürle.
         foreach (var card in _toolCards.Values)
         {
@@ -466,22 +533,60 @@ public sealed partial class ChatPage : Page
         }
     }
 
-    private void ScrollToEnd()
+    private long _lastScrollTicks;
+    private bool _scrollPending;
+
+    private void ScrollToEnd(bool force = false) => RequestScrollToEnd(force);
+
+    private void RequestScrollToEnd(bool force = false)
     {
         if (Messages.Count == 0)
         {
             return;
         }
-        DispatcherQueue.TryEnqueue(() =>
+        var now = Environment.TickCount64;
+        if (force || now - _lastScrollTicks > 80)
         {
-            try
+            _lastScrollTicks = now;
+            _scrollPending = false;
+            DispatcherQueue.TryEnqueue(() =>
             {
-                MessageList.ScrollIntoView(Messages[^1]);
-            }
-            catch (Exception ex)
+                try
+                {
+                    if (Messages.Count > 0)
+                    {
+                        MessageList.ScrollIntoView(Messages[^1]);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    App.LogCrash("ChatPage.ScrollToEnd", ex, ex.Message);
+                }
+            });
+        }
+        else if (!_scrollPending)
+        {
+            _scrollPending = true;
+            DispatcherQueue.TryEnqueue(async () =>
             {
-                App.LogCrash("ChatPage.ScrollToEnd", ex, ex.Message);
-            }
-        });
+                await Task.Delay(80);
+                if (_scrollPending)
+                {
+                    _scrollPending = false;
+                    _lastScrollTicks = Environment.TickCount64;
+                    try
+                    {
+                        if (Messages.Count > 0)
+                        {
+                            MessageList.ScrollIntoView(Messages[^1]);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        App.LogCrash("ChatPage.ScrollToEnd", ex, ex.Message);
+                    }
+                }
+            });
+        }
     }
 }

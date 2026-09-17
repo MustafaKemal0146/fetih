@@ -89,7 +89,7 @@
                                 BorderThickness="1"
                                 BorderBrush="{x:Bind BubbleBorderBrushKey, Converter={StaticResource ThemeBrushConverter}}"
                                 Visibility="{x:Bind IsBubble, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <StackPanel Spacing="3">
+                            <StackPanel Spacing="4">
                                 <StackPanel Orientation="Horizontal" Spacing="8"
                                             Visibility="{x:Bind IsSystem, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=invert}">
                                     <TextBlock Text="{x:Bind RoleLabel}"
@@ -102,10 +102,39 @@
                                                Opacity="0.8"
                                                VerticalAlignment="Center" />
                                 </StackPanel>
+
+                                <!-- Düşünce Süreci (Reasoning / Thinking) Expander -->
+                                <Expander IsExpanded="{x:Bind IsThoughtExpanded, Mode=TwoWay}"
+                                          Visibility="{x:Bind ShowThoughtSection, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                                          HorizontalAlignment="Stretch"
+                                          HorizontalContentAlignment="Stretch"
+                                          Margin="0,2,0,4">
+                                    <Expander.Header>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <ProgressRing Width="14" Height="14"
+                                                          IsActive="{x:Bind IsThinking, Mode=OneWay}"
+                                                          Visibility="{x:Bind IsThinking, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
+                                            <TextBlock Text="{x:Bind ThoughtHeader, Mode=OneWay}"
+                                                       FontSize="12"
+                                                       FontWeight="SemiBold"
+                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                        </StackPanel>
+                                    </Expander.Header>
+                                    <ScrollViewer MaxHeight="220" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                                        <TextBlock Text="{x:Bind Thought, Mode=OneWay}"
+                                                   FontSize="12"
+                                                   FontFamily="Consolas"
+                                                   TextWrapping="Wrap"
+                                                   IsTextSelectionEnabled="True"
+                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                                    </ScrollViewer>
+                                </Expander>
+
                                 <TextBlock Text="{x:Bind Text, Mode=OneWay}"
                                            TextWrapping="Wrap"
                                            IsTextSelectionEnabled="True"
-                                           Foreground="{x:Bind TextBrushKey, Converter={StaticResource ThemeBrushConverter}}" />
+                                           Foreground="{x:Bind TextBrushKey, Converter={StaticResource ThemeBrushConverter}}"
+                                           Visibility="{x:Bind HasText, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
                             </StackPanel>
                         </Border>
 

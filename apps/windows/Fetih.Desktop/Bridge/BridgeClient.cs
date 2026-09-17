@@ -33,7 +33,7 @@ public sealed record BridgeToolCall(string SessionId, string Id, string Name, st
 public sealed record BridgeToolResult(string SessionId, string Id, string Name, string ResultText);
 
 /// <summary>Bir turun başarıyla bitişi.</summary>
-public sealed record BridgeDone(string SessionId, string Text, int? ApiCalls, long? ElapsedMs);
+public sealed record BridgeDone(string SessionId, string Text, int? ApiCalls, long? ElapsedMs, string? Thought = null);
 
 /// <summary>Bir turun başarısız bitişi.</summary>
 public sealed record BridgeErrorEvent(string SessionId, string Error, string? Partial);
@@ -43,7 +43,7 @@ public sealed record BridgeErrorEvent(string SessionId, string Error, string? Pa
 /// Süreci <see cref="BridgeProcess"/> başlatır, token'ı el sıkışmadan alır,
 /// <c>bridge.authenticate</c> ile kimlik doğrular ve tüm RPC yüzeyini sunar.
 ///
-/// <para>Olaylar (Delta/ToolCall/ToolResult/Done/ErrorEvent) alım döngüsü
+/// <para>Olaylar (Delta/Thought/ToolCall/ToolResult/Done/ErrorEvent) alım döngüsü
 /// iş parçacığında tetiklenir; UI tüketicileri kendi DispatcherQueue'larına
 /// yönlendirmelidir.</para>
 /// </summary>
@@ -73,6 +73,7 @@ public sealed class BridgeClient : IDisposable
     public int ProtocolVersion => _protocolVersion;
 
     public event Action<string /*sessionId*/, string /*text*/>? SessionDelta;
+    public event Action<string /*sessionId*/, string /*text*/>? SessionThought;
     public event Action<BridgeToolCall>? SessionToolCall;
     public event Action<BridgeToolResult>? SessionToolResult;
     public event Action<BridgeDone>? SessionDone;
@@ -284,6 +285,11 @@ public sealed class BridgeClient : IDisposable
                     SessionDelta?.Invoke(Str(p, "session_id"), Str(p, "text"));
                     break;
 
+                case "session.thought":
+                case "session.reasoning":
+                    SessionThought?.Invoke(Str(p, "session_id"), Str(p, "text"));
+                    break;
+
                 case "session.tool_call":
                     SessionToolCall?.Invoke(new BridgeToolCall(
                         Str(p, "session_id"), Str(p, "id"), Str(p, "name"),
@@ -299,7 +305,8 @@ public sealed class BridgeClient : IDisposable
                 case "session.done":
                     SessionDone?.Invoke(new BridgeDone(
                         Str(p, "session_id"), Str(p, "text"),
-                        IntOrNull(p, "api_calls"), LongOrNull(p, "elapsed_ms")));
+                        IntOrNull(p, "api_calls"), LongOrNull(p, "elapsed_ms"),
+                        Str(p, "thought")));
                     break;
 
                 case "session.error":
