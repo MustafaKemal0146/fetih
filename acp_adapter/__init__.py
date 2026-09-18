@@ -19,4 +19,4 @@ __all__ = ["FETIH_VERSION"]
 
 # Kept in sync with the ``version`` field in pyproject.toml; the registry
 # manifest test asserts both match.
-FETIH_VERSION = "1.0.2"
+FETIH_VERSION = "1.1.0"

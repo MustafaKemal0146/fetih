@@ -102,7 +102,7 @@ Yanlış token → `-32000`. Token gerekmiyorsa her zaman başarılı.
   "auth_required": true,
   "authenticated": false,
   "transport": "ws",
-  "fetih_version": "1.0.2",
+  "fetih_version": "1.1.0",
   "methods": ["bridge.authenticate", "…"],
   "events": ["bridge.ready", "session.delta", "session.tool_call",
              "session.tool_result", "session.done", "session.error"]

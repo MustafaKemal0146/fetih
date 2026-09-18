@@ -49,7 +49,7 @@
       (bkz. Services/AppInfo.cs). Tek kaynak burasi olsun diye elle
       kopyalanmis sabit yerine AssemblyMetadata olarak gomulurler.
     -->
-    <Version>0.1.0</Version>
+    <Version>1.1.0</Version>
     <Product>FETIH Masaustu</Product>
     <Company>FETIH</Company>
     <WindowsAppSdkPackageVersion>2.4.0</WindowsAppSdkPackageVersion>
