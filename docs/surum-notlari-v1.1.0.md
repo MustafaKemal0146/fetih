@@ -7,8 +7,7 @@ Bu sürümün ana yeniliği: **FETIH artık bir Windows masaüstü uygulaması o
 ### 🪟 Windows Masaüstü Uygulaması
 
 - **Native WinUI 3 penceresi** — .NET 10 üzerinde, kendi kendine yeten paketleme
-- **Taşınabilir sürüm:** `dist\win-x64\fetih.cmd` — Python kurulu olmayan makinede de çalışır
-- **Kurulum paketi:** Inno Setup ile `Fetih-Setup-1.1.0-win-x64.exe`
+- **Taşınabilir sürüm:** bu sürüme ekli `Fetih-1.1.0-win-x64-portable.zip` — arşivi aç, `fetih.cmd` dosyasına çift tıkla. Kurulum gerekmez, Python kurulu olmayan makinede de çalışır.
 - Sohbet arayüzü, oturum listesi, model seçimi ve araç çağrısı görünümü
 - Uygulama kapanırken arka planda yetim süreç bırakmaz (Job Object ile süreç ağacı takibi)
 
@@ -48,10 +47,16 @@ Deneysel olduğu için bazı şeyler pürüzlü olabilir:
 **Masaüstü uygulaması (Windows):**
 
 ```
-Releases sayfasından Fetih-Setup-1.1.0-win-x64.exe indir ve çalıştır
+Fetih-1.1.0-win-x64-portable.zip indir → bir klasöre çıkar → fetih.cmd çift tıkla
 ```
 
-Taşınabilir sürüm istiyorsan kurulum gerekmez — arşivi açıp `fetih.cmd` dosyasına çift tıkla.
+Kurulum gerekmez, yönetici izni gerekmez. Klasörü istediğin yere taşıyabilirsin.
+
+> 📝 Klasik kurulum sihirbazı (`Fetih-Setup-...exe`) bu sürümde **yok**. Betiği hazır (`packaging/windows/build-installer.ps1`) ama derlemek için [Inno Setup 6](https://jrsoftware.org/isdl.php) gerekiyor. Şimdilik taşınabilir paket kullan.
+
+```
+SHA256: 7bab6166e1b71a1a98c6c7521279f325e78f1ddec56c53e8896fddefdba0db68
+```
 
 **CLI:**
 
