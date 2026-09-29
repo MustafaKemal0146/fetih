@@ -104,6 +104,12 @@ public partial class App : Application
 
         MainAppWindow = _window;
         _window.Activate();
+
+        // Açılıştan hemen sonra, arka planda ve sessizce: günde en fazla bir
+        // kez GitHub Releases'e bakar. Bulursa Hakkında sayfası bir sonraki
+        // açılışında (veya LastKnownUpdate zaten set edildiyse hemen)
+        // gösterir. Ağ hatası/gecikmesi açılışı ASLA bloklamaz — fire-and-forget.
+        _ = Fetih.Desktop.Services.UpdateService.CheckInBackgroundAsync(TimeSpan.FromHours(24));
     }
 
     /// <summary>

@@ -262,6 +262,8 @@ class BridgeServer:
             "events": [
                 "bridge.ready",
                 "session.delta",
+                "session.thought",
+                "session.status",
                 "session.tool_call",
                 "session.tool_result",
                 "session.done",
@@ -319,9 +321,23 @@ class BridgeServer:
                 )
 
         def on_thought(text: str) -> None:
+            # Genuine chain-of-thought from the model (DeepSeek reasoner, o1,
+            # Groq thinking, ...). Streamed incrementally and appended by the
+            # desktop app's Reasoning panel.
             if stream and text:
                 conn.emit_threadsafe(
                     loop, event("session.thought", {"session_id": session.id, "text": text})
+                )
+
+        def on_status(text: str) -> None:
+            # Decorative "still working" ticker (random kaomoji + verb) meant
+            # for the CLI's terminal spinner — NOT model reasoning. Sent as a
+            # separate event so the desktop app can show it as a transient
+            # status label instead of piling it into the Reasoning transcript.
+            # See agent/conversation_loop.py's thinking_callback call sites.
+            if stream:
+                conn.emit_threadsafe(
+                    loop, event("session.status", {"session_id": session.id, "text": text or ""})
                 )
 
         def on_tool_start(call_id, name, args) -> None:
@@ -377,7 +393,7 @@ class BridgeServer:
         agent = session.agent
         agent.stream_delta_callback = on_delta if stream else None
         agent.reasoning_callback = on_thought if stream else None
-        agent.thinking_callback = on_thought if stream else None
+        agent.thinking_callback = on_status if stream else None
         agent.tool_start_callback = on_tool_start
         agent.tool_complete_callback = on_tool_complete
 

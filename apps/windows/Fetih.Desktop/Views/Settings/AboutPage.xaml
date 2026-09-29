@@ -52,6 +52,42 @@
                 </StackPanel>
             </Border>
 
+            <!-- Güncellemeler -->
+            <Border Style="{StaticResource CardBorderStyle}">
+                <StackPanel Spacing="8">
+                    <TextBlock x:Name="UpdateSectionHeader" Style="{StaticResource SectionHeaderTextStyle}" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <Button x:Name="CheckUpdateButton"
+                                Click="CheckUpdateButton_Click"
+                                AutomationProperties.AutomationId="about_check_update" />
+                        <ProgressRing x:Name="UpdateProgressRing"
+                                      Width="18" Height="18"
+                                      IsActive="False"
+                                      Visibility="Collapsed" />
+                        <TextBlock x:Name="UpdateStatusText"
+                                   VerticalAlignment="Center"
+                                   Style="{StaticResource MutedTextStyle}" />
+                    </StackPanel>
+
+                    <InfoBar x:Name="UpdateAvailableInfoBar"
+                             IsOpen="False"
+                             IsClosable="False"
+                             Severity="Informational">
+                        <InfoBar.ActionButton>
+                            <Button x:Name="DownloadInstallButton"
+                                    Click="DownloadInstallButton_Click"
+                                    AutomationProperties.AutomationId="about_download_install" />
+                        </InfoBar.ActionButton>
+                    </InfoBar>
+
+                    <TextBlock x:Name="UpdateChannelText"
+                               Style="{StaticResource MutedTextStyle}"
+                               FontSize="11"
+                               Opacity="0.75" />
+                </StackPanel>
+            </Border>
+
             <!-- Bağlantılar -->
             <Border Style="{StaticResource CardBorderStyle}">
                 <StackPanel Spacing="4">

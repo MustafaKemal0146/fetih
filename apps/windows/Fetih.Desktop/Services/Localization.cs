@@ -384,12 +384,36 @@ public static class Loc
         ["about.row.windows"] = new("Windows", "Windows"),
         ["about.row.install_type"] = new("Kurulum tipi", "Installation type"),
         ["about.row.install_desc"] = new(
-            "Bu derleme paketlenmemiş (paket kimliği olmadan) çalışır; güncelleme dağıtımı depodan elle yapılır.",
-            "This build runs unpackaged (without package identity); updates are distributed manually from the repository."),
+            "Bu derleme paketlenmemiş (paket kimliği olmadan) çalışır; aşağıdaki Güncellemeler bölümü GitHub Releases'i kontrol eder.",
+            "This build runs unpackaged (without package identity); the Updates section below checks GitHub Releases."),
         ["about.row.app_dir"] = new("Uygulama klasörü", "Application directory"),
         ["about.unknown"] = new("bilinmiyor", "unknown"),
         ["about.install.packaged"] = new("Paketli (MSIX)", "Packaged (MSIX)"),
         ["about.install.unpackaged"] = new("Paketlenmemiş (geliştirici)", "Unpackaged (developer)"),
+
+        // ── Güncellemeler bölümü (Hakkında sayfası) ─────────────────────
+        ["update.section.header"] = new("Güncellemeler", "Updates"),
+        ["update.check_button"] = new("Güncellemeleri denetle", "Check for updates"),
+        ["update.checking"] = new("Denetleniyor…", "Checking…"),
+        ["update.up_to_date"] = new("Güncel sürümü kullanıyorsunuz.", "You're on the latest version."),
+        ["update.check_failed"] = new(
+            "Denetlenemedi — internet bağlantınızı kontrol edin.",
+            "Couldn't check — verify your internet connection."),
+        ["update.available"] = new("Yeni sürüm mevcut", "New version available"),
+        ["update.download_install"] = new("İndir ve kur", "Download and install"),
+        ["update.view_notes"] = new("Sürüm notlarını gör", "View release notes"),
+        ["update.downloading"] = new("İndiriliyor…", "Downloading…"),
+        ["update.installing"] = new(
+            "Kuruluyor — uygulama kısa süre sonra yeniden başlayacak…",
+            "Installing — the app will restart shortly…"),
+        ["update.no_asset_for_channel"] = new(
+            "Bu sürüm için indirilebilir bir paket bulunamadı.",
+            "No downloadable package was found for this release."),
+        ["update.install_failed"] = new(
+            "Güncelleme indirilirken/kurulurken bir hata oluştu.",
+            "An error occurred while downloading/installing the update."),
+        ["update.channel.setup"] = new("Kurulum sürümü", "Installed via Setup"),
+        ["update.channel.portable"] = new("Taşınabilir sürüm", "Portable version"),
 
         // ── Tanılama sayfası ─────────────────────────────────────────────
         ["diag.title"] = new("Tanılama", "Diagnostics"),
