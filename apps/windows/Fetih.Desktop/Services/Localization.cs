@@ -104,6 +104,20 @@ public static class Loc
         return key;
     }
 
+    /// <summary>Bir anahtarı etkin dile çevirip argümanlarla biçimlendirir.</summary>
+    public static string Format(string key, params object[] args)
+    {
+        var text = T(key);
+        try
+        {
+            return string.Format(text, args);
+        }
+        catch
+        {
+            return text;
+        }
+    }
+
     private static UiLanguage Resolve(string preference) => preference switch
     {
         "tr" => UiLanguage.Turkish,
@@ -233,15 +247,100 @@ public static class Loc
         ["settings.all"] = new("Detaylı Mod", "Advanced Mode"),
         ["settings.about"] = new("Hakkında", "About"),
 
+        // ── Ortak Diyaloglar ─────────────────────────────────────────────
+        ["dialog.save"] = new("Kaydet", "Save"),
+        ["dialog.cancel"] = new("İptal", "Cancel"),
+        ["dialog.confirm"] = new("Onayla", "Confirm"),
+        ["dialog.stop"] = new("Durdur", "Stop"),
+
         // ── Sohbet ───────────────────────────────────────────────────────
+        ["chat.default_title"] = new("Yeni sohbet", "New chat"),
         ["chat.placeholder"] = new(
             "Bir görev yaz… (ör. hedef alan adı için OSINT toplama)",
             "Type a task… (e.g. OSINT gathering for a target domain)"),
+        ["chat.prompt_placeholder"] = new(
+            "Mesajını yaz…",
+            "Type your message…"),
+        ["chat.new_chat"] = new("Yeni sohbet", "New chat"),
+        ["chat.empty_state"] = new("Nasıl yardımcı olabilirim?", "How can I help you?"),
+        ["chat.empty_state_title"] = new("Nasıl yardımcı olabilirim?", "How can I help you?"),
+        ["chat.empty_state_desc"] = new(
+            "Bir soru sorun, komut çalıştırın veya kod incelemesi isteyin.",
+            "Ask a question, run commands, or request a code review."),
+        ["chat.empty_prompt"] = new("FETİH siber güvenlik ve kodlama asistanınız hazır. Bir görev veya soru yazarak başlayın.", "FETİH cybersecurity and coding assistant is ready. Type a task or question to begin."),
+        ["chat.rename"] = new("Yeniden adlandır", "Rename"),
+        ["chat.delete"] = new("Sil", "Delete"),
+        ["chat.delete_all"] = new("Tüm sohbetleri sil", "Delete all chats"),
+        ["chat.delete_confirm_title"] = new("Sohbet silinsin mi?", "Delete chat?"),
+        ["chat.delete_confirm_body"] = new("\"{0}\" başlıklı sohbet kalıcı olarak silinecektir. Emin misiniz?", "Chat \"{0}\" will be permanently deleted. Are you sure?"),
+        ["chat.delete_all_confirm_title"] = new("Tüm sohbetler silinsin mi?", "Delete all chats?"),
+        ["chat.delete_all_confirm_body"] = new("Tüm kayıtlı sohbet geçmişi kalıcı olarak temizlenecektir. Bu işlem geri alınamaz. Emin misiniz?", "All saved chat history will be permanently cleared. This action cannot be undone. Are you sure?"),
+        ["chat.cancel_busy_confirm_title"] = new("Çalışan işlem durdurulsun mu?", "Stop active task?"),
+        ["chat.cancel_busy_confirm_body"] = new("Başka sohbete geçmek veya yeni sohbet açmak için devam eden işlem durdurulacak.", "The active task will be stopped to switch or create a new chat."),
         ["chat.hint"] = new(
             "Enter yeni satır · Ctrl+Enter gönderir",
             "Enter for a new line · Ctrl+Enter to send"),
+        ["chat.hint_default"] = new(
+            "Enter: Gönder · Shift+Enter: Yeni satır · Ctrl+N: Yeni sohbet",
+            "Enter: Send · Shift+Enter: New line · Ctrl+N: New chat"),
+        ["chat.hint_safety"] = new(
+            "Terminal komutları ve dosya yazma işlemleri otomatik onay mekanizmasıyla korunur",
+            "Terminal commands and file writes are protected with auto-approval checks"),
+        ["chat.hint_editing"] = new(
+            "Mesajı düzenliyorsunuz · Gönderildiğinde sonraki yanıtlar yenilenecek",
+            "Editing message · Submitting will regenerate subsequent responses"),
+        ["chat.session_timeout"] = new(
+            "Oturum zaman aşımına uğradı, yeni oturum açılıyor…",
+            "Session timed out, opening a new session…"),
         ["chat.send"] = new("Gönder", "Send"),
+        ["chat.stop"] = new("Durdur", "Stop"),
+        ["chat.cancelled"] = new("İşlem kullanıcı tarafından durduruldu.", "Operation cancelled by user."),
         ["chat.connecting"] = new("Bağlanıyor…", "Connecting…"),
+
+        // Aktivite Kartları & Durumlar
+        ["chat.activity.thinking"] = new("Düşünüyor…", "Thinking…"),
+        ["chat.activity.coding"] = new("Kodlanıyor…", "Writing code…"),
+        ["chat.activity.command"] = new("Komut çalıştırılıyor…", "Running command…"),
+        ["chat.activity.reading"] = new("Dosya okunuyor…", "Reading file…"),
+        ["chat.activity.running"] = new("Çalışıyor…", "Running…"),
+        ["chat.activity.thought_process"] = new("Düşünce süreci", "Thought process"),
+        ["chat.activity.actions"] = new("{0} işlem", "{0} actions"),
+        ["chat.activity.errors"] = new("{0} hata", "{0} errors"),
+        ["chat.activity.stopped"] = new("durduruldu", "stopped"),
+        ["unit.sec"] = new("sn", "s"),
+        ["unit.min"] = new("dk", "m"),
+
+        // Claude tarzı Aktivite & Sayaç Anahtarları
+        ["Activity_Thinking"] = new("Düşünüyor…", "Thinking…"),
+        ["Activity_Tool_write_file"] = new("Kodlanıyor…", "Writing code…"),
+        ["Activity_Tool_write_to_file"] = new("Kodlanıyor…", "Writing code…"),
+        ["Activity_Tool_terminal"] = new("Komut çalıştırılıyor…", "Running command…"),
+        ["Activity_Tool_execute_command"] = new("Komut çalıştırılıyor…", "Running command…"),
+        ["Activity_Tool_read_file"] = new("Dosya okunuyor…", "Reading file…"),
+        ["Activity_Tool_view_file"] = new("Dosya okunuyor…", "Reading file…"),
+        ["Activity_Tool_Default"] = new("Çalışıyor…", "Running…"),
+        ["Activity_Action_One"] = new("1 işlem", "1 action"),
+        ["Activity_Actions_Many"] = new("{0} işlem", "{0} actions"),
+        ["Activity_Error_One"] = new("1 hata", "1 error"),
+        ["Activity_Errors"] = new("{0} hata", "{0} errors"),
+        ["Activity_Cancelled"] = new("durduruldu", "stopped"),
+        ["Unit_Sec"] = new("sn", "s"),
+        ["Unit_Min"] = new("dk", "m"),
+        ["Chat_Working"] = new("Çalışıyor", "Working"),
+
+        ["chat.status.running"] = new("Çalışıyor…", "Running…"),
+        ["chat.status.done"] = new("Tamamlandı", "Completed"),
+        ["chat.status.error"] = new("Hata", "Error"),
+        ["chat.status.denied"] = new("Reddedildi", "Denied"),
+        ["chat.status.stopped"] = new("Durduruldu", "Stopped"),
+
+        // Araç Biçimlendirici (ToolFormatter)
+        ["tool.format.write_file"] = new("Dosya yaz · {0}", "Write file · {0}"),
+        ["tool.format.read_file"] = new("Dosya oku · {0}", "Read file · {0}"),
+        ["tool.format.denied"] = new(
+            "Bu işlem güvenlik veya onay kuralı nedeniyle reddedildi.\n\n",
+            "This operation was rejected by security or approval rules.\n\n"),
+        ["tool.format.exit_code"] = new("çıkış kodu: {0}", "exit code: {0}"),
         ["chat.role.user"] = new("Sen", "You"),
         ["chat.role.agent"] = new("FETİH", "FETİH"),
         ["chat.role.system"] = new("Sistem", "System"),

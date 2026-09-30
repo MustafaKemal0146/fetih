@@ -48,6 +48,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--port", type=int, default=0, help="WebSocket port (0 = pick a free one)")
     p.add_argument("--token", default="", help="shared token (default: $FETIH_BRIDGE_TOKEN or generated)")
     p.add_argument("--no-auth", action="store_true", help="disable the token check (stdio/debug only)")
+    p.add_argument("--fake-model", action="store_true", help="use a deterministic fake model for manual UI testing")
     p.add_argument("--print-handshake", action="store_true", default=True, help=argparse.SUPPRESS)
     p.add_argument("--version", action="store_true", help="print the bridge protocol version and exit")
     return p
@@ -62,11 +63,12 @@ def main(argv: Optional[List[str]] = None) -> int:
 
     token = (args.token or os.getenv("FETIH_BRIDGE_TOKEN") or "").strip()
     require_auth = not args.no_auth
+    fake_model = args.fake_model or bool(os.getenv("FETIH_FAKE_MODEL"))
 
     if args.stdio:
         # The parent process spawned us over a private pipe; it already holds
         # every privilege the bridge could grant, so a token adds nothing.
-        server = BridgeServer(token=token, require_auth=require_auth and bool(token))
+        server = BridgeServer(token=token, require_auth=require_auth and bool(token), fake_model=fake_model)
         try:
             return asyncio.run(serve_stdio(server, ready_frame=server.ready_frame()))
         except KeyboardInterrupt:
@@ -84,7 +86,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 2
 
     port = args.port or _free_port()
-    server = BridgeServer(token=token, require_auth=True)
+    server = BridgeServer(token=token, require_auth=True, fake_model=fake_model)
 
     def _announce(bound_port: int) -> None:
         # One machine-readable line on stdout so a launcher can parse it and

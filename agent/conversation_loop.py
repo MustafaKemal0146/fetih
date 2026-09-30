@@ -3102,7 +3102,14 @@ def run_conversation(
             elif hasattr(agent, "_codex_incomplete_retries"):
                 agent._codex_incomplete_retries = 0
             
-            # Check for tool calls
+            # Check for tool calls or raw DSML in content
+            if not assistant_message.tool_calls and assistant_message.content and ("DSML" in assistant_message.content or "function_calls" in assistant_message.content):
+                from agent.agent_runtime_helpers import extract_dsml_tool_calls
+                _cleaned_content, _dsml_tcs = extract_dsml_tool_calls(assistant_message.content)
+                if _dsml_tcs:
+                    assistant_message.tool_calls = _dsml_tcs
+                    assistant_message.content = _cleaned_content
+
             if assistant_message.tool_calls:
                 if not agent.quiet_mode:
                     agent._vprint(f"{agent.log_prefix}🔧 Processing {len(assistant_message.tool_calls)} tool call(s)...")

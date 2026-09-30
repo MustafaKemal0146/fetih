@@ -90,3 +90,8 @@ apps/windows/**/.vs/
 *.user
 *.suo
 dist/
+.ruff_cache/
+*.db
+*.db-shm
+*.db-wal
+

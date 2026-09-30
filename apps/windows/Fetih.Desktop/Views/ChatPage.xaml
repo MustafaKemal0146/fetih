@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:models="using:Fetih.Desktop.Models"
+    xmlns:controls="using:Fetih.Desktop.Controls"
     xmlns:services="using:Fetih.Desktop.Services"
     xmlns:views="using:Fetih.Desktop.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -11,14 +12,261 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-        <!--
-            Mesaj eylemi düğmeleri: görünürlük mesajın ROLÜNE, etiket ve ipucu
-            ise eylemin adına göre çözülür (bkz. ChatPage.xaml.cs).
-        -->
         <views:ChatActionVisibilityConverter x:Key="ChatActionVisibilityConverter" />
         <views:ChatActionLabelConverter x:Key="ChatActionLabelConverter" />
+
+        <!-- User Message Template -->
+        <DataTemplate x:Key="UserTemplate" x:DataType="models:ChatMessage">
+            <Grid Margin="16,4" HorizontalAlignment="Right" MaxWidth="680">
+                <Border Padding="14,10"
+                        CornerRadius="16,16,4,16"
+                        Background="{ThemeResource AccentFillColorDefaultBrush}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{x:Bind Text, Mode=OneWay}"
+                                   TextWrapping="Wrap"
+                                   IsTextSelectionEnabled="True"
+                                   Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                        <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right">
+                            <Button Click="CopyMessage_Click"
+                                    Padding="4,2"
+                                    FontSize="11"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Foreground="{ThemeResource TextOnAccentFillColorSecondaryBrush}"
+                                    Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy}" />
+                            <Button Click="EditMessage_Click"
+                                    Padding="4,2"
+                                    FontSize="11"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Foreground="{ThemeResource TextOnAccentFillColorSecondaryBrush}"
+                                    Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=edit}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </DataTemplate>
+
+        <!-- Assistant Message Template -->
+        <DataTemplate x:Key="AgentTemplate" x:DataType="models:ChatMessage">
+            <Grid Margin="16,4" HorizontalAlignment="Left" MaxWidth="780">
+                <Border Padding="14,10"
+                        CornerRadius="16,16,16,4"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                    <StackPanel Spacing="6">
+                        <services:ChatMarkdownView Markdown="{x:Bind Text, Mode=OneWay}"
+                                                   TextBrush="{ThemeResource TextFillColorPrimaryBrush}" />
+                        <ProgressRing IsActive="{x:Bind IsStreaming, Mode=OneWay}"
+                                      Width="14" Height="14"
+                                      Visibility="{x:Bind IsStreaming, Mode=OneWay}"
+                                      HorizontalAlignment="Left" />
+                        <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right"
+                                    Visibility="{x:Bind IsStreaming, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=invert}">
+                            <Button Click="CopyMessage_Click"
+                                    Padding="4,2"
+                                    FontSize="11"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy}" />
+                            <Button Click="RetryMessage_Click"
+                                    Padding="4,2"
+                                    FontSize="11"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=retry}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </DataTemplate>
+
+        <!-- Step Thought Template (Inside ActivityGroup) -->
+        <DataTemplate x:Key="StepThoughtTemplate" x:DataType="models:ChatMessage">
+            <Border Margin="0,4" Padding="4,2">
+                <TextBlock Text="{x:Bind Text, Mode=OneWay}"
+                           TextWrapping="Wrap"
+                           IsTextSelectionEnabled="True"
+                           FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </Border>
+        </DataTemplate>
+
+        <!-- Step Tool Template (Inside ActivityGroup) -->
+        <DataTemplate x:Key="StepToolTemplate" x:DataType="models:ChatMessage">
+            <Grid Margin="0,4">
+                <Expander HorizontalAlignment="Stretch"
+                          HorizontalContentAlignment="Stretch"
+                          IsExpanded="{x:Bind IsExpanded, Mode=TwoWay}">
+                    <Expander.Header>
+                        <Grid ColumnSpacing="8" HorizontalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <ProgressRing Width="12" Height="12"
+                                          IsActive="{x:Bind IsRunning, Mode=OneWay}"
+                                          Visibility="{x:Bind IsRunning, Mode=OneWay}" />
+                            <FontIcon Glyph="{x:Bind StatusGlyph, Mode=OneWay}" FontSize="12"
+                                      Visibility="{x:Bind IsNotRunning, Mode=OneWay}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{x:Bind ToolTitle, Mode=OneWay}"
+                                       FontWeight="SemiBold"
+                                       FontSize="11"
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center" />
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                <TextBlock Text="{x:Bind Duration, Mode=OneWay}"
+                                           FontSize="10"
+                                           Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                                <TextBlock Text="{x:Bind StatusText, Mode=OneWay}"
+                                           FontSize="10"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </Grid>
+                    </Expander.Header>
+                    <StackPanel Spacing="4">
+                        <Border Background="{ThemeResource LayerFillColorAltBrush}"
+                                CornerRadius="4"
+                                Padding="6"
+                                Visibility="{x:Bind HasInput, Mode=OneWay}">
+                            <ScrollViewer MaxHeight="160" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                                <TextBlock Text="{x:Bind ToolInput, Mode=OneWay}"
+                                           FontFamily="Consolas"
+                                           FontSize="11"
+                                           TextWrapping="Wrap"
+                                           IsTextSelectionEnabled="True" />
+                            </ScrollViewer>
+                        </Border>
+                        <Border Background="{ThemeResource LayerFillColorAltBrush}"
+                                CornerRadius="4"
+                                Padding="6"
+                                Visibility="{x:Bind HasOutput, Mode=OneWay}">
+                            <ScrollViewer MaxHeight="200" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                                <TextBlock Text="{x:Bind ToolOutput, Mode=OneWay}"
+                                           FontFamily="Consolas"
+                                           FontSize="11"
+                                           TextWrapping="Wrap"
+                                           IsTextSelectionEnabled="True" />
+                            </ScrollViewer>
+                        </Border>
+                    </StackPanel>
+                </Expander>
+            </Grid>
+        </DataTemplate>
+
+        <views:StepTemplateSelector x:Key="StepSelector"
+                                    Thought="{StaticResource StepThoughtTemplate}"
+                                    Tool="{StaticResource StepToolTemplate}" />
+
+        <!-- Claude-style Consolidated Activity Card Template -->
+        <DataTemplate x:Key="ActivityTemplate" x:DataType="models:ActivityGroup">
+            <Grid Margin="16,2" HorizontalAlignment="Left" MaxWidth="780">
+                <StackPanel Spacing="2">
+                    <!-- Entire Header Row as Clickable Button -->
+                    <Button Click="ToggleGroup_Click"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Stretch"
+                            Padding="6,4"
+                            CornerRadius="4"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            AutomationProperties.Name="{x:Bind SummaryText, Mode=OneWay}">
+                        <Grid ColumnSpacing="8" HorizontalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Left: Status Icon (Only when done) -->
+                            <FontIcon Grid.Column="0"
+                                      Glyph="{x:Bind HeaderGlyph, Mode=OneWay}"
+                                      FontSize="13"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      VerticalAlignment="Center"
+                                      Visibility="{x:Bind IsDone, Mode=OneWay}" />
+
+                            <!-- Middle: Text & Live Timer -->
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <!-- Running state: PulseText + Live Timer -->
+                                <controls:PulseText Text="{x:Bind Label, Mode=OneWay}"
+                                                    IsActive="{x:Bind IsRunning, Mode=OneWay}"
+                                                    VerticalAlignment="Center"
+                                                    Visibility="{x:Bind IsRunning, Mode=OneWay}" />
+                                <TextBlock Text="{x:Bind ElapsedText, Mode=OneWay}"
+                                           FontSize="13"
+                                           Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                           VerticalAlignment="Center"
+                                           Visibility="{x:Bind IsRunning, Mode=OneWay}" />
+
+                                <!-- Done state: Summary text (Label + Actions + Duration) -->
+                                <TextBlock Text="{x:Bind SummaryText, Mode=OneWay}"
+                                           FontSize="13"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                           VerticalAlignment="Center"
+                                           Visibility="{x:Bind IsDone, Mode=OneWay}" />
+                            </StackPanel>
+
+                            <!-- Right: Chevron (0 deg closed, 90 deg open) -->
+                            <FontIcon Grid.Column="2"
+                                      Glyph="&#xE76C;"
+                                      FontSize="11"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      VerticalAlignment="Center"
+                                      RenderTransformOrigin="0.5,0.5">
+                                <FontIcon.RenderTransform>
+                                    <RotateTransform Angle="{x:Bind ChevronAngle, Mode=OneWay}" />
+                                </FontIcon.RenderTransform>
+                            </FontIcon>
+                        </Grid>
+                    </Button>
+
+                    <!-- Collapsible Step Details (With 2px vertical border on left) -->
+                    <Border Visibility="{x:Bind IsExpanded, Mode=OneWay}"
+                            Margin="6,2,0,4"
+                            Padding="14,0,0,0"
+                            BorderThickness="2,0,0,0"
+                            BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}">
+                        <ScrollViewer MaxHeight="320"
+                                      HorizontalScrollBarVisibility="Disabled"
+                                      VerticalScrollBarVisibility="Auto"
+                                      PointerWheelChanged="ActivityScrollViewer_PointerWheelChanged">
+                            <ItemsControl ItemsSource="{x:Bind Steps}"
+                                          ItemTemplateSelector="{StaticResource StepSelector}" />
+                        </ScrollViewer>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </DataTemplate>
+
+        <!-- System Message Template -->
+        <DataTemplate x:Key="SystemTemplate" x:DataType="models:ChatMessage">
+            <Border HorizontalAlignment="Center" Margin="16,4" Padding="12,6"
+                    CornerRadius="8" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}">
+                <TextBlock Text="{x:Bind Text, Mode=OneWay}"
+                           FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                           TextWrapping="Wrap"
+                           TextAlignment="Center" />
+            </Border>
+        </DataTemplate>
+
+        <!-- Root Chat Selector -->
+        <views:ChatTemplateSelector x:Key="ChatSelector"
+                                    User="{StaticResource UserTemplate}"
+                                    Agent="{StaticResource AgentTemplate}"
+                                    Thought="{StaticResource StepThoughtTemplate}"
+                                    Tool="{StaticResource StepToolTemplate}"
+                                    Activity="{StaticResource ActivityTemplate}"
+                                    System="{StaticResource SystemTemplate}" />
     </Page.Resources>
 
+    <!-- Main Content Area: Full Width Chat -->
     <Grid Padding="20,12,20,16" RowSpacing="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -26,7 +274,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Bağlantı durumu rozeti -->
+        <!-- Top: Connection status badge -->
         <Border Grid.Row="0"
                 Padding="12,8"
                 CornerRadius="6"
@@ -36,239 +284,77 @@
             <Grid ColumnSpacing="10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!--
-                    Sohbet şeridindeki nokta da başlık çubuğu rozetiyle AYNI
-                    kaynaktan boyanır. Sabit sarı kaldığında iki gösterge aynı
-                    anda farklı şey söylüyordu: rozet "Model hatası", şerit
-                    hâlâ nötr sarı.
-                -->
                 <Ellipse x:Name="StatusDot"
                          Grid.Column="0"
                          Width="10"
                          Height="10"
                          VerticalAlignment="Center"
-                         AutomationProperties.AutomationId="chat_status_dot"
-                         AutomationProperties.AccessibilityView="Raw"
                          Fill="{x:Bind Status.BadgeBrush, Mode=OneWay}" />
 
                 <TextBlock Grid.Column="1"
                            VerticalAlignment="Center"
-                           FontWeight="SemiBold"
-                           Text="{x:Bind Status.StateLabel, Mode=OneWay}" />
-
-                <TextBlock Grid.Column="2"
-                           VerticalAlignment="Center"
-                           Opacity="0.65"
+                           Opacity="0.8"
                            TextTrimming="CharacterEllipsis"
                            Text="{x:Bind Status.Detail, Mode=OneWay}" />
 
-                <ProgressRing Grid.Column="3"
+                <ProgressRing Grid.Column="2"
                               Width="16"
                               Height="16"
-                              AutomationProperties.AccessibilityView="Raw"
                               IsActive="{x:Bind Status.IsBusy, Mode=OneWay}" />
             </Grid>
         </Border>
 
-        <!-- Mesaj listesi -->
-        <ListView x:Name="MessageList"
-                  Grid.Row="1"
-                  AutomationProperties.AutomationId="chat_messages"
-                  ItemsSource="{x:Bind Messages}"
-                  SelectionMode="None"
-                  IsItemClickEnabled="False"
-                  ScrollViewer.VerticalScrollBarVisibility="Auto">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Setter Property="Padding" Value="0,3" />
-                </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="models:ChatMessage">
-                    <!-- Baloncuk, role göre sağa/sola/ortaya yaslanır -->
-                    <Grid HorizontalAlignment="{x:Bind BubbleAlignment}"
-                          Margin="{x:Bind BubbleMargin}"
-                          MaxWidth="720">
-                        <!-- Normal mesaj baloncuğu (kullanıcı / asistan / sistem) -->
-                        <Border Padding="14,10"
-                                CornerRadius="{x:Bind BubbleCorner}"
-                                Background="{x:Bind BubbleBrushKey, Converter={StaticResource ThemeBrushConverter}}"
-                                BorderThickness="1"
-                                BorderBrush="{x:Bind BubbleBorderBrushKey, Converter={StaticResource ThemeBrushConverter}}"
-                                Visibility="{x:Bind IsBubble, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <StackPanel Spacing="4">
-                                <StackPanel Orientation="Horizontal" Spacing="8"
-                                            Visibility="{x:Bind IsSystem, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=invert}">
-                                    <TextBlock Text="{x:Bind RoleLabel}"
-                                               FontWeight="SemiBold"
-                                               FontSize="12"
-                                               Foreground="{x:Bind MetaBrushKey, Converter={StaticResource ThemeBrushConverter}}" />
-                                    <TextBlock Text="{x:Bind TimeLabel}"
-                                               FontSize="11"
-                                               Foreground="{x:Bind MetaBrushKey, Converter={StaticResource ThemeBrushConverter}}"
-                                               Opacity="0.8"
-                                               VerticalAlignment="Center" />
-                                </StackPanel>
+        <!-- Middle: Messages Flow + Empty State -->
+        <Grid Grid.Row="1">
+            <!-- Empty State Overlay -->
+            <StackPanel x:Name="EmptyStatePanel"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="12"
+                        Visibility="Collapsed">
+                <FontIcon Glyph="&#xE768;" FontSize="42" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                <TextBlock x:Name="EmptyStateTitle"
+                           FontSize="20"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center" />
+                <TextBlock x:Name="EmptyStateDesc"
+                           FontSize="13"
+                           Opacity="0.6"
+                           HorizontalAlignment="Center" />
+            </StackPanel>
 
-                                <!-- Düşünce Süreci (Reasoning / Thinking) Expander -->
-                                <Expander IsExpanded="{x:Bind IsThoughtExpanded, Mode=TwoWay}"
-                                          Visibility="{x:Bind ShowThoughtSection, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
-                                          HorizontalAlignment="Stretch"
-                                          HorizontalContentAlignment="Stretch"
-                                          Margin="0,2,0,4">
-                                    <Expander.Header>
-                                        <StackPanel Orientation="Horizontal" Spacing="8">
-                                            <ProgressRing Width="14" Height="14"
-                                                          IsActive="{x:Bind IsThinking, Mode=OneWay}"
-                                                          AutomationProperties.AccessibilityView="Raw"
-                                                          Visibility="{x:Bind IsThinking, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-                                            <TextBlock Text="{x:Bind ThoughtHeader, Mode=OneWay}"
-                                                       FontSize="12"
-                                                       FontWeight="SemiBold"
-                                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                        </StackPanel>
-                                    </Expander.Header>
-                                    <ScrollViewer MaxHeight="220" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                                        <TextBlock Text="{x:Bind Thought, Mode=OneWay}"
-                                                   FontSize="12"
-                                                   FontFamily="Consolas"
-                                                   TextWrapping="Wrap"
-                                                   IsTextSelectionEnabled="True"
-                                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                                    </ScrollViewer>
-                                </Expander>
+            <!-- Messages Stream -->
+            <ScrollViewer x:Name="Scroller"
+                          VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <ItemsControl x:Name="MessageItems"
+                                  ItemsSource="{x:Bind Messages}"
+                                  ItemTemplateSelector="{StaticResource ChatSelector}" />
 
-                                <!--
-                                    Asistan ve sistem mesajları güvenli markdown ile
-                                    çizilir (bkz. Services/ChatMarkdown.cs). Kullanıcı
-                                    mesajı düz metin kalır: kullanıcının yazdığı
-                                    karakterler biçim olarak yorumlanmasın.
-                                    Render edici bağlantı üretmez, görsel yüklemez.
-                                -->
-                                <services:ChatMarkdownView
-                                    Markdown="{x:Bind Text, Mode=OneWay}"
-                                    TextBrush="{x:Bind TextBrushKey, Converter={StaticResource ThemeBrushConverter}}"
-                                    Visibility="{x:Bind IsUser, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=invert}" />
-
-                                <TextBlock Text="{x:Bind Text, Mode=OneWay}"
-                                           TextWrapping="Wrap"
-                                           IsTextSelectionEnabled="True"
-                                           Foreground="{x:Bind TextBrushKey, Converter={StaticResource ThemeBrushConverter}}"
-                                           Visibility="{x:Bind IsUser, Converter={StaticResource BoolToVisibilityConverter}}" />
-
-                                <!--
-                                    Mesaj eylemleri. Rol başına görünürlük:
-                                    · Kopyala  → kullanıcı, ajan, sistem
-                                    · Düzenle  → yalnızca kullanıcı
-                                    · Yeniden dene → kullanıcı, ajan
-                                -->
-                                <StackPanel Orientation="Horizontal"
-                                            Spacing="2"
-                                            Margin="0,2,-4,-4"
-                                            HorizontalAlignment="Right">
-                                    <Button Click="CopyMessage_Click"
-                                            Padding="6,2"
-                                            FontSize="11"
-                                            Background="Transparent"
-                                            BorderThickness="0"
-                                            UseSystemFocusVisuals="True"
-                                            Foreground="{x:Bind MetaBrushKey, Converter={StaticResource ThemeBrushConverter}}"
-                                            AutomationProperties.AutomationId="chat_action_copy"
-                                            AutomationProperties.Name="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy}"
-                                            Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy}"
-                                            ToolTipService.ToolTip="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy.hint}"
-                                            Visibility="{x:Bind Role, Converter={StaticResource ChatActionVisibilityConverter}, ConverterParameter=User|Agent|System}" />
-
-                                    <Button Click="EditMessage_Click"
-                                            Padding="6,2"
-                                            FontSize="11"
-                                            Background="Transparent"
-                                            BorderThickness="0"
-                                            UseSystemFocusVisuals="True"
-                                            Foreground="{x:Bind MetaBrushKey, Converter={StaticResource ThemeBrushConverter}}"
-                                            AutomationProperties.AutomationId="chat_action_edit"
-                                            AutomationProperties.Name="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=edit}"
-                                            Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=edit}"
-                                            ToolTipService.ToolTip="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=edit.hint}"
-                                            Visibility="{x:Bind Role, Converter={StaticResource ChatActionVisibilityConverter}, ConverterParameter=User}" />
-
-                                    <Button Click="RetryMessage_Click"
-                                            Padding="6,2"
-                                            FontSize="11"
-                                            Background="Transparent"
-                                            BorderThickness="0"
-                                            UseSystemFocusVisuals="True"
-                                            Foreground="{x:Bind MetaBrushKey, Converter={StaticResource ThemeBrushConverter}}"
-                                            AutomationProperties.AutomationId="chat_action_retry"
-                                            AutomationProperties.Name="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=retry}"
-                                            Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=retry}"
-                                            ToolTipService.ToolTip="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=retry.hint}"
-                                            Visibility="{x:Bind Role, Converter={StaticResource ChatActionVisibilityConverter}, ConverterParameter=User|Agent}" />
-                                </StackPanel>
-                            </StackPanel>
-                        </Border>
-
-                        <!-- Araç-kullanım kartı (session.tool_call / tool_result) -->
-                        <Border Padding="12,10"
-                                CornerRadius="{x:Bind BubbleCorner}"
-                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
-                                BorderThickness="1"
-                                BorderBrush="{ThemeResource SystemFillColorAttentionBackgroundBrush}"
-                                Visibility="{x:Bind IsTool, Converter={StaticResource BoolToVisibilityConverter}}">
-                            <StackPanel Spacing="6">
-                                <StackPanel Orientation="Horizontal" Spacing="8">
-                                    <ProgressRing Width="14" Height="14"
-                                                  IsActive="{x:Bind IsRunning, Mode=OneWay}"
-                                                  AutomationProperties.AccessibilityView="Raw" />
-                                    <TextBlock Text="{x:Bind ToolHeader, Mode=OneWay}"
-                                               FontWeight="SemiBold"
-                                               FontSize="13" />
-                                    <TextBlock Text="{x:Bind TimeLabel}"
-                                               FontSize="12"
-                                               Opacity="0.5"
-                                               VerticalAlignment="Center" />
-                                </StackPanel>
-                                <TextBlock Text="{x:Bind ToolArguments}"
-                                           FontFamily="Consolas"
-                                           FontSize="11"
-                                           Opacity="0.7"
-                                           TextWrapping="Wrap"
-                                           IsTextSelectionEnabled="True" />
-                                <TextBlock Text="{x:Bind ToolResult, Mode=OneWay}"
-                                           FontFamily="Consolas"
-                                           FontSize="11"
-                                           Opacity="0.85"
-                                           TextWrapping="Wrap"
-                                           IsTextSelectionEnabled="True"
-                                           Visibility="{x:Bind HasToolResult, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}" />
-
-                                <!-- Araç kartı da panoya kopyalanabilir (ad + argüman + sonuç). -->
-                                <Button Click="CopyMessage_Click"
-                                        Padding="6,2"
-                                        FontSize="11"
-                                        Background="Transparent"
-                                        BorderThickness="0"
-                                        HorizontalAlignment="Right"
-                                        UseSystemFocusVisuals="True"
-                                        AutomationProperties.AutomationId="chat_tool_copy"
-                                        AutomationProperties.Name="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy}"
-                                        Content="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy}"
-                                        ToolTipService.ToolTip="{x:Bind Role, Converter={StaticResource ChatActionLabelConverter}, ConverterParameter=copy.hint}"
-                                        Visibility="{x:Bind Role, Converter={StaticResource ChatActionVisibilityConverter}, ConverterParameter=Tool}" />
-                            </StackPanel>
-                        </Border>
+                    <!-- Bottom Working Indicator (Outside Messages collection) -->
+                    <Grid x:Name="BottomWorkingIndicator"
+                          Margin="30,8,0,16"
+                          HorizontalAlignment="Left"
+                          Visibility="Collapsed">
+                        <FontIcon x:Name="WorkingSpinnerIcon"
+                                  Glyph="&#xE735;"
+                                  FontSize="22"
+                                  Foreground="{ThemeResource AccentFillColorDefaultBrush}"
+                                  RenderTransformOrigin="0.5,0.5">
+                            <FontIcon.RenderTransform>
+                                <RotateTransform x:Name="WorkingSpinnerRotation" Angle="0" />
+                            </FontIcon.RenderTransform>
+                        </FontIcon>
                     </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
 
-        <!-- Giriş kutusu: Enter yeni satır, Ctrl+Enter gönderir -->
+        <!-- Bottom: Input box, Send & Stop buttons -->
         <Grid Grid.Row="2" ColumnSpacing="8" RowSpacing="4">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -299,13 +385,10 @@
                     IsEnabled="False"
                     AutomationProperties.AutomationId="chat_send"
                     Style="{StaticResource AccentButtonStyle}"
-                    Click="SendButton_Click" />
+                    Click="SendButton_Click">
+                <FontIcon Glyph="&#xE724;" />
+            </Button>
 
-            <!--
-                Tur sürerken Gönder'in YERİNE geçer (aynı hücre): üretim
-                iptal edilebilir olsun diye. Görünürlüğü UpdateSendButton
-                yönetir.
-            -->
             <Button x:Name="StopButton"
                     Grid.Row="0"
                     Grid.Column="1"
@@ -313,7 +396,9 @@
                     VerticalAlignment="Bottom"
                     Visibility="Collapsed"
                     AutomationProperties.AutomationId="chat_stop"
-                    Click="StopButton_Click" />
+                    Click="StopButton_Click">
+                <FontIcon Glyph="&#xE71A;" />
+            </Button>
 
             <TextBlock x:Name="HintText"
                        Grid.Row="1"

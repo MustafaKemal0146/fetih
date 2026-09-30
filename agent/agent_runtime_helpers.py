@@ -503,6 +503,10 @@ def strip_think_blocks(agent, content: str) -> str:
         content,
         flags=re.DOTALL | re.IGNORECASE,
     )
+    # 1d. DSML / DeepSeek raw tool call blocks (<｜DSML｜...>, <|DSML|...>)
+    content = re.sub(r'<[|｜]DSML[|｜][^>]*>.*?</[|｜]DSML[|｜][^>]*>', '', content, flags=re.DOTALL | re.IGNORECASE)
+    content = re.sub(r'<[|｜]DSML[|｜][^>]*>.*$', '', content, flags=re.DOTALL | re.IGNORECASE)
+
     # 2. Unterminated reasoning block — open tag at a block boundary
     #    (start of text, or after a newline) with no matching close.
     #    Strip from the tag to end of string.  Fixes #8878 / #9568
@@ -520,17 +524,73 @@ def strip_think_blocks(agent, content: str) -> str:
         content,
         flags=re.IGNORECASE,
     )
-    # 3b. Stray tool-call closers. (We do NOT strip bare <function> or
-    #     unterminated <function name="..."> because a truncated tail
-    #     during streaming may still be valuable to the user; matches
-    #     OpenClaw's intentional asymmetry.)
+    # 3b. Stray tool-call closers and DSML fragments.
     content = re.sub(
         r'</(?:tool_call|tool_calls|tool_result|function_call|function_calls|function)>\s*',
         '',
         content,
         flags=re.IGNORECASE,
     )
+    content = re.sub(
+        r'</?[|｜]DSML[|｜][^>]*>\s*',
+        '',
+        content,
+        flags=re.IGNORECASE,
+    )
     return content
+
+
+def extract_dsml_tool_calls(content: str) -> Tuple[str, List[Any]]:
+    """Extract DSML/DeepSeek raw tool calls from content and return (cleaned_text, tool_calls)."""
+    if not content or ("DSML" not in content and "function_calls" not in content):
+        return content, []
+
+    tool_calls: List[Any] = []
+    from types import SimpleNamespace
+
+    invoke_pattern = re.compile(
+        r'<[|｜]DSML[|｜]invoke\s+name=["\'](?P<name>[^"\']+)["\']\s*>(?P<body>.*?)</[|｜]DSML[|｜]invoke>',
+        re.DOTALL | re.IGNORECASE,
+    )
+    param_pattern = re.compile(
+        r'<[|｜]DSML[|｜]parameter\s+name=["\'](?P<pname>[^"\']+)["\']\s*>(?P<pval>.*?)</[|｜]DSML[|｜]parameter>',
+        re.DOTALL | re.IGNORECASE,
+    )
+
+    for m in invoke_pattern.finditer(content):
+        tool_name = m.group("name").strip()
+        body = m.group("body")
+        args_dict = {}
+        for pm in param_pattern.finditer(body):
+            pname = pm.group("pname").strip()
+            pval = pm.group("pval").strip()
+            try:
+                args_dict[pname] = json.loads(pval)
+            except Exception:
+                args_dict[pname] = pval
+
+        call_id = f"call_{uuid.uuid4().hex[:8]}"
+        tc = SimpleNamespace(
+            id=call_id,
+            type="function",
+            function=SimpleNamespace(
+                name=tool_name,
+                arguments=json.dumps(args_dict, ensure_ascii=False),
+            ),
+        )
+        tool_calls.append(tc)
+
+    cleaned = re.sub(
+        r'<[|｜]DSML[|｜][^>]*>.*?</[|｜]DSML[|｜][^>]*>',
+        '',
+        content,
+        flags=re.DOTALL | re.IGNORECASE,
+    )
+    cleaned = re.sub(r'<[|｜]DSML[|｜].*$', '', cleaned, flags=re.DOTALL | re.IGNORECASE)
+    cleaned = re.sub(r'</?[|｜]DSML[|｜][^>]*>', '', cleaned, flags=re.IGNORECASE).strip()
+
+    return cleaned, tool_calls
+
 
 
 

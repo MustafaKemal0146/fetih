@@ -228,8 +228,59 @@ def test_empty_message_rejected_before_any_agent_work():
 
 def test_session_list_starts_empty():
     server = BridgeServer(require_auth=False)
+    server.store.delete_all()
     conn = FakeConn(authenticated=True)
     assert drive(server, conn, "session.list")["result"]["sessions"] == []
+
+
+def test_session_crud_and_persistence():
+    server = BridgeServer(require_auth=False)
+    server.store.delete_all()
+    conn = FakeConn(authenticated=True)
+
+    # 1. Create
+    res = drive(server, conn, "session.create", {"session_id": "s1", "title": "Test 1"})["result"]
+    assert res["session_id"] == "s1"
+    assert res["title"] == "Test 1"
+
+    # 2. List
+    list_res = drive(server, conn, "session.list")["result"]["sessions"]
+    assert len(list_res) == 1
+    assert list_res[0]["session_id"] == "s1"
+    assert list_res[0]["title"] == "Test 1"
+
+    # 3. Rename
+    rename_res = drive(server, conn, "session.rename", {"session_id": "s1", "title": "New Title"})["result"]
+    assert rename_res["title"] == "New Title"
+
+    # Verify session.updated event emitted
+    updated_events = [f for f in conn.sent if f.get("method") == "session.updated"]
+    assert len(updated_events) >= 1
+    assert updated_events[-1]["params"]["session_id"] == "s1"
+    assert updated_events[-1]["params"]["title"] == "New Title"
+
+    # 4. Load
+    server.store.append("s1", "user", {"text": "Hello"})
+    server.store.append("s1", "assistant", {"text": "World"})
+    load_res = drive(server, conn, "session.load", {"session_id": "s1"})["result"]
+    assert load_res["session_id"] == "s1"
+    assert load_res["title"] == "New Title"
+    assert len(load_res["items"]) == 2
+    assert load_res["items"][0]["kind"] == "user"
+    assert load_res["items"][0]["text"] == "Hello"
+
+    # 5. Delete
+    del_res = drive(server, conn, "session.delete", {"session_id": "s1"})["result"]
+    assert del_res["deleted"] is True
+    assert drive(server, conn, "session.list")["result"]["sessions"] == []
+
+    # 6. Delete all
+    drive(server, conn, "session.create", {"session_id": "s2", "title": "Test 2"})
+    drive(server, conn, "session.create", {"session_id": "s3", "title": "Test 3"})
+    assert len(drive(server, conn, "session.list")["result"]["sessions"]) == 2
+    drive(server, conn, "session.delete_all")
+    assert drive(server, conn, "session.list")["result"]["sessions"] == []
+
 
 
 # ── read-only introspection works without a provider ─────────────────────
@@ -398,7 +449,7 @@ def test_session_thought_event_emitted():
             self.tool_start_callback = None
             self.tool_complete_callback = None
 
-        def run_conversation(self, message):
+        def run_conversation(self, message, *args, **kwargs):
             if self.reasoning_callback:
                 self.reasoning_callback("Thinking step 1...")
             if self.stream_delta_callback:
@@ -425,4 +476,190 @@ def test_session_thought_event_emitted():
     delta_events = [f for f in conn.sent if f.get("method") == "session.delta"]
     assert len(delta_events) == 1
     assert delta_events[0]["params"]["text"] == "Answer text."
+
+
+def test_session_send_with_stored_session_id():
+    server = BridgeServer(require_auth=False)
+    server.store.delete_all()
+    conn = FakeConn(authenticated=True)
+
+    # Create session in store (as C# desktop app does via session.create)
+    create_res = drive(server, conn, "session.create", {"session_id": "persisted-session-1", "title": "Test"})
+    assert create_res["result"]["session_id"] == "persisted-session-1"
+
+    res = drive(server, conn, "session.send", {
+        "session_id": "persisted-session-1",
+        "message": "hello",
+    })
+    assert "error" not in res or res["error"]["code"] != -32603
+
+
+def test_session_send_unknown_session_id():
+    server = BridgeServer(require_auth=False)
+    server.store.delete_all()
+    conn = FakeConn(authenticated=True)
+
+    res = drive(server, conn, "session.send", {
+        "session_id": "non-existent-id",
+        "message": "hello",
+    })
+    assert res["error"]["code"] == SESSION_NOT_FOUND
+    error_events = [f for f in conn.sent if f.get("method") == "session.error"]
+    assert len(error_events) >= 1
+    assert error_events[-1]["params"]["session_id"] == "non-existent-id"
+
+
+def test_dsml_tool_call_extraction():
+    from agent.agent_runtime_helpers import extract_dsml_tool_calls
+
+    raw_text = (
+        "I will run the command for you.\n"
+        "<｜DSML｜function_calls>\n"
+        '<｜DSML｜invoke name="terminal">\n'
+        '<｜DSML｜parameter name="command">echo test</｜DSML｜parameter>\n'
+        "</｜DSML｜invoke>\n"
+        "</｜DSML｜function_calls>"
+    )
+
+    cleaned, tool_calls = extract_dsml_tool_calls(raw_text)
+    assert "DSML" not in cleaned
+    assert "echo test" not in cleaned
+    assert len(tool_calls) == 1
+    assert tool_calls[0].function.name == "terminal"
+    assert json.loads(tool_calls[0].function.arguments) == {"command": "echo test"}
+
+    # Broken/empty DSML text
+    broken_text = "Some text with broken <｜DSML｜invoke and no closing"
+    cleaned2, tool_calls2 = extract_dsml_tool_calls(broken_text)
+    assert len(tool_calls2) == 0
+    assert "DSML" not in cleaned2
+
+
+def test_dsml_stream_delta_suppression():
+    server = BridgeServer(require_auth=False)
+    conn = FakeConn(authenticated=True)
+
+    class MockAgent:
+        def __init__(self):
+            self.stream_delta_callback = None
+            self.reasoning_callback = None
+            self.thinking_callback = None
+            self.tool_start_callback = None
+            self.tool_complete_callback = None
+
+        def run_conversation(self, message, conversation_history=None):
+            if self.stream_delta_callback:
+                self.stream_delta_callback("Here is the start of text. ")
+                self.stream_delta_callback("<｜DSML｜function_calls>")
+                self.stream_delta_callback('<｜DSML｜invoke name="terminal">')
+            return {"final_response": "Here is the start of text."}
+
+    from fetih_desktop_bridge.server import BridgeSession
+    session = BridgeSession("test-dsml-stream", MockAgent(), model="mock", provider="mock", cwd=".")
+    server.sessions[session.id] = session
+
+    drive(server, conn, "session.send", {
+        "session_id": session.id,
+        "message": "run something",
+        "stream": True,
+    })
+
+    deltas = [f["params"]["text"] for f in conn.sent if f.get("method") == "session.delta"]
+    assert len(deltas) == 1
+    assert deltas[0] == "Here is the start of text. "
+    # The DSML raw tags were suppressed from streaming
+    assert not any("DSML" in d for d in deltas)
+
+
+def test_thought_duration_recording():
+    server = BridgeServer(require_auth=False)
+    server.store.delete_all()
+    conn = FakeConn(authenticated=True)
+
+    class MockAgent:
+        def __init__(self):
+            self.reasoning_callback = None
+            self.stream_delta_callback = None
+            self.thinking_callback = None
+            self.tool_start_callback = None
+            self.tool_complete_callback = None
+
+        def run_conversation(self, message, *args, **kwargs):
+            if self.reasoning_callback:
+                self.reasoning_callback("Thinking step for timing...")
+            import time
+            time.sleep(0.02)
+            if self.stream_delta_callback:
+                self.stream_delta_callback("Done.")
+            return {"final_response": "Done."}
+
+    from fetih_desktop_bridge.server import BridgeSession
+    session = BridgeSession("test-timing-session", MockAgent(), model="mock", provider="mock", cwd=".")
+    server.sessions[session.id] = session
+
+    drive(server, conn, "session.send", {
+        "session_id": session.id,
+        "message": "calculate timing",
+        "stream": True,
+    })
+
+    items = server.store.items(session.id)
+    thought_items = [it for it in items if it.get("kind") == "thought"]
+    assert len(thought_items) >= 1
+    t = thought_items[0]
+    assert t["text"] == "Thinking step for timing..."
+    assert "ts_start" in t
+    assert "ts_end" in t
+    assert "duration_ms" in t
+    assert t["ts_end"] >= t["ts_start"]
+    assert t["duration_ms"] >= 0
+
+
+def test_session_load_returns_thought_duration():
+    server = BridgeServer(require_auth=False)
+    server.store.delete_all()
+    conn = FakeConn(authenticated=True)
+
+    sid = "test-load-session"
+    server.store.create(sid=sid, title="Timing Load Test")
+    server.store.append(sid, "thought", {
+        "text": "Recorded thought",
+        "ts_start": 1000.0,
+        "ts_end": 1002.5,
+        "duration_ms": 2500,
+    })
+    server.store.append(sid, "assistant", {"text": "Hello"})
+
+    res = drive(server, conn, "session.load", {"session_id": sid})["result"]
+    assert res["session_id"] == sid
+    assert res["title"] == "Timing Load Test"
+    assert len(res["items"]) == 2
+
+    thought_item = res["items"][0]
+    assert thought_item["kind"] == "thought"
+    assert thought_item["text"] == "Recorded thought"
+    assert thought_item["duration_ms"] == 2500
+    assert thought_item["ts_start"] == 1000.0
+    assert thought_item["ts_end"] == 1002.5
+
+
+def test_fake_model_flow():
+    server = BridgeServer(require_auth=False, fake_model=True)
+    server.store.delete_all()
+    conn = FakeConn(authenticated=True)
+
+    drive(server, conn, "session.send", {
+        "message": "test fake model flow",
+        "stream": True,
+    })
+
+    methods = [f.get("method") for f in conn.sent]
+    assert "session.thought" in methods
+    assert "session.tool_call" in methods
+    assert "session.tool_result" in methods
+    assert "session.delta" in methods
+
+
+
+
 

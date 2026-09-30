@@ -39,6 +39,9 @@ public sealed record BridgeDone(string SessionId, string Text, int? ApiCalls, lo
 /// <summary>Bir turun başarısız bitişi.</summary>
 public sealed record BridgeErrorEvent(string SessionId, string Error, string? Partial);
 
+/// <summary>Oturum özeti.</summary>
+public sealed record SessionSummary(string SessionId, string Title, double UpdatedAt);
+
 /// <summary>
 /// Masaüstü Köprüsü'nün GERÇEK WebSocket / JSON-RPC 2.0 (NDJSON) istemcisi.
 /// Süreci <see cref="BridgeProcess"/> başlatır, token'ı el sıkışmadan alır,
@@ -79,6 +82,7 @@ public sealed class BridgeClient : IDisposable
     public event Action<BridgeToolResult>? SessionToolResult;
     public event Action<BridgeDone>? SessionDone;
     public event Action<BridgeErrorEvent>? SessionError;
+    public event Action<string /*sessionId*/, string /*title*/, double /*updatedAt*/>? SessionUpdated;
     public event Action<JsonElement>? FindingDiscovered;
     public event Action? ConnectionLost;
 
@@ -145,7 +149,7 @@ public sealed class BridgeClient : IDisposable
             }
 
             Status.Update(BridgeConnectionState.Ready,
-                string.Format(Loc.T("bridge.detail.connected"), _protocolVersion, handshake.Pid));
+                Loc.Format("bridge.detail.connected", _protocolVersion, handshake.Pid));
         }
         catch (Exception ex)
         {
@@ -316,6 +320,13 @@ public sealed class BridgeClient : IDisposable
                         p.TryGetProperty("partial", out var pt) ? pt.ToString() : null));
                     break;
 
+                case "session.updated":
+                    SessionUpdated?.Invoke(
+                        Str(p, "session_id"),
+                        Str(p, "title"),
+                        p.TryGetProperty("updated_at", out var ua) && ua.ValueKind == JsonValueKind.Number ? ua.GetDouble() : 0.0);
+                    break;
+
                 case "findings.discovered":
                     if (p.TryGetProperty("finding", out var findingEl))
                     {
@@ -387,6 +398,80 @@ public sealed class BridgeClient : IDisposable
         var p = SessionParams(model, provider, toolsets, skipContextFiles, skipMemory);
         var res = await CallAsync("session.new", p, ct).ConfigureAwait(false);
         return Str(res, "session_id");
+    }
+
+    public async Task<string> CreateSessionAsync(string? sessionId = null, string title = "", CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        var p = new Dictionary<string, object?>();
+        if (!string.IsNullOrEmpty(sessionId)) p["session_id"] = sessionId;
+        if (!string.IsNullOrEmpty(title)) p["title"] = title;
+        var res = await CallAsync("session.create", p, ct).ConfigureAwait(false);
+        return Str(res, "session_id");
+    }
+
+    public async Task<List<SessionSummary>> ListSessionsAsync(CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        var res = await CallAsync("session.list", null, ct).ConfigureAwait(false);
+        var list = new List<SessionSummary>();
+        if (res.TryGetProperty("sessions", out var arr) && arr.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var item in arr.EnumerateArray())
+            {
+                var sid = Str(item, "session_id");
+                var title = Str(item, "title");
+                var updated = item.TryGetProperty("updated_at", out var ua) && ua.ValueKind == JsonValueKind.Number ? ua.GetDouble() : 0.0;
+                list.Add(new SessionSummary(sid, string.IsNullOrWhiteSpace(title) ? "Yeni sohbet" : title, updated));
+            }
+        }
+        return list;
+    }
+
+    public async Task<(string Title, List<StoredItem> Items)> LoadSessionAsync(string sessionId, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        var p = new Dictionary<string, object?> { ["session_id"] = sessionId };
+        var res = await CallAsync("session.load", p, ct).ConfigureAwait(false);
+        var title = Str(res, "title");
+        var items = new List<StoredItem>();
+        if (res.TryGetProperty("items", out var arr) && arr.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var it in arr.EnumerateArray())
+            {
+                var kind = Str(it, "kind");
+                var text = it.TryGetProperty("text", out var t) ? t.GetString() : null;
+                var callId = it.TryGetProperty("call_id", out var cid) ? cid.GetString() : null;
+                var name = it.TryGetProperty("name", out var n) ? n.GetString() : null;
+                var args = it.TryGetProperty("args", out var a) ? (a.ValueKind == JsonValueKind.String ? a.GetString() : a.GetRawText()) : null;
+                var result = it.TryGetProperty("result", out var r) ? (r.ValueKind == JsonValueKind.String ? r.GetString() : r.GetRawText()) : null;
+                var dur = it.TryGetProperty("duration_ms", out var d) && d.ValueKind == JsonValueKind.Number ? d.GetDouble() : (double?)null;
+                var tsStart = it.TryGetProperty("ts_start", out var tss) && tss.ValueKind == JsonValueKind.Number ? tss.GetDouble() : (double?)null;
+                var tsEnd = it.TryGetProperty("ts_end", out var tse) && tse.ValueKind == JsonValueKind.Number ? tse.GetDouble() : (double?)null;
+                items.Add(new StoredItem(kind, text, callId, name, args, result, dur, tsStart, tsEnd));
+            }
+        }
+        return (title, items);
+    }
+
+    public async Task RenameSessionAsync(string sessionId, string title, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        var p = new Dictionary<string, object?> { ["session_id"] = sessionId, ["title"] = title };
+        await CallAsync("session.rename", p, ct).ConfigureAwait(false);
+    }
+
+    public async Task DeleteSessionAsync(string sessionId, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        var p = new Dictionary<string, object?> { ["session_id"] = sessionId };
+        await CallAsync("session.delete", p, ct).ConfigureAwait(false);
+    }
+
+    public async Task DeleteAllSessionsAsync(CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        await CallAsync("session.delete_all", null, ct).ConfigureAwait(false);
     }
 
     /// <summary>
