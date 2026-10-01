@@ -382,6 +382,8 @@ class BridgeServer:
                 "session.done",
                 "session.error",
                 "session.updated",
+                "thought.label",
+                "session.thought_label",
             ],
         }
 
@@ -409,7 +411,21 @@ class BridgeServer:
             raise BridgeError(INVALID_PARAMS, "missing 'session_id'")
         items = self.store.items(sid)
         title = self.store.title(sid)
-        return {"session_id": sid, "title": title, "items": items}
+        running = False
+        pending = None
+        session = self.sessions.get(sid)
+        if session and session.busy and getattr(session, "recorder", None):
+            running = True
+            snap = session.recorder.snapshot()
+            if snap:
+                pending = snap
+        return {
+            "session_id": sid,
+            "title": title,
+            "items": items,
+            "running": running,
+            "pending": pending,
+        }
 
     def _m_session_rename(self, conn, params):
         sid = str(params.get("session_id") or "")
@@ -474,7 +490,10 @@ class BridgeServer:
             raise BridgeError(SESSION_BUSY, f"session {session.id} is already running a turn")
 
         from fetih_desktop_bridge.session_store import TranscriptRecorder
+        from fetih_desktop_bridge.thought_labeler import ThoughtLabeler
+
         recorder = TranscriptRecorder(self.store, session.id)
+        session.recorder = recorder
 
         # Ensure session in store and initialize title from first message if empty
         if not self.store.exists(session.id) or not self.store.title(session.id):
@@ -488,6 +507,22 @@ class BridgeServer:
 
         loop = self.loop_for(conn) or asyncio.get_running_loop()
         stream = params.get("stream", True) is not False
+
+        def on_thought_label(sid: str, label: str) -> None:
+            recorder.set_thought_label(label)
+            conn.emit_threadsafe(
+                loop, event("thought.label", {"session_id": sid, "label": label})
+            )
+            conn.emit_threadsafe(
+                loop, event("session.thought_label", {"session_id": sid, "label": label})
+            )
+
+        thought_labeler = ThoughtLabeler(
+            session_id=session.id,
+            loop=loop,
+            on_label=on_thought_label,
+            fake_model=self.fake_model,
+        )
 
         session.busy = True
         started = time.perf_counter()
@@ -505,6 +540,7 @@ class BridgeServer:
                 dsml_suppressed = True
                 return
             if stream and text:
+                thought_labeler.on_close()
                 recorder.text("assistant", text)
                 conn.emit_threadsafe(
                     loop, event("session.delta", {"session_id": session.id, "text": text})
@@ -515,6 +551,7 @@ class BridgeServer:
             # Groq thinking, ...). Streamed incrementally and appended by the
             # desktop app's Reasoning panel.
             if stream and text:
+                thought_labeler.on_chunk(text)
                 recorder.text("thought", text)
                 conn.emit_threadsafe(
                     loop, event("session.thought", {"session_id": session.id, "text": text})
@@ -532,6 +569,7 @@ class BridgeServer:
                 )
 
         def on_tool_start(call_id, name, args) -> None:
+            thought_labeler.on_close()
             recorder.tool_call(call_id, name, args)
             tool_calls.append({"id": str(call_id), "name": name})
             conn.emit_threadsafe(
@@ -617,8 +655,10 @@ class BridgeServer:
             await conn.send_frame(event("session.error", payload))
             raise BridgeError(AGENT_ERROR, payload["error"], {"session_id": session.id})
         finally:
+            thought_labeler.on_close()
             session.busy = False
             session.thread_id = None
+            session.recorder = None
             agent.stream_delta_callback = None
             agent.reasoning_callback = None
             agent.thinking_callback = None

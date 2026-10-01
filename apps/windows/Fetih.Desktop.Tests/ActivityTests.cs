@@ -340,4 +340,98 @@ public class ActivityTests
         // Süresiz eski kayıt "0 sn" içermemeli
         Assert.DoesNotContain("0 sn", act3.SummaryText);
     }
+
+    // ── 10. Canlı Etiket ve Araç Etiketi Denetimleri (ToolLabelBuilder) ───────
+
+    [Fact]
+    public void ToolLabelBuilder_Terminal_MasksSecretsAndExtractsFirstLine()
+    {
+        Loc.SetPreference("tr");
+        var args = "{\"command\": \"curl -H 'Authorization: Bearer my_secret_token_12345' https://api.fetih.dev\\nnext line\"}";
+        var label = ToolLabelBuilder.BuildLabel("terminal", args);
+
+        Assert.NotNull(label);
+        Assert.DoesNotContain("my_secret_token_12345", label);
+        Assert.Contains("Bearer ***", label);
+        Assert.DoesNotContain("next line", label);
+    }
+
+    [Fact]
+    public void ToolLabelBuilder_ReadFile_ExtractsFileName()
+    {
+        Loc.SetPreference("tr");
+        var args = "{\"path\": \"C:\\\\Users\\\\Project\\\\src\\\\config.json\"}";
+        var label = ToolLabelBuilder.BuildLabel("read_file", args);
+
+        Assert.NotNull(label);
+        Assert.Contains("config.json", label);
+    }
+
+    [Fact]
+    public void ToolLabelBuilder_WriteFile_ExtractsFileName()
+    {
+        Loc.SetPreference("tr");
+        var args = "{\"TargetFile\": \"/etc/nginx/sites-available/default\"}";
+        var label = ToolLabelBuilder.BuildLabel("write_file", args);
+
+        Assert.NotNull(label);
+        Assert.Contains("default", label);
+    }
+
+    [Fact]
+    public void ToolLabelBuilder_SearchWeb_ExtractsAndMasksQuery()
+    {
+        Loc.SetPreference("tr");
+        var args = "{\"query\": \"fetih agent password=SuperSecretPassword123\"}";
+        var label = ToolLabelBuilder.BuildLabel("search_web", args);
+
+        Assert.NotNull(label);
+        Assert.DoesNotContain("SuperSecretPassword123", label);
+        Assert.Contains("password=***", label);
+    }
+
+    [Fact]
+    public void ToolLabelBuilder_ReadUrl_ExtractsHost()
+    {
+        Loc.SetPreference("tr");
+        var args = "{\"url\": \"https://github.com/google/fetih/issues/42\"}";
+        var label = ToolLabelBuilder.BuildLabel("read_url_content", args);
+
+        Assert.NotNull(label);
+        Assert.Contains("github.com", label);
+    }
+
+    [Fact]
+    public void ToolLabelBuilder_NullOrEmptyArguments_FallsBackToDefaultTool()
+    {
+        Loc.SetPreference("tr");
+        var label = ToolLabelBuilder.BuildLabel("custom_scanner", "");
+        Assert.NotNull(label);
+        Assert.Contains("custom_scanner", label);
+    }
+
+    [Fact]
+    public void ActivityLabelBuilder_RawThoughtLeaks_Rejected()
+    {
+        Assert.Null(ActivityLabelBuilder.BuildLabel("kullanıcı benden dosyayı silmemi istiyor."));
+        Assert.Null(ActivityLabelBuilder.BuildLabel("The user wants to analyze the logs first."));
+        Assert.Null(ActivityLabelBuilder.BuildLabel("Okay, let's explore the directory structure."));
+        Assert.Null(ActivityLabelBuilder.BuildLabel("I should check if the server is running."));
+        Assert.Null(ActivityLabelBuilder.BuildLabel("I need to verify authentication keys."));
+    }
+
+    [Fact]
+    public void TranscriptBuilder_WithStoredLabel_RestoresLabelOnGroup()
+    {
+        var items = new List<StoredItem>
+        {
+            new("thought", "Düşünce metni...", null, null, null, null, 1500, null, null, "Kimlik doğrulama kodu analiz ediliyor")
+        };
+
+        var messages = TranscriptBuilder.Build(items);
+        Assert.Single(messages);
+        Assert.IsType<ActivityGroup>(messages[0]);
+        var group = (ActivityGroup)messages[0];
+        Assert.Equal("Kimlik doğrulama kodu analiz ediliyor", group.Label);
+    }
 }

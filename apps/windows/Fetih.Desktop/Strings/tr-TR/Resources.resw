@@ -51,25 +51,34 @@
     <value>Düşünüyor…</value>
   </data>
   <data name="Activity_Tool_Default" xml:space="preserve">
-    <value>Çalışıyor…</value>
+    <value>{0} çalıştırılıyor</value>
+  </data>
+  <data name="Activity_Tool_edit_file" xml:space="preserve">
+    <value>{0} düzenleniyor</value>
   </data>
   <data name="Activity_Tool_execute_command" xml:space="preserve">
-    <value>Komut çalıştırılıyor…</value>
+    <value>Komut çalıştırılıyor: {0}</value>
+  </data>
+  <data name="Activity_Tool_fetch_url" xml:space="preserve">
+    <value>{0} getiriliyor</value>
   </data>
   <data name="Activity_Tool_read_file" xml:space="preserve">
-    <value>Dosya okunuyor…</value>
+    <value>{0} okunuyor</value>
+  </data>
+  <data name="Activity_Tool_search_web" xml:space="preserve">
+    <value>Web'de aranıyor: {0}</value>
   </data>
   <data name="Activity_Tool_terminal" xml:space="preserve">
-    <value>Komut çalıştırılıyor…</value>
+    <value>Komut çalıştırılıyor: {0}</value>
   </data>
   <data name="Activity_Tool_view_file" xml:space="preserve">
-    <value>Dosya okunuyor…</value>
+    <value>{0} okunuyor</value>
   </data>
   <data name="Activity_Tool_write_file" xml:space="preserve">
-    <value>Kodlanıyor…</value>
+    <value>{0} yazılıyor</value>
   </data>
   <data name="Activity_Tool_write_to_file" xml:space="preserve">
-    <value>Kodlanıyor…</value>
+    <value>{0} yazılıyor</value>
   </data>
   <data name="Chat_Working" xml:space="preserve">
     <value>Çalışıyor</value>

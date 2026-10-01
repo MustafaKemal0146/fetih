@@ -95,6 +95,25 @@ class SessionStore:
                 logger.warning("Failed to parse item payload: %s", e)
         return result
 
+    def update_last_thought_label(self, sid: str, label: str) -> None:
+        if not label:
+            return
+        row = self.db.execute(
+            "SELECT id, payload FROM items WHERE session_id=? AND kind='thought' ORDER BY id DESC LIMIT 1",
+            (sid,),
+        ).fetchone()
+        if row:
+            try:
+                data = json.loads(row["payload"])
+                data["label"] = label
+                self.db.execute(
+                    "UPDATE items SET payload=? WHERE id=?",
+                    (json.dumps(data, ensure_ascii=False), row["id"]),
+                )
+                self.db.commit()
+            except Exception as e:
+                logger.warning("Failed to update thought label: %s", e)
+
     def delete(self, sid: str) -> None:
         self.db.execute("DELETE FROM sessions WHERE id=?", (sid,))
         self.db.commit()
@@ -114,6 +133,26 @@ class TranscriptRecorder:
         self.buf: List[str] = []
         self.t0: Dict[str, float] = {}
         self.kind_start: Optional[float] = None
+        self.current_thought_label: Optional[str] = None
+
+    def set_thought_label(self, label: str) -> None:
+        if not label:
+            return
+        self.current_thought_label = label
+        self.store.update_last_thought_label(self.sid, label)
+
+    def snapshot(self) -> Optional[Dict[str, Any]]:
+        if self.kind and self.buf:
+            text_val = "".join(self.buf)
+            if text_val:
+                payload: Dict[str, Any] = {"text": text_val, "in_flight": True}
+                if self.kind == "thought":
+                    if self.kind_start is not None:
+                        payload["ts_start"] = self.kind_start
+                    if self.current_thought_label:
+                        payload["label"] = self.current_thought_label
+                return {"kind": self.kind, **payload}
+        return None
 
     def text(self, kind: str, chunk: str) -> None:
         if not chunk:
@@ -129,15 +168,19 @@ class TranscriptRecorder:
             text_val = "".join(self.buf)
             if text_val:
                 payload: Dict[str, Any] = {"text": text_val}
-                if self.kind == "thought" and self.kind_start is not None:
-                    now = time.time()
-                    payload["ts_start"] = self.kind_start
-                    payload["ts_end"] = now
-                    payload["duration_ms"] = int((now - self.kind_start) * 1000)
+                if self.kind == "thought":
+                    if self.kind_start is not None:
+                        now = time.time()
+                        payload["ts_start"] = self.kind_start
+                        payload["ts_end"] = now
+                        payload["duration_ms"] = int((now - self.kind_start) * 1000)
+                    if self.current_thought_label:
+                        payload["label"] = self.current_thought_label
                 self.store.append(self.sid, self.kind, payload)
         self.kind = None
         self.buf = []
         self.kind_start = None
+        self.current_thought_label = None
 
     def tool_call(self, call_id: str, name: str, args: Any) -> None:
         self.flush()

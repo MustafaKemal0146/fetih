@@ -98,24 +98,25 @@ Bu doküman, FETİH masaüstü uygulamasında (WinUI 3 / Windows App SDK) Claude
 
 ---
 
-### 6. Alttaki "Çalışıyor" Göstergesi
-### 6. Bottom Rotating Working Indicator
-- **Eylem / Action:** Kullanıcı mesaj gönderir ve yanıt beklenir.
+### 6. Tur Sırasında Sayfa Değiştirme ve Geri Dönme (Gezinme Dayanıklılığı)
+### 6. Navigation Resilience During In-Flight Turn
+- **Eylem / Action:** Sohbet kutusuna bir soru gönderip işlem başladıktan hemen sonra sol menüden Yetenekler (Skills) veya Ayarlar (Settings) sayfasına geçin, 2-3 saniye bekleyip tekrar Sohbet (Chat) sayfasına dönün.
 - **Beklenen Durum / Expected State:**
-  - Sohbet listesinin en altında, mesaj balonlarının dışında sol hizalı (ajan mesajı girintisiyle uyumlu `Margin="30,8,0,16"`) dönen bir gösterge ve yanında "Çalışıyor…" ("Working…") metni belirir.
-  - Mesajlar koleksiyonuna sahte mesaj eklenmez; `Messages.Count` değişmez.
-  - Ajan yanıtı tamamlandığında gösterge yumuşakça durur ve 150 ms debounce sonrası görünmez olur (`Visibility = Collapsed`).
-- **Ekran Görüntüsü / Screenshot:** Yanıt üretilirken en altta görünen dönen gösterge.
+  - Sohbet sayfası boşalmaz veya sıfırlanmaz.
+  - Tur arka planda kesintisiz devam eder, gelen düşünce ve araç akışı canlı olarak akar.
+  - Aktivite satırındaki `PulseText` nefes alma animasyonu ve canlı saniye sayacı kesintisiz çalışır.
+  - Dönen yıldız/spinner tamamen kaldırılmıştır; canlılık PulseText + sayaç ve Durdur butonu ile hissettirilir.
+  - Yanıt tamamlandığında nihai ajan mesajı eksiksiz şekilde listeye eklenmiş olur.
+- **Ekran Görüntüsü / Screenshot:** Sayfadan çıkıp dönüldükten sonra devam eden canlı aktivite satırı.
 - [ ] Başarılı / Passed | [ ] Başarısız / Failed
 
 ---
 
 ### 7. Durdur Butonuna Basıldığında Akışın Durması
 ### 7. Cancel / Stop Button Behavior
-- **Eylem / Action:** Model düşünürken veya araç çalıştırırken sağ alttaki kırmızı kare "Durdur" butonuna tıklayın.
+- **Eylem / Action:** Model düşünürken veya araç çalıştırırken sağ alttaki kare "Durdur" butonuna tıklayın.
 - **Beklenen Durum / Expected State:**
   - Akış anında kesilir.
-  - Dönen alttaki gösterge kaybolur.
   - Aktivite özetine "durduruldu" ("stopped") rozeti eklenir (örn: `Talebi inceliyor · 1 işlem · durduruldu · 8 sn`).
   - Aktivite başlığındaki durum glifi durdurulma sembolüne (`\uE71A`) dönüşür.
   - Gönder butonu tekrar aktif olur.

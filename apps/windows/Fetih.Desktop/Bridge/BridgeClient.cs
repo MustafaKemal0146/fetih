@@ -42,6 +42,28 @@ public sealed record BridgeErrorEvent(string SessionId, string Error, string? Pa
 /// <summary>Oturum özeti.</summary>
 public sealed record SessionSummary(string SessionId, string Title, double UpdatedAt);
 
+/// <summary>Oturum yükleme sonucu (geriye dönük deconstruct uyumlu).</summary>
+public sealed record BridgeSessionLoadResult(
+    string Title,
+    List<StoredItem> Items,
+    bool Running = false,
+    StoredItem? Pending = null)
+{
+    public void Deconstruct(out string title, out List<StoredItem> items)
+    {
+        title = Title;
+        items = Items;
+    }
+
+    public void Deconstruct(out string title, out List<StoredItem> items, out bool running, out StoredItem? pending)
+    {
+        title = Title;
+        items = Items;
+        running = Running;
+        pending = Pending;
+    }
+}
+
 /// <summary>
 /// Masaüstü Köprüsü'nün GERÇEK WebSocket / JSON-RPC 2.0 (NDJSON) istemcisi.
 /// Süreci <see cref="BridgeProcess"/> başlatır, token'ı el sıkışmadan alır,
@@ -83,6 +105,7 @@ public sealed class BridgeClient : IDisposable
     public event Action<BridgeDone>? SessionDone;
     public event Action<BridgeErrorEvent>? SessionError;
     public event Action<string /*sessionId*/, string /*title*/, double /*updatedAt*/>? SessionUpdated;
+    public event Action<string /*sessionId*/, string /*label*/>? ThoughtLabel;
     public event Action<JsonElement>? FindingDiscovered;
     public event Action? ConnectionLost;
 
@@ -327,6 +350,11 @@ public sealed class BridgeClient : IDisposable
                         p.TryGetProperty("updated_at", out var ua) && ua.ValueKind == JsonValueKind.Number ? ua.GetDouble() : 0.0);
                     break;
 
+                case "thought.label":
+                case "session.thought_label":
+                    ThoughtLabel?.Invoke(Str(p, "session_id"), Str(p, "label"));
+                    break;
+
                 case "findings.discovered":
                     if (p.TryGetProperty("finding", out var findingEl))
                     {
@@ -428,30 +456,43 @@ public sealed class BridgeClient : IDisposable
         return list;
     }
 
-    public async Task<(string Title, List<StoredItem> Items)> LoadSessionAsync(string sessionId, CancellationToken ct = default)
+    public async Task<BridgeSessionLoadResult> LoadSessionAsync(string sessionId, CancellationToken ct = default)
     {
         await EnsureConnectedAsync(ct).ConfigureAwait(false);
         var p = new Dictionary<string, object?> { ["session_id"] = sessionId };
         var res = await CallAsync("session.load", p, ct).ConfigureAwait(false);
         var title = Str(res, "title");
+        var running = res.TryGetProperty("running", out var rEl) && rEl.ValueKind == JsonValueKind.True;
+        StoredItem? pending = null;
+        if (res.TryGetProperty("pending", out var pEl) && pEl.ValueKind == JsonValueKind.Object)
+        {
+            pending = ParseStoredItem(pEl);
+        }
+
         var items = new List<StoredItem>();
         if (res.TryGetProperty("items", out var arr) && arr.ValueKind == JsonValueKind.Array)
         {
             foreach (var it in arr.EnumerateArray())
             {
-                var kind = Str(it, "kind");
-                var text = it.TryGetProperty("text", out var t) ? t.GetString() : null;
-                var callId = it.TryGetProperty("call_id", out var cid) ? cid.GetString() : null;
-                var name = it.TryGetProperty("name", out var n) ? n.GetString() : null;
-                var args = it.TryGetProperty("args", out var a) ? (a.ValueKind == JsonValueKind.String ? a.GetString() : a.GetRawText()) : null;
-                var result = it.TryGetProperty("result", out var r) ? (r.ValueKind == JsonValueKind.String ? r.GetString() : r.GetRawText()) : null;
-                var dur = it.TryGetProperty("duration_ms", out var d) && d.ValueKind == JsonValueKind.Number ? d.GetDouble() : (double?)null;
-                var tsStart = it.TryGetProperty("ts_start", out var tss) && tss.ValueKind == JsonValueKind.Number ? tss.GetDouble() : (double?)null;
-                var tsEnd = it.TryGetProperty("ts_end", out var tse) && tse.ValueKind == JsonValueKind.Number ? tse.GetDouble() : (double?)null;
-                items.Add(new StoredItem(kind, text, callId, name, args, result, dur, tsStart, tsEnd));
+                items.Add(ParseStoredItem(it));
             }
         }
-        return (title, items);
+        return new BridgeSessionLoadResult(title, items, running, pending);
+    }
+
+    private static StoredItem ParseStoredItem(JsonElement it)
+    {
+        var kind = Str(it, "kind");
+        var text = it.TryGetProperty("text", out var t) ? t.GetString() : null;
+        var callId = it.TryGetProperty("call_id", out var cid) ? cid.GetString() : null;
+        var name = it.TryGetProperty("name", out var n) ? n.GetString() : null;
+        var args = it.TryGetProperty("args", out var a) ? (a.ValueKind == JsonValueKind.String ? a.GetString() : a.GetRawText()) : null;
+        var result = it.TryGetProperty("result", out var r) ? (r.ValueKind == JsonValueKind.String ? r.GetString() : r.GetRawText()) : null;
+        var dur = it.TryGetProperty("duration_ms", out var d) && d.ValueKind == JsonValueKind.Number ? d.GetDouble() : (double?)null;
+        var tsStart = it.TryGetProperty("ts_start", out var tss) && tss.ValueKind == JsonValueKind.Number ? tss.GetDouble() : (double?)null;
+        var tsEnd = it.TryGetProperty("ts_end", out var tse) && tse.ValueKind == JsonValueKind.Number ? tse.GetDouble() : (double?)null;
+        var label = it.TryGetProperty("label", out var l) ? l.GetString() : null;
+        return new StoredItem(kind, text, callId, name, args, result, dur, tsStart, tsEnd, label);
     }
 
     public async Task RenameSessionAsync(string sessionId, string title, CancellationToken ct = default)

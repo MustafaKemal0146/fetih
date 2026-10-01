@@ -10,4 +10,5 @@ public sealed record StoredItem(
     string? Result,
     double? DurationMs,
     double? TsStart = null,
-    double? TsEnd = null);
+    double? TsEnd = null,
+    string? Label = null);

@@ -18,6 +18,55 @@ public static class ActivityLabelBuilder
         @"\s+",
         RegexOptions.Compiled);
 
+    private static readonly string[] ThoughtLeakPrefixes =
+    [
+        "the user",
+        "user wants",
+        "okay",
+        "ok,",
+        "ok.",
+        "let me",
+        "let's",
+        "lets",
+        "i need",
+        "i should",
+        "i will",
+        "i must",
+        "i have to",
+        "i am going to",
+        "i'm going to"
+    ];
+
+    private static readonly string[] ThoughtLeakPhrases =
+    [
+        "the user wants",
+        "the user is asking",
+        "the user asked",
+        "kullan\u0131c\u0131 istiyor",
+        "kullan\u0131c\u0131 benden",
+        "kullan\u0131c\u0131 bizden",
+        "kullan\u0131c\u0131n\u0131n iste\u011Fi",
+        "kullan\u0131c\u0131 istedi",
+        "kullan\u0131c\u0131 sordu"
+    ];
+
+    public static bool IsThoughtLeak(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return false;
+        var trimmed = text.Trim();
+        foreach (var prefix in ThoughtLeakPrefixes)
+        {
+            if (trimmed.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                return true;
+        }
+        foreach (var phrase in ThoughtLeakPhrases)
+        {
+            if (trimmed.IndexOf(phrase, StringComparison.OrdinalIgnoreCase) >= 0)
+                return true;
+        }
+        return false;
+    }
+
     /// <summary>
     /// Verilen düşünce metninden tek satırlık özet üretir.
     /// </summary>
@@ -37,6 +86,9 @@ public static class ActivityLabelBuilder
         // 3. Çoklu boşluk dizilerini tek boşluğa indir
         text = MultiWhitespace.Replace(text, " ").Trim();
         if (string.IsNullOrWhiteSpace(text)) return null;
+
+        // Sızıntı kontrolü
+        if (IsThoughtLeak(text)) return null;
 
         // 4. Cümle sonundaki noktalama işaretlerini ve boşlukları temizle
         text = TrimTrailingPunctuation(text);

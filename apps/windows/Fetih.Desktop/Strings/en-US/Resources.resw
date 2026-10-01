@@ -51,25 +51,34 @@
     <value>Thinking…</value>
   </data>
   <data name="Activity_Tool_Default" xml:space="preserve">
-    <value>Running…</value>
+    <value>Running {0}</value>
+  </data>
+  <data name="Activity_Tool_edit_file" xml:space="preserve">
+    <value>Editing {0}</value>
   </data>
   <data name="Activity_Tool_execute_command" xml:space="preserve">
-    <value>Running command…</value>
+    <value>Running command: {0}</value>
+  </data>
+  <data name="Activity_Tool_fetch_url" xml:space="preserve">
+    <value>Fetching {0}</value>
   </data>
   <data name="Activity_Tool_read_file" xml:space="preserve">
-    <value>Reading file…</value>
+    <value>Reading {0}</value>
+  </data>
+  <data name="Activity_Tool_search_web" xml:space="preserve">
+    <value>Searching web: {0}</value>
   </data>
   <data name="Activity_Tool_terminal" xml:space="preserve">
-    <value>Running command…</value>
+    <value>Running command: {0}</value>
   </data>
   <data name="Activity_Tool_view_file" xml:space="preserve">
-    <value>Reading file…</value>
+    <value>Reading {0}</value>
   </data>
   <data name="Activity_Tool_write_file" xml:space="preserve">
-    <value>Writing code…</value>
+    <value>Writing {0}</value>
   </data>
   <data name="Activity_Tool_write_to_file" xml:space="preserve">
-    <value>Writing code…</value>
+    <value>Writing {0}</value>
   </data>
   <data name="Chat_Working" xml:space="preserve">
     <value>Working</value>

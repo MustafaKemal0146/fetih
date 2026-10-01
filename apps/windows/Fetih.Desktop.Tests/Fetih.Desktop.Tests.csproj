@@ -21,10 +21,12 @@
     <Compile Include="..\Fetih.Desktop\Bridge\StoredItem.cs" Link="Bridge\StoredItem.cs" />
     <Compile Include="..\Fetih.Desktop\Models\ActivityLabelBuilder.cs" Link="Models\ActivityLabelBuilder.cs" />
     <Compile Include="..\Fetih.Desktop\Models\ActivityGroup.cs" Link="Models\ActivityGroup.cs" />
+    <Compile Include="..\Fetih.Desktop\Models\ToolLabelBuilder.cs" Link="Models\ToolLabelBuilder.cs" />
     <Compile Include="..\Fetih.Desktop\Models\ChatMessage.cs" Link="Models\ChatMessage.cs" />
     <Compile Include="..\Fetih.Desktop\Views\TranscriptBuilder.cs" Link="Views\TranscriptBuilder.cs" />
     <Compile Include="..\Fetih.Desktop\Views\ToolFormatter.cs" Link="Views\ToolFormatter.cs" />
     <Compile Include="..\Fetih.Desktop\Services\Localization.cs" Link="Services\Localization.cs" />
+    <Compile Include="..\Fetih.Desktop\Services\IUiDispatcher.cs" Link="Services\IUiDispatcher.cs" />
   </ItemGroup>
 
 </Project>

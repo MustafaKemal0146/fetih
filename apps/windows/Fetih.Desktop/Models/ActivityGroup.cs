@@ -185,11 +185,21 @@ public sealed class ActivityGroup : ChatMessage
     /// <summary>
     /// Grupta yeni bir araç adımı başladığında çağrılır.
     /// </summary>
-    public void SetToolRunning(string toolName)
+    public void SetToolRunning(string toolName, string? argumentsJson = null)
     {
         EndedAt = DateTime.Now;
-        Label = ActivityLabels.Running(toolName);
-        // Araç adımları doğrudan araç adını gösterir; kilit yeni düşünce adımı gelene kadar sabit kalır
+        Label = ToolLabelBuilder.BuildLabel(toolName, argumentsJson);
+        // Araç adımları doğrudan araç etiketini gösterir; kilit yeni düşünce adımı gelene kadar sabit kalır
+        IsLabelLocked = true;
+    }
+
+    /// <summary>
+    /// Köprüden veya depodan canlı/kalıcı düşünce etiketi geldiğinde çağrılır.
+    /// </summary>
+    public void SetThoughtLabel(string label)
+    {
+        if (string.IsNullOrWhiteSpace(label)) return;
+        Label = label.Trim();
         IsLabelLocked = true;
     }
 

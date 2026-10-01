@@ -108,7 +108,14 @@ public static class TranscriptBuilder
                         hasTiming = true;
                     }
 
-                    g.UpdateThoughtText(thought.Text, isClosing: false);
+                    if (!string.IsNullOrEmpty(item.Label))
+                    {
+                        g.SetThoughtLabel(item.Label);
+                    }
+                    else
+                    {
+                        g.UpdateThoughtText(thought.Text, isClosing: false);
+                    }
                     break;
 
                 case "tool_call":
@@ -124,7 +131,7 @@ public static class TranscriptBuilder
                         ParentGroup = tg
                     };
                     tg.Steps.Add(tool);
-                    tg.SetToolRunning(item.Name ?? "");
+                    tg.SetToolRunning(item.Name ?? "", item.Args);
                     break;
 
                 case "tool_result":

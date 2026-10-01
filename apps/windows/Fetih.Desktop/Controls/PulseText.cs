@@ -13,6 +13,10 @@ public sealed partial class PulseText : UserControl
     public PulseText()
     {
         Content = _tb;
+        Loaded += (_, _) =>
+        {
+            if (IsActive) Start();
+        };
         Unloaded += (_, _) => Stop();
     }
 
