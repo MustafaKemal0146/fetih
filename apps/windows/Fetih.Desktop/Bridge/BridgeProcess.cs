@@ -223,6 +223,16 @@ public sealed class BridgeProcess : IDisposable
             return (explicitPy!, moduleArgs);
         }
 
+        var repoRoot = FetihPaths.RepositoryRoot;
+        if (repoRoot is not null)
+        {
+            var venvPy = Path.Combine(repoRoot, ".venv", "Scripts", "python.exe");
+            if (File.Exists(venvPy))
+            {
+                return (venvPy, moduleArgs);
+            }
+        }
+
         // Bu makinede FETİH'in çalıştığı Python (bkz. proje notları).
         var known = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
