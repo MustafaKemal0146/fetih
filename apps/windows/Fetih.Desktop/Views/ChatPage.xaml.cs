@@ -279,6 +279,33 @@ public sealed partial class ChatPage : Page
         await SendAsync();
     }
 
+    // ── Onay Kartı Eylemleri ─────────────────────────────────────────────────
+
+    private async void ApprovalAllowOnce_Click(object sender, RoutedEventArgs e)
+        => await RespondApprovalAsync(sender, "once");
+
+    private async void ApprovalAllowSession_Click(object sender, RoutedEventArgs e)
+        => await RespondApprovalAsync(sender, "session");
+
+    private async void ApprovalAllowAlways_Click(object sender, RoutedEventArgs e)
+        => await RespondApprovalAsync(sender, "always");
+
+    private async void ApprovalDeny_Click(object sender, RoutedEventArgs e)
+        => await RespondApprovalAsync(sender, "deny");
+
+    private async Task RespondApprovalAsync(object sender, string choice)
+    {
+        if (MessageOf(sender) is not { } message || !message.IsApproval) return;
+        try
+        {
+            await Controller.RespondApprovalAsync(message, choice);
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("ChatPage.RespondApproval", ex, ex.Message);
+        }
+    }
+
     private static ChatMessage? MessageOf(object sender)
         => (sender as FrameworkElement)?.DataContext as ChatMessage;
 

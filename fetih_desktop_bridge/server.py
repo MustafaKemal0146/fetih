@@ -326,6 +326,7 @@ class BridgeServer:
                 "session.close": self._m_session_close,
                 "session.send": self._m_session_send,
                 "session.cancel": self._m_session_cancel,
+                "session.approve": self._m_session_approve,
                 "config.get": self._m_config_get,
                 "config.set": self._m_config_set,
                 "providers.list": self._m_providers_list,
@@ -382,8 +383,11 @@ class BridgeServer:
                 "session.done",
                 "session.error",
                 "session.updated",
+                "session.approval_request",
+                "session.approval_resolved",
                 "thought.label",
                 "session.thought_label",
+                "findings.discovered",
             ],
         }
 
@@ -507,6 +511,35 @@ class BridgeServer:
 
         loop = self.loop_for(conn) or asyncio.get_running_loop()
         stream = params.get("stream", True) is not False
+
+        # ── Approval wiring ──────────────────────────────────────────────
+        # Dangerous commands block the agent thread inside tools.approval and
+        # call this notify, which surfaces a ``session.approval_request`` the
+        # desktop answers with ``session.approve`` → resolve_gateway_approval.
+        # Keyed by session id so parallel turns don't cross wires.
+        try:
+            from tools import approval as _approval
+        except Exception:
+            _approval = None
+
+        def _approval_notify(approval_data) -> None:
+            data = approval_data if isinstance(approval_data, dict) else {}
+            payload = {
+                "session_id": session.id,
+                "request_id": uuid.uuid4().hex[:12],
+                "command": data.get("command") if data else str(approval_data),
+                "description": data.get("description", ""),
+                "pattern_key": data.get("pattern_key", ""),
+                "pattern_keys": data.get("pattern_keys", []),
+            }
+            conn.emit_threadsafe(loop, event("session.approval_request", payload))
+
+        if _approval is not None:
+            try:
+                _approval.register_gateway_notify(session.id, _approval_notify)
+                _approval.load_permanent_allowlist()
+            except Exception:
+                _approval = None
 
         def on_thought_label(sid: str, label: str) -> None:
             recorder.set_thought_label(label)
@@ -632,6 +665,15 @@ class BridgeServer:
             import threading
 
             session.thread_id = threading.get_ident()
+            # Bind the approval session key on THIS worker thread so dangerous
+            # commands the agent runs look up our notify callback (above) and
+            # block here until the desktop responds.
+            _key_token = None
+            if _approval is not None:
+                try:
+                    _key_token = _approval.set_current_session_key(session.id)
+                except Exception:
+                    _key_token = None
             conv_hist = session.history if session.history else None
             try:
                 if conv_hist:
@@ -640,6 +682,12 @@ class BridgeServer:
                     res = agent.run_conversation(message) or {}
             except TypeError:
                 res = agent.run_conversation(message) or {}
+            finally:
+                if _approval is not None and _key_token is not None:
+                    try:
+                        _approval.reset_current_session_key(_key_token)
+                    except Exception:
+                        pass
             if getattr(agent, "_session_messages", None):
                 session.history = list(agent._session_messages)
             return res
@@ -655,6 +703,13 @@ class BridgeServer:
             await conn.send_frame(event("session.error", payload))
             raise BridgeError(AGENT_ERROR, payload["error"], {"session_id": session.id})
         finally:
+            if _approval is not None:
+                # Releases any approval still blocking the agent thread so the
+                # turn can unwind even if the user never answered.
+                try:
+                    _approval.unregister_gateway_notify(session.id)
+                except Exception:
+                    pass
             thought_labeler.on_close()
             session.busy = False
             session.thread_id = None
@@ -716,13 +771,80 @@ class BridgeServer:
             raise BridgeError(SESSION_NOT_FOUND, f"no such session: {sid}")
         if not session.busy:
             return {"cancelled": False, "reason": "session is idle"}
+
+        # Release any approval currently blocking the agent thread, otherwise
+        # the interrupt can't be noticed until the user answers the prompt.
+        try:
+            from tools.approval import resolve_gateway_approval
+
+            resolve_gateway_approval(sid, "deny", resolve_all=True)
+        except Exception:
+            pass
+
+        # Prefer agent.interrupt(): it propagates to in-flight tool worker
+        # threads too, not just the main agent thread (which is all that
+        # set_interrupt(thread_id) reaches).
+        interrupted = False
+        try:
+            agent = getattr(session, "agent", None)
+            if agent is not None and hasattr(agent, "interrupt"):
+                agent.interrupt()
+                interrupted = True
+        except Exception:
+            interrupted = False
+
         try:
             from tools.interrupt import set_interrupt
 
             set_interrupt(True, session.thread_id)
         except Exception as exc:
-            raise BridgeError(CANCELLED, f"cancel failed: {exc}")
+            if not interrupted:
+                raise BridgeError(CANCELLED, f"cancel failed: {exc}")
         return {"cancelled": True, "session_id": sid}
+
+    def _m_session_approve(self, conn, params):
+        """Resolve a pending dangerous-command approval for a session.
+
+        ``choice`` is one of ``once`` (allow this single time), ``session``
+        (allow this pattern for the rest of the session), ``always`` (persist
+        to the permanent allowlist), or ``deny`` (block, do not retry).  When
+        ``all`` is true every approval queued for the session is resolved with
+        the same choice at once.
+        """
+        sid = str(params.get("session_id") or "")
+        choice = str(params.get("choice") or "").lower()
+        resolve_all = bool(params.get("all"))
+        if choice not in {"once", "session", "always", "deny"}:
+            raise BridgeError(INVALID_PARAMS, "choice must be once|session|always|deny")
+
+        try:
+            from tools.approval import resolve_gateway_approval
+
+            resolved = resolve_gateway_approval(sid, choice, resolve_all=resolve_all)
+        except Exception as exc:
+            raise BridgeError(INTERNAL_ERROR, f"approval resolve failed: {exc}")
+
+        # Echo an event so a card the desktop shows can be dismissed even when
+        # the resolution came from elsewhere (e.g. a bulk approve).
+        try:
+            loop = self.loop_for(conn)
+            if loop is not None:
+                conn.emit_threadsafe(
+                    loop,
+                    event(
+                        "session.approval_resolved",
+                        {
+                            "session_id": sid,
+                            "choice": choice,
+                            "resolved": resolved,
+                            "all": resolve_all,
+                        },
+                    ),
+                )
+        except Exception:
+            pass
+
+        return {"resolved": resolved, "choice": choice, "session_id": sid}
 
     # ── config.* ────────────────────────────────────────────────────────
 

@@ -14,7 +14,8 @@ public enum ChatRole
     Tool,
     System,
     Thought,
-    Activity
+    Activity,
+    Approval
 }
 
 /// <summary>Bir araç yürütme kartının durumu.</summary>
@@ -229,7 +230,58 @@ public class ChatMessage : INotifyPropertyChanged
     public bool IsTool => Role == ChatRole.Tool;
     public bool IsThought => Role == ChatRole.Thought;
     public bool IsActivity => Role == ChatRole.Activity;
-    public bool IsBubble => Role != ChatRole.Tool && Role != ChatRole.Thought && Role != ChatRole.Activity;
+    public bool IsApproval => Role == ChatRole.Approval;
+    public bool IsBubble => Role != ChatRole.Tool && Role != ChatRole.Thought && Role != ChatRole.Activity && Role != ChatRole.Approval;
+
+    // ── Onay (approval) kartı alanları ───────────────────────────────────────
+    /// <summary>Köprünün ürettiği istek kimliği; FIFO çözümde ilişkilendirme için.</summary>
+    public string? ApprovalRequestId { get; set; }
+
+    /// <summary>Onay bekleyen komutun tam metni.</summary>
+    public string ApprovalCommand { get; set; } = "";
+
+    /// <summary>Komutun neden tehlikeli bulunduğunun açıklaması.</summary>
+    public string ApprovalDescription { get; set; } = "";
+
+    public bool HasApprovalDescription => !string.IsNullOrWhiteSpace(ApprovalDescription);
+
+    private bool _approvalResolved;
+    /// <summary>Kullanıcı yanıtladıktan sonra kart düğmeleri kapanır.</summary>
+    public bool ApprovalResolved
+    {
+        get => _approvalResolved;
+        set
+        {
+            if (Set(ref _approvalResolved, value))
+            {
+                OnChanged(nameof(ApprovalPending));
+            }
+        }
+    }
+
+    public bool ApprovalPending => !_approvalResolved;
+
+    private string _approvalOutcome = "";
+    /// <summary>Çözüm sonrası gösterilen özet (ör. "İzin verildi (bir kez)").</summary>
+    public string ApprovalOutcome
+    {
+        get => _approvalOutcome;
+        set
+        {
+            if (Set(ref _approvalOutcome, value))
+            {
+                OnChanged(nameof(HasApprovalOutcome));
+            }
+        }
+    }
+
+    public bool HasApprovalOutcome => !string.IsNullOrEmpty(_approvalOutcome);
+
+    public string ApprovalTitle => Loc.T("chat.approval.title");
+    public string ApprovalAllowOnceLabel => Loc.T("chat.approval.allow_once");
+    public string ApprovalAllowSessionLabel => Loc.T("chat.approval.allow_session");
+    public string ApprovalAllowAlwaysLabel => Loc.T("chat.approval.allow_always");
+    public string ApprovalDenyLabel => Loc.T("chat.approval.deny");
 
     public string ToolHeader => $"🔧 {ToolTitle} {StatusText}";
 

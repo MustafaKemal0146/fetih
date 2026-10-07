@@ -65,6 +65,14 @@ def main(argv: Optional[List[str]] = None) -> int:
     require_auth = not args.no_auth
     fake_model = args.fake_model or bool(os.getenv("FETIH_FAKE_MODEL"))
 
+    # The desktop app is a security tool: dangerous commands must never run
+    # unattended.  FETIH_EXEC_ASK routes them through the approval flow
+    # (tools.approval), which blocks the agent thread and emits a
+    # ``session.approval_request`` event the desktop can answer with
+    # ``session.approve``.  Without this the agent runs in a non-interactive
+    # context and auto-approves.  It is a per-process policy, set once here.
+    os.environ.setdefault("FETIH_EXEC_ASK", "1")
+
     if args.stdio:
         # The parent process spawned us over a private pipe; it already holds
         # every privilege the bridge could grant, so a token adds nothing.

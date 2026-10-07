@@ -33,6 +33,7 @@ public sealed class ChatConversationController
     private readonly BridgeClient _bridge;
     private readonly IUiDispatcher _dispatcher;
     private readonly Dictionary<string, ChatMessage> _toolByCallId = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, ChatMessage> _approvalByRequestId = new(StringComparer.Ordinal);
     private ChatMessage? _lastTool;
 
     private readonly StringBuilder _buffer = new();
@@ -86,6 +87,8 @@ public sealed class ChatConversationController
         _bridge.SessionError += OnSessionError;
         _bridge.ConnectionLost += OnConnectionLost;
         _bridge.ThoughtLabel += OnThoughtLabel;
+        _bridge.ApprovalRequested += OnApprovalRequested;
+        _bridge.ApprovalResolved += OnApprovalResolved;
     }
 
     private static string StripDsml(string? text)
@@ -240,6 +243,99 @@ public sealed class ChatConversationController
         });
     }
 
+    // ── Onay (approval) akışı ────────────────────────────────────────────────
+
+    private void OnApprovalRequested(BridgeApprovalRequest req)
+    {
+        // Yalnızca aktif oturumun onayını göster; eşleşmeyen oturumlar tur
+        // sonunda köprü tarafında zaten reddedilir.
+        if (!string.IsNullOrEmpty(_currentSessionId) && req.SessionId != _currentSessionId) return;
+
+        _dispatcher.Run(() =>
+        {
+            // Akışı toparla ki onay kartı metnin ortasına düşmesin.
+            FlushBuffer();
+
+            var card = new ChatMessage(ChatRole.Approval)
+            {
+                ApprovalRequestId = req.RequestId,
+                ApprovalCommand = req.Command,
+                ApprovalDescription = req.Description,
+            };
+            if (!string.IsNullOrEmpty(req.RequestId))
+            {
+                _approvalByRequestId[req.RequestId] = card;
+            }
+            Messages.Add(card);
+            NotifyMessagesChanged();
+            RequestScroll();
+        });
+    }
+
+    private void OnApprovalResolved(string sessionId, string requestId)
+    {
+        if (!string.IsNullOrEmpty(_currentSessionId) && sessionId != _currentSessionId) return;
+
+        _dispatcher.Run(() =>
+        {
+            if (!string.IsNullOrEmpty(requestId)
+                && _approvalByRequestId.TryGetValue(requestId, out var card))
+            {
+                if (!card.ApprovalResolved)
+                {
+                    card.ApprovalResolved = true;
+                }
+            }
+        });
+    }
+
+    /// <summary>
+    /// Kullanıcının onay kartındaki seçimini köprüye iletir.
+    /// <paramref name="choice"/>: once | session | always | deny.
+    /// </summary>
+    public async Task RespondApprovalAsync(ChatMessage card, string choice)
+    {
+        if (card is null || card.ApprovalResolved) return;
+        var sessionId = _currentSessionId;
+        if (string.IsNullOrEmpty(sessionId)) return;
+
+        // Anında geri bildirim: düğmeleri kapat ve sonucu göster. Köprüden
+        // gelecek approval_resolved olayı yalnızca yedek doğrulamadır.
+        card.ApprovalOutcome = ApprovalOutcomeText(choice);
+        card.ApprovalResolved = true;
+
+        try
+        {
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            await _bridge.ApproveAsync(sessionId, choice, ct: cts.Token).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("ChatConversationController.RespondApproval", ex, ex.Message);
+        }
+    }
+
+    private static string ApprovalOutcomeText(string choice) => choice switch
+    {
+        "once" => Loc.T("chat.approval.outcome_once"),
+        "session" => Loc.T("chat.approval.outcome_session"),
+        "always" => Loc.T("chat.approval.outcome_always"),
+        _ => Loc.T("chat.approval.outcome_denied"),
+    };
+
+    private void ResolveOutstandingApprovals()
+    {
+        foreach (var card in _approvalByRequestId.Values)
+        {
+            if (!card.ApprovalResolved)
+            {
+                card.ApprovalOutcome = Loc.T("chat.approval.outcome_denied");
+                card.ApprovalResolved = true;
+            }
+        }
+        _approvalByRequestId.Clear();
+    }
+
     // ── Tampon ve Segment Yönetimi ──────────────────────────────────────────
 
     private void QueueText(ChatRole kind, string text)
@@ -362,6 +458,7 @@ public sealed class ChatConversationController
         _activity = null;
         _lastTool = null;
         _toolByCallId.Clear();
+        _approvalByRequestId.Clear();
         _buffer.Clear();
 
         SetBusy(true);
@@ -381,6 +478,7 @@ public sealed class ChatConversationController
         CloseThoughtStep();
         CloseActivity(cancelled);
         CloseAgentSegment();
+        ResolveOutstandingApprovals();
 
         if (cancelled)
         {

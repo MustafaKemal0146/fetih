@@ -336,6 +336,21 @@ public static class Loc
         ["chat.status.denied"] = new("Reddedildi", "Denied"),
         ["chat.status.stopped"] = new("Durduruldu", "Stopped"),
 
+        // Onay kartı (tehlikeli komut)
+        ["chat.approval.title"] = new(
+            "Bu komutu çalıştırmak için onay gerekiyor",
+            "This command needs your approval"),
+        ["chat.approval.allow_once"] = new("Bir kez izin ver", "Allow once"),
+        ["chat.approval.allow_session"] = new("Bu oturumda izin ver", "Allow this session"),
+        ["chat.approval.allow_always"] = new("Her zaman izin ver", "Always allow"),
+        ["chat.approval.deny"] = new("Reddet", "Deny"),
+        ["chat.approval.outcome_once"] = new("İzin verildi (bir kez)", "Allowed (once)"),
+        ["chat.approval.outcome_session"] = new(
+            "İzin verildi (bu oturum)", "Allowed (this session)"),
+        ["chat.approval.outcome_always"] = new(
+            "İzin verildi (her zaman)", "Allowed (always)"),
+        ["chat.approval.outcome_denied"] = new("Reddedildi", "Denied"),
+
         // Araç Biçimlendirici (ToolFormatter)
         ["tool.format.write_file"] = new("Dosya yaz · {0}", "Write file · {0}"),
         ["tool.format.read_file"] = new("Dosya oku · {0}", "Read file · {0}"),

@@ -42,6 +42,11 @@ public sealed record BridgeErrorEvent(string SessionId, string Error, string? Pa
 /// <summary>Oturum özeti.</summary>
 public sealed record SessionSummary(string SessionId, string Title, double UpdatedAt);
 
+/// <summary>Tehlikeli bir komut için kullanıcı onayı isteyen olayın yükü.</summary>
+public sealed record BridgeApprovalRequest(
+    string SessionId, string RequestId, string Command, string Description,
+    IReadOnlyList<string> PatternKeys);
+
 /// <summary>Oturum yükleme sonucu (geriye dönük deconstruct uyumlu).</summary>
 public sealed record BridgeSessionLoadResult(
     string Title,
@@ -107,6 +112,8 @@ public sealed class BridgeClient : IDisposable
     public event Action<string /*sessionId*/, string /*title*/, double /*updatedAt*/>? SessionUpdated;
     public event Action<string /*sessionId*/, string /*label*/>? ThoughtLabel;
     public event Action<JsonElement>? FindingDiscovered;
+    public event Action<BridgeApprovalRequest>? ApprovalRequested;
+    public event Action<string /*sessionId*/, string /*requestId*/>? ApprovalResolved;
     public event Action? ConnectionLost;
 
     // ── Bağlantı ────────────────────────────────────────────────────────────
@@ -361,6 +368,17 @@ public sealed class BridgeClient : IDisposable
                         FindingDiscovered?.Invoke(findingEl);
                     }
                     break;
+
+                case "session.approval_request":
+                    ApprovalRequested?.Invoke(new BridgeApprovalRequest(
+                        Str(p, "session_id"), Str(p, "request_id"),
+                        Str(p, "command"), Str(p, "description"),
+                        StrList(p, "pattern_keys")));
+                    break;
+
+                case "session.approval_resolved":
+                    ApprovalResolved?.Invoke(Str(p, "session_id"), Str(p, "request_id"));
+                    break;
             }
         }
         catch
@@ -565,6 +583,22 @@ public sealed class BridgeClient : IDisposable
             new Dictionary<string, object?> { ["session_id"] = sessionId }, ct).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// <c>session.approve</c> — tehlikeli komut onayını yanıtlar.
+    /// <paramref name="choice"/>: <c>once</c> | <c>session</c> | <c>always</c> | <c>deny</c>.
+    /// </summary>
+    public async Task<JsonElement> ApproveAsync(
+        string sessionId, string choice, bool all = false, CancellationToken ct = default)
+    {
+        var p = new Dictionary<string, object?>
+        {
+            ["session_id"] = sessionId,
+            ["choice"] = choice,
+        };
+        if (all) p["all"] = true;
+        return await CallAsync("session.approve", p, ct).ConfigureAwait(false);
+    }
+
     public async Task<JsonElement> ConfigGetAsync(string? key = null, CancellationToken ct = default)
     {
         await EnsureConnectedAsync(ct).ConfigureAwait(false);
@@ -752,6 +786,24 @@ public sealed class BridgeClient : IDisposable
             return v.ValueKind == JsonValueKind.String ? v.GetString() ?? "" : v.GetRawText();
         }
         return "";
+    }
+
+    private static IReadOnlyList<string> StrList(JsonElement e, string name)
+    {
+        var list = new List<string>();
+        if (e.ValueKind == JsonValueKind.Object && e.TryGetProperty(name, out var arr)
+            && arr.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var item in arr.EnumerateArray())
+            {
+                if (item.ValueKind == JsonValueKind.String)
+                {
+                    var s = item.GetString();
+                    if (!string.IsNullOrEmpty(s)) list.Add(s);
+                }
+            }
+        }
+        return list;
     }
 
     private static int? IntOrNull(JsonElement e, string name)

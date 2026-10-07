@@ -244,6 +244,77 @@
             </Grid>
         </DataTemplate>
 
+        <!-- Approval Card Template (dangerous command → user consent) -->
+        <DataTemplate x:Key="ApprovalTemplate" x:DataType="models:ChatMessage">
+            <Grid Margin="16,6" HorizontalAlignment="Left" MaxWidth="780">
+                <Border Padding="14,12"
+                        CornerRadius="12"
+                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderThickness="1"
+                        BorderBrush="{ThemeResource SystemFillColorCautionBrush}">
+                    <StackPanel Spacing="10">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE7BA;"
+                                      FontSize="16"
+                                      Foreground="{ThemeResource SystemFillColorCautionBrush}"
+                                      VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Bind ApprovalTitle}"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <TextBlock Text="{x:Bind ApprovalDescription}"
+                                   TextWrapping="Wrap"
+                                   FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                   Visibility="{x:Bind HasApprovalDescription}" />
+
+                        <Border Background="{ThemeResource LayerFillColorAltBrush}"
+                                CornerRadius="6"
+                                Padding="8">
+                            <ScrollViewer MaxHeight="140"
+                                          HorizontalScrollBarVisibility="Auto"
+                                          VerticalScrollBarVisibility="Auto">
+                                <TextBlock Text="{x:Bind ApprovalCommand}"
+                                           FontFamily="Consolas"
+                                           FontSize="12"
+                                           TextWrapping="Wrap"
+                                           IsTextSelectionEnabled="True" />
+                            </ScrollViewer>
+                        </Border>
+
+                        <!-- Action buttons (while pending) -->
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="8"
+                                    Visibility="{x:Bind ApprovalPending, Mode=OneWay}">
+                            <Button Click="ApprovalAllowOnce_Click"
+                                    Style="{StaticResource AccentButtonStyle}"
+                                    Content="{x:Bind ApprovalAllowOnceLabel}" />
+                            <Button Click="ApprovalAllowSession_Click"
+                                    Content="{x:Bind ApprovalAllowSessionLabel}" />
+                            <Button Click="ApprovalAllowAlways_Click"
+                                    Content="{x:Bind ApprovalAllowAlwaysLabel}" />
+                            <Button Click="ApprovalDeny_Click"
+                                    Content="{x:Bind ApprovalDenyLabel}" />
+                        </StackPanel>
+
+                        <!-- Outcome (after resolution) -->
+                        <StackPanel Orientation="Horizontal"
+                                    Spacing="6"
+                                    Visibility="{x:Bind HasApprovalOutcome, Mode=OneWay}">
+                            <FontIcon Glyph="&#xE73E;" FontSize="12"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                      VerticalAlignment="Center" />
+                            <TextBlock Text="{x:Bind ApprovalOutcome, Mode=OneWay}"
+                                       FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       VerticalAlignment="Center" />
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </DataTemplate>
+
         <!-- System Message Template -->
         <DataTemplate x:Key="SystemTemplate" x:DataType="models:ChatMessage">
             <Border HorizontalAlignment="Center" Margin="16,4" Padding="12,6"
@@ -263,6 +334,7 @@
                                     Thought="{StaticResource StepThoughtTemplate}"
                                     Tool="{StaticResource StepToolTemplate}"
                                     Activity="{StaticResource ActivityTemplate}"
+                                    Approval="{StaticResource ApprovalTemplate}"
                                     System="{StaticResource SystemTemplate}" />
     </Page.Resources>
 
