@@ -749,6 +749,19 @@ public sealed partial class SetupWindow : Window
             });
         }
 
+        // Tek-çalışma kilidi: ikinci bir sihirbazın aynı anda .env/config'e
+        // yazıp bu çalışmayı ezmesini engelle.
+        var lockDir = System.IO.Path.GetDirectoryName(JournalPath)
+            ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        if (!SetupRunLock.TryAcquire(lockDir, out var runLock))
+        {
+            ResultBar.Severity = InfoBarSeverity.Warning;
+            ResultBar.Title = Loc.T("setup.lock.busy_title");
+            ResultBar.Message = Loc.T("setup.lock.busy_msg");
+            ResultBar.IsOpen = true;
+            return;
+        }
+
         var journal = new TransactionJournal(JournalPath);
         journal.Reset();
         var pipeline = new SetupPipeline(steps, journal);
@@ -763,6 +776,10 @@ public sealed partial class SetupWindow : Window
         catch (Exception ex)
         {
             result = new PipelineResult(PipelineOutcome.Failed, null, ex.Message);
+        }
+        finally
+        {
+            runLock?.Dispose();
         }
 
         pipeline.Progress -= OnProgress;

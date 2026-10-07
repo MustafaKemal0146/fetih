@@ -1105,6 +1105,11 @@ public static class Loc
             "The Desktop Bridge is ready and the model returned a real response. You can go to the chat."),
         ["setup.cancelled"] = new("İptal edildi", "Cancelled"),
         ["setup.failed"] = new("Kurulum başarısız", "Setup failed"),
+        ["setup.lock.busy_title"] = new(
+            "Kurulum zaten çalışıyor", "Setup already running"),
+        ["setup.lock.busy_msg"] = new(
+            "Başka bir kurulum çalışması sürüyor. Lütfen tamamlanmasını bekleyin.",
+            "Another setup run is in progress. Please wait for it to finish."),
         ["setup.log_suffix"] = new("  ·  Günlük: ", "  ·  Log: "),
 
         // ── İlk kurulum: adım adları ve adım sonuçları ───────────────────
