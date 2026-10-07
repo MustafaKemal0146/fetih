@@ -870,8 +870,10 @@ internal static class MdTheme
 /// </summary>
 public sealed class ChatMarkdownView : Grid
 {
-    /// <summary>İki çizim arasındaki en küçük süre (ms) — akış birleştirme.</summary>
-    private const int MinRenderIntervalMs = 40;
+    /// <summary>İki çizim arasındaki en küçük süre (ms) — akış birleştirme.
+    /// Controller'ın flush aralığıyla (80 ms) hizalı: daha seyrek yeniden-çizim,
+    /// daha az titreme.</summary>
+    private const int MinRenderIntervalMs = 80;
 
     /// <summary>Vurgu ve kod için kullanılan eş aralıklı yazı tipi.</summary>
     private static readonly FontFamily MonoFont = new("Consolas");

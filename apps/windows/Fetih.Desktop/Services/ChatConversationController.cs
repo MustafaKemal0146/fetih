@@ -549,7 +549,11 @@ public sealed class ChatConversationController
                 FlushBuffer();
                 _activity?.Tick();
             });
-        }, null, 40, 40);
+            // 80 ms: akışı daha büyük parçalarda uygula. Markdown görünümü her
+            // Text değişiminde son bloğu yeniden kurduğu için, daha seyrek flush
+            // = daha az yeniden-çizim = algılanan "titreme"nin yarıya inmesi.
+            // Gecikme gözle fark edilmez.
+        }, null, 80, 80);
     }
 
     private void StopFlushTimer()

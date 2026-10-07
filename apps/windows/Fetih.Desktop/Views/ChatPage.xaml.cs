@@ -402,14 +402,22 @@ public sealed partial class ChatPage : Page
         else DispatcherQueue.TryEnqueue(() => action());
     }
 
+    private bool _scrollQueued;
+
     private void ScrollToEndIfSticky()
     {
-        if (!_stickToBottom) return;
+        if (!_stickToBottom || _scrollQueued) return;
+        // Birleştir: akış sırasında saniyede ~12 kez RequestScroll gelebilir;
+        // her biri için ayrı ChangeView kuyruğa atmak ekranı "zıplatıyordu".
+        // Tek bir bekleyen ChangeView yeter. UpdateLayout() da kaldırıldı:
+        // Low öncelik zaten layout pass'inden sonra çalışır, dolayısıyla
+        // ScrollableHeight günceldir ve zorlanan senkron layout sarsıntısı biter.
+        _scrollQueued = true;
         DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
         {
+            _scrollQueued = false;
             try
             {
-                Scroller.UpdateLayout();
                 Scroller.ChangeView(null, Scroller.ScrollableHeight, null, true);
             }
             catch { }
