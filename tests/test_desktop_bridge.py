@@ -731,6 +731,33 @@ def test_session_approve_unblocks_dangerous_command(monkeypatch):
         ap.unregister_gateway_notify(sid)
 
 
+def test_session_store_wal_and_concurrent_append(tmp_path):
+    """Store açılışta WAL moduna geçmeli ve çok iş parçacıklı append güvenli
+    olmalı (eşzamanlı dispatch'e geçtikten sonra kritik)."""
+    import threading
+
+    from fetih_desktop_bridge.session_store import SessionStore
+
+    store = SessionStore(str(tmp_path / "s.db"))
+    mode = store.db.execute("PRAGMA journal_mode").fetchone()[0]
+    assert str(mode).lower() == "wal"
+
+    sid = store.create(title="eş zamanlı")
+
+    def worker(n: int):
+        for i in range(25):
+            store.append(sid, "text", {"text": f"t{n}-{i}"})
+
+    threads = [threading.Thread(target=worker, args=(n,)) for n in range(4)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    items = store.items(sid)
+    assert len(items) == 100  # 4 iş parçacığı × 25, kayıp/çakışma yok
+
+
 def test_session_cancel_resolves_pending_approval(monkeypatch):
     """Cancelling a turn must release an approval blocking the agent thread,
     otherwise the interrupt is never seen."""

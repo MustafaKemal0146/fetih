@@ -28,6 +28,16 @@ class SessionStore:
         self.db = sqlite3.connect(path, check_same_thread=False)
         self.db.row_factory = sqlite3.Row
         self.db.execute("PRAGMA foreign_keys=ON")
+        # WAL + synchronous=NORMAL: her tur onlarca append() (text flush, her
+        # tool_call/tool_result) ayrı commit yapar. WAL okuyucuyu yazardan
+        # ayırır ve fsync maliyetini düşürür; loopback/tek-kullanıcı deposu
+        # için NORMAL dayanıklılık yeterli. En iyi çaba — bazı dosya
+        # sistemlerinde (ağ sürücüsü) WAL reddedilebilir, o yüzden sarmalı.
+        try:
+            self.db.execute("PRAGMA journal_mode=WAL")
+            self.db.execute("PRAGMA synchronous=NORMAL")
+        except sqlite3.Error as exc:
+            logger.warning("WAL/synchronous pragma uygulanamadı: %s", exc)
         self.db.executescript("""
         CREATE TABLE IF NOT EXISTS sessions(
             id TEXT PRIMARY KEY,
