@@ -505,6 +505,9 @@ public sealed class ChatConversationController
             AddSystem("Hata: " + error);
         }
 
+        // Tur bitti — akan segment/aktivite yok; en eski öğeleri güvenle kırp.
+        ChatHistoryTrimmer.Trim(Messages);
+
         SetBusy(false);
         NotifyMessagesChanged();
     }
@@ -702,6 +705,8 @@ public sealed class ChatConversationController
                 {
                     Messages.Add(m);
                 }
+                // Çok uzun bir geçmişi yüklerken de tavanı uygula.
+                ChatHistoryTrimmer.Trim(Messages);
                 NotifyMessagesChanged();
                 RequestScroll();
             });
