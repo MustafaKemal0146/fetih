@@ -94,6 +94,7 @@ public sealed class BridgeClient : IDisposable
     private int _protocolVersion = 1;
     private volatile bool _authenticated;
     private volatile bool _disposed;
+    private int _reconnecting;
 
     // ── Durum + olaylar ─────────────────────────────────────────────────────
 
@@ -254,6 +255,62 @@ public sealed class BridgeClient : IDisposable
         Status.Update(BridgeConnectionState.Reconnecting,
             Loc.T("bridge.detail.reconnecting"));
         try { ConnectionLost?.Invoke(); } catch { }
+
+        // Proaktif yeniden bağlanma: eskiden durum yalnızca "Reconnecting"
+        // etiketinde kalıyor, bağlantı ancak bir sonraki kullanıcı isteğinde
+        // tembel kuruluyordu. Artık backoff ile otomatik denenir.
+        if (!_disposed)
+        {
+            _ = ReconnectLoopAsync();
+        }
+    }
+
+    /// <summary>
+    /// Bağlantı koptuğunda arka planda çalışan yeniden bağlanma döngüsü.
+    /// Backoff ile (1→60 sn, tavanlı) bağlanana veya süreç dispose edilene
+    /// kadar dener. Aynı anda yalnızca bir döngü koşar.
+    /// </summary>
+    private async Task ReconnectLoopAsync()
+    {
+        if (Interlocked.Exchange(ref _reconnecting, 1) == 1)
+        {
+            return;
+        }
+        try
+        {
+            var attempt = 0;
+            while (!_disposed && !IsConnected)
+            {
+                var delay = BridgeBackoff.ForAttempt(attempt);
+                Status.Update(BridgeConnectionState.Reconnecting,
+                    Loc.Format("bridge.detail.reconnecting_in", (int)delay.TotalSeconds));
+                try
+                {
+                    await Task.Delay(delay).ConfigureAwait(false);
+                }
+                catch
+                {
+                    // yoksay
+                }
+                if (_disposed)
+                {
+                    break;
+                }
+                try
+                {
+                    await EnsureConnectedAsync().ConfigureAwait(false);
+                    break; // bağlandı
+                }
+                catch
+                {
+                    attempt++;
+                }
+            }
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _reconnecting, 0);
+        }
     }
 
     private void DispatchFrame(string frame)

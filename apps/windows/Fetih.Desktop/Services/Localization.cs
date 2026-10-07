@@ -1191,6 +1191,9 @@ public static class Loc
         ["bridge.detail.reconnecting"] = new(
             "Bağlantı koptu; sonraki istekte yeniden bağlanılacak.",
             "The connection dropped; it will reconnect on the next request."),
+        ["bridge.detail.reconnecting_in"] = new(
+            "Bağlantı koptu; {0} sn içinde yeniden bağlanılıyor…",
+            "Connection dropped; reconnecting in {0}s…"),
         ["bridge.detail.not_connected"] = new(
             "Köprü bağlı değil.", "The bridge is not connected."),
         ["bridge.detail.send_failed"] = new(

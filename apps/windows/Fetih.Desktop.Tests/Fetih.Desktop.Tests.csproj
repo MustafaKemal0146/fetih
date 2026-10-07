@@ -19,6 +19,7 @@
   <ItemGroup>
     <!-- Saf C# mantık sınıflarını doğrudan derle -->
     <Compile Include="..\Fetih.Desktop\Bridge\StoredItem.cs" Link="Bridge\StoredItem.cs" />
+    <Compile Include="..\Fetih.Desktop\Bridge\BridgeBackoff.cs" Link="Bridge\BridgeBackoff.cs" />
     <Compile Include="..\Fetih.Desktop\Models\ActivityLabelBuilder.cs" Link="Models\ActivityLabelBuilder.cs" />
     <Compile Include="..\Fetih.Desktop\Models\ActivityGroup.cs" Link="Models\ActivityGroup.cs" />
     <Compile Include="..\Fetih.Desktop\Models\ToolLabelBuilder.cs" Link="Models\ToolLabelBuilder.cs" />
