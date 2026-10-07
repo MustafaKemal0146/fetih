@@ -26,6 +26,15 @@ public partial class App : Application
     {
         InitializeComponent();
 
+        // Yapısal günlükleyiciyi erkenden başlat (crash.log'un yanında, döngüsel
+        // uygulama logu). En iyi çaba — başlatılamazsa Write'lar sessizce düşer.
+        Fetih.Desktop.Services.Logger.Initialize();
+        Fetih.Desktop.Services.Logger.Info("FETİH Desktop başlatılıyor.");
+
+        // Süreç kapanışında bekleyen log satırlarını diske akıt.
+        AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+            Fetih.Desktop.Services.Logger.Shutdown();
+
         // WinUI3/XAML dispatcher'ında yakalanmayan istisna: varsayılan davranış
         // pencereyi sessizce kapatmaktır. e.Handled = true YAPMIYORUZ (uygulamayı
         // sahte bir "iyi" durumda tutmak yanıltıcı olur) — sadece loglayıp
@@ -138,6 +147,18 @@ public partial class App : Application
         {
             // Loglama sırasında ikinci bir istisna atarsak orijinal çökmeyi
             // gizlememesi için burada bilerek yutuyoruz.
+        }
+
+        // Yapısal loga da düş (gizli bilgiler orada redakte edilir). Ayrı
+        // try: crash.log yazımını hiçbir koşulda etkilemesin.
+        try
+        {
+            Fetih.Desktop.Services.Logger.Error(
+                $"{source}: {message} {(ex is null ? "" : ex.GetType().Name)}");
+        }
+        catch
+        {
+            // yut
         }
     }
 }
