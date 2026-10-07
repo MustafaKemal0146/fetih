@@ -1034,19 +1034,37 @@ public sealed class ChatMarkdownView : Grid
             }
         }
 
-        // Hızlı yol: yalnızca son blok değişti ve ikisi de aynı dildeki kod
-        // bloğu ise metni yerinde güncelle — kaydırma ve kopyala düğmesi korunur.
+        // Hızlı yol: yalnızca SON blok değişti ve türü aynıysa, o bloğu görsel
+        // ağaçtan silip yeniden kurmak yerine YERİNDE güncelle. Böylece akan
+        // metinde son blok her 40-80 ms'de bir kaybolup yeniden çizilmez
+        // (titreme/flaş kaynağı buydu); kaydırma ve metin seçimi de korunur.
         if (!force &&
             prefix == _blocks.Count - 1 &&
             prefix == blocks.Count - 1 &&
             _elements.Count == _blocks.Count &&
-            _blocks[prefix].Kind == MdBlockKind.Code &&
-            blocks[prefix].Kind == MdBlockKind.Code &&
-            string.Equals(_blocks[prefix].Language, blocks[prefix].Language, StringComparison.Ordinal))
+            _blocks[prefix].Kind == blocks[prefix].Kind)
         {
-            if (_elements[prefix].Tag is TextBlock code)
+            var kind = blocks[prefix].Kind;
+
+            // Kod bloğu: aynı dilse metni yerinde yaz.
+            if (kind == MdBlockKind.Code &&
+                string.Equals(_blocks[prefix].Language, blocks[prefix].Language, StringComparison.Ordinal) &&
+                _elements[prefix].Tag is TextBlock code)
             {
                 code.Text = string.Join('\n', blocks[prefix].Lines);
+                _blocks.Clear();
+                _blocks.AddRange(blocks);
+                return;
+            }
+
+            // Paragraf (akışın en yaygın durumu — düz prose): satır içi
+            // koleksiyonu temizleyip AYNI üretim koduyla (ParseInline+AppendRuns)
+            // yeniden doldur. İçerik tam rebuild'le birebir aynı olur; tek fark
+            // TextBlock elemanının ağaçta kalması → flaş yok.
+            if (kind == MdBlockKind.Paragraph && _elements[prefix] is TextBlock para)
+            {
+                para.Inlines.Clear();
+                AppendRuns(para.Inlines, ChatMarkdown.ParseInline(blocks[prefix].Text), null);
                 _blocks.Clear();
                 _blocks.AddRange(blocks);
                 return;
