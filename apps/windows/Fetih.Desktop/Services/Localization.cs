@@ -528,6 +528,9 @@ public static class Loc
         ["update.install_failed"] = new(
             "Güncelleme indirilirken/kurulurken bir hata oluştu.",
             "An error occurred while downloading/installing the update."),
+        ["update.hash_mismatch"] = new(
+            "İndirilen dosyanın SHA-256 özeti beklenenle eşleşmedi; güncelleme iptal edildi.",
+            "Downloaded file's SHA-256 did not match; update aborted."),
         ["update.channel.setup"] = new("Kurulum sürümü", "Installed via Setup"),
         ["update.channel.portable"] = new("Taşınabilir sürüm", "Portable version"),
 

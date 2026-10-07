@@ -199,12 +199,12 @@ public sealed class BridgeClient : IDisposable
     private async Task ReceiveLoopAsync(ClientWebSocket ws, CancellationToken ct)
     {
         var buffer = new byte[64 * 1024];
-        var sb = new StringBuilder();
+        using var message = new MemoryStream();
         try
         {
             while (!ct.IsCancellationRequested && ws.State == WebSocketState.Open)
             {
-                sb.Clear();
+                message.SetLength(0);
                 WebSocketReceiveResult result;
                 do
                 {
@@ -214,13 +214,16 @@ public sealed class BridgeClient : IDisposable
                     {
                         throw new WebSocketException(Loc.T("bridge.detail.server_closed"));
                     }
-                    sb.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
+                    message.Write(buffer, 0, result.Count);
                 }
                 while (!result.EndOfMessage);
 
-                var frame = sb.ToString();
-                if (frame.Length > 0)
+                // Tüm mesaj biriktikten SONRA tek seferde çöz: çok baytlı bir
+                // karakter (ş, ğ, İ, emoji) 64 KB'lık parça sınırına denk
+                // gelirse parça parça çözmek onu U+FFFD'ye (�) çevirirdi.
+                if (message.Length > 0)
                 {
+                    var frame = Encoding.UTF8.GetString(message.GetBuffer(), 0, (int)message.Length);
                     DispatchFrame(frame);
                 }
             }

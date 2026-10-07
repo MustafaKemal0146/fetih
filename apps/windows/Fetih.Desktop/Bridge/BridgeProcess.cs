@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -45,6 +46,14 @@ public sealed class BridgeProcess : IDisposable
     /// </summary>
     public async Task<Handshake> StartAsync(CancellationToken ct = default)
     {
+        // Yeniden bağlanma: önceki süreci/iş nesnesini üzerine YAZMADAN önce
+        // kapat. Aksi halde her başarısız bağlantı denemesinde yeni bir
+        // python.exe doğar ve eskisi oturum boyunca yetim kalır.
+        if (_ownsProcess && _process is not null)
+        {
+            Stop();
+        }
+
         // Dışarıdan verilmiş köprü: süreç bizim değil, yalnızca bağlanırız.
         var envUrl = SafeEnv("FETIH_BRIDGE_URL");
         var envToken = SafeEnv("FETIH_BRIDGE_TOKEN");
@@ -67,6 +76,10 @@ public sealed class BridgeProcess : IDisposable
             UseShellExecute = false,
             CreateNoWindow = true,
             WorkingDirectory = repoRoot ?? Environment.CurrentDirectory,
+            // El sıkışma satırını ve stderr tracebacklerini UTF-8 olarak çöz;
+            // "Kişisel Projeler" gibi Türkçe karakterli yollar bozulmasın.
+            StandardOutputEncoding = new UTF8Encoding(false),
+            StandardErrorEncoding = new UTF8Encoding(false),
         };
         foreach (var a in prefixArgs)
         {
@@ -86,6 +99,12 @@ public sealed class BridgeProcess : IDisposable
                 : repoRoot + Path.PathSeparator + existing;
         }
         psi.Environment["PYTHONUNBUFFERED"] = "1";
+        // Python'u UTF-8 moduna sabitle: stdout/stderr ve dosya yolları cp1254
+        // gibi eski bir kod sayfasına düşmesin (emoji/Türkçe → UnicodeEncodeError
+        // ya da bozuk karakter). Köprü stdio modunda bu, sessiz bağlantı
+        // ölümünü de önler.
+        psi.Environment["PYTHONUTF8"] = "1";
+        psi.Environment["PYTHONIOENCODING"] = "utf-8";
 
         var proc = new Process { StartInfo = psi, EnableRaisingEvents = true };
         try

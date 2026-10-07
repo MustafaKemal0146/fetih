@@ -25,13 +25,29 @@ public sealed class ChatConversationController
     private static ChatConversationController? _shared;
     public static ChatConversationController Shared => _shared ??= new ChatConversationController();
 
+    /// <summary>
+    /// Sayfa kurulumunda çağrılır. İLK çağrıda tekil controller'ı kurar;
+    /// sonraki çağrılarda yalnızca UI dispatcher'ını yeniden bağlar.
+    ///
+    /// <para>Eskiden her çağrı yeni bir controller üretiyordu; bu, sayfalar
+    /// arası her gezinmede (Sohbet → Yetenekler → Sohbet) süren turu, aktivite
+    /// akışını ve köprü olay aboneliklerini sıfırlıyor, ayrıca eski örneğin
+    /// abonelikleri hiç kaldırılmadığı için bellek sızdırıyordu.</para>
+    /// </summary>
     public static void Initialize(IUiDispatcher dispatcher)
     {
-        _shared = new ChatConversationController(dispatcher);
+        if (_shared is null)
+        {
+            _shared = new ChatConversationController(dispatcher);
+        }
+        else
+        {
+            _shared._dispatcher = dispatcher;
+        }
     }
 
     private readonly BridgeClient _bridge;
-    private readonly IUiDispatcher _dispatcher;
+    private IUiDispatcher _dispatcher;
     private readonly Dictionary<string, ChatMessage> _toolByCallId = new(StringComparer.Ordinal);
     private readonly Dictionary<string, ChatMessage> _approvalByRequestId = new(StringComparer.Ordinal);
     private ChatMessage? _lastTool;

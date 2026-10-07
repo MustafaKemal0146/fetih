@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -174,6 +175,8 @@ public static class UpdateService
 
                 Uri? installerUrl = null;
                 Uri? portableUrl = null;
+                string? installerSha = null;
+                string? portableSha = null;
                 if (release.TryGetProperty("assets", out var assets) && assets.ValueKind == JsonValueKind.Array)
                 {
                     foreach (var asset in assets.EnumerateArray())
@@ -185,21 +188,30 @@ public static class UpdateService
                             continue;
                         }
 
+                        // GitHub, her sürüm varlığı için yüklenen içerikten
+                        // hesapladığı bir "digest" (ör. "sha256:ABC…") döndürür.
+                        // İndirmeden sonra bunu doğrulayarak aktarım sırasında
+                        // bozulma/değişime karşı koruruz.
+                        var sha = ParseSha256Digest(GetString(asset, "digest"));
+
                         if (name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) &&
                             name.Contains("Setup", StringComparison.OrdinalIgnoreCase))
                         {
                             installerUrl = new Uri(download);
+                            installerSha = sha;
                         }
                         else if (name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) &&
                                  name.Contains("Portable", StringComparison.OrdinalIgnoreCase))
                         {
                             portableUrl = new Uri(download);
+                            portableSha = sha;
                         }
                     }
                 }
 
                 var notesUrl = GetString(release, "html_url") ?? AppInfo.ReleasesUrl;
-                return new UpdateInfo(versionText, tag, installerUrl, portableUrl, notesUrl);
+                return new UpdateInfo(versionText, tag, installerUrl, portableUrl, notesUrl,
+                    installerSha, portableSha);
             }
 
             return null;
@@ -212,6 +224,16 @@ public static class UpdateService
 
     private static string? GetString(JsonElement el, string prop) =>
         el.TryGetProperty(prop, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
+
+    /// <summary>"sha256:ABC…" biçimindeki digest'ten salt hex özeti çıkarır; başka algoritma ya da biçimde null.</summary>
+    private static string? ParseSha256Digest(string? digest)
+    {
+        if (string.IsNullOrWhiteSpace(digest)) return null;
+        const string prefix = "sha256:";
+        if (!digest.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) return null;
+        var hex = digest[prefix.Length..].Trim();
+        return hex.Length == 64 ? hex : null;
+    }
 
     private static bool GetBool(JsonElement el, string prop) =>
         el.TryGetProperty(prop, out var v) && v.ValueKind is JsonValueKind.True or JsonValueKind.False && v.GetBoolean();
@@ -260,35 +282,61 @@ public static class UpdateService
         }
     }
 
-    /// <summary>Bir dosyayı geçici klasöre indirir; ilerleme 0..1 aralığında raporlanır.</summary>
-    public static async Task<string> DownloadAsync(Uri url, IProgress<double>? progress, CancellationToken ct = default)
+    /// <summary>
+    /// Bir dosyayı geçici klasöre indirir; ilerleme 0..1 aralığında raporlanır.
+    /// <paramref name="expectedSha256"/> verilirse indirme sonrası SHA-256
+    /// doğrulanır; eşleşmezse dosya silinir ve hata fırlatılır (fail-closed).
+    /// </summary>
+    public static async Task<string> DownloadAsync(
+        Uri url, IProgress<double>? progress, string? expectedSha256 = null,
+        CancellationToken ct = default)
     {
         var tempFile = Path.Combine(
             Path.GetTempPath(),
             $"fetih-update-{Guid.NewGuid():N}{Path.GetExtension(url.LocalPath)}");
 
-        using var resp = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false);
-        resp.EnsureSuccessStatusCode();
-
-        var total = resp.Content.Headers.ContentLength ?? -1L;
-        await using var httpStream = await resp.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
-        await using var fileStream = new FileStream(
-            tempFile, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true);
-
-        var buffer = new byte[81920];
-        long readTotal = 0;
-        int read;
-        while ((read = await httpStream.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
+        using (var resp = await Http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct).ConfigureAwait(false))
         {
-            await fileStream.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
-            readTotal += read;
-            if (total > 0)
+            resp.EnsureSuccessStatusCode();
+
+            var total = resp.Content.Headers.ContentLength ?? -1L;
+            await using var httpStream = await resp.Content.ReadAsStreamAsync(ct).ConfigureAwait(false);
+            await using var fileStream = new FileStream(
+                tempFile, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true);
+
+            var buffer = new byte[81920];
+            long readTotal = 0;
+            int read;
+            while ((read = await httpStream.ReadAsync(buffer, ct).ConfigureAwait(false)) > 0)
             {
-                progress?.Report((double)readTotal / total);
+                await fileStream.WriteAsync(buffer.AsMemory(0, read), ct).ConfigureAwait(false);
+                readTotal += read;
+                if (total > 0)
+                {
+                    progress?.Report((double)readTotal / total);
+                }
+            }
+        }
+
+        if (!string.IsNullOrEmpty(expectedSha256))
+        {
+            var actual = await ComputeSha256Async(tempFile, ct).ConfigureAwait(false);
+            if (!string.Equals(actual, expectedSha256, StringComparison.OrdinalIgnoreCase))
+            {
+                try { File.Delete(tempFile); } catch { /* en iyi çaba */ }
+                throw new InvalidOperationException(Loc.T("update.hash_mismatch"));
             }
         }
 
         return tempFile;
+    }
+
+    private static async Task<string> ComputeSha256Async(string path, CancellationToken ct)
+    {
+        await using var stream = new FileStream(
+            path, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, useAsync: true);
+        var hash = await SHA256.HashDataAsync(stream, ct).ConfigureAwait(false);
+        return Convert.ToHexString(hash);
     }
 
     /// <summary>
@@ -324,31 +372,43 @@ public static class UpdateService
         var scriptPath = Path.Combine(Path.GetTempPath(), $"fetih-updater-{Guid.NewGuid():N}.cmd");
         var exePath = Path.Combine(installDir, exeFileName);
 
-        // robocopy /E /IS /IT: alt klasörler dâhil, mevcut/aynı/eski dosyaları
-        // da kopyala (üzerine yaz). Exit code >=8 gerçek hatadır; 0-7 normaldir.
-        var script = $@"@echo off
-setlocal
-:wait
-tasklist /FI ""PID eq {pid}"" 2>NUL | find ""{pid}"" >NUL
-if not errorlevel 1 (
-    timeout /t 1 /nobreak >NUL
-    goto wait
-)
-robocopy ""{staging}"" ""{installDir}"" /E /IS /IT /NFL /NDL /NJH /NJS /R:3 /W:1
-start """" ""{exePath}""
-rmdir /s /q ""{staging}"" >NUL 2>&1
-(goto) 2>nul & del ""%~f0""
-";
-        File.WriteAllText(scriptPath, script);
+        // KRİTİK: betik gövdesi YALNIZCA ASCII içerir. Yolları (staging,
+        // installDir, exePath — "Kişisel Projeler" gibi Türkçe karakterli
+        // olabilir) betiğe GÖMMEK yerine %1/%2/%3 argümanlarıyla geçiriyoruz.
+        // cmd.exe toplu iş dosyasını konsolun OEM kod sayfasıyla okur; dosyaya
+        // gömülü UTF-8 ş/ğ/İ bozulur, robocopy yanlış klasöre kopyalar ve
+        // güncelleme sessizce başarısız olurdu. Argümanlar ise CreateProcess'e
+        // Unicode komut satırı olarak gider ve %1 Unicode korur.
+        //
+        // Süreç bitişini tasklist|find ile beklemek yerine PowerShell
+        // Wait-Process kullanıyoruz: "find" alt dize eşleştiriyordu (PID 123,
+        // 1234 ile eşleşir) ve "No tasks" metni yerelleştirilmiş Windows'ta
+        // kilitlenmeye yol açıyordu.
+        const string script =
+            "@echo off\r\n" +
+            "setlocal\r\n" +
+            "powershell -NoProfile -NonInteractive -Command \"Wait-Process -Id %~1 -ErrorAction SilentlyContinue; Start-Sleep -Milliseconds 300\"\r\n" +
+            // %2=staging kaynak, %3=installDir hedef, %4=exePath
+            "robocopy %2 %3 /E /IS /IT /NFL /NDL /NJH /NJS /R:3 /W:1\r\n" +
+            "start \"\" %4\r\n" +
+            "rmdir /s /q %2 >NUL 2>&1\r\n" +
+            "(goto) 2>nul & del \"%~f0\"\r\n";
+        File.WriteAllText(scriptPath, script, new System.Text.UTF8Encoding(false));
 
         var psi = new ProcessStartInfo
         {
             FileName = "cmd.exe",
-            Arguments = $"/c \"{scriptPath}\"",
             UseShellExecute = false,
             CreateNoWindow = true,
             WindowStyle = ProcessWindowStyle.Hidden,
         };
+        // ArgumentList her argümanı doğru biçimde tırnaklar (boşluk/Unicode).
+        psi.ArgumentList.Add("/c");
+        psi.ArgumentList.Add(scriptPath);                   // %0 (cmd /c <script> …)
+        psi.ArgumentList.Add(pid.ToString());               // %1
+        psi.ArgumentList.Add(staging);                      // %2
+        psi.ArgumentList.Add(installDir);                   // %3
+        psi.ArgumentList.Add(exePath);                      // %4
         Process.Start(psi);
         Environment.Exit(0);
     }
@@ -360,4 +420,6 @@ public sealed record UpdateInfo(
     string TagName,
     Uri? InstallerUrl,
     Uri? PortableZipUrl,
-    string ReleaseNotesUrl);
+    string ReleaseNotesUrl,
+    string? InstallerSha256 = null,
+    string? PortableSha256 = null);

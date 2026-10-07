@@ -198,6 +198,7 @@ public sealed partial class AboutPage : Page
         {
             var viaSetup = UpdateService.IsInstalledViaSetup();
             var assetUrl = viaSetup ? _pendingUpdate.InstallerUrl : _pendingUpdate.PortableZipUrl;
+            var assetSha = viaSetup ? _pendingUpdate.InstallerSha256 : _pendingUpdate.PortableSha256;
             if (assetUrl is null)
             {
                 UpdateStatusText.Text = Loc.T("update.no_asset_for_channel");
@@ -210,7 +211,7 @@ public sealed partial class AboutPage : Page
             });
 
             UpdateStatusText.Text = Loc.T("update.downloading");
-            var downloadedPath = await UpdateService.DownloadAsync(assetUrl, progress);
+            var downloadedPath = await UpdateService.DownloadAsync(assetUrl, progress, assetSha);
 
             UpdateStatusText.Text = Loc.T("update.installing");
             await Task.Delay(400); // Kullanıcının mesajı görmesi için kısa duraklama.
