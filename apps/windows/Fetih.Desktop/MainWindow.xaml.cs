@@ -1,12 +1,16 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 using Fetih.Desktop.Bridge;
+using Fetih.Desktop.Models;
 using Fetih.Desktop.Services;
 using Fetih.Desktop.Views;
 using Fetih.Desktop.Views.Settings;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 
 namespace Fetih.Desktop;
 
@@ -30,6 +34,7 @@ public sealed partial class MainWindow : Window
 {
     private readonly ObservableCollection<object> _menuItems = new();
     private readonly ObservableCollection<object> _footerItems = new();
+    private NavigationViewItem? _chatItem;
 
     /// <summary>Menü yeniden kurulurken tetiklenen seçim olaylarını bastırır.</summary>
     private bool _suppressSelection;
@@ -57,6 +62,9 @@ public sealed partial class MainWindow : Window
         // Köprü durumu güncellemeleri arka plandan gelir ama x:Bind'e bağlıdır;
         // UI iş parçacığına yönlendirebilmesi için kuyruğu ver.
         Bridge.BridgeStatus.Shared.Dispatcher = DispatcherQueue;
+        ChatSessionService.Shared.Dispatcher = DispatcherQueue;
+        ChatSessionService.Shared.SessionsUpdated += OnChatSessionsUpdated;
+        ChatSessionService.Shared.CurrentChanged += OnCurrentSessionChanged;
 
         RootNavigation.MenuItemsSource = _menuItems;
         RootNavigation.FooterMenuItemsSource = _footerItems;
@@ -80,6 +88,8 @@ public sealed partial class MainWindow : Window
             {
                 Loc.LanguageChanged -= OnLanguageChanged;
                 ShellNavigation.Requested -= OnShellNavigationRequested;
+                ChatSessionService.Shared.SessionsUpdated -= OnChatSessionsUpdated;
+                ChatSessionService.Shared.CurrentChanged -= OnCurrentSessionChanged;
                 Bridge.BridgeClient.Shared.Dispose();
             }
             catch
@@ -148,7 +158,8 @@ public sealed partial class MainWindow : Window
             _menuItems.Clear();
             _footerItems.Clear();
 
-            _menuItems.Add(CreateItem(Loc.T("nav.chat"), NavTags.Chat, Symbol.Message));
+            _chatItem = CreateItem(Loc.T("nav.chat"), NavTags.Chat, Symbol.Message);
+            _menuItems.Add(_chatItem);
             _menuItems.Add(CreateItem(Loc.T("nav.skills"), NavTags.Skills, Symbol.Library));
             _menuItems.Add(CreateItem(Loc.T("nav.findings"), NavTags.Findings, Symbol.Flag));
 
@@ -163,7 +174,8 @@ public sealed partial class MainWindow : Window
             RootNavigation.IsBackEnabled = false;
 
             _mode = ShellMode.Normal;
-            RootNavigation.SelectedItem = _menuItems[0];
+            RebuildChatSubItems();
+            RootNavigation.SelectedItem = _chatItem;
         }
         finally
         {
@@ -299,7 +311,290 @@ public sealed partial class MainWindow : Window
         ShellNavigation.Request(status.ActionNavTag);
     }
 
+    // ── Sohbet Alt Menüsü Yönetimi ─────────────────────────────────────────
+
+    private void OnChatSessionsUpdated()
+    {
+        EnqueueSafe(RebuildChatSubItems, nameof(RebuildChatSubItems));
+    }
+
+    private void OnCurrentSessionChanged(string? sid)
+    {
+        EnqueueSafe(SyncChatSelection, nameof(SyncChatSelection));
+    }
+
+    private void RebuildChatSubItems()
+    {
+        if (_chatItem is null || _mode != ShellMode.Normal) return;
+
+        _chatItem.MenuItems.Clear();
+
+        // 1. "＋ Yeni sohbet"
+        var newChatItem = new NavigationViewItem
+        {
+            Content = Loc.T("chat.new_chat"),
+            Tag = NavTags.ChatNew,
+            Icon = new SymbolIcon(Symbol.Add)
+        };
+        AutomationProperties.SetAutomationId(newChatItem, NavTags.ChatNew);
+        AutomationProperties.SetName(newChatItem, Loc.T("chat.new_chat"));
+        _chatItem.MenuItems.Add(newChatItem);
+
+        // 2. Kaydedilmiş oturumlar
+        var sessions = ChatSessionService.Shared.Sessions;
+        foreach (var session in sessions)
+        {
+            var sessionItem = CreateSessionMenuItem(session);
+            _chatItem.MenuItems.Add(sessionItem);
+        }
+
+        // 3. Oturum varsa en altta "Tümünü sil"
+        if (sessions.Count > 0)
+        {
+            var clearAllItem = new NavigationViewItem
+            {
+                Content = Loc.T("chat.delete_all"),
+                Tag = NavTags.ChatClearAll,
+                Icon = new SymbolIcon(Symbol.Delete)
+            };
+            AutomationProperties.SetAutomationId(clearAllItem, NavTags.ChatClearAll);
+            AutomationProperties.SetName(clearAllItem, Loc.T("chat.delete_all"));
+            _chatItem.MenuItems.Add(clearAllItem);
+        }
+
+        AttachChatParentFlyout(_chatItem);
+        SyncChatSelection();
+    }
+
+    private NavigationViewItem CreateSessionMenuItem(ChatSessionInfo session)
+    {
+        var tb = new TextBlock
+        {
+            Text = session.Title,
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            MaxLines = 1
+        };
+        var item = new NavigationViewItem
+        {
+            Content = tb,
+            Tag = "session:" + session.Id,
+            Icon = new SymbolIcon(Symbol.Message)
+        };
+        ToolTipService.SetToolTip(item, session.Title);
+        AutomationProperties.SetAutomationId(item, "session_" + session.Id);
+        AutomationProperties.SetName(item, session.Title);
+
+        session.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(ChatSessionInfo.Title))
+            {
+                EnqueueSafe(() =>
+                {
+                    tb.Text = session.Title;
+                    ToolTipService.SetToolTip(item, session.Title);
+                    AutomationProperties.SetName(item, session.Title);
+                }, "UpdateSessionTitle");
+            }
+        };
+
+        var flyout = new MenuFlyout();
+        var renameItem = new MenuFlyoutItem
+        {
+            Text = Loc.T("chat.rename"),
+            Icon = new FontIcon { Glyph = "\uE8AC" }
+        };
+        renameItem.Click += async (_, _) => await PromptRenameSessionAsync(session);
+
+        var deleteItem = new MenuFlyoutItem
+        {
+            Text = Loc.T("chat.delete"),
+            Icon = new FontIcon { Glyph = "\uE74D" }
+        };
+        deleteItem.Click += async (_, _) => await PromptDeleteSessionAsync(session);
+
+        flyout.Items.Add(renameItem);
+        flyout.Items.Add(deleteItem);
+        item.ContextFlyout = flyout;
+
+        return item;
+    }
+
+    private void AttachChatParentFlyout(NavigationViewItem chatItem)
+    {
+        var flyout = new MenuFlyout();
+        var newChatItem = new MenuFlyoutItem
+        {
+            Text = Loc.T("chat.new_chat"),
+            Icon = new SymbolIcon(Symbol.Add)
+        };
+        newChatItem.Click += (_, _) =>
+        {
+            NavigateTo(NavTags.Chat);
+            ChatSessionService.Shared.RequestNewChat();
+        };
+        flyout.Items.Add(newChatItem);
+
+        if (ChatSessionService.Shared.Sessions.Count > 0)
+        {
+            var deleteAllItem = new MenuFlyoutItem
+            {
+                Text = Loc.T("chat.delete_all"),
+                Icon = new FontIcon { Glyph = "\uE74D" }
+            };
+            deleteAllItem.Click += async (_, _) => await PromptDeleteAllSessionsAsync();
+            flyout.Items.Add(deleteAllItem);
+        }
+        chatItem.ContextFlyout = flyout;
+    }
+
+    private void SyncChatSelection()
+    {
+        if (_suppressSelection || _mode != ShellMode.Normal || _chatItem is null) return;
+        var curSid = ChatSessionService.Shared.CurrentSessionId;
+        if (string.IsNullOrEmpty(curSid))
+        {
+            if (ContentFrame.Content is ChatPage)
+            {
+                _suppressSelection = true;
+                RootNavigation.SelectedItem = _chatItem;
+                _suppressSelection = false;
+            }
+            return;
+        }
+
+        foreach (var obj in _chatItem.MenuItems)
+        {
+            if (obj is NavigationViewItem nvi && nvi.Tag is string tag && tag == "session:" + curSid)
+            {
+                _suppressSelection = true;
+                RootNavigation.SelectedItem = nvi;
+                _suppressSelection = false;
+                return;
+            }
+        }
+    }
+
+    private async Task PromptRenameSessionAsync(ChatSessionInfo session)
+    {
+        var input = new TextBox
+        {
+            Text = session.Title,
+            Margin = new Thickness(0, 8, 0, 0)
+        };
+        input.Loaded += (_, _) =>
+        {
+            input.SelectAll();
+            input.Focus(FocusState.Programmatic);
+        };
+
+        var dialog = new ContentDialog
+        {
+            Title = Loc.T("chat.rename"),
+            Content = input,
+            PrimaryButtonText = Loc.T("dialog.save"),
+            CloseButtonText = Loc.T("dialog.cancel"),
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = Content.XamlRoot
+        };
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            var newTitle = input.Text.Trim();
+            if (!string.IsNullOrEmpty(newTitle) && newTitle != session.Title)
+            {
+                await ChatSessionService.Shared.RenameAsync(session.Id, newTitle);
+            }
+        }
+    }
+
+    private async Task PromptDeleteSessionAsync(ChatSessionInfo session)
+    {
+        var dialog = new ContentDialog
+        {
+            Title = Loc.T("chat.delete_confirm_title"),
+            Content = Loc.Format("chat.delete_confirm_body", session.Title),
+            PrimaryButtonText = Loc.T("chat.delete"),
+            CloseButtonText = Loc.T("dialog.cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = Content.XamlRoot
+        };
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            await ChatSessionService.Shared.DeleteAsync(session.Id);
+        }
+    }
+
+    private async Task PromptDeleteAllSessionsAsync()
+    {
+        var dialog = new ContentDialog
+        {
+            Title = Loc.T("chat.delete_all_confirm_title"),
+            Content = Loc.T("chat.delete_all_confirm_body"),
+            PrimaryButtonText = Loc.T("chat.delete_all"),
+            CloseButtonText = Loc.T("dialog.cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = Content.XamlRoot
+        };
+
+        if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+        {
+            await ChatSessionService.Shared.DeleteAllAsync();
+        }
+    }
+
     // ── Olaylar ─────────────────────────────────────────────────────────────
+
+    private void NewChatAccelerator_Invoked(KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        args.Handled = true;
+        NavigateTo(NavTags.Chat);
+        ChatSessionService.Shared.RequestNewChat();
+    }
+
+    private async void RootNavigation_ItemInvoked(
+        NavigationView sender,
+        NavigationViewItemInvokedEventArgs args)
+    {
+        if (args.IsSettingsInvoked) return;
+
+        if (args.InvokedItemContainer is NavigationViewItem nvi && nvi.Tag is string tag)
+        {
+            if (tag == NavTags.ChatNew)
+            {
+                NavigateTo(NavTags.Chat);
+                ChatSessionService.Shared.RequestNewChat();
+                _suppressSelection = true;
+                RootNavigation.SelectedItem = _chatItem;
+                _suppressSelection = false;
+                return;
+            }
+
+            if (tag == NavTags.ChatClearAll)
+            {
+                await PromptDeleteAllSessionsAsync();
+                return;
+            }
+
+            if (tag.StartsWith("session:", StringComparison.Ordinal))
+            {
+                var sid = tag["session:".Length..];
+                var session = ChatSessionService.Shared.Sessions.FirstOrDefault(s => s.Id == sid);
+                NavigateTo(NavTags.Chat);
+                if (session is not null)
+                {
+                    ChatSessionService.Shared.RequestOpen(session);
+                }
+                return;
+            }
+
+            if (tag == NavTags.Chat)
+            {
+                NavigateTo(NavTags.Chat);
+                return;
+            }
+        }
+    }
 
     private void RootNavigation_SelectionChanged(
         NavigationView sender,
@@ -327,6 +622,33 @@ public sealed partial class MainWindow : Window
 
             if (args.SelectedItem is NavigationViewItem { Tag: string tag })
             {
+                if (tag == NavTags.ChatNew)
+                {
+                    NavigateTo(NavTags.Chat);
+                    ChatSessionService.Shared.RequestNewChat();
+                    SyncChatSelection();
+                    return;
+                }
+
+                if (tag == NavTags.ChatClearAll)
+                {
+                    SyncChatSelection();
+                    _ = PromptDeleteAllSessionsAsync();
+                    return;
+                }
+
+                if (tag.StartsWith("session:", StringComparison.Ordinal))
+                {
+                    var sid = tag["session:".Length..];
+                    var session = ChatSessionService.Shared.Sessions.FirstOrDefault(s => s.Id == sid);
+                    NavigateTo(NavTags.Chat);
+                    if (session is not null)
+                    {
+                        ChatSessionService.Shared.RequestOpen(session);
+                    }
+                    return;
+                }
+
                 NavigateTo(tag);
             }
         }
@@ -469,6 +791,8 @@ public sealed partial class MainWindow : Window
 internal static class NavTags
 {
     public const string Chat = "nav_chat";
+    public const string ChatNew = "nav_chat_new";
+    public const string ChatClearAll = "nav_chat_clear_all";
     public const string Skills = "nav_skills";
     public const string Findings = "nav_findings";
     public const string Diagnostics = "nav_diagnostics";

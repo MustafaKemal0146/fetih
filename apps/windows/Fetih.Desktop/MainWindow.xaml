@@ -14,7 +14,10 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid>
+    <Grid KeyboardAcceleratorPlacementMode="Hidden">
+        <Grid.KeyboardAccelerators>
+            <KeyboardAccelerator Key="N" Modifiers="Control" Invoked="NewChatAccelerator_Invoked" />
+        </Grid.KeyboardAccelerators>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -104,6 +107,7 @@
                              IsPaneToggleButtonVisible="True"
                              PaneDisplayMode="Left"
                              OpenPaneLength="240"
+                             ItemInvoked="RootNavigation_ItemInvoked"
                              SelectionChanged="RootNavigation_SelectionChanged"
                              BackRequested="RootNavigation_BackRequested">
             <Frame x:Name="ContentFrame" />

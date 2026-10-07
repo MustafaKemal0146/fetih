@@ -1,0 +1,1963 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>Microsoft.Build.Tasks.ResourceHandling.RestrictedResXFileHandler, Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </resheader>
+  <resheader name="writer">
+    <value>Microsoft.Build.Tasks.ResourceHandling.RestrictedResXFileHandler, Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </resheader>
+  <data name="Activity_Action_One" xml:space="preserve">
+    <value>1 action</value>
+  </data>
+  <data name="Activity_Actions_Many" xml:space="preserve">
+    <value>{0} actions</value>
+  </data>
+  <data name="Activity_Cancelled" xml:space="preserve">
+    <value>stopped</value>
+  </data>
+  <data name="Activity_Error_One" xml:space="preserve">
+    <value>1 error</value>
+  </data>
+  <data name="Activity_Errors" xml:space="preserve">
+    <value>{0} errors</value>
+  </data>
+  <data name="Activity_Thinking" xml:space="preserve">
+    <value>Thinking…</value>
+  </data>
+  <data name="Activity_Tool_Default" xml:space="preserve">
+    <value>Running {0}</value>
+  </data>
+  <data name="Activity_Tool_edit_file" xml:space="preserve">
+    <value>Editing {0}</value>
+  </data>
+  <data name="Activity_Tool_execute_command" xml:space="preserve">
+    <value>Running command: {0}</value>
+  </data>
+  <data name="Activity_Tool_fetch_url" xml:space="preserve">
+    <value>Fetching {0}</value>
+  </data>
+  <data name="Activity_Tool_read_file" xml:space="preserve">
+    <value>Reading {0}</value>
+  </data>
+  <data name="Activity_Tool_search_web" xml:space="preserve">
+    <value>Searching web: {0}</value>
+  </data>
+  <data name="Activity_Tool_terminal" xml:space="preserve">
+    <value>Running command: {0}</value>
+  </data>
+  <data name="Activity_Tool_view_file" xml:space="preserve">
+    <value>Reading {0}</value>
+  </data>
+  <data name="Activity_Tool_write_file" xml:space="preserve">
+    <value>Writing {0}</value>
+  </data>
+  <data name="Activity_Tool_write_to_file" xml:space="preserve">
+    <value>Writing {0}</value>
+  </data>
+  <data name="Chat_Working" xml:space="preserve">
+    <value>Working</value>
+  </data>
+  <data name="Unit_Min" xml:space="preserve">
+    <value>m</value>
+  </data>
+  <data name="Unit_Sec" xml:space="preserve">
+    <value>s</value>
+  </data>
+  <data name="about_desc" xml:space="preserve">
+    <value>A model-agnostic agent for CTF solving, penetration testing, OSINT, forensics, and red team operations. The desktop app is a shell; agent logic runs on Python.</value>
+  </data>
+  <data name="about_design_doc" xml:space="preserve">
+    <value>Desktop application design document: docs/windows-app-plani.md (in repository)</value>
+  </data>
+  <data name="about_disclaimer_message" xml:space="preserve">
+    <value>FETİH is an attack simulation and security testing tool. Only use on systems you own or have written permission to test.</value>
+  </data>
+  <data name="about_disclaimer_title" xml:space="preserve">
+    <value>Scope Warning</value>
+  </data>
+  <data name="about_install_packaged" xml:space="preserve">
+    <value>Packaged (MSIX)</value>
+  </data>
+  <data name="about_install_unpackaged" xml:space="preserve">
+    <value>Unpackaged (developer)</value>
+  </data>
+  <data name="about_releases_link" xml:space="preserve">
+    <value>Releases and release notes</value>
+  </data>
+  <data name="about_repo_link" xml:space="preserve">
+    <value>Project repository — github.com/MustafaKemal0146/fetih</value>
+  </data>
+  <data name="about_row_app_dir" xml:space="preserve">
+    <value>Application directory</value>
+  </data>
+  <data name="about_row_app_name" xml:space="preserve">
+    <value>Application name</value>
+  </data>
+  <data name="about_row_architecture" xml:space="preserve">
+    <value>Architecture</value>
+  </data>
+  <data name="about_row_build_date" xml:space="preserve">
+    <value>Build date</value>
+  </data>
+  <data name="about_row_install_desc" xml:space="preserve">
+    <value>This build runs unpackaged (without package identity); the Updates section below checks GitHub Releases.</value>
+  </data>
+  <data name="about_row_install_type" xml:space="preserve">
+    <value>Installation type</value>
+  </data>
+  <data name="about_row_runtime" xml:space="preserve">
+    <value>Runtime</value>
+  </data>
+  <data name="about_row_target_framework" xml:space="preserve">
+    <value>Target framework</value>
+  </data>
+  <data name="about_row_version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="about_row_windows" xml:space="preserve">
+    <value>Windows</value>
+  </data>
+  <data name="about_section_app_info" xml:space="preserve">
+    <value>Application Information</value>
+  </data>
+  <data name="about_section_links" xml:space="preserve">
+    <value>Links</value>
+  </data>
+  <data name="about_title" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="about_unknown" xml:space="preserve">
+    <value>unknown</value>
+  </data>
+  <data name="app_product_name" xml:space="preserve">
+    <value>FETİH Desktop</value>
+  </data>
+  <data name="app_tagline" xml:space="preserve">
+    <value>Cyber Security Operations Console</value>
+  </data>
+  <data name="appearance_language" xml:space="preserve">
+    <value>Interface language</value>
+  </data>
+  <data name="appearance_language_auto" xml:space="preserve">
+    <value>Automatic (system)</value>
+  </data>
+  <data name="appearance_language_en" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="appearance_language_note" xml:space="preserve">
+    <value>Applied immediately and saved persistently.</value>
+  </data>
+  <data name="appearance_language_tr" xml:space="preserve">
+    <value>Türkçe</value>
+  </data>
+  <data name="bridge_badge_tooltip_fix" xml:space="preserve">
+    <value>Click to fix</value>
+  </data>
+  <data name="bridge_detail_auth_failed" xml:space="preserve">
+    <value>Bridge authentication failed.</value>
+  </data>
+  <data name="bridge_detail_auth_rejected" xml:space="preserve">
+    <value>Authentication was rejected.</value>
+  </data>
+  <data name="bridge_detail_connect_failed" xml:space="preserve">
+    <value>Could not connect to the bridge: </value>
+  </data>
+  <data name="bridge_detail_connected" xml:space="preserve">
+    <value>Connected · protocol v{0} · pid {1}</value>
+  </data>
+  <data name="bridge_detail_connecting" xml:space="preserve">
+    <value>Starting the Desktop Bridge…</value>
+  </data>
+  <data name="bridge_detail_dropped" xml:space="preserve">
+    <value>The bridge connection dropped.</value>
+  </data>
+  <data name="bridge_detail_idle" xml:space="preserve">
+    <value>The Desktop Bridge has not been started yet.</value>
+  </data>
+  <data name="bridge_detail_model_error" xml:space="preserve">
+    <value>The bridge is connected but the model is unreachable. Check Settings › Model &amp; Provider.</value>
+  </data>
+  <data name="bridge_detail_model_ok" xml:space="preserve">
+    <value>Connected — the model is responding.</value>
+  </data>
+  <data name="bridge_detail_not_connected" xml:space="preserve">
+    <value>The bridge is not connected.</value>
+  </data>
+  <data name="bridge_detail_protocol_mismatch" xml:space="preserve">
+    <value>Protocol mismatch: client {0}, server {1}–{2}.</value>
+  </data>
+  <data name="bridge_detail_protocol_mismatch_ex" xml:space="preserve">
+    <value>The bridge protocol version is incompatible (client 1, server {0}–{1}).</value>
+  </data>
+  <data name="bridge_detail_reconnecting" xml:space="preserve">
+    <value>The connection dropped; it will reconnect on the next request.</value>
+  </data>
+  <data name="bridge_detail_send_failed" xml:space="preserve">
+    <value>Could not send the request to the bridge: </value>
+  </data>
+  <data name="bridge_detail_server_closed" xml:space="preserve">
+    <value>the server closed the connection</value>
+  </data>
+  <data name="bridge_dir_exists" xml:space="preserve">
+    <value>Directory exists.</value>
+  </data>
+  <data name="bridge_dir_missing" xml:space="preserve">
+    <value>Directory does not exist.</value>
+  </data>
+  <data name="bridge_env_active" xml:space="preserve">
+    <value>Currently defined in environment.</value>
+  </data>
+  <data name="bridge_env_file" xml:space="preserve">
+    <value>Defined in .env file.</value>
+  </data>
+  <data name="bridge_env_none" xml:space="preserve">
+    <value>Undefined — will be generated when bridge starts.</value>
+  </data>
+  <data name="bridge_file_exists" xml:space="preserve">
+    <value>File exists.</value>
+  </data>
+  <data name="bridge_file_missing" xml:space="preserve">
+    <value>File does not exist.</value>
+  </data>
+  <data name="bridge_intro" xml:space="preserve">
+    <value>The transport layer between the desktop app and the Python agent. Completely separate from the messaging bridge (Telegram/Discord/WhatsApp) — that management is not on this page.</value>
+  </data>
+  <data name="bridge_live_desc" xml:space="preserve">
+    <value>The app starts the Python bridge itself and connects on the first message. The values above reflect live state; all of them are read-only information.</value>
+  </data>
+  <data name="bridge_live_title" xml:space="preserve">
+    <value>The bridge is active in this build</value>
+  </data>
+  <data name="bridge_path_app" xml:space="preserve">
+    <value>Application directory</value>
+  </data>
+  <data name="bridge_path_config" xml:space="preserve">
+    <value>Configuration</value>
+  </data>
+  <data name="bridge_path_env" xml:space="preserve">
+    <value>Environment file</value>
+  </data>
+  <data name="bridge_path_repo" xml:space="preserve">
+    <value>Repository root</value>
+  </data>
+  <data name="bridge_paths_note" xml:space="preserve">
+    <value>The app does not trust the user's PATH; the Python process will be started using absolute paths.</value>
+  </data>
+  <data name="bridge_proc_detail" xml:space="preserve">
+    <value>Details: </value>
+  </data>
+  <data name="bridge_proc_handshake_parse" xml:space="preserve">
+    <value>The bridge handshake line could not be parsed: </value>
+  </data>
+  <data name="bridge_proc_handshake_read" xml:space="preserve">
+    <value>The bridge handshake line could not be read (the process ended unexpectedly). </value>
+  </data>
+  <data name="bridge_proc_no_token" xml:space="preserve">
+    <value>The handshake line has no token field.</value>
+  </data>
+  <data name="bridge_proc_no_url" xml:space="preserve">
+    <value>The handshake line has no url field.</value>
+  </data>
+  <data name="bridge_proc_no_value" xml:space="preserve">
+    <value>(none)</value>
+  </data>
+  <data name="bridge_proc_start_failed" xml:space="preserve">
+    <value>The bridge process could not be started: {0}</value>
+  </data>
+  <data name="bridge_proc_start_failed_ex" xml:space="preserve">
+    <value>The bridge process could not be started ({0}): {1}</value>
+  </data>
+  <data name="bridge_proc_unexpected_event" xml:space="preserve">
+    <value>expected 'bridge.listening', got: {0}</value>
+  </data>
+  <data name="bridge_refresh" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+  <data name="bridge_repo_catalog" xml:space="preserve">
+    <value>Skill catalog is read from here.</value>
+  </data>
+  <data name="bridge_repo_outside" xml:space="preserve">
+    <value>App may have been run from outside repo tree.</value>
+  </data>
+  <data name="bridge_section_paths" xml:space="preserve">
+    <value>Resolved Paths</value>
+  </data>
+  <data name="bridge_section_transport" xml:space="preserve">
+    <value>Transport Configuration</value>
+  </data>
+  <data name="bridge_state_connecting" xml:space="preserve">
+    <value>Connecting…</value>
+  </data>
+  <data name="bridge_state_error" xml:space="preserve">
+    <value>Connection error</value>
+  </data>
+  <data name="bridge_state_idle" xml:space="preserve">
+    <value>Waiting to connect…</value>
+  </data>
+  <data name="bridge_state_model_error" xml:space="preserve">
+    <value>Model error</value>
+  </data>
+  <data name="bridge_state_ready" xml:space="preserve">
+    <value>Connected</value>
+  </data>
+  <data name="bridge_state_reconnecting" xml:space="preserve">
+    <value>Reconnecting…</value>
+  </data>
+  <data name="bridge_title" xml:space="preserve">
+    <value>Desktop Bridge</value>
+  </data>
+  <data name="bridge_transport_alt" xml:space="preserve">
+    <value>Alternative transport</value>
+  </data>
+  <data name="bridge_transport_alt_note" xml:space="preserve">
+    <value>Connects only to local interface; requires a single-use token generated each session.</value>
+  </data>
+  <data name="bridge_transport_alt_val" xml:space="preserve">
+    <value>WebSocket — ws://127.0.0.1:&lt;port&gt;</value>
+  </data>
+  <data name="bridge_transport_default" xml:space="preserve">
+    <value>Default transport</value>
+  </data>
+  <data name="bridge_transport_default_note" xml:space="preserve">
+    <value>The app launches the Python process itself; no open ports (safest option).</value>
+  </data>
+  <data name="bridge_transport_mod_avail" xml:space="preserve">
+    <value>fetih_desktop_bridge (available)</value>
+  </data>
+  <data name="bridge_transport_mod_avail_note" xml:space="preserve">
+    <value>Started via python -m fetih_desktop_bridge.</value>
+  </data>
+  <data name="bridge_transport_mod_missing" xml:space="preserve">
+    <value>fetih_desktop_bridge (not found)</value>
+  </data>
+  <data name="bridge_transport_mod_missing_note" xml:space="preserve">
+    <value>The Python module is not visible in the repository root. Run the app from inside the repository tree; the bridge cannot connect until it is there.</value>
+  </data>
+  <data name="bridge_transport_port_var" xml:space="preserve">
+    <value>Port variable</value>
+  </data>
+  <data name="bridge_transport_proto" xml:space="preserve">
+    <value>Protocol</value>
+  </data>
+  <data name="bridge_transport_proto_note" xml:space="preserve">
+    <value>The same contract applies to both transports.</value>
+  </data>
+  <data name="bridge_transport_proto_val" xml:space="preserve">
+    <value>Newline-delimited JSON-RPC (NDJSON)</value>
+  </data>
+  <data name="bridge_transport_python_mod" xml:space="preserve">
+    <value>Python module</value>
+  </data>
+  <data name="bridge_transport_token_note" xml:space="preserve">
+    <value> Value is never displayed or written to file; passed to Python process solely via environment variable.</value>
+  </data>
+  <data name="bridge_transport_token_var" xml:space="preserve">
+    <value>Token variable</value>
+  </data>
+  <data name="chat_action_busy" xml:space="preserve">
+    <value>A turn is already running. Stop it first.</value>
+  </data>
+  <data name="chat_action_cancelled" xml:space="preserve">
+    <value>Turn stopped. Partial output is kept above.</value>
+  </data>
+  <data name="chat_action_cancelling" xml:space="preserve">
+    <value>Stopping the turn…</value>
+  </data>
+  <data name="chat_action_copied" xml:space="preserve">
+    <value>Message copied to the clipboard.</value>
+  </data>
+  <data name="chat_action_copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="chat_action_copy_hint" xml:space="preserve">
+    <value>Copy this message to the clipboard</value>
+  </data>
+  <data name="chat_action_copy_failed" xml:space="preserve">
+    <value>Could not copy to the clipboard.</value>
+  </data>
+  <data name="chat_action_edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="chat_action_edit_hint" xml:space="preserve">
+    <value>Load this message into the input box, then send the corrected version</value>
+  </data>
+  <data name="chat_action_edit_restarted" xml:space="preserve">
+    <value>The message was edited; everything after it was removed and a new bridge session started.</value>
+  </data>
+  <data name="chat_action_no_turn" xml:space="preserve">
+    <value>No preceding user message to repeat.</value>
+  </data>
+  <data name="chat_action_retry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="chat_action_retry_hint" xml:space="preserve">
+    <value>Send this turn again</value>
+  </data>
+  <data name="chat_action_send_failed" xml:space="preserve">
+    <value>Message could not be sent: </value>
+  </data>
+  <data name="chat_action_session_gone" xml:space="preserve">
+    <value>The previous bridge session no longer exists; a new one was started.</value>
+  </data>
+  <data name="chat_action_stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="chat_activity_actions" xml:space="preserve">
+    <value>{0} actions</value>
+  </data>
+  <data name="chat_activity_coding" xml:space="preserve">
+    <value>Writing code…</value>
+  </data>
+  <data name="chat_activity_command" xml:space="preserve">
+    <value>Running command…</value>
+  </data>
+  <data name="chat_activity_errors" xml:space="preserve">
+    <value>{0} errors</value>
+  </data>
+  <data name="chat_activity_reading" xml:space="preserve">
+    <value>Reading file…</value>
+  </data>
+  <data name="chat_activity_running" xml:space="preserve">
+    <value>Running…</value>
+  </data>
+  <data name="chat_activity_stopped" xml:space="preserve">
+    <value>stopped</value>
+  </data>
+  <data name="chat_activity_thinking" xml:space="preserve">
+    <value>Thinking…</value>
+  </data>
+  <data name="chat_activity_thought_process" xml:space="preserve">
+    <value>Thought process</value>
+  </data>
+  <data name="chat_cancel_busy_confirm_body" xml:space="preserve">
+    <value>The active task will be stopped to switch or create a new chat.</value>
+  </data>
+  <data name="chat_cancel_busy_confirm_title" xml:space="preserve">
+    <value>Stop active task?</value>
+  </data>
+  <data name="chat_cancelled" xml:space="preserve">
+    <value>Operation cancelled by user.</value>
+  </data>
+  <data name="chat_connecting" xml:space="preserve">
+    <value>Connecting…</value>
+  </data>
+  <data name="chat_default_title" xml:space="preserve">
+    <value>New chat</value>
+  </data>
+  <data name="chat_delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="chat_delete_all" xml:space="preserve">
+    <value>Delete all chats</value>
+  </data>
+  <data name="chat_delete_all_confirm_body" xml:space="preserve">
+    <value>All saved chat history will be permanently cleared. This action cannot be undone. Are you sure?</value>
+  </data>
+  <data name="chat_delete_all_confirm_title" xml:space="preserve">
+    <value>Delete all chats?</value>
+  </data>
+  <data name="chat_delete_confirm_body" xml:space="preserve">
+    <value>Chat "{0}" will be permanently deleted. Are you sure?</value>
+  </data>
+  <data name="chat_delete_confirm_title" xml:space="preserve">
+    <value>Delete chat?</value>
+  </data>
+  <data name="chat_empty_prompt" xml:space="preserve">
+    <value>FETİH cybersecurity and coding assistant is ready. Type a task or question to begin.</value>
+  </data>
+  <data name="chat_empty_state" xml:space="preserve">
+    <value>How can I help you?</value>
+  </data>
+  <data name="chat_empty_state_desc" xml:space="preserve">
+    <value>Ask a question, run commands, or request a code review.</value>
+  </data>
+  <data name="chat_empty_state_title" xml:space="preserve">
+    <value>How can I help you?</value>
+  </data>
+  <data name="chat_error_agent_failed" xml:space="preserve">
+    <value>The agent ran but failed: </value>
+  </data>
+  <data name="chat_error_auth" xml:space="preserve">
+    <value>The bridge refused authentication.</value>
+  </data>
+  <data name="chat_error_bridge" xml:space="preserve">
+    <value>Bridge error (</value>
+  </data>
+  <data name="chat_error_busy" xml:space="preserve">
+    <value>A turn is already running in this session; wait for it to finish.</value>
+  </data>
+  <data name="chat_error_cancel_failed" xml:space="preserve">
+    <value>The turn could not be stopped: </value>
+  </data>
+  <data name="chat_error_session_unknown" xml:space="preserve">
+    <value>The bridge does not recognize this session; a new one will be opened.</value>
+  </data>
+  <data name="chat_hint" xml:space="preserve">
+    <value>Enter for a new line · Ctrl+Enter to send</value>
+  </data>
+  <data name="chat_hint_default" xml:space="preserve">
+    <value>Enter: Send · Shift+Enter: New line · Ctrl+N: New chat</value>
+  </data>
+  <data name="chat_hint_editing" xml:space="preserve">
+    <value>Editing message · Submitting will regenerate subsequent responses</value>
+  </data>
+  <data name="chat_hint_safety" xml:space="preserve">
+    <value>Terminal commands and file writes are protected with auto-approval checks</value>
+  </data>
+  <data name="chat_md_copied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
+  <data name="chat_md_copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="chat_new_chat" xml:space="preserve">
+    <value>New chat</value>
+  </data>
+  <data name="chat_placeholder" xml:space="preserve">
+    <value>Type a task… (e.g. OSINT gathering for a target domain)</value>
+  </data>
+  <data name="chat_prompt_placeholder" xml:space="preserve">
+    <value>Type your message…</value>
+  </data>
+  <data name="chat_rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="chat_role_agent" xml:space="preserve">
+    <value>FETİH</value>
+  </data>
+  <data name="chat_role_system" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="chat_role_tool" xml:space="preserve">
+    <value>🔧 Tool</value>
+  </data>
+  <data name="chat_role_user" xml:space="preserve">
+    <value>You</value>
+  </data>
+  <data name="chat_send" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="chat_session_timeout" xml:space="preserve">
+    <value>Session timed out, opening a new session…</value>
+  </data>
+  <data name="chat_status_denied" xml:space="preserve">
+    <value>Denied</value>
+  </data>
+  <data name="chat_status_done" xml:space="preserve">
+    <value>Completed</value>
+  </data>
+  <data name="chat_status_error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="chat_status_running" xml:space="preserve">
+    <value>Running…</value>
+  </data>
+  <data name="chat_status_stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="chat_stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="chat_thought_header" xml:space="preserve">
+    <value>🧠 Reasoning</value>
+  </data>
+  <data name="chat_thought_thinking" xml:space="preserve">
+    <value>🧠 Thinking…</value>
+  </data>
+  <data name="chat_tool_done" xml:space="preserve">
+    <value>done</value>
+  </data>
+  <data name="chat_tool_running" xml:space="preserve">
+    <value>running…</value>
+  </data>
+  <data name="chat_warmup_failed" xml:space="preserve">
+    <value>Could not connect to the Desktop Bridge: </value>
+  </data>
+  <data name="chat_warmup_retry" xml:space="preserve">
+    <value> · It will be retried when you send your first message.</value>
+  </data>
+  <data name="chat_welcome" xml:space="preserve">
+    <value>FETİH desktop shell is ready. When you send your first message the Desktop Bridge starts automatically and responses stream here in real time.</value>
+  </data>
+  <data name="common_off" xml:space="preserve">
+    <value>off</value>
+  </data>
+  <data name="common_on" xml:space="preserve">
+    <value>on</value>
+  </data>
+  <data name="common_reload" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+  <data name="config_advanced_subtitle" xml:space="preserve">
+    <value>The whole of FETİH's on-disk configuration file, section by section. Every row shows the raw key name and a note specific to it; changing a value writes to ~/.fetih/config.yaml immediately.</value>
+  </data>
+  <data name="config_advanced_warn_body" xml:space="preserve">
+    <value>This page holds ALL of FETİH's raw configuration keys. If you are not sure what you are doing, use the normal Settings pages instead.</value>
+  </data>
+  <data name="config_advanced_warn_title" xml:space="preserve">
+    <value>Advanced Mode — raw configuration</value>
+  </data>
+  <data name="config_bridge_error" xml:space="preserve">
+    <value>Bridge error</value>
+  </data>
+  <data name="config_complex_list" xml:space="preserve">
+    <value>  (complex list — not editable here)</value>
+  </data>
+  <data name="config_empty" xml:space="preserve">
+    <value>No editable field was found for this section.</value>
+  </data>
+  <data name="config_env_ref" xml:space="preserve">
+    <value>  (environment variable reference)</value>
+  </data>
+  <data name="config_error_no_keys" xml:space="preserve">
+    <value>config.yaml was read but no key could be parsed.</value>
+  </data>
+  <data name="config_list_placeholder" xml:space="preserve">
+    <value>comma-separated list</value>
+  </data>
+  <data name="config_load_failed" xml:space="preserve">
+    <value>Could not load the configuration: </value>
+  </data>
+  <data name="config_read_failed" xml:space="preserve">
+    <value>Could not read the configuration.</value>
+  </data>
+  <data name="config_rejected" xml:space="preserve">
+    <value>refused (secret key or managed installation)</value>
+  </data>
+  <data name="config_reload" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+  <data name="config_revert" xml:space="preserve">
+    <value>Revert to the loaded value</value>
+  </data>
+  <data name="config_saved" xml:space="preserve">
+    <value>✓ saved</value>
+  </data>
+  <data name="config_saving" xml:space="preserve">
+    <value>saving…</value>
+  </data>
+  <data name="config_secret" xml:space="preserve">
+    <value>•••••• (secret — kept in ~/.fetih/.env)</value>
+  </data>
+  <data name="config_subtitle" xml:space="preserve">
+    <value>Changing a value writes it to ~/.fetih/config.yaml immediately. The note under each row explains what that setting does and what changes if you touch it.</value>
+  </data>
+  <data name="danger_cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="danger_failed" xml:space="preserve">
+    <value>The action failed: </value>
+  </data>
+  <data name="danger_intro" xml:space="preserve">
+    <value>These two actions cannot be undone. The difference between them matters: one only resets your settings, the other deletes everything.</value>
+  </data>
+  <data name="danger_partial" xml:space="preserve">
+    <value>Some files could not be deleted because they are in use: </value>
+  </data>
+  <data name="danger_reset_button" xml:space="preserve">
+    <value>Reset (fresh install)</value>
+  </data>
+  <data name="danger_reset_confirm_body" xml:space="preserve">
+    <value>Only your provider/model settings and API keys (config.yaml and .env) will be deleted. Your conversation history, memory and logs will be kept. The setup wizard will run when you reopen the app.
+
+Are you sure?</value>
+  </data>
+  <data name="danger_reset_confirm_title" xml:space="preserve">
+    <value>Reset the configuration?</value>
+  </data>
+  <data name="danger_reset_desc" xml:space="preserve">
+    <value>Deletes ONLY your configuration: your provider/model choice and your API keys. Your conversation history, memory and logs are KEPT. The first-run setup wizard runs again the next time you open the app.</value>
+  </data>
+  <data name="danger_reset_done" xml:space="preserve">
+    <value>The configuration has been reset. Your conversation history is intact. You need to restart the app.</value>
+  </data>
+  <data name="danger_reset_title" xml:space="preserve">
+    <value>Reset (fresh install)</value>
+  </data>
+  <data name="danger_restart_later" xml:space="preserve">
+    <value>Later</value>
+  </data>
+  <data name="danger_restart_now" xml:space="preserve">
+    <value>Restart now</value>
+  </data>
+  <data name="danger_restart_title" xml:space="preserve">
+    <value>Restart required</value>
+  </data>
+  <data name="danger_title" xml:space="preserve">
+    <value>Danger Zone</value>
+  </data>
+  <data name="danger_wipe_button" xml:space="preserve">
+    <value>Delete all data</value>
+  </data>
+  <data name="danger_wipe_confirm_body" xml:space="preserve">
+    <value>This permanently deletes all conversation history, memory, logs AND your configuration (API keys included). It cannot be undone.
+
+Shall we continue?</value>
+  </data>
+  <data name="danger_wipe_confirm_title" xml:space="preserve">
+    <value>Are you sure?</value>
+  </data>
+  <data name="danger_wipe_desc" xml:space="preserve">
+    <value>Deletes EVERYTHING FETİH keeps about you: conversation history, memory, logs, sandboxes AND your configuration (API keys included). It cannot be undone.</value>
+  </data>
+  <data name="danger_wipe_done" xml:space="preserve">
+    <value>All data has been deleted. You need to restart the app.</value>
+  </data>
+  <data name="danger_wipe_title" xml:space="preserve">
+    <value>Delete all data</value>
+  </data>
+  <data name="danger_working" xml:space="preserve">
+    <value>deleting…</value>
+  </data>
+  <data name="danger_yes" xml:space="preserve">
+    <value>Yes, delete</value>
+  </data>
+  <data name="danger_yes_reset" xml:space="preserve">
+    <value>Yes, reset</value>
+  </data>
+  <data name="diag_catalog_unreadable" xml:space="preserve">
+    <value>Skill catalog unreadable</value>
+  </data>
+  <data name="diag_clear" xml:space="preserve">
+    <value>Clear log</value>
+  </data>
+  <data name="diag_clear_failed" xml:space="preserve">
+    <value>Could not clear log: </value>
+  </data>
+  <data name="diag_cleared" xml:space="preserve">
+    <value>Crash log cleared.</value>
+  </data>
+  <data name="diag_copied" xml:space="preserve">
+    <value>Diagnostics report copied to clipboard.</value>
+  </data>
+  <data name="diag_copy" xml:space="preserve">
+    <value>Copy to clipboard</value>
+  </data>
+  <data name="diag_copy_failed" xml:space="preserve">
+    <value>Could not copy to clipboard: </value>
+  </data>
+  <data name="diag_file_missing" xml:space="preserve">
+    <value>File not found</value>
+  </data>
+  <data name="diag_keys_defined" xml:space="preserve">
+    <value>keys defined (values hidden)</value>
+  </data>
+  <data name="diag_keys_read" xml:space="preserve">
+    <value>root keys read</value>
+  </data>
+  <data name="diag_log_absent" xml:space="preserve">
+    <value> — file missing (no crash has ever been recorded).</value>
+  </data>
+  <data name="diag_log_bytes" xml:space="preserve">
+    <value> bytes · last written </value>
+  </data>
+  <data name="diag_log_empty" xml:space="preserve">
+    <value>The log is empty.</value>
+  </data>
+  <data name="diag_log_none" xml:space="preserve">
+    <value>No crash recorded.</value>
+  </data>
+  <data name="diag_log_read_failed" xml:space="preserve">
+    <value>Could not read the log: </value>
+  </data>
+  <data name="diag_log_tail_notice" xml:space="preserve">
+    <value>… (only the tail of the log is shown) …
+</value>
+  </data>
+  <data name="diag_missing" xml:space="preserve">
+    <value>Missing</value>
+  </data>
+  <data name="diag_no_log" xml:space="preserve">
+    <value>No log to clear.</value>
+  </data>
+  <data name="diag_none" xml:space="preserve">
+    <value>(not found)</value>
+  </data>
+  <data name="diag_present" xml:space="preserve">
+    <value>Present</value>
+  </data>
+  <data name="diag_refresh" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+  <data name="diag_report_crash_log" xml:space="preserve">
+    <value>Crash log:</value>
+  </data>
+  <data name="diag_report_created" xml:space="preserve">
+    <value>Created: </value>
+  </data>
+  <data name="diag_report_title" xml:space="preserve">
+    <value>FETİH Desktop — diagnostics report</value>
+  </data>
+  <data name="diag_row_app" xml:space="preserve">
+    <value>Application</value>
+  </data>
+  <data name="diag_row_app_dir" xml:space="preserve">
+    <value>Application directory</value>
+  </data>
+  <data name="diag_row_build_date" xml:space="preserve">
+    <value>Build date</value>
+  </data>
+  <data name="diag_row_crash_log" xml:space="preserve">
+    <value>Crash log</value>
+  </data>
+  <data name="diag_row_install_type" xml:space="preserve">
+    <value>Installation type</value>
+  </data>
+  <data name="diag_row_logs" xml:space="preserve">
+    <value>Logs</value>
+  </data>
+  <data name="diag_row_machine" xml:space="preserve">
+    <value>Machine</value>
+  </data>
+  <data name="diag_row_os_arch" xml:space="preserve">
+    <value>OS architecture</value>
+  </data>
+  <data name="diag_row_proc_arch" xml:space="preserve">
+    <value>Process architecture</value>
+  </data>
+  <data name="diag_row_repo" xml:space="preserve">
+    <value>Repository root</value>
+  </data>
+  <data name="diag_row_runtime" xml:space="preserve">
+    <value>Runtime</value>
+  </data>
+  <data name="diag_row_sandbox" xml:space="preserve">
+    <value>Sandbox folder</value>
+  </data>
+  <data name="diag_row_target_framework" xml:space="preserve">
+    <value>Target framework</value>
+  </data>
+  <data name="diag_row_ui" xml:space="preserve">
+    <value>UI</value>
+  </data>
+  <data name="diag_row_windows" xml:space="preserve">
+    <value>Windows</value>
+  </data>
+  <data name="diag_section_crash_log" xml:space="preserve">
+    <value>Crash Log</value>
+  </data>
+  <data name="diag_section_paths" xml:space="preserve">
+    <value>Resolved Paths</value>
+  </data>
+  <data name="diag_section_system" xml:space="preserve">
+    <value>System Information</value>
+  </data>
+  <data name="diag_subtitle" xml:space="preserve">
+    <value>First place to look when asking for support: runtime info, resolved paths, and crash log.</value>
+  </data>
+  <data name="diag_title" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
+  <data name="diag_unknown" xml:space="preserve">
+    <value>unknown</value>
+  </data>
+  <data name="dialog_cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="dialog_confirm" xml:space="preserve">
+    <value>Confirm</value>
+  </data>
+  <data name="dialog_save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="dialog_stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="findings_empty_desc" xml:space="preserve">
+    <value>Findings will be listed here once a scan or task completes. Skill and workspace security scanning can be performed via the Desktop Bridge.</value>
+  </data>
+  <data name="findings_empty_disclaimer" xml:space="preserve">
+    <value>Only test on systems you are authorized to test.</value>
+  </data>
+  <data name="findings_empty_title" xml:space="preserve">
+    <value>No findings yet</value>
+  </data>
+  <data name="findings_scan_button" xml:space="preserve">
+    <value>Start Security Scan</value>
+  </data>
+  <data name="findings_severity_all" xml:space="preserve">
+    <value>All severity levels</value>
+  </data>
+  <data name="findings_severity_critical" xml:space="preserve">
+    <value>Critical</value>
+  </data>
+  <data name="findings_severity_high" xml:space="preserve">
+    <value>High</value>
+  </data>
+  <data name="findings_severity_info" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="findings_severity_low" xml:space="preserve">
+    <value>Low</value>
+  </data>
+  <data name="findings_severity_medium" xml:space="preserve">
+    <value>Medium</value>
+  </data>
+  <data name="findings_severity_label" xml:space="preserve">
+    <value>Severity filter</value>
+  </data>
+  <data name="findings_showing_count" xml:space="preserve">
+    <value>Showing {0} / {1} findings</value>
+  </data>
+  <data name="findings_summary" xml:space="preserve">
+    <value>Security findings produced by the agent are collected here.</value>
+  </data>
+  <data name="findings_title" xml:space="preserve">
+    <value>Findings</value>
+  </data>
+  <data name="nav_chat" xml:space="preserve">
+    <value>Chat</value>
+  </data>
+  <data name="nav_diagnostics" xml:space="preserve">
+    <value>Diagnostics</value>
+  </data>
+  <data name="nav_findings" xml:space="preserve">
+    <value>Findings</value>
+  </data>
+  <data name="nav_settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="nav_skills" xml:space="preserve">
+    <value>Skills</value>
+  </data>
+  <data name="provider_active_config_file" xml:space="preserve">
+    <value>Configuration file</value>
+  </data>
+  <data name="provider_active_custom" xml:space="preserve">
+    <value>User-defined providers</value>
+  </data>
+  <data name="provider_active_custom_none" xml:space="preserve">
+    <value>(none)</value>
+  </data>
+  <data name="provider_active_custom_note" xml:space="preserve">
+    <value>Custom OpenAI-compatible endpoints added under the providers: section in config.yaml.</value>
+  </data>
+  <data name="provider_active_fallback_note" xml:space="preserve">
+    <value>Kicks in when the primary provider returns 429/529/503.</value>
+  </data>
+  <data name="provider_active_last_modified" xml:space="preserve">
+    <value>Last modified: {0}</value>
+  </data>
+  <data name="provider_active_config" xml:space="preserve">
+    <value>Active Configuration</value>
+  </data>
+  <data name="provider_auth_api_key" xml:space="preserve">
+    <value>API key</value>
+  </data>
+  <data name="provider_auth_aws_sdk" xml:space="preserve">
+    <value>AWS credentials</value>
+  </data>
+  <data name="provider_auth_external_process" xml:space="preserve">
+    <value>External process</value>
+  </data>
+  <data name="provider_auth_none" xml:space="preserve">
+    <value>No authentication</value>
+  </data>
+  <data name="provider_auth_oauth_device_code" xml:space="preserve">
+    <value>OAuth (device code)</value>
+  </data>
+  <data name="provider_auth_oauth_external" xml:space="preserve">
+    <value>OAuth (external flow)</value>
+  </data>
+  <data name="provider_aux_approval_desc" xml:space="preserve">
+    <value>Decides whether a dangerous command is approved automatically. A cheap, fast model is recommended.</value>
+  </data>
+  <data name="provider_aux_approval_title" xml:space="preserve">
+    <value>Approval decision</value>
+  </data>
+  <data name="provider_aux_compression_desc" xml:space="preserve">
+    <value>Summarizes older turns to free room once the conversation grows.</value>
+  </data>
+  <data name="provider_aux_compression_title" xml:space="preserve">
+    <value>Context compression</value>
+  </data>
+  <data name="provider_aux_curator_desc" xml:space="preserve">
+    <value>A fork that reviews skill usage. It can take a while.</value>
+  </data>
+  <data name="provider_aux_curator_title" xml:space="preserve">
+    <value>Curator (skill review)</value>
+  </data>
+  <data name="provider_aux_kanban_decomposer_desc" xml:space="preserve">
+    <value>Splits a task into a subtask graph; it spends more tokens than the others.</value>
+  </data>
+  <data name="provider_aux_kanban_decomposer_title" xml:space="preserve">
+    <value>Task decomposition</value>
+  </data>
+  <data name="provider_aux_mcp_desc" xml:space="preserve">
+    <value>Short calls related to MCP servers.</value>
+  </data>
+  <data name="provider_aux_mcp_title" xml:space="preserve">
+    <value>MCP helper</value>
+  </data>
+  <data name="provider_aux_profile_describer_desc" xml:space="preserve">
+    <value>Describes what a profile does in a sentence or two.</value>
+  </data>
+  <data name="provider_aux_profile_describer_title" xml:space="preserve">
+    <value>Profile description</value>
+  </data>
+  <data name="provider_aux_skills_hub_desc" xml:space="preserve">
+    <value>Skill search and matching calls.</value>
+  </data>
+  <data name="provider_aux_skills_hub_title" xml:space="preserve">
+    <value>Skills hub</value>
+  </data>
+  <data name="provider_aux_title_generation_desc" xml:space="preserve">
+    <value>Writes a short title for a session.</value>
+  </data>
+  <data name="provider_aux_title_generation_title" xml:space="preserve">
+    <value>Chat title generation</value>
+  </data>
+  <data name="provider_aux_triage_specifier_desc" xml:space="preserve">
+    <value>Turns a one-line item in the Kanban 'triage' column into a concrete spec.</value>
+  </data>
+  <data name="provider_aux_triage_specifier_title" xml:space="preserve">
+    <value>Task detailing</value>
+  </data>
+  <data name="provider_aux_vision_desc" xml:space="preserve">
+    <value>Screenshot and image analysis (vision_analyze, browser captures). Requires a multimodal model.</value>
+  </data>
+  <data name="provider_aux_vision_title" xml:space="preserve">
+    <value>Image analysis</value>
+  </data>
+  <data name="provider_aux_web_extract_desc" xml:space="preserve">
+    <value>The side task that reads and summarizes a page.</value>
+  </data>
+  <data name="provider_aux_web_extract_title" xml:space="preserve">
+    <value>Web page summarization</value>
+  </data>
+  <data name="provider_badge_active" xml:space="preserve">
+    <value>Active</value>
+  </data>
+  <data name="provider_badge_aggregator" xml:space="preserve">
+    <value>aggregator</value>
+  </data>
+  <data name="provider_badge_configured" xml:space="preserve">
+    <value>Credentials configured</value>
+  </data>
+  <data name="provider_badge_local" xml:space="preserve">
+    <value>local — data never leaves the machine</value>
+  </data>
+  <data name="provider_badge_not_configured" xml:space="preserve">
+    <value>No credentials</value>
+  </data>
+  <data name="provider_baseurl_default" xml:space="preserve">
+    <value>default endpoint in use</value>
+  </data>
+  <data name="provider_baseurl_overridden" xml:space="preserve">
+    <value>endpoint overridden</value>
+  </data>
+  <data name="provider_change_model" xml:space="preserve">
+    <value>Change Active Model</value>
+  </data>
+  <data name="provider_change_model_desc" xml:space="preserve">
+    <value>Search and select a provider, enter the model ID. When saved, config.set writes to ~/.fetih/config.yaml and it takes effect on the next message. The API key must be defined in ~/.fetih/.env.</value>
+  </data>
+  <data name="provider_cli_auth_required" xml:space="preserve">
+    <value>This provider requires CLI or OAuth login.</value>
+  </data>
+  <data name="provider_config_error" xml:space="preserve">
+    <value>Could not read the configuration: </value>
+  </data>
+  <data name="provider_config_unreadable" xml:space="preserve">
+    <value>Could not read the configuration; the bridge is not connected.</value>
+  </data>
+  <data name="provider_count" xml:space="preserve">
+    <value>{0} / {1} providers</value>
+  </data>
+  <data name="provider_get_key" xml:space="preserve">
+    <value>Get key ↗</value>
+  </data>
+  <data name="provider_key_defined" xml:space="preserve">
+    <value>Configured</value>
+  </data>
+  <data name="provider_key_undefined" xml:space="preserve">
+    <value>Not configured</value>
+  </data>
+  <data name="provider_label_api_key" xml:space="preserve">
+    <value>API Key</value>
+  </data>
+  <data name="provider_label_model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="provider_label_provider" xml:space="preserve">
+    <value>Provider</value>
+  </data>
+  <data name="provider_list_name" xml:space="preserve">
+    <value>Provider list</value>
+  </data>
+  <data name="provider_local_no_key" xml:space="preserve">
+    <value>Local server — no API key required.</value>
+  </data>
+  <data name="provider_models_curated" xml:space="preserve">
+    <value>{0} models listed.</value>
+  </data>
+  <data name="provider_models_failed" xml:space="preserve">
+    <value>Could not fetch the model list; you can type the model ID directly.</value>
+  </data>
+  <data name="provider_models_live" xml:space="preserve">
+    <value>{0} models fetched live from the provider.</value>
+  </data>
+  <data name="provider_models_ready" xml:space="preserve">
+    <value>{0} models ready.</value>
+  </data>
+  <data name="provider_name_ai_gateway" xml:space="preserve">
+    <value>Vercel AI (model router)</value>
+  </data>
+  <data name="provider_name_codex" xml:space="preserve">
+    <value>OpenAI Codex (ChatGPT sign-in)</value>
+  </data>
+  <data name="provider_name_custom" xml:space="preserve">
+    <value>Custom local endpoint (vLLM / llama.cpp)</value>
+  </data>
+  <data name="provider_name_kimi_cn" xml:space="preserve">
+    <value>Kimi (China)</value>
+  </data>
+  <data name="provider_name_lmstudio" xml:space="preserve">
+    <value>LM Studio (local)</value>
+  </data>
+  <data name="provider_name_minimax_cn" xml:space="preserve">
+    <value>MiniMax (China)</value>
+  </data>
+  <data name="provider_name_ollama" xml:space="preserve">
+    <value>Ollama (local)</value>
+  </data>
+  <data name="provider_only_configured" xml:space="preserve">
+    <value>Only configured providers</value>
+  </data>
+  <data name="provider_placeholder_api_key_configured" xml:space="preserve">
+    <value>●●●●●●●●  (Configured — enter new key to replace)</value>
+  </data>
+  <data name="provider_placeholder_api_key_missing" xml:space="preserve">
+    <value>Enter API key (e.g. sk-…)</value>
+  </data>
+  <data name="provider_placeholder_model" xml:space="preserve">
+    <value>Select or type a model (e.g. deepseek-chat)…</value>
+  </data>
+  <data name="provider_placeholder_provider" xml:space="preserve">
+    <value>Search provider (e.g. groq, deepseek, anthropic)…</value>
+  </data>
+  <data name="provider_save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="provider_save_model_and_key" xml:space="preserve">
+    <value>✓ Model and API key saved — it takes effect on the next message</value>
+  </data>
+  <data name="provider_save_model_only" xml:space="preserve">
+    <value>✓ Model saved — it takes effect on the next message</value>
+  </data>
+  <data name="provider_save_need_input" xml:space="preserve">
+    <value>Enter a provider or a model.</value>
+  </data>
+  <data name="provider_save_no_key_yet" xml:space="preserve">
+    <value> ⚠ No API key has been entered yet.</value>
+  </data>
+  <data name="provider_save_rejected" xml:space="preserve">
+    <value>refused (managed installation)</value>
+  </data>
+  <data name="provider_save_saving" xml:space="preserve">
+    <value>saving…</value>
+  </data>
+  <data name="provider_search_name" xml:space="preserve">
+    <value>Search providers</value>
+  </data>
+  <data name="provider_search_placeholder" xml:space="preserve">
+    <value>Search provider…</value>
+  </data>
+  <data name="provider_select_button" xml:space="preserve">
+    <value>Select Provider</value>
+  </data>
+  <data name="provider_slots_auto" xml:space="preserve">
+    <value>Automatic (auto)</value>
+  </data>
+  <data name="provider_slots_aux_header" xml:space="preserve">
+    <value>Auxiliary models — a separate model per side task ({0} slots)</value>
+  </data>
+  <data name="provider_slots_aux_name" xml:space="preserve">
+    <value>Auxiliary models</value>
+  </data>
+  <data name="provider_slots_chain_note" xml:space="preserve">
+    <value>A {0}-step fallback chain is currently configured; saving here reduces the chain to a single fallback.</value>
+  </data>
+  <data name="provider_slots_fallback_desc" xml:space="preserve">
+    <value>This model takes over when the primary provider returns 429/503/529. Left empty, there is no fallback.</value>
+  </data>
+  <data name="provider_slots_fallback_title" xml:space="preserve">
+    <value>Fallback model</value>
+  </data>
+  <data name="provider_slots_model_placeholder" xml:space="preserve">
+    <value>Model ID (empty = the provider's default)</value>
+  </data>
+  <data name="provider_slots_none" xml:space="preserve">
+    <value>(none)</value>
+  </data>
+  <data name="provider_slots_rejected" xml:space="preserve">
+    <value>refused (managed installation)</value>
+  </data>
+  <data name="provider_slots_save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="provider_slots_save_name" xml:space="preserve">
+    <value>Save {0}</value>
+  </data>
+  <data name="provider_slots_saved" xml:space="preserve">
+    <value>✓ saved</value>
+  </data>
+  <data name="provider_slots_saving" xml:space="preserve">
+    <value>saving…</value>
+  </data>
+  <data name="provider_slots_intro" xml:space="preserve">
+    <value>Model selections other than the active model. Provider list comes from the bridge (providers.list); each entry is written to ~/.fetih/config.yaml via config.set. Leaving the model box blank means 'provider default'.</value>
+  </data>
+  <data name="provider_slots_title" xml:space="preserve">
+    <value>Other Model Slots</value>
+  </data>
+  <data name="provider_source_env_file" xml:space="preserve">
+    <value>~/.fetih/.env</value>
+  </data>
+  <data name="provider_source_environment" xml:space="preserve">
+    <value>process environment variable</value>
+  </data>
+  <data name="provider_source_none" xml:space="preserve">
+    <value>not found in any source</value>
+  </data>
+  <data name="provider_status_key_configured" xml:space="preserve">
+    <value>Configured</value>
+  </data>
+  <data name="provider_status_key_missing" xml:space="preserve">
+    <value>Missing</value>
+  </data>
+  <data name="provider_subtitle" xml:space="preserve">
+    <value>FETİH is model-agnostic. The list below shows supported providers and whether required environment variables are set. For security, key values are never read or displayed.</value>
+  </data>
+  <data name="provider_title" xml:space="preserve">
+    <value>Model &amp; Provider</value>
+  </data>
+  <data name="provider_transport_openai_chat" xml:space="preserve">
+    <value>OpenAI-compatible chat</value>
+  </data>
+  <data name="settings_about" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="settings_agent" xml:space="preserve">
+    <value>Agent</value>
+  </data>
+  <data name="settings_all" xml:space="preserve">
+    <value>Advanced Mode</value>
+  </data>
+  <data name="settings_appearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="settings_automation" xml:space="preserve">
+    <value>Automation</value>
+  </data>
+  <data name="settings_bridge" xml:space="preserve">
+    <value>Desktop Bridge</value>
+  </data>
+  <data name="settings_channels" xml:space="preserve">
+    <value>Channels</value>
+  </data>
+  <data name="settings_header_advanced" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
+  <data name="settings_header_app" xml:space="preserve">
+    <value>Application</value>
+  </data>
+  <data name="settings_header_automation" xml:space="preserve">
+    <value>Automation &amp; Context</value>
+  </data>
+  <data name="settings_header_connection" xml:space="preserve">
+    <value>Connection</value>
+  </data>
+  <data name="settings_header_model_tools" xml:space="preserve">
+    <value>Model &amp; Tools</value>
+  </data>
+  <data name="settings_header_security_exec" xml:space="preserve">
+    <value>Security &amp; Execution</value>
+  </data>
+  <data name="settings_memory" xml:space="preserve">
+    <value>Memory</value>
+  </data>
+  <data name="settings_permissions" xml:space="preserve">
+    <value>Permissions</value>
+  </data>
+  <data name="settings_provider" xml:space="preserve">
+    <value>Model &amp; Provider</value>
+  </data>
+  <data name="settings_sandbox" xml:space="preserve">
+    <value>Execution Environment</value>
+  </data>
+  <data name="settings_security" xml:space="preserve">
+    <value>Security</value>
+  </data>
+  <data name="settings_shell" xml:space="preserve">
+    <value>Shell (Windows)</value>
+  </data>
+  <data name="settings_system" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="settings_tools" xml:space="preserve">
+    <value>Tools</value>
+  </data>
+  <data name="settings_voice" xml:space="preserve">
+    <value>Voice</value>
+  </data>
+  <data name="setup_api_key_header" xml:space="preserve">
+    <value>API key</value>
+  </data>
+  <data name="setup_api_key_placeholder" xml:space="preserve">
+    <value>sk-… / gsk_…</value>
+  </data>
+  <data name="setup_aws_message" xml:space="preserve">
+    <value>This provider does not ask for a key; it uses environment credentials such as AWS_PROFILE or an IAM role.</value>
+  </data>
+  <data name="setup_aws_title" xml:space="preserve">
+    <value>AWS credential chain</value>
+  </data>
+  <data name="setup_back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="setup_back_to_provider" xml:space="preserve">
+    <value>Back to the provider</value>
+  </data>
+  <data name="setup_brandmark" xml:space="preserve">
+    <value>FETİH — autonomous AI security agent running in the terminal</value>
+  </data>
+  <data name="setup_cancelled" xml:space="preserve">
+    <value>Cancelled</value>
+  </data>
+  <data name="setup_cli_message" xml:space="preserve">
+    <value>{0} does not use an API key; it uses a session you open with your account. The "Sign in" button starts FETİH's REAL login flow in a console window; come back here after approving it in the browser.</value>
+  </data>
+  <data name="setup_cli_title" xml:space="preserve">
+    <value>A browser session is required</value>
+  </data>
+  <data name="setup_cli_check" xml:space="preserve">
+    <value>Check status</value>
+  </data>
+  <data name="setup_cli_login" xml:space="preserve">
+    <value>Sign in</value>
+  </data>
+  <data name="setup_continue" xml:space="preserve">
+    <value>Continue</value>
+  </data>
+  <data name="setup_done_msg" xml:space="preserve">
+    <value>The Desktop Bridge is ready and the model returned a real response. You can go to the chat.</value>
+  </data>
+  <data name="setup_done_title" xml:space="preserve">
+    <value>Setup complete</value>
+  </data>
+  <data name="setup_dot_done" xml:space="preserve">
+    <value> (done)</value>
+  </data>
+  <data name="setup_dot_name" xml:space="preserve">
+    <value>Step {0}/{1}</value>
+  </data>
+  <data name="setup_failed" xml:space="preserve">
+    <value>Setup failed</value>
+  </data>
+  <data name="setup_go_to_chat" xml:space="preserve">
+    <value>Go to chat</value>
+  </data>
+  <data name="setup_heading" xml:space="preserve">
+    <value>First-Time Setup</value>
+  </data>
+  <data name="setup_install" xml:space="preserve">
+    <value>Install and start</value>
+  </data>
+  <data name="setup_key_hint_env" xml:space="preserve">
+    <value>The key is saved to ~/.fetih/.env under the name {0}.</value>
+  </data>
+  <data name="setup_key_hint_none" xml:space="preserve">
+    <value>No environment variable is defined for this provider.</value>
+  </data>
+  <data name="setup_key_required" xml:space="preserve">
+    <value>This provider requires an API key; please enter it.</value>
+  </data>
+  <data name="setup_local_found" xml:space="preserve">
+    <value>{0} models found · {1}</value>
+  </data>
+  <data name="setup_local_installed_models" xml:space="preserve">
+    <value>The models PULLED on this machine are listed.</value>
+  </data>
+  <data name="setup_local_no_models_hint" xml:space="preserve">
+    <value>Models will be listed here once the server is up.</value>
+  </data>
+  <data name="setup_local_not_found" xml:space="preserve">
+    <value>{0} not found</value>
+  </data>
+  <data name="setup_local_not_found_msg" xml:space="preserve">
+    <value>No server is running at {0}. Start it, then press "Probe again".</value>
+  </data>
+  <data name="setup_local_running" xml:space="preserve">
+    <value>{0} is running</value>
+  </data>
+  <data name="setup_local_running_no_models" xml:space="preserve">
+    <value>{0} is running, but no model has been pulled</value>
+  </data>
+  <data name="setup_local_running_no_models_msg" xml:space="preserve">
+    <value>{0} is responding. Pull a model first (e.g. `ollama pull`).</value>
+  </data>
+  <data name="setup_local_install_link" xml:space="preserve">
+    <value>Open the installation page</value>
+  </data>
+  <data name="setup_local_install_link_url" xml:space="preserve">
+    <value>Installation page — {0}</value>
+  </data>
+  <data name="setup_log_suffix" xml:space="preserve">
+    <value>  ·  Log: </value>
+  </data>
+  <data name="setup_login_failed_title" xml:space="preserve">
+    <value>The login flow could not be started</value>
+  </data>
+  <data name="setup_login_ok_msg" xml:space="preserve">
+    <value>{0} credentials were found in the FETİH credential store.</value>
+  </data>
+  <data name="setup_login_ok_title" xml:space="preserve">
+    <value>Signed in</value>
+  </data>
+  <data name="setup_login_opened_msg" xml:space="preserve">
+    <value>Follow the instructions in the console window, then come back here.</value>
+  </data>
+  <data name="setup_login_opened_title" xml:space="preserve">
+    <value>The login window is open</value>
+  </data>
+  <data name="setup_login_pending_msg" xml:space="preserve">
+    <value>The login flow looks incomplete. Try "Sign in" again.</value>
+  </data>
+  <data name="setup_login_pending_title" xml:space="preserve">
+    <value>Not signed in yet</value>
+  </data>
+  <data name="setup_model_failed" xml:space="preserve">
+    <value>Could not fetch the model list: </value>
+  </data>
+  <data name="setup_model_header" xml:space="preserve">
+    <value>Default model</value>
+  </data>
+  <data name="setup_model_live" xml:space="preserve">
+    <value>{0} models fetched LIVE from the provider.</value>
+  </data>
+  <data name="setup_model_loading" xml:space="preserve">
+    <value>Fetching the model list…</value>
+  </data>
+  <data name="setup_model_offline" xml:space="preserve">
+    <value>{0} models (offline fallback list).</value>
+  </data>
+  <data name="setup_model_unavailable" xml:space="preserve">
+    <value>Could not fetch the model list. Finish setup and pick one from Settings › Model.</value>
+  </data>
+  <data name="setup_needs_login_msg" xml:space="preserve">
+    <value>To continue with {0}, please complete the login in your browser using 'Sign in'.</value>
+  </data>
+  <data name="setup_needs_login_title" xml:space="preserve">
+    <value>You need to sign in</value>
+  </data>
+  <data name="setup_pipeline_cancelled" xml:space="preserve">
+    <value>Cancelled.</value>
+  </data>
+  <data name="setup_pipeline_done" xml:space="preserve">
+    <value>Setup completed.</value>
+  </data>
+  <data name="setup_pipeline_skipped" xml:space="preserve">
+    <value>already satisfied — skipped</value>
+  </data>
+  <data name="setup_pipeline_starting" xml:space="preserve">
+    <value>starting…</value>
+  </data>
+  <data name="setup_probe_failed" xml:space="preserve">
+    <value>The probe failed</value>
+  </data>
+  <data name="setup_probing" xml:space="preserve">
+    <value>Probing…</value>
+  </data>
+  <data name="setup_progress_title" xml:space="preserve">
+    <value>Installing</value>
+  </data>
+  <data name="setup_provider_aggregator" xml:space="preserve">
+    <value> · aggregator</value>
+  </data>
+  <data name="setup_provider_body" xml:space="preserve">
+    <value>FETİH is model-agnostic. Groq is a good free starting point; if you do not want your data to leave the machine, Ollama is a good pick.</value>
+  </data>
+  <data name="setup_provider_header" xml:space="preserve">
+    <value>Provider</value>
+  </data>
+  <data name="setup_provider_local" xml:space="preserve">
+    <value> · local</value>
+  </data>
+  <data name="setup_provider_local_hint" xml:space="preserve">
+    <value>This provider runs on this machine; it needs no API key and your data never leaves the computer.</value>
+  </data>
+  <data name="setup_provider_title" xml:space="preserve">
+    <value>Model provider</value>
+  </data>
+  <data name="setup_python_missing_msg" xml:space="preserve">
+    <value>The login flow runs through the FETİH CLI; Python 3.11+ is required.</value>
+  </data>
+  <data name="setup_python_missing_title" xml:space="preserve">
+    <value>Python not found</value>
+  </data>
+  <data name="setup_reprobe" xml:space="preserve">
+    <value>Probe again</value>
+  </data>
+  <data name="setup_retry" xml:space="preserve">
+    <value>Retry</value>
+  </data>
+  <data name="setup_security_body" xml:space="preserve">
+    <value>Your API key is written only to ~/.fetih/.env on this machine. Its value is never shown on screen, never logged and never sent over the network. If you pick a local provider, no key is asked for at all.</value>
+  </data>
+  <data name="setup_security_title" xml:space="preserve">
+    <value>Security note</value>
+  </data>
+  <data name="setup_signup_link" xml:space="preserve">
+    <value>Get a key</value>
+  </data>
+  <data name="setup_signup_link_url" xml:space="preserve">
+    <value>Get a key — {0}</value>
+  </data>
+  <data name="setup_step_auth_cancelled" xml:space="preserve">
+    <value>The login process was cancelled.</value>
+  </data>
+  <data name="setup_step_auth_confirmed" xml:space="preserve">
+    <value>Session verified{0}.</value>
+  </data>
+  <data name="setup_step_auth_error" xml:space="preserve">
+    <value>Error during the login flow: </value>
+  </data>
+  <data name="setup_step_auth_incomplete" xml:space="preserve">
+    <value>The login flow for {0} was not completed. Please finish signing in in the browser or console window, then try again.</value>
+  </data>
+  <data name="setup_step_auth_name" xml:space="preserve">
+    <value>Checking the provider session</value>
+  </data>
+  <data name="setup_step_auth_noprovider" xml:space="preserve">
+    <value>No provider id was given.</value>
+  </data>
+  <data name="setup_step_auth_nopython" xml:space="preserve">
+    <value>Python was not found, so the login flow cannot run.</value>
+  </data>
+  <data name="setup_step_auth_opened" xml:space="preserve">
+    <value>Session opened successfully{0}.</value>
+  </data>
+  <data name="setup_step_auth_spawn_failed" xml:space="preserve">
+    <value>The login process could not be started ({0} -m fetih_cli auth add {1}).</value>
+  </data>
+  <data name="setup_step_auth_verify_failed" xml:space="preserve">
+    <value>The login could not be verified: </value>
+  </data>
+  <data name="setup_step_bridge_name" xml:space="preserve">
+    <value>Starting the Desktop Bridge</value>
+  </data>
+  <data name="setup_step_bridge_ok" xml:space="preserve">
+    <value>Bridge connected (protocol v{0}).</value>
+  </data>
+  <data name="setup_step_config_fail" xml:space="preserve">
+    <value>Could not write the configuration: </value>
+  </data>
+  <data name="setup_step_config_fail_managed" xml:space="preserve">
+    <value>Could not write the configuration (managed setup): </value>
+  </data>
+  <data name="setup_step_config_name" xml:space="preserve">
+    <value>Writing the configuration</value>
+  </data>
+  <data name="setup_step_config_ok" xml:space="preserve">
+    <value>model.provider / model.default saved.</value>
+  </data>
+  <data name="setup_step_home_name" xml:space="preserve">
+    <value>Preparing the state directory</value>
+  </data>
+  <data name="setup_step_home_ok" xml:space="preserve">
+    <value>{0} created.</value>
+  </data>
+  <data name="setup_step_key_fail" xml:space="preserve">
+    <value>Could not write the API key: </value>
+  </data>
+  <data name="setup_step_key_name" xml:space="preserve">
+    <value>Saving the API key</value>
+  </data>
+  <data name="setup_step_key_ok" xml:space="preserve">
+    <value>{0} written to the .env file.</value>
+  </data>
+  <data name="setup_step_os_fail" xml:space="preserve">
+    <value>This desktop shell runs on Windows only.</value>
+  </data>
+  <data name="setup_step_os_name" xml:space="preserve">
+    <value>Checking the operating system</value>
+  </data>
+  <data name="setup_step_os_ok" xml:space="preserve">
+    <value>Windows detected.</value>
+  </data>
+  <data name="setup_step_python_fail" xml:space="preserve">
+    <value>Python was not found. Install Python 3.11+ to run FETİH, or set the FETIH_PYTHON environment variable.</value>
+  </data>
+  <data name="setup_step_python_name" xml:space="preserve">
+    <value>Looking for Python</value>
+  </data>
+  <data name="setup_step_python_ok" xml:space="preserve">
+    <value>Python found: {0}</value>
+  </data>
+  <data name="setup_step_verify_empty" xml:space="preserve">
+    <value>The model responded (empty text) — setup is complete.</value>
+  </data>
+  <data name="setup_step_verify_fail" xml:space="preserve">
+    <value>The model did not respond ({0}): {1}  Go back to the provider and fix the key or the model.</value>
+  </data>
+  <data name="setup_step_verify_name" xml:space="preserve">
+    <value>Verifying with a real message</value>
+  </data>
+  <data name="setup_step_verify_ok" xml:space="preserve">
+    <value>The model responded: </value>
+  </data>
+  <data name="setup_step_verify_prompt" xml:space="preserve">
+    <value>This is a setup check. Reply with only this word: TAMAM</value>
+  </data>
+  <data name="setup_step_verify_timeout" xml:space="preserve">
+    <value>The model did not respond within 90 seconds. Is the network or endpoint reachable?</value>
+  </data>
+  <data name="setup_step_waiting" xml:space="preserve">
+    <value>waiting</value>
+  </data>
+  <data name="setup_welcome_body" xml:space="preserve">
+    <value>This wizard helps you pick a model provider, store your credentials safely and start the Desktop Bridge. It takes three steps.</value>
+  </data>
+  <data name="setup_welcome_title" xml:space="preserve">
+    <value>Welcome to FETİH</value>
+  </data>
+  <data name="setup_window_title" xml:space="preserve">
+    <value>FETİH — First-Time Setup</value>
+  </data>
+  <data name="shell_bridge_error" xml:space="preserve">
+    <value>Bridge error ({0}): {1}</value>
+  </data>
+  <data name="shell_create_user" xml:space="preserve">
+    <value>Create WSL user for FETİH</value>
+  </data>
+  <data name="shell_create_user_desc" xml:space="preserve">
+    <value>Creates a dedicated 'fetih' user inside WSL so agent-written files stay out of your own home directory.</value>
+  </data>
+  <data name="shell_distro" xml:space="preserve">
+    <value>Distribution</value>
+  </data>
+  <data name="shell_effective" xml:space="preserve">
+    <value>Effective shell</value>
+  </data>
+  <data name="shell_git_bash" xml:space="preserve">
+    <value>Git Bash</value>
+  </data>
+  <data name="shell_git_bash_desc" xml:space="preserve">
+    <value>Git for Windows' MSYS2 bash. Accesses the Windows filesystem directly (C:\ ↔ /c/) and runs Windows binaries. Default.</value>
+  </data>
+  <data name="shell_intro" xml:space="preserve">
+    <value>FETİH's terminal tool runs through a POSIX shell on Windows. PowerShell is deliberately not offered (the tool layer relies on export -p, pwd -P and POSIX quoting). Two options exist:</value>
+  </data>
+  <data name="shell_needs_bridge" xml:space="preserve">
+    <value>Shell status is read via the Desktop Bridge; connecting…</value>
+  </data>
+  <data name="shell_save_failed" xml:space="preserve">
+    <value>✗ save failed</value>
+  </data>
+  <data name="shell_saved" xml:space="preserve">
+    <value>✓ saved</value>
+  </data>
+  <data name="shell_title" xml:space="preserve">
+    <value>Shell (Windows)</value>
+  </data>
+  <data name="shell_user_exists" xml:space="preserve">
+    <value>The 'fetih' user already exists.</value>
+  </data>
+  <data name="shell_windows_only" xml:space="preserve">
+    <value>Shell selection only applies on Windows.</value>
+  </data>
+  <data name="shell_wsl" xml:space="preserve">
+    <value>WSL</value>
+  </data>
+  <data name="shell_wsl_desc" xml:space="preserve">
+    <value>A real Linux distro via wsl.exe. Windows drives appear under /mnt/c/; Linux tooling like apt, gcc, binwalk becomes available.</value>
+  </data>
+  <data name="shell_wsl_not_installed" xml:space="preserve">
+    <value>No installed WSL distribution was found on this machine. Install one with `wsl --install -d Ubuntu`.</value>
+  </data>
+  <data name="simple_advanced_group" xml:space="preserve">
+    <value>Advanced</value>
+  </data>
+  <data name="simple_list_clear" xml:space="preserve">
+    <value>Clear the list</value>
+  </data>
+  <data name="simple_list_empty" xml:space="preserve">
+    <value>The list is empty.</value>
+  </data>
+  <data name="simple_open_advanced" xml:space="preserve">
+    <value>Open the raw form of these settings in Advanced Mode</value>
+  </data>
+  <data name="simple_reference" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="simple_reload" xml:space="preserve">
+    <value>Reload</value>
+  </data>
+  <data name="simple_unknown_value" xml:space="preserve">
+    <value>The current value is not in the list: {0}</value>
+  </data>
+  <data name="skills_all_categories" xml:space="preserve">
+    <value>All categories</value>
+  </data>
+  <data name="skills_empty_filter" xml:space="preserve">
+    <value>No results for this search/category.</value>
+  </data>
+  <data name="skills_empty_none" xml:space="preserve">
+    <value>No SKILL.md was found. If the repository root could not be resolved, run the app from the apps/windows/Fetih.Desktop folder inside the repository.</value>
+  </data>
+  <data name="skills_error" xml:space="preserve">
+    <value>An error occurred while scanning catalog:
+</value>
+  </data>
+  <data name="skills_failed" xml:space="preserve">
+    <value>Could not read skill catalog.</value>
+  </data>
+  <data name="skills_no_description" xml:space="preserve">
+    <value>(no description)</value>
+  </data>
+  <data name="skills_root_segment" xml:space="preserve">
+    <value>(root)</value>
+  </data>
+  <data name="skills_scanning" xml:space="preserve">
+    <value>Scanning skill catalog…</value>
+  </data>
+  <data name="skills_search_placeholder" xml:space="preserve">
+    <value>Search: e.g. SQL injection, pcap, ATT&amp;CK, osint…</value>
+  </data>
+  <data name="skills_source_optional" xml:space="preserve">
+    <value>optional</value>
+  </data>
+  <data name="skills_source_repo" xml:space="preserve">
+    <value>repository</value>
+  </data>
+  <data name="skills_source_user" xml:space="preserve">
+    <value>user</value>
+  </data>
+  <data name="skills_summary_counts" xml:space="preserve">
+    <value>{0} skills · skills/ {1} · optional-skills/ {2} · user-only {3} ({4} ms)</value>
+  </data>
+  <data name="skills_summary_duplicates" xml:space="preserve">
+    <value> · {0} installed duplicate(s) skipped</value>
+  </data>
+  <data name="skills_summary_repo_missing" xml:space="preserve">
+    <value>FETİH repository not found — skills were read only from {0} ({1} entries).</value>
+  </data>
+  <data name="skills_summary_warning" xml:space="preserve">
+    <value>{0} — warning: {1}</value>
+  </data>
+  <data name="skills_title" xml:space="preserve">
+    <value>Skills</value>
+  </data>
+  <data name="skills_unnamed" xml:space="preserve">
+    <value>(unnamed)</value>
+  </data>
+  <data name="tool_format_denied" xml:space="preserve">
+    <value>This operation was rejected by security or approval rules.
+
+</value>
+  </data>
+  <data name="tool_format_exit_code" xml:space="preserve">
+    <value>exit code: {0}</value>
+  </data>
+  <data name="tool_format_read_file" xml:space="preserve">
+    <value>Read file · {0}</value>
+  </data>
+  <data name="tool_format_write_file" xml:space="preserve">
+    <value>Write file · {0}</value>
+  </data>
+  <data name="unit_min" xml:space="preserve">
+    <value>m</value>
+  </data>
+  <data name="unit_sec" xml:space="preserve">
+    <value>s</value>
+  </data>
+  <data name="update_available" xml:space="preserve">
+    <value>New version available</value>
+  </data>
+  <data name="update_channel_portable" xml:space="preserve">
+    <value>Portable version</value>
+  </data>
+  <data name="update_channel_setup" xml:space="preserve">
+    <value>Installed via Setup</value>
+  </data>
+  <data name="update_check_button" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="update_check_failed" xml:space="preserve">
+    <value>Couldn't check — verify your internet connection.</value>
+  </data>
+  <data name="update_checking" xml:space="preserve">
+    <value>Checking…</value>
+  </data>
+  <data name="update_download_install" xml:space="preserve">
+    <value>Download and install</value>
+  </data>
+  <data name="update_downloading" xml:space="preserve">
+    <value>Downloading…</value>
+  </data>
+  <data name="update_install_failed" xml:space="preserve">
+    <value>An error occurred while downloading/installing the update.</value>
+  </data>
+  <data name="update_installing" xml:space="preserve">
+    <value>Installing — the app will restart shortly…</value>
+  </data>
+  <data name="update_no_asset_for_channel" xml:space="preserve">
+    <value>No downloadable package was found for this release.</value>
+  </data>
+  <data name="update_section_header" xml:space="preserve">
+    <value>Updates</value>
+  </data>
+  <data name="update_up_to_date" xml:space="preserve">
+    <value>You're on the latest version.</value>
+  </data>
+  <data name="update_view_notes" xml:space="preserve">
+    <value>View release notes</value>
+  </data>
+  <data name="voice_auto_detect" xml:space="preserve">
+    <value>(detect automatically)</value>
+  </data>
+  <data name="voice_device" xml:space="preserve">
+    <value>Device</value>
+  </data>
+  <data name="voice_enabled" xml:space="preserve">
+    <value>Enabled</value>
+  </data>
+  <data name="voice_language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="voice_live_desc" xml:space="preserve">
+    <value>Push-to-talk recording and response readout run on the Python side; the desktop shell has no record button. This page shows the real on-disk voice configuration without changing it — use Settings › Advanced Mode to edit it.</value>
+  </data>
+  <data name="voice_live_title" xml:space="preserve">
+    <value>This page is read-only</value>
+  </data>
+  <data name="voice_model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="voice_provider" xml:space="preserve">
+    <value>Provider</value>
+  </data>
+  <data name="voice_recording_auto_tts" xml:space="preserve">
+    <value>Read responses aloud automatically</value>
+  </data>
+  <data name="voice_recording_beep" xml:space="preserve">
+    <value>Recording beeps</value>
+  </data>
+  <data name="voice_recording_beep_desc" xml:space="preserve">
+    <value>Start/stop signal for recording.</value>
+  </data>
+  <data name="voice_recording_key" xml:space="preserve">
+    <value>Recording shortcut</value>
+  </data>
+  <data name="voice_recording_key_desc" xml:space="preserve">
+    <value>Starts and stops push-to-talk recording.</value>
+  </data>
+  <data name="voice_recording_max" xml:space="preserve">
+    <value>Maximum recording length</value>
+  </data>
+  <data name="voice_recording_silence_duration" xml:space="preserve">
+    <value>Silence duration</value>
+  </data>
+  <data name="voice_recording_silence_duration_desc" xml:space="preserve">
+    <value>Automatic stop threshold in continuous (VAD) mode.</value>
+  </data>
+  <data name="voice_recording_silence_threshold" xml:space="preserve">
+    <value>Silence threshold</value>
+  </data>
+  <data name="voice_recording_silence_threshold_desc" xml:space="preserve">
+    <value>Audio below this RMS level counts as silence (0–32767).</value>
+  </data>
+  <data name="voice_seconds" xml:space="preserve">
+    <value>{0} s</value>
+  </data>
+  <data name="voice_section_recording" xml:space="preserve">
+    <value>Recording Behavior</value>
+  </data>
+  <data name="voice_section_stt" xml:space="preserve">
+    <value>Speech-to-Text (STT)</value>
+  </data>
+  <data name="voice_section_tts" xml:space="preserve">
+    <value>Text-to-Speech (TTS)</value>
+  </data>
+  <data name="voice_stt_model_options" xml:space="preserve">
+    <value>tiny / base / small / medium / large-v3</value>
+  </data>
+  <data name="voice_stt_options" xml:space="preserve">
+    <value>Options: local (faster-whisper, free), groq, openai (Whisper API), mistral (Voxtral).</value>
+  </data>
+  <data name="voice_subtitle" xml:space="preserve">
+    <value>FETİH's voice capabilities: text-to-speech (TTS), speech-to-text (STT), and push-to-talk recording. Values are read from ~/.fetih/config.yaml.</value>
+  </data>
+  <data name="voice_title" xml:space="preserve">
+    <value>Voice</value>
+  </data>
+  <data name="voice_tts_options" xml:space="preserve">
+    <value>Options: edge (free), elevenlabs, openai, xai, minimax, mistral, gemini, neutts / kittentts / piper (local).</value>
+  </data>
+  <data name="voice_undefined" xml:space="preserve">
+    <value>(undefined)</value>
+  </data>
+  <data name="voice_voice" xml:space="preserve">
+    <value>Voice</value>
+  </data>
+  <data name="voice_voice_id" xml:space="preserve">
+    <value>Voice ID</value>
+  </data>
+  <data name="yaml_child_keys" xml:space="preserve">
+    <value>({0} nested keys)</value>
+  </data>
+  <data name="yaml_empty_list" xml:space="preserve">
+    <value>(empty list)</value>
+  </data>
+  <data name="yaml_empty_map" xml:space="preserve">
+    <value>(empty)</value>
+  </data>
+  <data name="yaml_nested" xml:space="preserve">
+    <value>(…)</value>
+  </data>
+  <data name="Chat_NewChat.Content" xml:space="preserve">
+    <value>New chat</value>
+  </data>
+  <data name="Chat_PromptBox.PlaceholderText" xml:space="preserve">
+    <value>Type your message…</value>
+  </data>
+  <data name="Chat_SendButton.Content" xml:space="preserve">
+    <value>Send</value>
+  </data>
+  <data name="Chat_StopButton.Content" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Chat_EmptyStateTitle.Text" xml:space="preserve">
+    <value>How can I help you?</value>
+  </data>
+  <data name="Chat_EmptyStateDesc.Text" xml:space="preserve">
+    <value>Ask a question, run commands, or request a code review.</value>
+  </data>
+</root>

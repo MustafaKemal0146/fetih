@@ -1,269 +1,298 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Fetih.Desktop.Services;
-using Microsoft.UI.Xaml;
 
 namespace Fetih.Desktop.Models;
 
-/// <summary>Bir sohbet mesajının kaynağı.</summary>
+/// <summary>Bir sohbet mesajının veya kartının rolü.</summary>
 public enum ChatRole
 {
-    /// <summary>Kullanıcının yazdığı mesaj.</summary>
     User,
-
-    /// <summary>Ajanın ürettiği yanıt.</summary>
     Agent,
-
-    /// <summary>Sistem/bağlantı bilgisi (ör. köprü durumu).</summary>
-    System,
-
-    /// <summary>Araç kullanımı kartı (session.tool_call / session.tool_result).</summary>
     Tool,
+    System,
+    Thought,
+    Activity,
+    Approval
+}
+
+/// <summary>Bir araç yürütme kartının durumu.</summary>
+public enum ToolStatus
+{
+    Running,
+    Success,
+    Error,
+    Denied,
+    Cancelled
 }
 
 /// <summary>
-/// Sohbet akışındaki tek bir öğe. Normal mesaj baloncuğu veya (Role=Tool ise)
-/// bir araç-kullanım kartı olabilir. Metin akış sırasında token token
-/// güncellenebildiği için <see cref="INotifyPropertyChanged"/> uygular.
+/// Sohbet akışındaki tek bir öğe. Segment mimarisiyle bağımsız Thought, Agent, Tool, Activity veya System öğeleridir.
 /// </summary>
-public sealed class ChatMessage : INotifyPropertyChanged
+public class ChatMessage : INotifyPropertyChanged
 {
-    private string _text;
-    private string _thought = "";
-    private bool _isThinking;
-    private bool _isThoughtExpanded = true;
-    private string _toolResult = "";
-    private bool _isRunning;
-
-    public ChatMessage(ChatRole role, string text)
+    public ChatMessage(ChatRole role, string text = "")
     {
         Role = role;
         _text = text;
         Timestamp = DateTimeOffset.Now;
+        StartedAt = DateTime.Now;
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     public ChatRole Role { get; }
+    public DateTimeOffset Timestamp { get; }
+    public DateTime StartedAt { get; }
 
-    /// <summary>Mesaj gövdesi (akışta güncellenebilir).</summary>
+    /// <summary>Bu adım bir Aktivite Grubu içindeyse ebeveyn grubu.</summary>
+    public ActivityGroup? ParentGroup { get; set; }
+
+    public string ThoughtHeaderText => Loc.T("chat.activity.thought_process");
+
+    private string _text = "";
     public string Text
     {
         get => _text;
         set
         {
-            if (_text == value)
+            if (Set(ref _text, value))
             {
-                return;
+                OnChanged(nameof(HasText));
             }
-            _text = value;
-            Notify();
-            Notify(nameof(HasText));
         }
     }
-
-    /// <summary>Mesaj gövdesi dolu mu?</summary>
     public bool HasText => !string.IsNullOrEmpty(_text);
 
-    public DateTimeOffset Timestamp { get; }
-
-    // ── Düşünce / Akıl Yürütme (Reasoning) alanları (Role=Agent) ────────────
-
-    /// <summary>Modelin akıl yürütme / düşünce metni (ör. DeepSeek reasoner, OpenAI o1, Groq thinking).</summary>
-    public string Thought
+    private bool _isStreaming;
+    public bool IsStreaming
     {
-        get => _thought;
+        get => _isStreaming;
+        set => Set(ref _isStreaming, value);
+    }
+
+    private bool _isExpanded;
+    public bool IsExpanded
+    {
+        get => _isExpanded;
         set
         {
-            if (_thought == value)
+            if (Set(ref _isExpanded, value))
             {
-                return;
+                OnChanged(nameof(ChevronAngle));
             }
-            _thought = value;
-            Notify();
-            Notify(nameof(HasThought));
-            Notify(nameof(ShowThoughtSection));
-            Notify(nameof(ThoughtHeader));
         }
     }
 
-    /// <summary>Düşünce metni var mı?</summary>
-    public bool HasThought => !string.IsNullOrWhiteSpace(_thought);
+    public double ChevronAngle => IsExpanded ? 90 : 0;
+    public void Toggle() => IsExpanded = !IsExpanded;
 
-    /// <summary>Model şu anda düşünüyor mu?</summary>
-    public bool IsThinking
-    {
-        get => _isThinking;
-        set
-        {
-            if (_isThinking == value)
-            {
-                return;
-            }
-            _isThinking = value;
-            Notify();
-            Notify(nameof(ShowThoughtSection));
-            Notify(nameof(ThoughtHeader));
-        }
-    }
-
-    /// <summary>Düşünce paneli açık mı (Expander)?</summary>
-    public bool IsThoughtExpanded
-    {
-        get => _isThoughtExpanded;
-        set
-        {
-            if (_isThoughtExpanded == value)
-            {
-                return;
-            }
-            _isThoughtExpanded = value;
-            Notify();
-        }
-    }
-
-    /// <summary>Düşünce paneli gösterilmeli mi (düşünüyorsa veya düşünce metni varsa)?</summary>
-    public bool ShowThoughtSection => Role == ChatRole.Agent && (HasThought || IsThinking);
-
-    /// <summary>Düşünce paneli başlığı (etkin dile göre).</summary>
-    public string ThoughtHeader => Loc.T(IsThinking ? "chat.thought.thinking" : "chat.thought.header");
-
-    /// <summary>Düşünce metnine parça ekler ve olayları tetikler.</summary>
-    public void AppendThought(string delta)
-    {
-        if (string.IsNullOrEmpty(delta))
-        {
-            return;
-        }
-        _thought += delta;
-        Notify(nameof(Thought));
-        Notify(nameof(HasThought));
-        Notify(nameof(ShowThoughtSection));
-        Notify(nameof(ThoughtHeader));
-    }
-
-    // ── Araç kartı alanları (Role=Tool) ──────────────────────────────────────
-
-    /// <summary>Araç adı (ör. <c>read_file</c>).</summary>
+    // ── Tool kartı alanları ──────────────────────────────────────────────────
+    public string? ToolCallId { get; set; }
     public string ToolName { get; set; } = "";
 
-    /// <summary>Araç argümanları (kırpılmış JSON metni).</summary>
-    public string ToolArguments { get; set; } = "";
+    private string _toolTitle = "";
+    public string ToolTitle
+    {
+        get => _toolTitle;
+        set => Set(ref _toolTitle, value);
+    }
 
-    /// <summary>Araç sonucu (tamamlanınca doldurulur).</summary>
+    private string _toolInput = "";
+    public string ToolInput
+    {
+        get => _toolInput;
+        set
+        {
+            if (Set(ref _toolInput, value))
+            {
+                OnChanged(nameof(HasInput));
+                OnChanged(nameof(ToolArguments));
+            }
+        }
+    }
+
+    private string _toolOutput = "";
+    public string ToolOutput
+    {
+        get => _toolOutput;
+        set
+        {
+            if (Set(ref _toolOutput, value))
+            {
+                OnChanged(nameof(HasOutput));
+                OnChanged(nameof(ToolResult));
+                OnChanged(nameof(HasToolResult));
+            }
+        }
+    }
+
+    private string _duration = "";
+    public string Duration
+    {
+        get => _duration;
+        set => Set(ref _duration, value);
+    }
+
+    private ToolStatus _status = ToolStatus.Running;
+    public ToolStatus Status
+    {
+        get => _status;
+        set
+        {
+            if (!Set(ref _status, value)) return;
+            OnChanged(nameof(IsRunning));
+            OnChanged(nameof(IsNotRunning));
+            OnChanged(nameof(StatusText));
+            OnChanged(nameof(StatusGlyph));
+            OnChanged(nameof(ToolHeader));
+        }
+    }
+
+    public bool IsRunning => Status == ToolStatus.Running;
+    public bool IsNotRunning => Status != ToolStatus.Running;
+    public bool HasInput => !string.IsNullOrEmpty(ToolInput);
+    public bool HasOutput => !string.IsNullOrEmpty(ToolOutput);
+
+    public string StatusText => Status switch
+    {
+        ToolStatus.Running => Loc.T("chat.status.running"),
+        ToolStatus.Success => Loc.T("chat.status.done"),
+        ToolStatus.Error => Loc.T("chat.status.error"),
+        ToolStatus.Denied => Loc.T("chat.status.denied"),
+        ToolStatus.Cancelled => Loc.T("chat.status.stopped"),
+        _ => ""
+    };
+
+    public string StatusGlyph => Status switch
+    {
+        ToolStatus.Success => "\uE73E",   // onay / check
+        ToolStatus.Error => "\uE783",     // hata / warning
+        ToolStatus.Denied => "\uE72E",    // kilit / lock
+        ToolStatus.Cancelled => "\uE71A", // stop
+        _ => ""
+    };
+
+    // ── Geriye dönük uyumluluk alanları ──────────────────────────────────────
+    public string ToolArguments
+    {
+        get => _toolInput;
+        set => ToolInput = value;
+    }
+
     public string ToolResult
     {
-        get => _toolResult;
-        set
-        {
-            if (_toolResult == value)
-            {
-                return;
-            }
-            _toolResult = value;
-            Notify();
-            Notify(nameof(HasToolResult));
-        }
+        get => _toolOutput;
+        set => ToolOutput = value;
     }
 
-    /// <summary>Araç hâlâ çalışıyor mu?</summary>
-    public bool IsRunning
+    public bool HasToolResult => HasOutput;
+
+    public string Thought
     {
-        get => _isRunning;
-        set
-        {
-            if (_isRunning == value)
-            {
-                return;
-            }
-            _isRunning = value;
-            Notify();
-            Notify(nameof(ToolStatusLabel));
-            Notify(nameof(ToolHeader));
-        }
+        get => _text;
+        set => Text = value;
     }
 
-    public bool HasToolResult => !string.IsNullOrWhiteSpace(ToolResult);
+    public bool HasThought => Role == ChatRole.Thought && HasText;
+    public bool IsThinking => Role == ChatRole.Thought && IsStreaming;
+    public bool IsThoughtExpanded
+    {
+        get => _isExpanded;
+        set => IsExpanded = value;
+    }
+    public bool ShowThoughtSection => Role == ChatRole.Thought;
+    public string ThoughtHeader => Loc.T(IsStreaming ? "chat.thought.thinking" : "chat.thought.header");
 
-    public string ToolStatusLabel => Loc.T(IsRunning ? "chat.tool.running" : "chat.tool.done");
+    public void AppendThought(string delta)
+    {
+        if (string.IsNullOrEmpty(delta)) return;
+        Text += delta;
+        OnChanged(nameof(Thought));
+        OnChanged(nameof(HasThought));
+        OnChanged(nameof(ThoughtHeader));
+    }
 
     // ── Görünüm yardımcıları ─────────────────────────────────────────────────
-
-    /// <summary>Baloncuğun üzerinde gösterilen kısa etiket.</summary>
     public string RoleLabel => Role switch
     {
         ChatRole.User => Loc.T("chat.role.user"),
         ChatRole.Agent => Loc.T("chat.role.agent"),
         ChatRole.Tool => Loc.T("chat.role.tool"),
+        ChatRole.Thought => Loc.T("chat.thought.header"),
+        ChatRole.Activity => "Aktivite",
         _ => Loc.T("chat.role.system"),
     };
 
     public string TimeLabel => Timestamp.ToString("HH:mm");
-
     public bool IsUser => Role == ChatRole.User;
-
     public bool IsSystem => Role == ChatRole.System;
-
     public bool IsTool => Role == ChatRole.Tool;
+    public bool IsThought => Role == ChatRole.Thought;
+    public bool IsActivity => Role == ChatRole.Activity;
+    public bool IsApproval => Role == ChatRole.Approval;
+    public bool IsBubble => Role != ChatRole.Tool && Role != ChatRole.Thought && Role != ChatRole.Activity && Role != ChatRole.Approval;
 
-    /// <summary>Normal baloncuk mu (araç kartı değil)?</summary>
-    public bool IsBubble => Role != ChatRole.Tool;
+    // ── Onay (approval) kartı alanları ───────────────────────────────────────
+    /// <summary>Köprünün ürettiği istek kimliği; FIFO çözümde ilişkilendirme için.</summary>
+    public string? ApprovalRequestId { get; set; }
 
-    // ── Baloncuk yerleşimi (modern sohbet tasarımı) ──────────────────────────
+    /// <summary>Onay bekleyen komutun tam metni.</summary>
+    public string ApprovalCommand { get; set; } = "";
 
-    /// <summary>Kullanıcı sağa, asistan/araç sola, sistem ortaya yaslanır.</summary>
-    public HorizontalAlignment BubbleAlignment => Role switch
+    /// <summary>Komutun neden tehlikeli bulunduğunun açıklaması.</summary>
+    public string ApprovalDescription { get; set; } = "";
+
+    public bool HasApprovalDescription => !string.IsNullOrWhiteSpace(ApprovalDescription);
+
+    private bool _approvalResolved;
+    /// <summary>Kullanıcı yanıtladıktan sonra kart düğmeleri kapanır.</summary>
+    public bool ApprovalResolved
     {
-        ChatRole.User => HorizontalAlignment.Right,
-        ChatRole.System => HorizontalAlignment.Center,
-        _ => HorizontalAlignment.Left,
-    };
+        get => _approvalResolved;
+        set
+        {
+            if (Set(ref _approvalResolved, value))
+            {
+                OnChanged(nameof(ApprovalPending));
+            }
+        }
+    }
 
-    /// <summary>Baloncuk arka planı için tema fırçası anahtarı.</summary>
-    public string BubbleBrushKey => Role switch
+    public bool ApprovalPending => !_approvalResolved;
+
+    private string _approvalOutcome = "";
+    /// <summary>Çözüm sonrası gösterilen özet (ör. "İzin verildi (bir kez)").</summary>
+    public string ApprovalOutcome
     {
-        ChatRole.User => "AccentFillColorDefaultBrush",
-        ChatRole.System => "CardBackgroundFillColorSecondaryBrush",
-        _ => "CardBackgroundFillColorDefaultBrush",
-    };
+        get => _approvalOutcome;
+        set
+        {
+            if (Set(ref _approvalOutcome, value))
+            {
+                OnChanged(nameof(HasApprovalOutcome));
+            }
+        }
+    }
 
-    /// <summary>Baloncuk kenarlığı için tema fırçası anahtarı.</summary>
-    public string BubbleBorderBrushKey => Role switch
+    public bool HasApprovalOutcome => !string.IsNullOrEmpty(_approvalOutcome);
+
+    public string ApprovalTitle => Loc.T("chat.approval.title");
+    public string ApprovalAllowOnceLabel => Loc.T("chat.approval.allow_once");
+    public string ApprovalAllowSessionLabel => Loc.T("chat.approval.allow_session");
+    public string ApprovalAllowAlwaysLabel => Loc.T("chat.approval.allow_always");
+    public string ApprovalDenyLabel => Loc.T("chat.approval.deny");
+
+    public string ToolHeader => $"🔧 {ToolTitle} {StatusText}";
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+    protected void OnChanged(string n) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+
+    protected bool Set<T>(ref T field, T value, [CallerMemberName] string? n = null)
     {
-        ChatRole.User => "AccentFillColorSecondaryBrush",
-        _ => "CardStrokeColorDefaultBrush",
-    };
-
-    /// <summary>Gövde metni fırçası (kullanıcı balonunda vurgu üstü metin).</summary>
-    public string TextBrushKey => Role == ChatRole.User
-        ? "TextOnAccentFillColorPrimaryBrush"
-        : "TextFillColorPrimaryBrush";
-
-    /// <summary>Rol/zaman etiketi fırçası.</summary>
-    public string MetaBrushKey => Role == ChatRole.User
-        ? "TextOnAccentFillColorSecondaryBrush"
-        : "TextFillColorSecondaryBrush";
-
-    /// <summary>Kuyruğu konuşana bakan asimetrik köşe yarıçapı.</summary>
-    public CornerRadius BubbleCorner => Role switch
-    {
-        ChatRole.User => new CornerRadius(14, 14, 4, 14),
-        ChatRole.System => new CornerRadius(10),
-        _ => new CornerRadius(14, 14, 14, 4),
-    };
-
-    /// <summary>Baloncuk yatay iç boşluğu — sistem satırı daha dar.</summary>
-    public Thickness BubbleMargin => Role switch
-    {
-        ChatRole.User => new Thickness(64, 0, 0, 0),
-        ChatRole.System => new Thickness(24, 0, 24, 0),
-        _ => new Thickness(0, 0, 64, 0),
-    };
-
-    /// <summary>Araç kartının başlığı: "🔧 read_file çalışıyor…".</summary>
-    public string ToolHeader => $"🔧 {ToolName} {ToolStatusLabel}";
-
-    private void Notify([CallerMemberName] string? propertyName = null)
-        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnChanged(n!);
+        return true;
+    }
 }

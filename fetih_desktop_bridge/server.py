@@ -22,6 +22,7 @@ Security
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 import platform
 import sys
@@ -79,7 +80,16 @@ def _redact(value: Any, key: str = "") -> Any:
 class BridgeSession:
     """One conversation, backed by a live ``AIAgent`` instance."""
 
-    def __init__(self, session_id: str, agent, *, model: str, provider: str, cwd: str):
+    def __init__(
+        self,
+        session_id: str,
+        agent,
+        *,
+        model: str,
+        provider: str,
+        cwd: str,
+        history: Optional[List[Dict[str, Any]]] = None,
+    ):
         self.id = session_id
         self.agent = agent
         self.model = model
@@ -89,6 +99,7 @@ class BridgeSession:
         self.busy = False
         self.turns = 0
         self.thread_id: Optional[int] = None
+        self.history: List[Dict[str, Any]] = list(history) if history else []
 
     def snapshot(self) -> Dict[str, Any]:
         return {
@@ -102,18 +113,116 @@ class BridgeSession:
         }
 
 
+class FakeModelAgent:
+    """Deterministic simulation agent for UI manual testing and screenshots.
+
+    Executes the exact sequence:
+    uzun düşünce → metin → araç → metin → düşünce → araç → metin
+    """
+
+    def __init__(self):
+        self.stream_delta_callback = None
+        self.reasoning_callback = None
+        self.thinking_callback = None
+        self.tool_start_callback = None
+        self.tool_complete_callback = None
+
+    def run_conversation(self, message: str, conversation_history: Any = None) -> Dict[str, Any]:
+        import time
+
+        # 1. Uzun Düşünce (15+ karakter, cümle içeren, Claude tarzı kilitlenecek özet)
+        thought1 = (
+            "Hedef sistem mimarisi ve yapılandırma dosyaları inceleniyor. "
+            "Gereksinimler doğrultusunda index.html şablonu ve dizin yapısı hazırlanacak."
+        )
+        for chunk in thought1.split(" "):
+            if self.reasoning_callback:
+                self.reasoning_callback(chunk + " ")
+            time.sleep(0.04)
+
+        time.sleep(0.12)
+
+        # 2. Metin
+        text1 = "Masaüstünde hedef dizini oluşturup dosyayı hazırlamaya başlıyorum.\n"
+        for ch in text1:
+            if self.stream_delta_callback:
+                self.stream_delta_callback(ch)
+            time.sleep(0.01)
+
+        time.sleep(0.12)
+
+        # 3. Araç 1 (terminal)
+        call_id1 = "call_fake_001"
+        args1 = '{"command": "mkdir -p desktop_test"}'
+        if self.tool_start_callback:
+            self.tool_start_callback(call_id1, "terminal", args1)
+        time.sleep(0.4)
+        if self.tool_complete_callback:
+            self.tool_complete_callback(call_id1, "terminal", args1, '{"status": "success", "stdout": "desktop_test created."}')
+
+        time.sleep(0.12)
+
+        # 4. Metin
+        text2 = "Dizin başarıyla oluşturuldu. Şimdi web sayfası içeriğini kodluyorum.\n"
+        for ch in text2:
+            if self.stream_delta_callback:
+                self.stream_delta_callback(ch)
+            time.sleep(0.01)
+
+        time.sleep(0.12)
+
+        # 5. İkinci Düşünce
+        thought2 = (
+            "Modern HTML5 ve CSS yapısı oluşturuluyor. "
+            "Sayfa bileşenleri ve başlık etiketleri doğrulanıyor."
+        )
+        for chunk in thought2.split(" "):
+            if self.reasoning_callback:
+                self.reasoning_callback(chunk + " ")
+            time.sleep(0.04)
+
+        time.sleep(0.12)
+
+        # 6. Araç 2 (write_file)
+        call_id2 = "call_fake_002"
+        args2 = '{"path": "desktop_test/index.html", "content": "<!DOCTYPE html><html><body><h1>FETİH</h1></body></html>"}'
+        if self.tool_start_callback:
+            self.tool_start_callback(call_id2, "write_file", args2)
+        time.sleep(0.4)
+        if self.tool_complete_callback:
+            self.tool_complete_callback(call_id2, "write_file", args2, '{"status": "success", "bytes_written": 62}')
+
+        time.sleep(0.12)
+
+        # 7. Final Metin
+        text3 = "Tüm işlemler tamamlandı! index.html dosyası başarıyla kaydedildi."
+        for ch in text3:
+            if self.stream_delta_callback:
+                self.stream_delta_callback(ch)
+            time.sleep(0.01)
+
+        return {"final_response": text1 + text2 + text3}
+
+
 class BridgeServer:
     """Transport-agnostic JSON-RPC dispatcher."""
 
-    def __init__(self, *, token: str = "", require_auth: bool = True):
+    def __init__(self, *, token: str = "", require_auth: bool = True, fake_model: bool = False):
         self.token = token
         self.require_auth = require_auth
+        self.fake_model = fake_model or bool(os.getenv("FETIH_FAKE_MODEL"))
         self.sessions: Dict[str, BridgeSession] = {}
         self._connections: Dict[int, asyncio.AbstractEventLoop] = {}
         self._conn_objs: List[Any] = []
         self._methods: Dict[str, Callable[..., Any]] = {}
         self._findings: List[Dict[str, Any]] = []
         self._started = time.time()
+
+        from fetih_constants import get_fetih_home
+        from fetih_desktop_bridge.session_store import SessionStore
+        db_path = os.path.join(get_fetih_home(), "desktop_sessions.db")
+        self.store = SessionStore(db_path)
+
         self._register_methods()
 
     # ── connection bookkeeping ──────────────────────────────────────────
@@ -209,10 +318,16 @@ class BridgeServer:
                 "bridge.authenticate": self._m_authenticate,
                 "bridge.capabilities": self._m_capabilities,
                 "session.new": self._m_session_new,
+                "session.create": self._m_session_create,
                 "session.list": self._m_session_list,
+                "session.load": self._m_session_load,
+                "session.rename": self._m_session_rename,
+                "session.delete": self._m_session_delete,
+                "session.delete_all": self._m_session_delete_all,
                 "session.close": self._m_session_close,
                 "session.send": self._m_session_send,
                 "session.cancel": self._m_session_cancel,
+                "session.approve": self._m_session_approve,
                 "config.get": self._m_config_get,
                 "config.set": self._m_config_set,
                 "providers.list": self._m_providers_list,
@@ -268,6 +383,12 @@ class BridgeServer:
                 "session.tool_result",
                 "session.done",
                 "session.error",
+                "session.updated",
+                "session.approval_request",
+                "session.approval_resolved",
+                "thought.label",
+                "session.thought_label",
+                "findings.discovered",
             ],
         }
 
@@ -276,15 +397,71 @@ class BridgeServer:
     def _m_session_new(self, conn, params):
         session = self._build_session(**_session_params(params))
         self.sessions[session.id] = session
+        title = str(params.get("title") or "")
+        self.store.create(sid=session.id, title=title)
         return session.snapshot()
 
+    def _m_session_create(self, conn, params):
+        sid = params.get("session_id")
+        title = str(params.get("title") or "")
+        sid = self.store.create(sid=sid, title=title)
+        return {"session_id": sid, "title": title}
+
     def _m_session_list(self, conn, params):
-        return {"sessions": [s.snapshot() for s in self.sessions.values()]}
+        return {"sessions": self.store.list()}
+
+    def _m_session_load(self, conn, params):
+        sid = str(params.get("session_id") or "")
+        if not sid:
+            raise BridgeError(INVALID_PARAMS, "missing 'session_id'")
+        items = self.store.items(sid)
+        title = self.store.title(sid)
+        running = False
+        pending = None
+        session = self.sessions.get(sid)
+        if session and session.busy and getattr(session, "recorder", None):
+            running = True
+            snap = session.recorder.snapshot()
+            if snap:
+                pending = snap
+        return {
+            "session_id": sid,
+            "title": title,
+            "items": items,
+            "running": running,
+            "pending": pending,
+        }
+
+    def _m_session_rename(self, conn, params):
+        sid = str(params.get("session_id") or "")
+        title = str(params.get("title") or "")
+        if not sid:
+            raise BridgeError(INVALID_PARAMS, "missing 'session_id'")
+        self.store.rename(sid, title)
+        loop = self.loop_for(conn) or asyncio.get_running_loop()
+        conn.emit_threadsafe(
+            loop,
+            event("session.updated", {"session_id": sid, "title": title, "updated_at": time.time()}),
+        )
+        return {"session_id": sid, "title": title}
+
+    def _m_session_delete(self, conn, params):
+        sid = str(params.get("session_id") or "")
+        if not sid:
+            raise BridgeError(INVALID_PARAMS, "missing 'session_id'")
+        self.store.delete(sid)
+        self.sessions.pop(sid, None)
+        return {"deleted": True, "session_id": sid}
+
+    def _m_session_delete_all(self, conn, params):
+        self.store.delete_all()
+        self.sessions.clear()
+        return {"deleted_all": True}
 
     def _m_session_close(self, conn, params):
         sid = str(params.get("session_id") or "")
         session = self.sessions.pop(sid, None)
-        if session is None:
+        if session is None and not self.store.exists(sid):
             raise BridgeError(SESSION_NOT_FOUND, f"no such session: {sid}")
         return {"closed": True, "session_id": sid}
 
@@ -297,7 +474,19 @@ class BridgeServer:
         if sid:
             session = self.sessions.get(str(sid))
             if session is None:
-                raise BridgeError(SESSION_NOT_FOUND, f"no such session: {sid}")
+                # If session exists in store, instantiate an in-memory session for it
+                if self.store.exists(str(sid)):
+                    p = _session_params(params)
+                    p["session_id"] = str(sid)
+                    session = self._build_session(**p)
+                    self.sessions[session.id] = session
+                else:
+                    loop = self.loop_for(conn) or asyncio.get_running_loop()
+                    conn.emit_threadsafe(
+                        loop,
+                        event("session.error", {"session_id": str(sid), "error": f"no such session: {sid}"}),
+                    )
+                    raise BridgeError(SESSION_NOT_FOUND, f"no such session: {sid}")
         else:
             session = self._build_session(**_session_params(params))
             self.sessions[session.id] = session
@@ -305,8 +494,69 @@ class BridgeServer:
         if session.busy:
             raise BridgeError(SESSION_BUSY, f"session {session.id} is already running a turn")
 
+        from fetih_desktop_bridge.session_store import TranscriptRecorder
+        from fetih_desktop_bridge.thought_labeler import ThoughtLabeler
+
+        recorder = TranscriptRecorder(self.store, session.id)
+        session.recorder = recorder
+
+        # Ensure session in store and initialize title from first message if empty
+        if not self.store.exists(session.id) or not self.store.title(session.id):
+            clean_title = message.strip().replace("\r\n", " ").replace("\n", " ")
+            if len(clean_title) > 36:
+                clean_title = clean_title[:35] + "…"
+            self.store.create(sid=session.id, title=clean_title)
+
+        recorder.text("user", message)
+        recorder.flush()
+
         loop = self.loop_for(conn) or asyncio.get_running_loop()
         stream = params.get("stream", True) is not False
+
+        # ── Approval wiring ──────────────────────────────────────────────
+        # Dangerous commands block the agent thread inside tools.approval and
+        # call this notify, which surfaces a ``session.approval_request`` the
+        # desktop answers with ``session.approve`` → resolve_gateway_approval.
+        # Keyed by session id so parallel turns don't cross wires.
+        try:
+            from tools import approval as _approval
+        except Exception:
+            _approval = None
+
+        def _approval_notify(approval_data) -> None:
+            data = approval_data if isinstance(approval_data, dict) else {}
+            payload = {
+                "session_id": session.id,
+                "request_id": uuid.uuid4().hex[:12],
+                "command": data.get("command") if data else str(approval_data),
+                "description": data.get("description", ""),
+                "pattern_key": data.get("pattern_key", ""),
+                "pattern_keys": data.get("pattern_keys", []),
+            }
+            conn.emit_threadsafe(loop, event("session.approval_request", payload))
+
+        if _approval is not None:
+            try:
+                _approval.register_gateway_notify(session.id, _approval_notify)
+                _approval.load_permanent_allowlist()
+            except Exception:
+                _approval = None
+
+        def on_thought_label(sid: str, label: str) -> None:
+            recorder.set_thought_label(label)
+            conn.emit_threadsafe(
+                loop, event("thought.label", {"session_id": sid, "label": label})
+            )
+            conn.emit_threadsafe(
+                loop, event("session.thought_label", {"session_id": sid, "label": label})
+            )
+
+        thought_labeler = ThoughtLabeler(
+            session_id=session.id,
+            loop=loop,
+            on_label=on_thought_label,
+            fake_model=self.fake_model,
+        )
 
         session.busy = True
         started = time.perf_counter()
@@ -314,8 +564,18 @@ class BridgeServer:
 
         # These callbacks fire on the worker thread; every emit is marshalled
         # back onto the event loop via Connection.emit_threadsafe.
+        dsml_suppressed = False
+
         def on_delta(text: str) -> None:
+            nonlocal dsml_suppressed
+            if dsml_suppressed:
+                return
+            if "DSML" in text or "<tool_call" in text or "<function_call" in text:
+                dsml_suppressed = True
+                return
             if stream and text:
+                thought_labeler.on_close()
+                recorder.text("assistant", text)
                 conn.emit_threadsafe(
                     loop, event("session.delta", {"session_id": session.id, "text": text})
                 )
@@ -325,6 +585,8 @@ class BridgeServer:
             # Groq thinking, ...). Streamed incrementally and appended by the
             # desktop app's Reasoning panel.
             if stream and text:
+                thought_labeler.on_chunk(text)
+                recorder.text("thought", text)
                 conn.emit_threadsafe(
                     loop, event("session.thought", {"session_id": session.id, "text": text})
                 )
@@ -341,6 +603,8 @@ class BridgeServer:
                 )
 
         def on_tool_start(call_id, name, args) -> None:
+            thought_labeler.on_close()
+            recorder.tool_call(call_id, name, args)
             tool_calls.append({"id": str(call_id), "name": name})
             conn.emit_threadsafe(
                 loop,
@@ -356,6 +620,7 @@ class BridgeServer:
             )
 
         def on_tool_complete(call_id, name, args, result) -> None:
+            recorder.tool_result(call_id, result)
             conn.emit_threadsafe(
                 loop,
                 event(
@@ -401,12 +666,32 @@ class BridgeServer:
             import threading
 
             session.thread_id = threading.get_ident()
-            # ``AIAgent.chat()`` is ``run_conversation()[\"final_response\"]`` and
-            # raises KeyError on every failure path, because failed turns return
-            # {\"error\": ..., \"failed\": True} with no \"final_response\" key.
-            # Call run_conversation directly so a provider error reaches the
-            # desktop app as the provider's own message.
-            return agent.run_conversation(message) or {}
+            # Bind the approval session key on THIS worker thread so dangerous
+            # commands the agent runs look up our notify callback (above) and
+            # block here until the desktop responds.
+            _key_token = None
+            if _approval is not None:
+                try:
+                    _key_token = _approval.set_current_session_key(session.id)
+                except Exception:
+                    _key_token = None
+            conv_hist = session.history if session.history else None
+            try:
+                if conv_hist:
+                    res = agent.run_conversation(message, conversation_history=conv_hist) or {}
+                else:
+                    res = agent.run_conversation(message) or {}
+            except TypeError:
+                res = agent.run_conversation(message) or {}
+            finally:
+                if _approval is not None and _key_token is not None:
+                    try:
+                        _approval.reset_current_session_key(_key_token)
+                    except Exception:
+                        pass
+            if getattr(agent, "_session_messages", None):
+                session.history = list(agent._session_messages)
+            return res
 
         try:
             outcome = await asyncio.to_thread(_run)
@@ -419,13 +704,37 @@ class BridgeServer:
             await conn.send_frame(event("session.error", payload))
             raise BridgeError(AGENT_ERROR, payload["error"], {"session_id": session.id})
         finally:
+            if _approval is not None:
+                # Releases any approval still blocking the agent thread so the
+                # turn can unwind even if the user never answered.
+                try:
+                    _approval.unregister_gateway_notify(session.id)
+                except Exception:
+                    pass
+            thought_labeler.on_close()
             session.busy = False
             session.thread_id = None
+            session.recorder = None
             agent.stream_delta_callback = None
             agent.reasoning_callback = None
             agent.thinking_callback = None
             agent.tool_start_callback = None
             agent.tool_complete_callback = None
+            recorder.flush()
+            try:
+                conn.emit_threadsafe(
+                    loop,
+                    event(
+                        "session.updated",
+                        {
+                            "session_id": session.id,
+                            "title": self.store.title(session.id),
+                            "updated_at": time.time(),
+                        },
+                    ),
+                )
+            except Exception:
+                pass
 
         elapsed_ms = int((time.perf_counter() - started) * 1000)
 
@@ -463,13 +772,80 @@ class BridgeServer:
             raise BridgeError(SESSION_NOT_FOUND, f"no such session: {sid}")
         if not session.busy:
             return {"cancelled": False, "reason": "session is idle"}
+
+        # Release any approval currently blocking the agent thread, otherwise
+        # the interrupt can't be noticed until the user answers the prompt.
+        try:
+            from tools.approval import resolve_gateway_approval
+
+            resolve_gateway_approval(sid, "deny", resolve_all=True)
+        except Exception:
+            pass
+
+        # Prefer agent.interrupt(): it propagates to in-flight tool worker
+        # threads too, not just the main agent thread (which is all that
+        # set_interrupt(thread_id) reaches).
+        interrupted = False
+        try:
+            agent = getattr(session, "agent", None)
+            if agent is not None and hasattr(agent, "interrupt"):
+                agent.interrupt()
+                interrupted = True
+        except Exception:
+            interrupted = False
+
         try:
             from tools.interrupt import set_interrupt
 
             set_interrupt(True, session.thread_id)
         except Exception as exc:
-            raise BridgeError(CANCELLED, f"cancel failed: {exc}")
+            if not interrupted:
+                raise BridgeError(CANCELLED, f"cancel failed: {exc}")
         return {"cancelled": True, "session_id": sid}
+
+    def _m_session_approve(self, conn, params):
+        """Resolve a pending dangerous-command approval for a session.
+
+        ``choice`` is one of ``once`` (allow this single time), ``session``
+        (allow this pattern for the rest of the session), ``always`` (persist
+        to the permanent allowlist), or ``deny`` (block, do not retry).  When
+        ``all`` is true every approval queued for the session is resolved with
+        the same choice at once.
+        """
+        sid = str(params.get("session_id") or "")
+        choice = str(params.get("choice") or "").lower()
+        resolve_all = bool(params.get("all"))
+        if choice not in {"once", "session", "always", "deny"}:
+            raise BridgeError(INVALID_PARAMS, "choice must be once|session|always|deny")
+
+        try:
+            from tools.approval import resolve_gateway_approval
+
+            resolved = resolve_gateway_approval(sid, choice, resolve_all=resolve_all)
+        except Exception as exc:
+            raise BridgeError(INTERNAL_ERROR, f"approval resolve failed: {exc}")
+
+        # Echo an event so a card the desktop shows can be dismissed even when
+        # the resolution came from elsewhere (e.g. a bulk approve).
+        try:
+            loop = self.loop_for(conn)
+            if loop is not None:
+                conn.emit_threadsafe(
+                    loop,
+                    event(
+                        "session.approval_resolved",
+                        {
+                            "session_id": sid,
+                            "choice": choice,
+                            "resolved": resolved,
+                            "all": resolve_all,
+                        },
+                    ),
+                )
+        except Exception:
+            pass
+
+        return {"resolved": resolved, "choice": choice, "session_id": sid}
 
     # ── config.* ────────────────────────────────────────────────────────
 
@@ -1104,6 +1480,7 @@ class BridgeServer:
     def _build_session(
         self,
         *,
+        session_id: Optional[str] = None,
         model: Optional[str] = None,
         provider: Optional[str] = None,
         toolsets: Optional[Any] = None,
@@ -1111,12 +1488,18 @@ class BridgeServer:
         skip_context_files: bool = False,
         skip_memory: bool = False,
     ) -> BridgeSession:
-        """Build a real ``AIAgent``, mirroring ``fetih_cli/oneshot.py``.
+        effective_sid = (session_id or "").strip() or uuid.uuid4().hex
 
-        Kept deliberately close to the oneshot path so the bridge inherits the
-        same provider resolution, toolset selection and session-store wiring
-        the CLI already has — no second, divergent bootstrap.
-        """
+        if self.fake_model:
+            agent = FakeModelAgent()
+            return BridgeSession(
+                effective_sid,
+                agent,
+                model="fake-simulator",
+                provider="fake",
+                cwd=cwd or os.getcwd(),
+            )
+
         from fetih_cli.config import load_config
         from fetih_cli.runtime_provider import resolve_runtime_provider
         from fetih_cli.tools_config import _get_platform_tools
@@ -1164,6 +1547,36 @@ class BridgeServer:
             session_db = None
 
         work_dir = str(cwd) if cwd else os.getcwd()
+        effective_sid = session_id or uuid.uuid4().hex[:12]
+
+        if os.getenv("FETIH_BRIDGE_MOCK_AGENT") == "1":
+            class MockAgent:
+                def __init__(self):
+                    self.stream_delta_callback = None
+                    self.reasoning_callback = None
+                    self.thinking_callback = None
+                    self.tool_start_callback = None
+                    self.tool_complete_callback = None
+                    self._session_messages = []
+
+                def run_conversation(self, message, conversation_history=None):
+                    if self.reasoning_callback:
+                        self.reasoning_callback("Thinking smoke test...")
+                    if self.stream_delta_callback:
+                        self.stream_delta_callback("Smoke test response delta.")
+                    return {
+                        "final_response": "Smoke test response delta.",
+                        "reasoning": "Thinking smoke test...",
+                        "api_calls": 1,
+                    }
+
+            return BridgeSession(
+                effective_sid,
+                MockAgent(),
+                model=effective_model or "mock-model",
+                provider=effective_provider or "mock-provider",
+                cwd=work_dir,
+            )
 
         try:
             agent = AIAgent(
@@ -1176,12 +1589,9 @@ class BridgeServer:
                 quiet_mode=True,
                 platform="cli",
                 session_db=session_db,
+                session_id=effective_sid,
                 credential_pool=runtime.get("credential_pool"),
                 clarify_callback=_bridge_clarify_callback,
-                # Small-context endpoints (Groq's 8K-TPM free tier, GitHub
-                # Models, most local servers) cannot carry FETİH's full
-                # AGENTS.md + memory preamble on top of the tool schemas.
-                # The desktop app can trade context for headroom per session.
                 skip_context_files=bool(skip_context_files),
                 skip_memory=bool(skip_memory),
             )
@@ -1193,21 +1603,77 @@ class BridgeServer:
         agent.suppress_status_output = True
         agent.tool_gen_callback = None
 
+        # Reconstruct history from store if available
+        history: List[Dict[str, Any]] = []
+        if session_id and self.store.exists(session_id):
+            items = self.store.items(session_id)
+            history = _items_to_history(items)
+
         return BridgeSession(
-            uuid.uuid4().hex[:12],
+            effective_sid,
             agent,
             model=effective_model,
             provider=str(runtime.get("provider") or effective_provider or ""),
             cwd=work_dir,
+            history=history,
         )
 
 
 # --- helpers ----------------------------------------------------------------
 
 
+def _items_to_history(items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    history: List[Dict[str, Any]] = []
+    pending_tool_calls: List[Dict[str, Any]] = []
+
+    for item in items:
+        kind = item.get("kind")
+        if kind == "user":
+            if pending_tool_calls:
+                history.append({"role": "assistant", "content": None, "tool_calls": list(pending_tool_calls)})
+                pending_tool_calls = []
+            history.append({"role": "user", "content": str(item.get("text") or "")})
+        elif kind == "assistant":
+            if pending_tool_calls:
+                history.append({"role": "assistant", "content": item.get("text") or None, "tool_calls": list(pending_tool_calls)})
+                pending_tool_calls = []
+            else:
+                history.append({"role": "assistant", "content": str(item.get("text") or "")})
+        elif kind == "tool_call":
+            call_id = str(item.get("call_id") or "")
+            name = str(item.get("name") or "")
+            args_val = item.get("args") or "{}"
+            if not isinstance(args_val, str):
+                args_val = json.dumps(args_val, ensure_ascii=False)
+            pending_tool_calls.append({
+                "id": call_id,
+                "type": "function",
+                "function": {"name": name, "arguments": args_val}
+            })
+        elif kind == "tool_result":
+            if pending_tool_calls:
+                history.append({"role": "assistant", "content": None, "tool_calls": list(pending_tool_calls)})
+                pending_tool_calls = []
+            call_id = str(item.get("call_id") or "")
+            res_val = item.get("result")
+            if not isinstance(res_val, str):
+                res_val = json.dumps(res_val, ensure_ascii=False) if res_val is not None else ""
+            history.append({
+                "role": "tool",
+                "tool_call_id": call_id,
+                "content": res_val
+            })
+
+    if pending_tool_calls:
+        history.append({"role": "assistant", "content": None, "tool_calls": list(pending_tool_calls)})
+
+    return history
+
+
 def _session_params(params: Dict[str, Any]) -> Dict[str, Any]:
     """The session-shaping fields ``session.new`` and ``session.send`` share."""
     return {
+        "session_id": params.get("session_id"),
         "model": params.get("model"),
         "provider": params.get("provider"),
         "toolsets": params.get("toolsets"),

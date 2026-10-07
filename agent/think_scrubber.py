@@ -82,6 +82,16 @@ class StreamingThinkScrubber:
         "reasoning",
         "thought",
         "REASONING_SCRATCHPAD",
+        "tool_call",
+        "tool_calls",
+        "function_call",
+        "function_calls",
+        "｜DSML｜function_calls",
+        "|DSML|function_calls",
+        "｜DSML｜invoke",
+        "|DSML|invoke",
+        "｜DSML｜parameter",
+        "|DSML|parameter",
     )
 
     # Materialise literal tag strings so the hot path does string

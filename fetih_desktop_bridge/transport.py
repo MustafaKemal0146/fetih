@@ -34,7 +34,7 @@ class Connection:
     WebSocket, where the token exchange has to happen first.
     """
 
-    __slots__ = ("_send", "authenticated", "kind", "peer", "_closed")
+    __slots__ = ("_send", "authenticated", "kind", "peer", "_closed", "_send_lock")
 
     def __init__(
         self,
@@ -49,12 +49,18 @@ class Connection:
         self.authenticated = authenticated
         self.peer = peer
         self._closed = False
+        # Requests are now dispatched concurrently (see serve_*), so several
+        # tasks may write to the same socket at once.  Serialize writes so two
+        # frames never interleave on the wire.
+        self._send_lock = asyncio.Lock()
 
     async def send_frame(self, frame: Dict[str, Any]) -> None:
         if self._closed:
             return
+        encoded = encode(frame)
         try:
-            await self._send(encode(frame))
+            async with self._send_lock:
+                await self._send(encoded)
         except Exception:
             # A client that vanished mid-turn must not abort the agent run.
             self._closed = True
@@ -74,6 +80,32 @@ class Connection:
     @property
     def closed(self) -> bool:
         return self._closed
+
+
+class _TaskSet:
+    """Tracks in-flight request handlers so they can be awaited/cancelled.
+
+    Each inbound frame is dispatched as its own task so the read loop keeps
+    pulling frames while a ``session.send`` turn is parked in a worker thread.
+    Without this, an approval response (or a second session) could never be
+    read until the current turn finished — a deadlock, since the turn is
+    itself blocked waiting for that very response.
+    """
+
+    def __init__(self) -> None:
+        self._tasks: "set[asyncio.Task]" = set()
+
+    def spawn(self, coro) -> None:
+        task = asyncio.ensure_future(coro)
+        self._tasks.add(task)
+        task.add_done_callback(self._tasks.discard)
+
+    async def drain(self) -> None:
+        if not self._tasks:
+            return
+        for task in list(self._tasks):
+            task.cancel()
+        await asyncio.gather(*list(self._tasks), return_exceptions=True)
 
 
 # --- stdio ------------------------------------------------------------------
@@ -97,6 +129,7 @@ async def serve_stdio(server, *, ready_frame: Optional[Dict[str, Any]] = None) -
 
     conn = Connection(_write, kind="stdio", authenticated=True, peer="stdio")
     server.attach(conn, loop)
+    tasks = _TaskSet()
 
     if ready_frame is not None:
         await conn.send_frame(ready_frame)
@@ -109,9 +142,12 @@ async def serve_stdio(server, *, ready_frame: Optional[Dict[str, Any]] = None) -
             line = line.strip()
             if not line:
                 continue
-            await server.handle_line(conn, line)
+            # Dispatch concurrently so the read loop stays responsive while a
+            # turn is parked waiting on the agent (or on user approval).
+            tasks.spawn(server.handle_line(conn, line))
     finally:
         conn.close()
+        await tasks.drain()
         server.detach(conn)
     return 0
 
@@ -145,6 +181,7 @@ async def serve_websocket(server, *, port: int, on_listening=None) -> int:
 
         conn = Connection(ws.send, kind="ws", authenticated=False, peer=peer)
         server.attach(conn, loop)
+        tasks = _TaskSet()
         await conn.send_frame(server.ready_frame())
         try:
             async for raw in ws:
@@ -153,14 +190,22 @@ async def serve_websocket(server, *, port: int, on_listening=None) -> int:
                 raw = raw.strip()
                 if not raw:
                     continue
-                await server.handle_line(conn, raw)
+                # Concurrent dispatch — see serve_stdio for why this is
+                # required (approval responses must be readable mid-turn).
+                tasks.spawn(server.handle_line(conn, raw))
         except Exception:
             pass
         finally:
             conn.close()
+            await tasks.drain()
             server.detach(conn)
 
-    async with websockets.serve(handler, BIND_HOST, port, ping_interval=20):
+    # ``max_size`` lifts the default 1 MiB frame cap: a loaded session history
+    # or a large tool-argument blob can exceed it, and hitting the cap drops
+    # the whole connection.  Loopback-only, so the larger ceiling is safe.
+    async with websockets.serve(
+        handler, BIND_HOST, port, ping_interval=20, max_size=16 * 1024 * 1024
+    ):
         if on_listening is not None:
             on_listening(port)
         try:

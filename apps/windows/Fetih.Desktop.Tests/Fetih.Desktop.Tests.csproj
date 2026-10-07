@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Saf C# mantık sınıflarını doğrudan derle -->
+    <Compile Include="..\Fetih.Desktop\Bridge\StoredItem.cs" Link="Bridge\StoredItem.cs" />
+    <Compile Include="..\Fetih.Desktop\Bridge\BridgeBackoff.cs" Link="Bridge\BridgeBackoff.cs" />
+    <Compile Include="..\Fetih.Desktop\Models\ActivityLabelBuilder.cs" Link="Models\ActivityLabelBuilder.cs" />
+    <Compile Include="..\Fetih.Desktop\Models\ActivityGroup.cs" Link="Models\ActivityGroup.cs" />
+    <Compile Include="..\Fetih.Desktop\Models\ToolLabelBuilder.cs" Link="Models\ToolLabelBuilder.cs" />
+    <Compile Include="..\Fetih.Desktop\Models\ChatMessage.cs" Link="Models\ChatMessage.cs" />
+    <Compile Include="..\Fetih.Desktop\Views\TranscriptBuilder.cs" Link="Views\TranscriptBuilder.cs" />
+    <Compile Include="..\Fetih.Desktop\Views\ToolFormatter.cs" Link="Views\ToolFormatter.cs" />
+    <Compile Include="..\Fetih.Desktop\Services\Localization.cs" Link="Services\Localization.cs" />
+    <Compile Include="..\Fetih.Desktop\Services\IUiDispatcher.cs" Link="Services\IUiDispatcher.cs" />
+    <Compile Include="..\Fetih.Desktop\Services\ChatHistoryTrimmer.cs" Link="Services\ChatHistoryTrimmer.cs" />
+    <Compile Include="..\Fetih.Desktop\Services\LogFormatting.cs" Link="Services\LogFormatting.cs" />
+    <Compile Include="..\Fetih.Desktop\Setup\SetupPipeline.cs" Link="Setup\SetupPipeline.cs" />
+    <Compile Include="..\Fetih.Desktop\Setup\TransactionJournal.cs" Link="Setup\TransactionJournal.cs" />
+    <Compile Include="..\Fetih.Desktop\Setup\SetupRunLock.cs" Link="Setup\SetupRunLock.cs" />
+  </ItemGroup>
+
+</Project>

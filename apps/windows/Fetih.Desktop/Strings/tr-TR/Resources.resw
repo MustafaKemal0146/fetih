@@ -1,0 +1,1963 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>Microsoft.Build.Tasks.ResourceHandling.RestrictedResXFileHandler, Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </resheader>
+  <resheader name="writer">
+    <value>Microsoft.Build.Tasks.ResourceHandling.RestrictedResXFileHandler, Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </resheader>
+  <data name="Activity_Action_One" xml:space="preserve">
+    <value>1 işlem</value>
+  </data>
+  <data name="Activity_Actions_Many" xml:space="preserve">
+    <value>{0} işlem</value>
+  </data>
+  <data name="Activity_Cancelled" xml:space="preserve">
+    <value>durduruldu</value>
+  </data>
+  <data name="Activity_Error_One" xml:space="preserve">
+    <value>1 hata</value>
+  </data>
+  <data name="Activity_Errors" xml:space="preserve">
+    <value>{0} hata</value>
+  </data>
+  <data name="Activity_Thinking" xml:space="preserve">
+    <value>Düşünüyor…</value>
+  </data>
+  <data name="Activity_Tool_Default" xml:space="preserve">
+    <value>{0} çalıştırılıyor</value>
+  </data>
+  <data name="Activity_Tool_edit_file" xml:space="preserve">
+    <value>{0} düzenleniyor</value>
+  </data>
+  <data name="Activity_Tool_execute_command" xml:space="preserve">
+    <value>Komut çalıştırılıyor: {0}</value>
+  </data>
+  <data name="Activity_Tool_fetch_url" xml:space="preserve">
+    <value>{0} getiriliyor</value>
+  </data>
+  <data name="Activity_Tool_read_file" xml:space="preserve">
+    <value>{0} okunuyor</value>
+  </data>
+  <data name="Activity_Tool_search_web" xml:space="preserve">
+    <value>Web'de aranıyor: {0}</value>
+  </data>
+  <data name="Activity_Tool_terminal" xml:space="preserve">
+    <value>Komut çalıştırılıyor: {0}</value>
+  </data>
+  <data name="Activity_Tool_view_file" xml:space="preserve">
+    <value>{0} okunuyor</value>
+  </data>
+  <data name="Activity_Tool_write_file" xml:space="preserve">
+    <value>{0} yazılıyor</value>
+  </data>
+  <data name="Activity_Tool_write_to_file" xml:space="preserve">
+    <value>{0} yazılıyor</value>
+  </data>
+  <data name="Chat_Working" xml:space="preserve">
+    <value>Çalışıyor</value>
+  </data>
+  <data name="Unit_Min" xml:space="preserve">
+    <value>dk</value>
+  </data>
+  <data name="Unit_Sec" xml:space="preserve">
+    <value>sn</value>
+  </data>
+  <data name="about_desc" xml:space="preserve">
+    <value>CTF çözümü, sızma testi, OSINT, adli bilişim ve kırmızı takım operasyonları için model-agnostik bir ajan. Masaüstü uygulaması kabuktur; ajan mantığı Python tarafında çalışır.</value>
+  </data>
+  <data name="about_design_doc" xml:space="preserve">
+    <value>Masaüstü uygulaması tasarım belgesi: docs/windows-app-plani.md (depo içinde)</value>
+  </data>
+  <data name="about_disclaimer_message" xml:space="preserve">
+    <value>FETİH bir saldırı simülasyonu ve güvenlik testi aracıdır. Yalnızca sahibi olduğun ya da yazılı izin aldığın sistemlerde kullan.</value>
+  </data>
+  <data name="about_disclaimer_title" xml:space="preserve">
+    <value>Kapsam uyarısı</value>
+  </data>
+  <data name="about_install_packaged" xml:space="preserve">
+    <value>Paketli (MSIX)</value>
+  </data>
+  <data name="about_install_unpackaged" xml:space="preserve">
+    <value>Paketlenmemiş (geliştirici)</value>
+  </data>
+  <data name="about_releases_link" xml:space="preserve">
+    <value>Sürümler ve yayın notları</value>
+  </data>
+  <data name="about_repo_link" xml:space="preserve">
+    <value>Proje deposu — github.com/MustafaKemal0146/fetih</value>
+  </data>
+  <data name="about_row_app_dir" xml:space="preserve">
+    <value>Uygulama klasörü</value>
+  </data>
+  <data name="about_row_app_name" xml:space="preserve">
+    <value>Uygulama adı</value>
+  </data>
+  <data name="about_row_architecture" xml:space="preserve">
+    <value>Mimari</value>
+  </data>
+  <data name="about_row_build_date" xml:space="preserve">
+    <value>Derleme tarihi</value>
+  </data>
+  <data name="about_row_install_desc" xml:space="preserve">
+    <value>Bu derleme paketlenmemiş (paket kimliği olmadan) çalışır; aşağıdaki Güncellemeler bölümü GitHub Releases'i kontrol eder.</value>
+  </data>
+  <data name="about_row_install_type" xml:space="preserve">
+    <value>Kurulum tipi</value>
+  </data>
+  <data name="about_row_runtime" xml:space="preserve">
+    <value>Çalışma zamanı</value>
+  </data>
+  <data name="about_row_target_framework" xml:space="preserve">
+    <value>Hedef çatı</value>
+  </data>
+  <data name="about_row_version" xml:space="preserve">
+    <value>Sürüm</value>
+  </data>
+  <data name="about_row_windows" xml:space="preserve">
+    <value>Windows</value>
+  </data>
+  <data name="about_section_app_info" xml:space="preserve">
+    <value>Uygulama bilgisi</value>
+  </data>
+  <data name="about_section_links" xml:space="preserve">
+    <value>Bağlantılar</value>
+  </data>
+  <data name="about_title" xml:space="preserve">
+    <value>Hakkında</value>
+  </data>
+  <data name="about_unknown" xml:space="preserve">
+    <value>bilinmiyor</value>
+  </data>
+  <data name="app_product_name" xml:space="preserve">
+    <value>FETİH Masaüstü</value>
+  </data>
+  <data name="app_tagline" xml:space="preserve">
+    <value>Siber Güvenlik Operasyon Konsolu</value>
+  </data>
+  <data name="appearance_language" xml:space="preserve">
+    <value>Arayüz dili</value>
+  </data>
+  <data name="appearance_language_auto" xml:space="preserve">
+    <value>Otomatik (sistem)</value>
+  </data>
+  <data name="appearance_language_en" xml:space="preserve">
+    <value>İngilizce</value>
+  </data>
+  <data name="appearance_language_note" xml:space="preserve">
+    <value>Değişiklik anında uygulanır; kalıcı olarak kaydedilir.</value>
+  </data>
+  <data name="appearance_language_tr" xml:space="preserve">
+    <value>Türkçe</value>
+  </data>
+  <data name="bridge_badge_tooltip_fix" xml:space="preserve">
+    <value>Düzeltmek için tıkla</value>
+  </data>
+  <data name="bridge_detail_auth_failed" xml:space="preserve">
+    <value>Köprü kimlik doğrulaması başarısız.</value>
+  </data>
+  <data name="bridge_detail_auth_rejected" xml:space="preserve">
+    <value>Kimlik doğrulama reddedildi.</value>
+  </data>
+  <data name="bridge_detail_connect_failed" xml:space="preserve">
+    <value>Köprüye bağlanılamadı: </value>
+  </data>
+  <data name="bridge_detail_connected" xml:space="preserve">
+    <value>Bağlı · protokol v{0} · pid {1}</value>
+  </data>
+  <data name="bridge_detail_connecting" xml:space="preserve">
+    <value>Masaüstü Köprüsü başlatılıyor…</value>
+  </data>
+  <data name="bridge_detail_dropped" xml:space="preserve">
+    <value>Köprü bağlantısı koptu.</value>
+  </data>
+  <data name="bridge_detail_idle" xml:space="preserve">
+    <value>Masaüstü Köprüsü henüz başlatılmadı.</value>
+  </data>
+  <data name="bridge_detail_model_error" xml:space="preserve">
+    <value>Köprü bağlı ama modele ulaşılamıyor. Ayarlar › Model ve Sağlayıcı'yı denetle.</value>
+  </data>
+  <data name="bridge_detail_model_ok" xml:space="preserve">
+    <value>Bağlı — model yanıt veriyor.</value>
+  </data>
+  <data name="bridge_detail_not_connected" xml:space="preserve">
+    <value>Köprü bağlı değil.</value>
+  </data>
+  <data name="bridge_detail_protocol_mismatch" xml:space="preserve">
+    <value>Protokol uyumsuz: istemci {0}, sunucu {1}–{2}.</value>
+  </data>
+  <data name="bridge_detail_protocol_mismatch_ex" xml:space="preserve">
+    <value>Köprü protokol sürümü uyumsuz (istemci 1, sunucu {0}–{1}).</value>
+  </data>
+  <data name="bridge_detail_reconnecting" xml:space="preserve">
+    <value>Bağlantı koptu; sonraki istekte yeniden bağlanılacak.</value>
+  </data>
+  <data name="bridge_detail_send_failed" xml:space="preserve">
+    <value>Köprüye istek gönderilemedi: </value>
+  </data>
+  <data name="bridge_detail_server_closed" xml:space="preserve">
+    <value>sunucu bağlantıyı kapattı</value>
+  </data>
+  <data name="bridge_dir_exists" xml:space="preserve">
+    <value>Klasör mevcut.</value>
+  </data>
+  <data name="bridge_dir_missing" xml:space="preserve">
+    <value>Klasör yok.</value>
+  </data>
+  <data name="bridge_env_active" xml:space="preserve">
+    <value>Şu an ortamda tanımlı.</value>
+  </data>
+  <data name="bridge_env_file" xml:space="preserve">
+    <value>.env dosyasında tanımlı.</value>
+  </data>
+  <data name="bridge_env_none" xml:space="preserve">
+    <value>Tanımsız — köprü başlatılırken üretilecek.</value>
+  </data>
+  <data name="bridge_file_exists" xml:space="preserve">
+    <value>Dosya mevcut.</value>
+  </data>
+  <data name="bridge_file_missing" xml:space="preserve">
+    <value>Dosya yok.</value>
+  </data>
+  <data name="bridge_intro" xml:space="preserve">
+    <value>Masaüstü uygulaması ile Python ajanı arasındaki taşıma katmanı. Mesajlaşma köprüsünden (Telegram/Discord/WhatsApp) tamamen ayrıdır — o katman yönetimi bu sayfada yer almaz.</value>
+  </data>
+  <data name="bridge_live_desc" xml:space="preserve">
+    <value>Uygulama Python köprüsünü kendisi başlatır ve ilk mesajda bağlanır. Yukarıdaki değerler canlı durumu yansıtır; hepsi salt okunur bilgidir.</value>
+  </data>
+  <data name="bridge_live_title" xml:space="preserve">
+    <value>Köprü bu sürümde etkin</value>
+  </data>
+  <data name="bridge_path_app" xml:space="preserve">
+    <value>Uygulama klasörü</value>
+  </data>
+  <data name="bridge_path_config" xml:space="preserve">
+    <value>Yapılandırma</value>
+  </data>
+  <data name="bridge_path_env" xml:space="preserve">
+    <value>Ortam dosyası</value>
+  </data>
+  <data name="bridge_path_repo" xml:space="preserve">
+    <value>Depo kökü</value>
+  </data>
+  <data name="bridge_paths_note" xml:space="preserve">
+    <value>Uygulama kullanıcının PATH'ine güvenmez; Python süreci mutlak yollarla başlatılacaktır.</value>
+  </data>
+  <data name="bridge_proc_detail" xml:space="preserve">
+    <value>Ayrıntı: </value>
+  </data>
+  <data name="bridge_proc_handshake_parse" xml:space="preserve">
+    <value>Köprü el sıkışma satırı çözümlenemedi: </value>
+  </data>
+  <data name="bridge_proc_handshake_read" xml:space="preserve">
+    <value>Köprü el sıkışma satırı alınamadı (süreç beklenmedik şekilde sonlandı). </value>
+  </data>
+  <data name="bridge_proc_no_token" xml:space="preserve">
+    <value>El sıkışma satırında token alanı yok.</value>
+  </data>
+  <data name="bridge_proc_no_url" xml:space="preserve">
+    <value>El sıkışma satırında url alanı yok.</value>
+  </data>
+  <data name="bridge_proc_no_value" xml:space="preserve">
+    <value>(yok)</value>
+  </data>
+  <data name="bridge_proc_start_failed" xml:space="preserve">
+    <value>Köprü süreci başlatılamadı: {0}</value>
+  </data>
+  <data name="bridge_proc_start_failed_ex" xml:space="preserve">
+    <value>Köprü süreci başlatılamadı ({0}): {1}</value>
+  </data>
+  <data name="bridge_proc_unexpected_event" xml:space="preserve">
+    <value>beklenen 'bridge.listening', gelen: {0}</value>
+  </data>
+  <data name="bridge_refresh" xml:space="preserve">
+    <value>Yeniden oku</value>
+  </data>
+  <data name="bridge_repo_catalog" xml:space="preserve">
+    <value>Yetenek kataloğu buradan okunur.</value>
+  </data>
+  <data name="bridge_repo_outside" xml:space="preserve">
+    <value>Uygulama depo ağacının dışından çalıştırılmış olabilir.</value>
+  </data>
+  <data name="bridge_section_paths" xml:space="preserve">
+    <value>Çözümlenen yollar</value>
+  </data>
+  <data name="bridge_section_transport" xml:space="preserve">
+    <value>Taşıma yapılandırması</value>
+  </data>
+  <data name="bridge_state_connecting" xml:space="preserve">
+    <value>Bağlanılıyor…</value>
+  </data>
+  <data name="bridge_state_error" xml:space="preserve">
+    <value>Bağlantı hatası</value>
+  </data>
+  <data name="bridge_state_idle" xml:space="preserve">
+    <value>Bağlantı bekleniyor…</value>
+  </data>
+  <data name="bridge_state_model_error" xml:space="preserve">
+    <value>Model hatası</value>
+  </data>
+  <data name="bridge_state_ready" xml:space="preserve">
+    <value>Bağlı</value>
+  </data>
+  <data name="bridge_state_reconnecting" xml:space="preserve">
+    <value>Yeniden bağlanılıyor…</value>
+  </data>
+  <data name="bridge_title" xml:space="preserve">
+    <value>Masaüstü Köprüsü</value>
+  </data>
+  <data name="bridge_transport_alt" xml:space="preserve">
+    <value>Alternatif taşıma</value>
+  </data>
+  <data name="bridge_transport_alt_note" xml:space="preserve">
+    <value>Yalnızca yerel arayüze bağlanır; her oturumda üretilen tek kullanımlık bir belirteç ister.</value>
+  </data>
+  <data name="bridge_transport_alt_val" xml:space="preserve">
+    <value>WebSocket — ws://127.0.0.1:&lt;port&gt;</value>
+  </data>
+  <data name="bridge_transport_default" xml:space="preserve">
+    <value>Varsayılan taşıma</value>
+  </data>
+  <data name="bridge_transport_default_note" xml:space="preserve">
+    <value>Uygulama Python sürecini kendi başlatır; açık port yoktur (en güvenli seçenek).</value>
+  </data>
+  <data name="bridge_transport_mod_avail" xml:space="preserve">
+    <value>fetih_desktop_bridge (mevcut)</value>
+  </data>
+  <data name="bridge_transport_mod_avail_note" xml:space="preserve">
+    <value>python -m fetih_desktop_bridge ile başlatılır.</value>
+  </data>
+  <data name="bridge_transport_mod_missing" xml:space="preserve">
+    <value>fetih_desktop_bridge (bulunamadı)</value>
+  </data>
+  <data name="bridge_transport_mod_missing_note" xml:space="preserve">
+    <value>Python modülü depo kökünde görünmüyor. Uygulamayı depo ağacının içinden çalıştır; köprü kurulana kadar bağlantı kurulamaz.</value>
+  </data>
+  <data name="bridge_transport_port_var" xml:space="preserve">
+    <value>Bağlantı noktası değişkeni</value>
+  </data>
+  <data name="bridge_transport_proto" xml:space="preserve">
+    <value>Protokol</value>
+  </data>
+  <data name="bridge_transport_proto_note" xml:space="preserve">
+    <value>Aynı sözleşme iki taşıma üzerinde de geçerlidir.</value>
+  </data>
+  <data name="bridge_transport_proto_val" xml:space="preserve">
+    <value>Satır sonlu JSON-RPC (NDJSON)</value>
+  </data>
+  <data name="bridge_transport_python_mod" xml:space="preserve">
+    <value>Python modülü</value>
+  </data>
+  <data name="bridge_transport_token_note" xml:space="preserve">
+    <value> Değeri hiçbir zaman gösterilmez ve dosyaya yazılmaz; Python sürecine yalnızca ortam değişkeniyle geçirilir.</value>
+  </data>
+  <data name="bridge_transport_token_var" xml:space="preserve">
+    <value>Belirteç değişkeni</value>
+  </data>
+  <data name="chat_action_busy" xml:space="preserve">
+    <value>Bir tur zaten çalışıyor. Önce durdur.</value>
+  </data>
+  <data name="chat_action_cancelled" xml:space="preserve">
+    <value>Tur durduruldu. O ana kadar gelen çıktı yukarıda duruyor.</value>
+  </data>
+  <data name="chat_action_cancelling" xml:space="preserve">
+    <value>Tur durduruluyor…</value>
+  </data>
+  <data name="chat_action_copied" xml:space="preserve">
+    <value>Mesaj panoya kopyalandı.</value>
+  </data>
+  <data name="chat_action_copy" xml:space="preserve">
+    <value>Kopyala</value>
+  </data>
+  <data name="chat_action_copy_hint" xml:space="preserve">
+    <value>Bu mesajı panoya kopyala</value>
+  </data>
+  <data name="chat_action_copy_failed" xml:space="preserve">
+    <value>Panoya kopyalanamadı.</value>
+  </data>
+  <data name="chat_action_edit" xml:space="preserve">
+    <value>Düzenle</value>
+  </data>
+  <data name="chat_action_edit_hint" xml:space="preserve">
+    <value>Bu mesajı giriş kutusuna yükler; düzeltilmiş hâlini gönderirsin</value>
+  </data>
+  <data name="chat_action_edit_restarted" xml:space="preserve">
+    <value>Mesaj düzenlendi; sonrasındaki turlar kaldırıldı ve yeni bir köprü oturumu başlatıldı.</value>
+  </data>
+  <data name="chat_action_no_turn" xml:space="preserve">
+    <value>Yinelenecek bir kullanıcı mesajı yok.</value>
+  </data>
+  <data name="chat_action_retry" xml:space="preserve">
+    <value>Yeniden dene</value>
+  </data>
+  <data name="chat_action_retry_hint" xml:space="preserve">
+    <value>Bu turu yeniden gönder</value>
+  </data>
+  <data name="chat_action_send_failed" xml:space="preserve">
+    <value>Mesaj gönderilemedi: </value>
+  </data>
+  <data name="chat_action_session_gone" xml:space="preserve">
+    <value>Önceki köprü oturumu artık yok; yeni bir oturum başlatıldı.</value>
+  </data>
+  <data name="chat_action_stop" xml:space="preserve">
+    <value>Durdur</value>
+  </data>
+  <data name="chat_activity_actions" xml:space="preserve">
+    <value>{0} işlem</value>
+  </data>
+  <data name="chat_activity_coding" xml:space="preserve">
+    <value>Kodlanıyor…</value>
+  </data>
+  <data name="chat_activity_command" xml:space="preserve">
+    <value>Komut çalıştırılıyor…</value>
+  </data>
+  <data name="chat_activity_errors" xml:space="preserve">
+    <value>{0} hata</value>
+  </data>
+  <data name="chat_activity_reading" xml:space="preserve">
+    <value>Dosya okunuyor…</value>
+  </data>
+  <data name="chat_activity_running" xml:space="preserve">
+    <value>Çalışıyor…</value>
+  </data>
+  <data name="chat_activity_stopped" xml:space="preserve">
+    <value>durduruldu</value>
+  </data>
+  <data name="chat_activity_thinking" xml:space="preserve">
+    <value>Düşünüyor…</value>
+  </data>
+  <data name="chat_activity_thought_process" xml:space="preserve">
+    <value>Düşünce süreci</value>
+  </data>
+  <data name="chat_cancel_busy_confirm_body" xml:space="preserve">
+    <value>Başka sohbete geçmek veya yeni sohbet açmak için devam eden işlem durdurulacak.</value>
+  </data>
+  <data name="chat_cancel_busy_confirm_title" xml:space="preserve">
+    <value>Çalışan işlem durdurulsun mu?</value>
+  </data>
+  <data name="chat_cancelled" xml:space="preserve">
+    <value>İşlem kullanıcı tarafından durduruldu.</value>
+  </data>
+  <data name="chat_connecting" xml:space="preserve">
+    <value>Bağlanıyor…</value>
+  </data>
+  <data name="chat_default_title" xml:space="preserve">
+    <value>Yeni sohbet</value>
+  </data>
+  <data name="chat_delete" xml:space="preserve">
+    <value>Sil</value>
+  </data>
+  <data name="chat_delete_all" xml:space="preserve">
+    <value>Tüm sohbetleri sil</value>
+  </data>
+  <data name="chat_delete_all_confirm_body" xml:space="preserve">
+    <value>Tüm kayıtlı sohbet geçmişi kalıcı olarak temizlenecektir. Bu işlem geri alınamaz. Emin misiniz?</value>
+  </data>
+  <data name="chat_delete_all_confirm_title" xml:space="preserve">
+    <value>Tüm sohbetler silinsin mi?</value>
+  </data>
+  <data name="chat_delete_confirm_body" xml:space="preserve">
+    <value>"{0}" başlıklı sohbet kalıcı olarak silinecektir. Emin misiniz?</value>
+  </data>
+  <data name="chat_delete_confirm_title" xml:space="preserve">
+    <value>Sohbet silinsin mi?</value>
+  </data>
+  <data name="chat_empty_prompt" xml:space="preserve">
+    <value>FETİH siber güvenlik ve kodlama asistanınız hazır. Bir görev veya soru yazarak başlayın.</value>
+  </data>
+  <data name="chat_empty_state" xml:space="preserve">
+    <value>Nasıl yardımcı olabilirim?</value>
+  </data>
+  <data name="chat_empty_state_desc" xml:space="preserve">
+    <value>Bir soru sorun, komut çalıştırın veya kod incelemesi isteyin.</value>
+  </data>
+  <data name="chat_empty_state_title" xml:space="preserve">
+    <value>Nasıl yardımcı olabilirim?</value>
+  </data>
+  <data name="chat_error_agent_failed" xml:space="preserve">
+    <value>Ajan çalıştı ama başarısız oldu: </value>
+  </data>
+  <data name="chat_error_auth" xml:space="preserve">
+    <value>Köprü kimlik doğrulaması reddedildi.</value>
+  </data>
+  <data name="chat_error_bridge" xml:space="preserve">
+    <value>Köprü hatası (</value>
+  </data>
+  <data name="chat_error_busy" xml:space="preserve">
+    <value>Bu oturumda zaten bir tur çalışıyor; bitmesini bekle.</value>
+  </data>
+  <data name="chat_error_cancel_failed" xml:space="preserve">
+    <value>Tur durdurulamadı: </value>
+  </data>
+  <data name="chat_error_session_unknown" xml:space="preserve">
+    <value>Köprü bu oturumu tanımıyor; yeni bir oturum açılacak.</value>
+  </data>
+  <data name="chat_hint" xml:space="preserve">
+    <value>Enter yeni satır · Ctrl+Enter gönderir</value>
+  </data>
+  <data name="chat_hint_default" xml:space="preserve">
+    <value>Enter: Gönder · Shift+Enter: Yeni satır · Ctrl+N: Yeni sohbet</value>
+  </data>
+  <data name="chat_hint_editing" xml:space="preserve">
+    <value>Mesajı düzenliyorsunuz · Gönderildiğinde sonraki yanıtlar yenilenecek</value>
+  </data>
+  <data name="chat_hint_safety" xml:space="preserve">
+    <value>Terminal komutları ve dosya yazma işlemleri otomatik onay mekanizmasıyla korunur</value>
+  </data>
+  <data name="chat_md_copied" xml:space="preserve">
+    <value>Kopyalandı</value>
+  </data>
+  <data name="chat_md_copy" xml:space="preserve">
+    <value>Kopyala</value>
+  </data>
+  <data name="chat_new_chat" xml:space="preserve">
+    <value>Yeni sohbet</value>
+  </data>
+  <data name="chat_placeholder" xml:space="preserve">
+    <value>Bir görev yaz… (ör. hedef alan adı için OSINT toplama)</value>
+  </data>
+  <data name="chat_prompt_placeholder" xml:space="preserve">
+    <value>Mesajını yaz…</value>
+  </data>
+  <data name="chat_rename" xml:space="preserve">
+    <value>Yeniden adlandır</value>
+  </data>
+  <data name="chat_role_agent" xml:space="preserve">
+    <value>FETİH</value>
+  </data>
+  <data name="chat_role_system" xml:space="preserve">
+    <value>Sistem</value>
+  </data>
+  <data name="chat_role_tool" xml:space="preserve">
+    <value>🔧 Araç</value>
+  </data>
+  <data name="chat_role_user" xml:space="preserve">
+    <value>Sen</value>
+  </data>
+  <data name="chat_send" xml:space="preserve">
+    <value>Gönder</value>
+  </data>
+  <data name="chat_session_timeout" xml:space="preserve">
+    <value>Oturum zaman aşımına uğradı, yeni oturum açılıyor…</value>
+  </data>
+  <data name="chat_status_denied" xml:space="preserve">
+    <value>Reddedildi</value>
+  </data>
+  <data name="chat_status_done" xml:space="preserve">
+    <value>Tamamlandı</value>
+  </data>
+  <data name="chat_status_error" xml:space="preserve">
+    <value>Hata</value>
+  </data>
+  <data name="chat_status_running" xml:space="preserve">
+    <value>Çalışıyor…</value>
+  </data>
+  <data name="chat_status_stopped" xml:space="preserve">
+    <value>Durduruldu</value>
+  </data>
+  <data name="chat_stop" xml:space="preserve">
+    <value>Durdur</value>
+  </data>
+  <data name="chat_thought_header" xml:space="preserve">
+    <value>🧠 Düşünce Süreci</value>
+  </data>
+  <data name="chat_thought_thinking" xml:space="preserve">
+    <value>🧠 Düşünülüyor…</value>
+  </data>
+  <data name="chat_tool_done" xml:space="preserve">
+    <value>tamamlandı</value>
+  </data>
+  <data name="chat_tool_running" xml:space="preserve">
+    <value>çalışıyor…</value>
+  </data>
+  <data name="chat_warmup_failed" xml:space="preserve">
+    <value>Masaüstü Köprüsü'ne bağlanılamadı: </value>
+  </data>
+  <data name="chat_warmup_retry" xml:space="preserve">
+    <value> · İlk mesajı gönderdiğinde tekrar denenecek.</value>
+  </data>
+  <data name="chat_welcome" xml:space="preserve">
+    <value>FETİH masaüstü kabuğu açıldı. İlk mesajını gönderdiğinde Masaüstü Köprüsü otomatik başlatılır ve yanıtlar gerçek zamanlı olarak buraya akar.</value>
+  </data>
+  <data name="common_off" xml:space="preserve">
+    <value>kapalı</value>
+  </data>
+  <data name="common_on" xml:space="preserve">
+    <value>açık</value>
+  </data>
+  <data name="common_reload" xml:space="preserve">
+    <value>Yenile</value>
+  </data>
+  <data name="config_advanced_subtitle" xml:space="preserve">
+    <value>FETİH'in diskteki yapılandırma dosyasının tamamı, bölüm bölüm. Her satırda ham anahtar adı ve o anahtara özgü açıklama vardır; bir değeri değiştirdiğinde ~/.fetih/config.yaml dosyasına anında yazılır.</value>
+  </data>
+  <data name="config_advanced_warn_body" xml:space="preserve">
+    <value>Burada FETİH'in TÜM ham yapılandırma anahtarları bulunur. Ne yaptığınızdan emin değilseniz normal Ayarlar sayfalarını kullanın.</value>
+  </data>
+  <data name="config_advanced_warn_title" xml:space="preserve">
+    <value>Detaylı Mod — ham yapılandırma</value>
+  </data>
+  <data name="config_bridge_error" xml:space="preserve">
+    <value>Köprü hatası</value>
+  </data>
+  <data name="config_complex_list" xml:space="preserve">
+    <value>  (karmaşık liste — burada düzenlenmez)</value>
+  </data>
+  <data name="config_empty" xml:space="preserve">
+    <value>Bu bölüm için düzenlenebilir alan bulunamadı.</value>
+  </data>
+  <data name="config_env_ref" xml:space="preserve">
+    <value>  (ortam değişkeni referansı)</value>
+  </data>
+  <data name="config_error_no_keys" xml:space="preserve">
+    <value>config.yaml okundu ancak hiçbir anahtar ayrıştırılamadı.</value>
+  </data>
+  <data name="config_list_placeholder" xml:space="preserve">
+    <value>virgülle ayrılmış liste</value>
+  </data>
+  <data name="config_load_failed" xml:space="preserve">
+    <value>Yapılandırma yüklenemedi: </value>
+  </data>
+  <data name="config_read_failed" xml:space="preserve">
+    <value>Yapılandırma okunamadı.</value>
+  </data>
+  <data name="config_rejected" xml:space="preserve">
+    <value>reddedildi (gizli anahtar veya yönetilen kurulum)</value>
+  </data>
+  <data name="config_reload" xml:space="preserve">
+    <value>Yeniden yükle</value>
+  </data>
+  <data name="config_revert" xml:space="preserve">
+    <value>Yüklenen değere dön</value>
+  </data>
+  <data name="config_saved" xml:space="preserve">
+    <value>✓ kaydedildi</value>
+  </data>
+  <data name="config_saving" xml:space="preserve">
+    <value>kaydediliyor…</value>
+  </data>
+  <data name="config_secret" xml:space="preserve">
+    <value>•••••• (gizli — ~/.fetih/.env içinde)</value>
+  </data>
+  <data name="config_subtitle" xml:space="preserve">
+    <value>Bir değeri değiştirdiğinde ~/.fetih/config.yaml dosyasına anında yazılır. Her satırın altındaki açıklama o ayarın ne yaptığını ve değiştirilirse ne olacağını anlatır.</value>
+  </data>
+  <data name="danger_cancel" xml:space="preserve">
+    <value>Vazgeç</value>
+  </data>
+  <data name="danger_failed" xml:space="preserve">
+    <value>İşlem başarısız: </value>
+  </data>
+  <data name="danger_intro" xml:space="preserve">
+    <value>Bu iki işlem geri alınamaz. İkisi arasındaki fark önemlidir: biri yalnızca ayarlarını sıfırlar, diğeri her şeyi siler.</value>
+  </data>
+  <data name="danger_partial" xml:space="preserve">
+    <value>Bazı dosyalar kullanımda olduğu için silinemedi: </value>
+  </data>
+  <data name="danger_reset_button" xml:space="preserve">
+    <value>Sıfırla (Yeni Kurulum)</value>
+  </data>
+  <data name="danger_reset_confirm_body" xml:space="preserve">
+    <value>Sadece sağlayıcı/model ayarların ve API anahtarların (config.yaml ve .env) silinecek. Sohbet geçmişin, hafızan ve günlüklerin korunacak. Uygulamayı yeniden açtığında ilk kurulum sihirbazı çalışacak.
+
+Emin misin?</value>
+  </data>
+  <data name="danger_reset_confirm_title" xml:space="preserve">
+    <value>Yapılandırma sıfırlansın mı?</value>
+  </data>
+  <data name="danger_reset_desc" xml:space="preserve">
+    <value>YALNIZCA yapılandırmanı siler: sağlayıcı/model seçimin ve API anahtarların. Sohbet geçmişin, hafızan ve günlüklerin KORUNUR. Uygulamayı bir sonraki açışında ilk kurulum sihirbazı yeniden çalışır.</value>
+  </data>
+  <data name="danger_reset_done" xml:space="preserve">
+    <value>Yapılandırma sıfırlandı. Sohbet geçmişin duruyor. Uygulamayı yeniden başlatman gerekiyor.</value>
+  </data>
+  <data name="danger_reset_title" xml:space="preserve">
+    <value>Sıfırla (Yeni Kurulum)</value>
+  </data>
+  <data name="danger_restart_later" xml:space="preserve">
+    <value>Sonra</value>
+  </data>
+  <data name="danger_restart_now" xml:space="preserve">
+    <value>Şimdi yeniden başlat</value>
+  </data>
+  <data name="danger_restart_title" xml:space="preserve">
+    <value>Yeniden başlatma gerekiyor</value>
+  </data>
+  <data name="danger_title" xml:space="preserve">
+    <value>Tehlikeli Bölge</value>
+  </data>
+  <data name="danger_wipe_button" xml:space="preserve">
+    <value>Tüm verileri sil</value>
+  </data>
+  <data name="danger_wipe_confirm_body" xml:space="preserve">
+    <value>Bu işlem tüm sohbet geçmişini, hafızayı, günlükleri VE yapılandırmanızı (API anahtarları dahil) kalıcı olarak siler. Geri alınamaz.
+
+Devam edilsin mi?</value>
+  </data>
+  <data name="danger_wipe_confirm_title" xml:space="preserve">
+    <value>Emin misiniz?</value>
+  </data>
+  <data name="danger_wipe_desc" xml:space="preserve">
+    <value>FETİH'in senin hakkında sakladığı HER ŞEYİ siler: sohbet geçmişi, hafıza, günlükler, çalışma alanları VE yapılandırman (API anahtarların dahil). Geri alınamaz.</value>
+  </data>
+  <data name="danger_wipe_done" xml:space="preserve">
+    <value>Tüm veriler silindi. Uygulamayı yeniden başlatmanız gerekiyor.</value>
+  </data>
+  <data name="danger_wipe_title" xml:space="preserve">
+    <value>Tüm verileri sil</value>
+  </data>
+  <data name="danger_working" xml:space="preserve">
+    <value>siliniyor…</value>
+  </data>
+  <data name="danger_yes" xml:space="preserve">
+    <value>Evet, sil</value>
+  </data>
+  <data name="danger_yes_reset" xml:space="preserve">
+    <value>Evet, sıfırla</value>
+  </data>
+  <data name="diag_catalog_unreadable" xml:space="preserve">
+    <value>Yetenek kataloğu okunamaz</value>
+  </data>
+  <data name="diag_clear" xml:space="preserve">
+    <value>Günlüğü temizle</value>
+  </data>
+  <data name="diag_clear_failed" xml:space="preserve">
+    <value>Günlük temizlenemedi: </value>
+  </data>
+  <data name="diag_cleared" xml:space="preserve">
+    <value>Çökme günlüğü temizlendi.</value>
+  </data>
+  <data name="diag_copied" xml:space="preserve">
+    <value>Tanılama raporu panoya kopyalandı.</value>
+  </data>
+  <data name="diag_copy" xml:space="preserve">
+    <value>Panoya kopyala</value>
+  </data>
+  <data name="diag_copy_failed" xml:space="preserve">
+    <value>Panoya kopyalanamadı: </value>
+  </data>
+  <data name="diag_file_missing" xml:space="preserve">
+    <value>Dosya yok</value>
+  </data>
+  <data name="diag_keys_defined" xml:space="preserve">
+    <value>anahtar tanımlı (değerler okunmaz)</value>
+  </data>
+  <data name="diag_keys_read" xml:space="preserve">
+    <value>kök anahtar okundu</value>
+  </data>
+  <data name="diag_log_absent" xml:space="preserve">
+    <value> — dosya yok (hiç çökme kaydedilmemiş).</value>
+  </data>
+  <data name="diag_log_bytes" xml:space="preserve">
+    <value> bayt · son yazma </value>
+  </data>
+  <data name="diag_log_empty" xml:space="preserve">
+    <value>Günlük boş.</value>
+  </data>
+  <data name="diag_log_none" xml:space="preserve">
+    <value>Kayıtlı çökme yok.</value>
+  </data>
+  <data name="diag_log_read_failed" xml:space="preserve">
+    <value>Günlük okunamadı: </value>
+  </data>
+  <data name="diag_log_tail_notice" xml:space="preserve">
+    <value>… (günlüğün yalnızca son bölümü gösteriliyor) …
+</value>
+  </data>
+  <data name="diag_missing" xml:space="preserve">
+    <value>Yok</value>
+  </data>
+  <data name="diag_no_log" xml:space="preserve">
+    <value>Temizlenecek günlük yok.</value>
+  </data>
+  <data name="diag_none" xml:space="preserve">
+    <value>(bulunamadı)</value>
+  </data>
+  <data name="diag_present" xml:space="preserve">
+    <value>Mevcut</value>
+  </data>
+  <data name="diag_refresh" xml:space="preserve">
+    <value>Yenile</value>
+  </data>
+  <data name="diag_report_crash_log" xml:space="preserve">
+    <value>Çökme günlüğü:</value>
+  </data>
+  <data name="diag_report_created" xml:space="preserve">
+    <value>Oluşturma: </value>
+  </data>
+  <data name="diag_report_title" xml:space="preserve">
+    <value>FETİH Masaüstü — tanılama raporu</value>
+  </data>
+  <data name="diag_row_app" xml:space="preserve">
+    <value>Uygulama</value>
+  </data>
+  <data name="diag_row_app_dir" xml:space="preserve">
+    <value>Uygulama klasörü</value>
+  </data>
+  <data name="diag_row_build_date" xml:space="preserve">
+    <value>Derleme tarihi</value>
+  </data>
+  <data name="diag_row_crash_log" xml:space="preserve">
+    <value>Çökme günlüğü</value>
+  </data>
+  <data name="diag_row_install_type" xml:space="preserve">
+    <value>Kurulum tipi</value>
+  </data>
+  <data name="diag_row_logs" xml:space="preserve">
+    <value>Günlükler</value>
+  </data>
+  <data name="diag_row_machine" xml:space="preserve">
+    <value>Makine</value>
+  </data>
+  <data name="diag_row_os_arch" xml:space="preserve">
+    <value>İşletim sistemi mimarisi</value>
+  </data>
+  <data name="diag_row_proc_arch" xml:space="preserve">
+    <value>Süreç mimarisi</value>
+  </data>
+  <data name="diag_row_repo" xml:space="preserve">
+    <value>Depo kökü</value>
+  </data>
+  <data name="diag_row_runtime" xml:space="preserve">
+    <value>Çalışma zamanı</value>
+  </data>
+  <data name="diag_row_sandbox" xml:space="preserve">
+    <value>Sandbox klasörü</value>
+  </data>
+  <data name="diag_row_target_framework" xml:space="preserve">
+    <value>Hedef çatı</value>
+  </data>
+  <data name="diag_row_ui" xml:space="preserve">
+    <value>Arayüz</value>
+  </data>
+  <data name="diag_row_windows" xml:space="preserve">
+    <value>Windows</value>
+  </data>
+  <data name="diag_section_crash_log" xml:space="preserve">
+    <value>Çökme günlüğü</value>
+  </data>
+  <data name="diag_section_paths" xml:space="preserve">
+    <value>Çözümlenen yollar</value>
+  </data>
+  <data name="diag_section_system" xml:space="preserve">
+    <value>Sistem bilgisi</value>
+  </data>
+  <data name="diag_subtitle" xml:space="preserve">
+    <value>Destek istenirken ilk bakılacak yer: çalışma zamanı bilgisi, çözümlenen yollar ve çökme günlüğü.</value>
+  </data>
+  <data name="diag_title" xml:space="preserve">
+    <value>Tanılama</value>
+  </data>
+  <data name="diag_unknown" xml:space="preserve">
+    <value>bilinmiyor</value>
+  </data>
+  <data name="dialog_cancel" xml:space="preserve">
+    <value>İptal</value>
+  </data>
+  <data name="dialog_confirm" xml:space="preserve">
+    <value>Onayla</value>
+  </data>
+  <data name="dialog_save" xml:space="preserve">
+    <value>Kaydet</value>
+  </data>
+  <data name="dialog_stop" xml:space="preserve">
+    <value>Durdur</value>
+  </data>
+  <data name="findings_empty_desc" xml:space="preserve">
+    <value>Bir tarama veya görev tamamlandığında bulgular burada listelenecek. Masaüstü Köprüsü üzerinden yetenek ve çalışma alanı güvenlik taraması gerçekleştirilebilir.</value>
+  </data>
+  <data name="findings_empty_disclaimer" xml:space="preserve">
+    <value>Yalnızca yetkili olduğun sistemlerde test yap.</value>
+  </data>
+  <data name="findings_empty_title" xml:space="preserve">
+    <value>Henüz bulgu yok</value>
+  </data>
+  <data name="findings_scan_button" xml:space="preserve">
+    <value>Güvenlik Taraması Başlat</value>
+  </data>
+  <data name="findings_severity_all" xml:space="preserve">
+    <value>Tüm ciddiyet seviyeleri</value>
+  </data>
+  <data name="findings_severity_critical" xml:space="preserve">
+    <value>Kritik</value>
+  </data>
+  <data name="findings_severity_high" xml:space="preserve">
+    <value>Yüksek</value>
+  </data>
+  <data name="findings_severity_info" xml:space="preserve">
+    <value>Bilgi</value>
+  </data>
+  <data name="findings_severity_low" xml:space="preserve">
+    <value>Düşük</value>
+  </data>
+  <data name="findings_severity_medium" xml:space="preserve">
+    <value>Orta</value>
+  </data>
+  <data name="findings_severity_label" xml:space="preserve">
+    <value>Ciddiyet süzgeci</value>
+  </data>
+  <data name="findings_showing_count" xml:space="preserve">
+    <value>{0} / {1} bulgu gösteriliyor</value>
+  </data>
+  <data name="findings_summary" xml:space="preserve">
+    <value>Ajan tarafından üretilen güvenlik bulguları burada toplanır.</value>
+  </data>
+  <data name="findings_title" xml:space="preserve">
+    <value>Bulgular</value>
+  </data>
+  <data name="nav_chat" xml:space="preserve">
+    <value>Sohbet</value>
+  </data>
+  <data name="nav_diagnostics" xml:space="preserve">
+    <value>Tanılama</value>
+  </data>
+  <data name="nav_findings" xml:space="preserve">
+    <value>Bulgular</value>
+  </data>
+  <data name="nav_settings" xml:space="preserve">
+    <value>Ayarlar</value>
+  </data>
+  <data name="nav_skills" xml:space="preserve">
+    <value>Yetenekler</value>
+  </data>
+  <data name="provider_active_config_file" xml:space="preserve">
+    <value>Yapılandırma dosyası</value>
+  </data>
+  <data name="provider_active_custom" xml:space="preserve">
+    <value>Kullanıcı tanımlı sağlayıcılar</value>
+  </data>
+  <data name="provider_active_custom_none" xml:space="preserve">
+    <value>(yok)</value>
+  </data>
+  <data name="provider_active_custom_note" xml:space="preserve">
+    <value>config.yaml içindeki providers: bölümüne eklenen özel OpenAI uyumlu uçlar.</value>
+  </data>
+  <data name="provider_active_fallback_note" xml:space="preserve">
+    <value>Birincil sağlayıcı 429/529/503 döndüğünde devreye girer.</value>
+  </data>
+  <data name="provider_active_last_modified" xml:space="preserve">
+    <value>Son değişiklik: {0}</value>
+  </data>
+  <data name="provider_active_config" xml:space="preserve">
+    <value>Etkin yapılandırma</value>
+  </data>
+  <data name="provider_auth_api_key" xml:space="preserve">
+    <value>API anahtarı</value>
+  </data>
+  <data name="provider_auth_aws_sdk" xml:space="preserve">
+    <value>AWS kimlik bilgileri</value>
+  </data>
+  <data name="provider_auth_external_process" xml:space="preserve">
+    <value>Harici süreç</value>
+  </data>
+  <data name="provider_auth_none" xml:space="preserve">
+    <value>Kimlik doğrulama yok</value>
+  </data>
+  <data name="provider_auth_oauth_device_code" xml:space="preserve">
+    <value>OAuth (cihaz kodu)</value>
+  </data>
+  <data name="provider_auth_oauth_external" xml:space="preserve">
+    <value>OAuth (harici akış)</value>
+  </data>
+  <data name="provider_aux_approval_desc" xml:space="preserve">
+    <value>Tehlikeli bir komutun otomatik onaylanıp onaylanmayacağına karar verir. Ucuz ve hızlı bir model önerilir.</value>
+  </data>
+  <data name="provider_aux_approval_title" xml:space="preserve">
+    <value>Onay kararı</value>
+  </data>
+  <data name="provider_aux_compression_desc" xml:space="preserve">
+    <value>Sohbet uzayınca eski turları özetleyip yer açar.</value>
+  </data>
+  <data name="provider_aux_compression_title" xml:space="preserve">
+    <value>Bağlam sıkıştırma</value>
+  </data>
+  <data name="provider_aux_curator_desc" xml:space="preserve">
+    <value>Yetenek kullanımını gözden geçiren fork. Uzun sürebilir.</value>
+  </data>
+  <data name="provider_aux_curator_title" xml:space="preserve">
+    <value>Küratör (yetenek incelemesi)</value>
+  </data>
+  <data name="provider_aux_kanban_decomposer_desc" xml:space="preserve">
+    <value>Bir işi alt görev grafiğine böler; diğerlerinden daha çok token harcar.</value>
+  </data>
+  <data name="provider_aux_kanban_decomposer_title" xml:space="preserve">
+    <value>Görev parçalama</value>
+  </data>
+  <data name="provider_aux_mcp_desc" xml:space="preserve">
+    <value>MCP sunucularıyla ilgili kısa çağrılar.</value>
+  </data>
+  <data name="provider_aux_mcp_title" xml:space="preserve">
+    <value>MCP yardımcısı</value>
+  </data>
+  <data name="provider_aux_profile_describer_desc" xml:space="preserve">
+    <value>Bir profilin ne işe yaradığını bir iki cümleyle yazar.</value>
+  </data>
+  <data name="provider_aux_profile_describer_title" xml:space="preserve">
+    <value>Profil açıklaması</value>
+  </data>
+  <data name="provider_aux_skills_hub_desc" xml:space="preserve">
+    <value>Yetenek (skill) arama ve eşleştirme çağrıları.</value>
+  </data>
+  <data name="provider_aux_skills_hub_title" xml:space="preserve">
+    <value>Yetenek merkezi</value>
+  </data>
+  <data name="provider_aux_title_generation_desc" xml:space="preserve">
+    <value>Bir oturuma kısa bir başlık yazar.</value>
+  </data>
+  <data name="provider_aux_title_generation_title" xml:space="preserve">
+    <value>Sohbet başlığı üretme</value>
+  </data>
+  <data name="provider_aux_triage_specifier_desc" xml:space="preserve">
+    <value>Kanban 'triage' sütunundaki tek satırlık bir işi somut bir tarife dönüştürür.</value>
+  </data>
+  <data name="provider_aux_triage_specifier_title" xml:space="preserve">
+    <value>Görev ayrıntılandırma</value>
+  </data>
+  <data name="provider_aux_vision_desc" xml:space="preserve">
+    <value>Ekran görüntüsü ve resim analizi (vision_analyze, tarayıcı görüntüleri). Çok kipli (multimodal) bir model gerekir.</value>
+  </data>
+  <data name="provider_aux_vision_title" xml:space="preserve">
+    <value>Görüntü çözümleme</value>
+  </data>
+  <data name="provider_aux_web_extract_desc" xml:space="preserve">
+    <value>Bir sayfayı okuyup özetleyen yan görev.</value>
+  </data>
+  <data name="provider_aux_web_extract_title" xml:space="preserve">
+    <value>Web sayfası özetleme</value>
+  </data>
+  <data name="provider_badge_active" xml:space="preserve">
+    <value>Etkin</value>
+  </data>
+  <data name="provider_badge_aggregator" xml:space="preserve">
+    <value>toplayıcı</value>
+  </data>
+  <data name="provider_badge_configured" xml:space="preserve">
+    <value>Kimlik bilgisi tanımlı</value>
+  </data>
+  <data name="provider_badge_local" xml:space="preserve">
+    <value>yerel — veri makineden çıkmaz</value>
+  </data>
+  <data name="provider_badge_not_configured" xml:space="preserve">
+    <value>Kimlik bilgisi yok</value>
+  </data>
+  <data name="provider_baseurl_default" xml:space="preserve">
+    <value>varsayılan uç adresi kullanılır</value>
+  </data>
+  <data name="provider_baseurl_overridden" xml:space="preserve">
+    <value>uç adresi geçersiz kılınmış</value>
+  </data>
+  <data name="provider_change_model" xml:space="preserve">
+    <value>Etkin modeli değiştir</value>
+  </data>
+  <data name="provider_change_model_desc" xml:space="preserve">
+    <value>Sağlayıcıyı ara ve seç, model kimliğini gir. Kaydettiğinde config.set ile ~/.fetih/config.yaml'a yazılır ve bir sonraki mesajda etkili olur. API anahtarı ~/.fetih/.env içinde tanımlı olmalıdır.</value>
+  </data>
+  <data name="provider_cli_auth_required" xml:space="preserve">
+    <value>Bu sağlayıcı CLI veya OAuth oturumu gerektirir.</value>
+  </data>
+  <data name="provider_config_error" xml:space="preserve">
+    <value>Yapılandırma okunamadı: </value>
+  </data>
+  <data name="provider_config_unreadable" xml:space="preserve">
+    <value>Yapılandırma okunamadı; köprü bağlı değil.</value>
+  </data>
+  <data name="provider_count" xml:space="preserve">
+    <value>{0} / {1} sağlayıcı</value>
+  </data>
+  <data name="provider_get_key" xml:space="preserve">
+    <value>Anahtar al ↗</value>
+  </data>
+  <data name="provider_key_defined" xml:space="preserve">
+    <value>Tanımlı</value>
+  </data>
+  <data name="provider_key_undefined" xml:space="preserve">
+    <value>Tanımsız</value>
+  </data>
+  <data name="provider_label_api_key" xml:space="preserve">
+    <value>API Anahtarı</value>
+  </data>
+  <data name="provider_label_model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="provider_label_provider" xml:space="preserve">
+    <value>Sağlayıcı</value>
+  </data>
+  <data name="provider_list_name" xml:space="preserve">
+    <value>Sağlayıcı listesi</value>
+  </data>
+  <data name="provider_local_no_key" xml:space="preserve">
+    <value>Yerel sunucu — API anahtarı gerekmez.</value>
+  </data>
+  <data name="provider_models_curated" xml:space="preserve">
+    <value>{0} model listelendi.</value>
+  </data>
+  <data name="provider_models_failed" xml:space="preserve">
+    <value>Model listesi alınamadı; model adını doğrudan yazabilirsin.</value>
+  </data>
+  <data name="provider_models_live" xml:space="preserve">
+    <value>{0} model sağlayıcıdan canlı alındı.</value>
+  </data>
+  <data name="provider_models_ready" xml:space="preserve">
+    <value>{0} model hazır.</value>
+  </data>
+  <data name="provider_name_ai_gateway" xml:space="preserve">
+    <value>Vercel AI (model yönlendirici)</value>
+  </data>
+  <data name="provider_name_codex" xml:space="preserve">
+    <value>OpenAI Codex (ChatGPT girişi)</value>
+  </data>
+  <data name="provider_name_custom" xml:space="preserve">
+    <value>Özel yerel uç (vLLM / llama.cpp)</value>
+  </data>
+  <data name="provider_name_kimi_cn" xml:space="preserve">
+    <value>Kimi (Çin)</value>
+  </data>
+  <data name="provider_name_lmstudio" xml:space="preserve">
+    <value>LM Studio (yerel)</value>
+  </data>
+  <data name="provider_name_minimax_cn" xml:space="preserve">
+    <value>MiniMax (Çin)</value>
+  </data>
+  <data name="provider_name_ollama" xml:space="preserve">
+    <value>Ollama (yerel)</value>
+  </data>
+  <data name="provider_only_configured" xml:space="preserve">
+    <value>Yalnızca kimlik bilgisi tanımlı olanlar</value>
+  </data>
+  <data name="provider_placeholder_api_key_configured" xml:space="preserve">
+    <value>●●●●●●●●  (Tanımlı — değiştirmek için yeni anahtar gir)</value>
+  </data>
+  <data name="provider_placeholder_api_key_missing" xml:space="preserve">
+    <value>API anahtarını gir (ör. sk-…)</value>
+  </data>
+  <data name="provider_placeholder_model" xml:space="preserve">
+    <value>Model seç veya yaz (ör. deepseek-chat)…</value>
+  </data>
+  <data name="provider_placeholder_provider" xml:space="preserve">
+    <value>Sağlayıcı ara (ör. groq, deepseek, anthropic)…</value>
+  </data>
+  <data name="provider_save" xml:space="preserve">
+    <value>Kaydet</value>
+  </data>
+  <data name="provider_save_model_and_key" xml:space="preserve">
+    <value>✓ Model ve API anahtarı kaydedildi — bir sonraki mesajda etkili olacak</value>
+  </data>
+  <data name="provider_save_model_only" xml:space="preserve">
+    <value>✓ Model kaydedildi — bir sonraki mesajda etkili olacak</value>
+  </data>
+  <data name="provider_save_need_input" xml:space="preserve">
+    <value>Sağlayıcı veya model gir.</value>
+  </data>
+  <data name="provider_save_no_key_yet" xml:space="preserve">
+    <value> ⚠ API anahtarı henüz girilmedi.</value>
+  </data>
+  <data name="provider_save_rejected" xml:space="preserve">
+    <value>reddedildi (yönetilen kurulum)</value>
+  </data>
+  <data name="provider_save_saving" xml:space="preserve">
+    <value>kaydediliyor…</value>
+  </data>
+  <data name="provider_search_name" xml:space="preserve">
+    <value>Sağlayıcı ara</value>
+  </data>
+  <data name="provider_search_placeholder" xml:space="preserve">
+    <value>Sağlayıcı ara…</value>
+  </data>
+  <data name="provider_select_button" xml:space="preserve">
+    <value>Bu Sağlayıcıyı Seç</value>
+  </data>
+  <data name="provider_slots_auto" xml:space="preserve">
+    <value>Otomatik (auto)</value>
+  </data>
+  <data name="provider_slots_aux_header" xml:space="preserve">
+    <value>Yardımcı modeller — yan görev başına ayrı model ({0} yuva)</value>
+  </data>
+  <data name="provider_slots_aux_name" xml:space="preserve">
+    <value>Yardımcı modeller</value>
+  </data>
+  <data name="provider_slots_chain_note" xml:space="preserve">
+    <value>Şu anda {0} basamaklı bir yedek zinciri tanımlı; buradan kaydetmek zinciri tek bir yedeğe indirir.</value>
+  </data>
+  <data name="provider_slots_fallback_desc" xml:space="preserve">
+    <value>Birincil sağlayıcı 429/503/529 döndüğünde bu model devreye girer. Boş bırakılırsa yedek yoktur.</value>
+  </data>
+  <data name="provider_slots_fallback_title" xml:space="preserve">
+    <value>Yedek model</value>
+  </data>
+  <data name="provider_slots_model_placeholder" xml:space="preserve">
+    <value>Model kimliği (boş = sağlayıcının varsayılanı)</value>
+  </data>
+  <data name="provider_slots_none" xml:space="preserve">
+    <value>(yok)</value>
+  </data>
+  <data name="provider_slots_rejected" xml:space="preserve">
+    <value>reddedildi (yönetilen kurulum)</value>
+  </data>
+  <data name="provider_slots_save" xml:space="preserve">
+    <value>Kaydet</value>
+  </data>
+  <data name="provider_slots_save_name" xml:space="preserve">
+    <value>{0} kaydet</value>
+  </data>
+  <data name="provider_slots_saved" xml:space="preserve">
+    <value>✓ kaydedildi</value>
+  </data>
+  <data name="provider_slots_saving" xml:space="preserve">
+    <value>kaydediliyor…</value>
+  </data>
+  <data name="provider_slots_intro" xml:space="preserve">
+    <value>Etkin model dışındaki model seçimleri. Sağlayıcı listesi köprüden (providers.list) gelir; her kayıt config.set ile ~/.fetih/config.yaml'a yazılır. Boş bırakılan model kutusu 'sağlayıcının varsayılanı' demektir.</value>
+  </data>
+  <data name="provider_slots_title" xml:space="preserve">
+    <value>Diğer model yuvaları</value>
+  </data>
+  <data name="provider_source_env_file" xml:space="preserve">
+    <value>~/.fetih/.env</value>
+  </data>
+  <data name="provider_source_environment" xml:space="preserve">
+    <value>süreç ortam değişkeni</value>
+  </data>
+  <data name="provider_source_none" xml:space="preserve">
+    <value>hiçbir kaynakta yok</value>
+  </data>
+  <data name="provider_status_key_configured" xml:space="preserve">
+    <value>Tanımlı</value>
+  </data>
+  <data name="provider_status_key_missing" xml:space="preserve">
+    <value>Eksik</value>
+  </data>
+  <data name="provider_subtitle" xml:space="preserve">
+    <value>FETİH model-agnostiktir. Aşağıdaki liste desteklenen sağlayıcıları ve her biri için gereken ortam değişkenlerinin tanımlı olup olmadığını gösterir. Güvenlik gereği anahtar değerleri asla okunmaz veya gösterilmez.</value>
+  </data>
+  <data name="provider_title" xml:space="preserve">
+    <value>Model ve Sağlayıcı</value>
+  </data>
+  <data name="provider_transport_openai_chat" xml:space="preserve">
+    <value>OpenAI uyumlu sohbet</value>
+  </data>
+  <data name="settings_about" xml:space="preserve">
+    <value>Hakkında</value>
+  </data>
+  <data name="settings_agent" xml:space="preserve">
+    <value>Ajan</value>
+  </data>
+  <data name="settings_all" xml:space="preserve">
+    <value>Detaylı Mod</value>
+  </data>
+  <data name="settings_appearance" xml:space="preserve">
+    <value>Görünüm</value>
+  </data>
+  <data name="settings_automation" xml:space="preserve">
+    <value>Otomasyon</value>
+  </data>
+  <data name="settings_bridge" xml:space="preserve">
+    <value>Masaüstü Köprüsü</value>
+  </data>
+  <data name="settings_channels" xml:space="preserve">
+    <value>Kanallar</value>
+  </data>
+  <data name="settings_header_advanced" xml:space="preserve">
+    <value>Gelişmiş</value>
+  </data>
+  <data name="settings_header_app" xml:space="preserve">
+    <value>Uygulama</value>
+  </data>
+  <data name="settings_header_automation" xml:space="preserve">
+    <value>Otomasyon ve Bağlam</value>
+  </data>
+  <data name="settings_header_connection" xml:space="preserve">
+    <value>Bağlantı</value>
+  </data>
+  <data name="settings_header_model_tools" xml:space="preserve">
+    <value>Model ve Araçlar</value>
+  </data>
+  <data name="settings_header_security_exec" xml:space="preserve">
+    <value>Güvenlik ve Yürütme</value>
+  </data>
+  <data name="settings_memory" xml:space="preserve">
+    <value>Hafıza</value>
+  </data>
+  <data name="settings_permissions" xml:space="preserve">
+    <value>İzinler</value>
+  </data>
+  <data name="settings_provider" xml:space="preserve">
+    <value>Model ve Sağlayıcı</value>
+  </data>
+  <data name="settings_sandbox" xml:space="preserve">
+    <value>Çalışma Ortamı</value>
+  </data>
+  <data name="settings_security" xml:space="preserve">
+    <value>Güvenlik</value>
+  </data>
+  <data name="settings_shell" xml:space="preserve">
+    <value>Kabuk (Windows)</value>
+  </data>
+  <data name="settings_system" xml:space="preserve">
+    <value>Sistem</value>
+  </data>
+  <data name="settings_tools" xml:space="preserve">
+    <value>Araçlar</value>
+  </data>
+  <data name="settings_voice" xml:space="preserve">
+    <value>Ses</value>
+  </data>
+  <data name="setup_api_key_header" xml:space="preserve">
+    <value>API anahtarı</value>
+  </data>
+  <data name="setup_api_key_placeholder" xml:space="preserve">
+    <value>sk-… / gsk_…</value>
+  </data>
+  <data name="setup_aws_message" xml:space="preserve">
+    <value>Bu sağlayıcı anahtar istemez; AWS_PROFILE / IAM rolü gibi ortam kimlik bilgilerini kullanır.</value>
+  </data>
+  <data name="setup_aws_title" xml:space="preserve">
+    <value>AWS kimlik zinciri</value>
+  </data>
+  <data name="setup_back" xml:space="preserve">
+    <value>Geri</value>
+  </data>
+  <data name="setup_back_to_provider" xml:space="preserve">
+    <value>Sağlayıcıya dön</value>
+  </data>
+  <data name="setup_brandmark" xml:space="preserve">
+    <value>FETİH — terminalde çalışan otonom yapay zekâ güvenlik ajanı</value>
+  </data>
+  <data name="setup_cancelled" xml:space="preserve">
+    <value>İptal edildi</value>
+  </data>
+  <data name="setup_cli_message" xml:space="preserve">
+    <value>{0} bir API anahtarı değil, hesabınla açtığın bir oturum kullanır. "Oturum aç" düğmesi FETİH'in GERÇEK giriş akışını bir konsol penceresinde başlatır; tarayıcıda onayladıktan sonra buraya dön.</value>
+  </data>
+  <data name="setup_cli_title" xml:space="preserve">
+    <value>Tarayıcı oturumu gerekiyor</value>
+  </data>
+  <data name="setup_cli_check" xml:space="preserve">
+    <value>Durumu denetle</value>
+  </data>
+  <data name="setup_cli_login" xml:space="preserve">
+    <value>Oturum aç</value>
+  </data>
+  <data name="setup_continue" xml:space="preserve">
+    <value>Devam</value>
+  </data>
+  <data name="setup_done_msg" xml:space="preserve">
+    <value>Masaüstü Köprüsü hazır ve model gerçek bir yanıt döndürdü. Sohbete geçebilirsin.</value>
+  </data>
+  <data name="setup_done_title" xml:space="preserve">
+    <value>Kurulum tamamlandı</value>
+  </data>
+  <data name="setup_dot_done" xml:space="preserve">
+    <value> (tamam)</value>
+  </data>
+  <data name="setup_dot_name" xml:space="preserve">
+    <value>Adım {0}/{1}</value>
+  </data>
+  <data name="setup_failed" xml:space="preserve">
+    <value>Kurulum başarısız</value>
+  </data>
+  <data name="setup_go_to_chat" xml:space="preserve">
+    <value>Sohbete geç</value>
+  </data>
+  <data name="setup_heading" xml:space="preserve">
+    <value>İlk Kurulum</value>
+  </data>
+  <data name="setup_install" xml:space="preserve">
+    <value>Kur ve başlat</value>
+  </data>
+  <data name="setup_key_hint_env" xml:space="preserve">
+    <value>Anahtar {0} adıyla ~/.fetih/.env dosyasına kaydedilir.</value>
+  </data>
+  <data name="setup_key_hint_none" xml:space="preserve">
+    <value>Bu sağlayıcı için ortam değişkeni tanımlı değil.</value>
+  </data>
+  <data name="setup_key_required" xml:space="preserve">
+    <value>Bu sağlayıcı bir API anahtarı gerektirir; lütfen anahtarı gir.</value>
+  </data>
+  <data name="setup_local_found" xml:space="preserve">
+    <value>{0} model bulundu · {1}</value>
+  </data>
+  <data name="setup_local_installed_models" xml:space="preserve">
+    <value>Bu makinede İNDİRİLMİŞ modeller listelendi.</value>
+  </data>
+  <data name="setup_local_no_models_hint" xml:space="preserve">
+    <value>Sunucu ayağa kalkınca modeller burada listelenir.</value>
+  </data>
+  <data name="setup_local_not_found" xml:space="preserve">
+    <value>{0} bulunamadı</value>
+  </data>
+  <data name="setup_local_not_found_msg" xml:space="preserve">
+    <value>{0} adresinde çalışan bir sunucu yok. Sunucuyu başlat, sonra "Yeniden yokla"ya bas.</value>
+  </data>
+  <data name="setup_local_running" xml:space="preserve">
+    <value>{0} çalışıyor</value>
+  </data>
+  <data name="setup_local_running_no_models" xml:space="preserve">
+    <value>{0} çalışıyor, ama hiç model inmemiş</value>
+  </data>
+  <data name="setup_local_running_no_models_msg" xml:space="preserve">
+    <value>{0} yanıt veriyor. Önce bir model indir (ör. `ollama pull`).</value>
+  </data>
+  <data name="setup_local_install_link" xml:space="preserve">
+    <value>Kurulum sayfasını aç</value>
+  </data>
+  <data name="setup_local_install_link_url" xml:space="preserve">
+    <value>Kurulum sayfası — {0}</value>
+  </data>
+  <data name="setup_log_suffix" xml:space="preserve">
+    <value>  ·  Günlük: </value>
+  </data>
+  <data name="setup_login_failed_title" xml:space="preserve">
+    <value>Giriş akışı başlatılamadı</value>
+  </data>
+  <data name="setup_login_ok_msg" xml:space="preserve">
+    <value>{0} kimlik bilgileri FETİH kimlik deposunda bulundu.</value>
+  </data>
+  <data name="setup_login_ok_title" xml:space="preserve">
+    <value>Oturum açık</value>
+  </data>
+  <data name="setup_login_opened_msg" xml:space="preserve">
+    <value>Konsol penceresindeki yönergeleri izle; bitince buraya dön.</value>
+  </data>
+  <data name="setup_login_opened_title" xml:space="preserve">
+    <value>Giriş penceresi açıldı</value>
+  </data>
+  <data name="setup_login_pending_msg" xml:space="preserve">
+    <value>Giriş akışı tamamlanmamış görünüyor. "Oturum aç"ı yeniden dene.</value>
+  </data>
+  <data name="setup_login_pending_title" xml:space="preserve">
+    <value>Henüz oturum açılmadı</value>
+  </data>
+  <data name="setup_model_failed" xml:space="preserve">
+    <value>Model listesi alınamadı: </value>
+  </data>
+  <data name="setup_model_header" xml:space="preserve">
+    <value>Varsayılan model</value>
+  </data>
+  <data name="setup_model_live" xml:space="preserve">
+    <value>{0} model sağlayıcıdan CANLI alındı.</value>
+  </data>
+  <data name="setup_model_loading" xml:space="preserve">
+    <value>Model listesi alınıyor…</value>
+  </data>
+  <data name="setup_model_offline" xml:space="preserve">
+    <value>{0} model (çevrimdışı yedek liste).</value>
+  </data>
+  <data name="setup_model_unavailable" xml:space="preserve">
+    <value>Model listesi alınamadı. Kurulumu tamamlayıp Ayarlar › Model'den seçebilirsin.</value>
+  </data>
+  <data name="setup_needs_login_msg" xml:space="preserve">
+    <value>{0} ile devam etmek için lütfen 'Oturum aç' ile tarayıcıda girişi tamamla.</value>
+  </data>
+  <data name="setup_needs_login_title" xml:space="preserve">
+    <value>Oturum açılması gerekiyor</value>
+  </data>
+  <data name="setup_pipeline_cancelled" xml:space="preserve">
+    <value>İptal edildi.</value>
+  </data>
+  <data name="setup_pipeline_done" xml:space="preserve">
+    <value>Kurulum tamamlandı.</value>
+  </data>
+  <data name="setup_pipeline_skipped" xml:space="preserve">
+    <value>zaten sağlanmış — atlandı</value>
+  </data>
+  <data name="setup_pipeline_starting" xml:space="preserve">
+    <value>başlıyor…</value>
+  </data>
+  <data name="setup_probe_failed" xml:space="preserve">
+    <value>Yoklama yapılamadı</value>
+  </data>
+  <data name="setup_probing" xml:space="preserve">
+    <value>Yoklanıyor…</value>
+  </data>
+  <data name="setup_progress_title" xml:space="preserve">
+    <value>Kuruluyor</value>
+  </data>
+  <data name="setup_provider_aggregator" xml:space="preserve">
+    <value> · toplayıcı</value>
+  </data>
+  <data name="setup_provider_body" xml:space="preserve">
+    <value>FETİH model-agnostiktir. Ücretsiz başlamak için Groq, verinin makineden çıkmasını istemiyorsan Ollama iyi bir seçim.</value>
+  </data>
+  <data name="setup_provider_header" xml:space="preserve">
+    <value>Sağlayıcı</value>
+  </data>
+  <data name="setup_provider_local" xml:space="preserve">
+    <value> · yerel</value>
+  </data>
+  <data name="setup_provider_local_hint" xml:space="preserve">
+    <value>Bu sağlayıcı bu makinede çalışır; API anahtarı istemez. Veriler bilgisayardan çıkmaz.</value>
+  </data>
+  <data name="setup_provider_title" xml:space="preserve">
+    <value>Model sağlayıcısı</value>
+  </data>
+  <data name="setup_python_missing_msg" xml:space="preserve">
+    <value>Giriş akışı FETİH CLI üzerinden çalışır; Python 3.11+ gerekiyor.</value>
+  </data>
+  <data name="setup_python_missing_title" xml:space="preserve">
+    <value>Python bulunamadı</value>
+  </data>
+  <data name="setup_reprobe" xml:space="preserve">
+    <value>Yeniden yokla</value>
+  </data>
+  <data name="setup_retry" xml:space="preserve">
+    <value>Yeniden dene</value>
+  </data>
+  <data name="setup_security_body" xml:space="preserve">
+    <value>API anahtarın yalnızca bu bilgisayardaki ~/.fetih/.env dosyasına yazılır. Değeri hiçbir zaman ekranda gösterilmez, günlüğe yazılmaz veya ağ üzerinden gönderilmez. Yerel sağlayıcı seçersen hiç anahtar istenmez.</value>
+  </data>
+  <data name="setup_security_title" xml:space="preserve">
+    <value>Güvenlik notu</value>
+  </data>
+  <data name="setup_signup_link" xml:space="preserve">
+    <value>Anahtar al</value>
+  </data>
+  <data name="setup_signup_link_url" xml:space="preserve">
+    <value>Anahtar al — {0}</value>
+  </data>
+  <data name="setup_step_auth_cancelled" xml:space="preserve">
+    <value>Giriş işlemi iptal edildi.</value>
+  </data>
+  <data name="setup_step_auth_confirmed" xml:space="preserve">
+    <value>Oturum doğrulandı{0}.</value>
+  </data>
+  <data name="setup_step_auth_error" xml:space="preserve">
+    <value>Giriş akışı sırasında hata: </value>
+  </data>
+  <data name="setup_step_auth_incomplete" xml:space="preserve">
+    <value>{0} için oturum açma akışı tamamlanmadı. Lütfen açılan tarayıcıda veya konsolda oturum açma işlemini tamamlayıp yeniden deneyin.</value>
+  </data>
+  <data name="setup_step_auth_name" xml:space="preserve">
+    <value>Sağlayıcı oturumu denetleniyor</value>
+  </data>
+  <data name="setup_step_auth_noprovider" xml:space="preserve">
+    <value>Sağlayıcı kimliği belirtilmedi.</value>
+  </data>
+  <data name="setup_step_auth_nopython" xml:space="preserve">
+    <value>Giriş akışını çalıştırmak için Python bulunamadı.</value>
+  </data>
+  <data name="setup_step_auth_opened" xml:space="preserve">
+    <value>Oturum başarıyla açıldı{0}.</value>
+  </data>
+  <data name="setup_step_auth_spawn_failed" xml:space="preserve">
+    <value>Giriş süreci başlatılamadı ({0} -m fetih_cli auth add {1}).</value>
+  </data>
+  <data name="setup_step_auth_verify_failed" xml:space="preserve">
+    <value>Giriş doğrulanamadı: </value>
+  </data>
+  <data name="setup_step_bridge_name" xml:space="preserve">
+    <value>Masaüstü Köprüsü başlatılıyor</value>
+  </data>
+  <data name="setup_step_bridge_ok" xml:space="preserve">
+    <value>Köprü bağlı (protokol v{0}).</value>
+  </data>
+  <data name="setup_step_config_fail" xml:space="preserve">
+    <value>Yapılandırma yazılamadı: </value>
+  </data>
+  <data name="setup_step_config_fail_managed" xml:space="preserve">
+    <value>Yapılandırma yazılamadı (yönetilen kurulum): </value>
+  </data>
+  <data name="setup_step_config_name" xml:space="preserve">
+    <value>Yapılandırma yazılıyor</value>
+  </data>
+  <data name="setup_step_config_ok" xml:space="preserve">
+    <value>model.provider / model.default kaydedildi.</value>
+  </data>
+  <data name="setup_step_home_name" xml:space="preserve">
+    <value>Durum dizini hazırlanıyor</value>
+  </data>
+  <data name="setup_step_home_ok" xml:space="preserve">
+    <value>{0} oluşturuldu.</value>
+  </data>
+  <data name="setup_step_key_fail" xml:space="preserve">
+    <value>API anahtarı yazılamadı: </value>
+  </data>
+  <data name="setup_step_key_name" xml:space="preserve">
+    <value>API anahtarı kaydediliyor</value>
+  </data>
+  <data name="setup_step_key_ok" xml:space="preserve">
+    <value>{0} .env dosyasına yazıldı.</value>
+  </data>
+  <data name="setup_step_os_fail" xml:space="preserve">
+    <value>Bu masaüstü kabuğu yalnızca Windows'ta çalışır.</value>
+  </data>
+  <data name="setup_step_os_name" xml:space="preserve">
+    <value>İşletim sistemi denetimi</value>
+  </data>
+  <data name="setup_step_os_ok" xml:space="preserve">
+    <value>Windows algılandı.</value>
+  </data>
+  <data name="setup_step_python_fail" xml:space="preserve">
+    <value>Python bulunamadı. FETİH'i çalıştırmak için Python 3.11+ kurun veya FETIH_PYTHON ortam değişkenini ayarlayın.</value>
+  </data>
+  <data name="setup_step_python_name" xml:space="preserve">
+    <value>Python bulunuyor</value>
+  </data>
+  <data name="setup_step_python_ok" xml:space="preserve">
+    <value>Python bulundu: {0}</value>
+  </data>
+  <data name="setup_step_verify_empty" xml:space="preserve">
+    <value>Model yanıt verdi (boş metin) — kurulum tamam.</value>
+  </data>
+  <data name="setup_step_verify_fail" xml:space="preserve">
+    <value>Model yanıt vermedi ({0}): {1}  Sağlayıcıya dönüp anahtarı ya da modeli düzelt.</value>
+  </data>
+  <data name="setup_step_verify_name" xml:space="preserve">
+    <value>Gerçek mesajla doğrulama</value>
+  </data>
+  <data name="setup_step_verify_ok" xml:space="preserve">
+    <value>Model yanıt verdi: </value>
+  </data>
+  <data name="setup_step_verify_prompt" xml:space="preserve">
+    <value>Bu bir kurulum denetimidir. Yalnızca şu kelimeyle yanıt ver: TAMAM</value>
+  </data>
+  <data name="setup_step_verify_timeout" xml:space="preserve">
+    <value>Model 90 saniyede yanıt vermedi. Ağ/uç nokta erişilebilir mi?</value>
+  </data>
+  <data name="setup_step_waiting" xml:space="preserve">
+    <value>bekliyor</value>
+  </data>
+  <data name="setup_welcome_body" xml:space="preserve">
+    <value>Bu sihirbaz bir model sağlayıcısı seçmene, kimlik bilgilerini güvenle kaydetmene ve Masaüstü Köprüsü'nü başlatmana yardımcı olur. Üç adım sürer.</value>
+  </data>
+  <data name="setup_welcome_title" xml:space="preserve">
+    <value>FETİH'e hoş geldin</value>
+  </data>
+  <data name="setup_window_title" xml:space="preserve">
+    <value>FETİH — İlk Kurulum</value>
+  </data>
+  <data name="shell_bridge_error" xml:space="preserve">
+    <value>Köprü hatası ({0}): {1}</value>
+  </data>
+  <data name="shell_create_user" xml:space="preserve">
+    <value>FETİH için WSL kullanıcısı oluştur</value>
+  </data>
+  <data name="shell_create_user_desc" xml:space="preserve">
+    <value>WSL içinde 'fetih' adlı ayrılmış bir kullanıcı oluşturur; böylece ajanın yazdığı dosyalar senin ev dizinine karışmaz.</value>
+  </data>
+  <data name="shell_distro" xml:space="preserve">
+    <value>Dağıtım</value>
+  </data>
+  <data name="shell_effective" xml:space="preserve">
+    <value>Etkin kabuk</value>
+  </data>
+  <data name="shell_git_bash" xml:space="preserve">
+    <value>Git Bash</value>
+  </data>
+  <data name="shell_git_bash_desc" xml:space="preserve">
+    <value>Git for Windows'un MSYS2 bash'i. Windows dosya sistemine doğrudan erişir (C:\ ↔ /c/) ve Windows ikililerini çalıştırır. Varsayılan.</value>
+  </data>
+  <data name="shell_intro" xml:space="preserve">
+    <value>FETİH'in terminal aracı Windows'ta bir POSIX kabuğu üzerinden çalışır. PowerShell bilinçli olarak sunulmaz (araç katmanı export -p, pwd -P ve POSIX tırnaklamaya dayanır). İki seçenek vardır:</value>
+  </data>
+  <data name="shell_needs_bridge" xml:space="preserve">
+    <value>Kabuk durumu Masaüstü Köprüsü üzerinden okunur; köprüye bağlanılıyor…</value>
+  </data>
+  <data name="shell_save_failed" xml:space="preserve">
+    <value>✗ kaydedilemedi</value>
+  </data>
+  <data name="shell_saved" xml:space="preserve">
+    <value>✓ kaydedildi</value>
+  </data>
+  <data name="shell_title" xml:space="preserve">
+    <value>Kabuk (Windows)</value>
+  </data>
+  <data name="shell_user_exists" xml:space="preserve">
+    <value>'fetih' kullanıcısı zaten var.</value>
+  </data>
+  <data name="shell_windows_only" xml:space="preserve">
+    <value>Kabuk seçimi yalnızca Windows'ta geçerlidir.</value>
+  </data>
+  <data name="shell_wsl" xml:space="preserve">
+    <value>WSL</value>
+  </data>
+  <data name="shell_wsl_desc" xml:space="preserve">
+    <value>wsl.exe üzerinden gerçek bir Linux dağıtımı. Windows sürücüleri /mnt/c/ altında görünür; apt, gcc, binwalk gibi Linux araçları kullanılabilir.</value>
+  </data>
+  <data name="shell_wsl_not_installed" xml:space="preserve">
+    <value>Bu makinede kurulu bir WSL dağıtımı bulunamadı. `wsl --install -d Ubuntu` ile kurabilirsin.</value>
+  </data>
+  <data name="simple_advanced_group" xml:space="preserve">
+    <value>Gelişmiş</value>
+  </data>
+  <data name="simple_list_clear" xml:space="preserve">
+    <value>Listeyi boşalt</value>
+  </data>
+  <data name="simple_list_empty" xml:space="preserve">
+    <value>Liste boş.</value>
+  </data>
+  <data name="simple_open_advanced" xml:space="preserve">
+    <value>Bu ayarların ham hâlini Detaylı Mod'da aç</value>
+  </data>
+  <data name="simple_reference" xml:space="preserve">
+    <value>Ayrıntılar</value>
+  </data>
+  <data name="simple_reload" xml:space="preserve">
+    <value>Yenile</value>
+  </data>
+  <data name="simple_unknown_value" xml:space="preserve">
+    <value>Şu anki değer listede yok: {0}</value>
+  </data>
+  <data name="skills_all_categories" xml:space="preserve">
+    <value>Tüm kategoriler</value>
+  </data>
+  <data name="skills_empty_filter" xml:space="preserve">
+    <value>Bu arama/kategori için sonuç yok.</value>
+  </data>
+  <data name="skills_empty_none" xml:space="preserve">
+    <value>Hiç SKILL.md bulunamadı. Depo kökü çözümlenemediyse uygulamayı depo içindeki apps/windows/Fetih.Desktop klasöründen çalıştırın.</value>
+  </data>
+  <data name="skills_error" xml:space="preserve">
+    <value>Katalog taranırken hata oluştu:
+</value>
+  </data>
+  <data name="skills_failed" xml:space="preserve">
+    <value>Yetenek kataloğu okunamadı.</value>
+  </data>
+  <data name="skills_no_description" xml:space="preserve">
+    <value>(açıklama yok)</value>
+  </data>
+  <data name="skills_root_segment" xml:space="preserve">
+    <value>(kök)</value>
+  </data>
+  <data name="skills_scanning" xml:space="preserve">
+    <value>Yetenek kataloğu taranıyor…</value>
+  </data>
+  <data name="skills_search_placeholder" xml:space="preserve">
+    <value>Ara: ör. SQL injection, pcap, ATT&amp;CK, osint…</value>
+  </data>
+  <data name="skills_source_optional" xml:space="preserve">
+    <value>isteğe bağlı</value>
+  </data>
+  <data name="skills_source_repo" xml:space="preserve">
+    <value>depo</value>
+  </data>
+  <data name="skills_source_user" xml:space="preserve">
+    <value>kullanıcı</value>
+  </data>
+  <data name="skills_summary_counts" xml:space="preserve">
+    <value>{0} yetenek · skills/ {1} · optional-skills/ {2} · yalnızca kullanıcıda {3} ({4} ms)</value>
+  </data>
+  <data name="skills_summary_duplicates" xml:space="preserve">
+    <value> · {0} kurulu kopya atlandı</value>
+  </data>
+  <data name="skills_summary_repo_missing" xml:space="preserve">
+    <value>FETİH deposu bulunamadı — yetenekler yalnızca {0} altından okundu ({1} kayıt).</value>
+  </data>
+  <data name="skills_summary_warning" xml:space="preserve">
+    <value>{0} — uyarı: {1}</value>
+  </data>
+  <data name="skills_title" xml:space="preserve">
+    <value>Yetenekler</value>
+  </data>
+  <data name="skills_unnamed" xml:space="preserve">
+    <value>(adsız)</value>
+  </data>
+  <data name="tool_format_denied" xml:space="preserve">
+    <value>Bu işlem güvenlik veya onay kuralı nedeniyle reddedildi.
+
+</value>
+  </data>
+  <data name="tool_format_exit_code" xml:space="preserve">
+    <value>çıkış kodu: {0}</value>
+  </data>
+  <data name="tool_format_read_file" xml:space="preserve">
+    <value>Dosya oku · {0}</value>
+  </data>
+  <data name="tool_format_write_file" xml:space="preserve">
+    <value>Dosya yaz · {0}</value>
+  </data>
+  <data name="unit_min" xml:space="preserve">
+    <value>dk</value>
+  </data>
+  <data name="unit_sec" xml:space="preserve">
+    <value>sn</value>
+  </data>
+  <data name="update_available" xml:space="preserve">
+    <value>Yeni sürüm mevcut</value>
+  </data>
+  <data name="update_channel_portable" xml:space="preserve">
+    <value>Taşınabilir sürüm</value>
+  </data>
+  <data name="update_channel_setup" xml:space="preserve">
+    <value>Kurulum sürümü</value>
+  </data>
+  <data name="update_check_button" xml:space="preserve">
+    <value>Güncellemeleri denetle</value>
+  </data>
+  <data name="update_check_failed" xml:space="preserve">
+    <value>Denetlenemedi — internet bağlantınızı kontrol edin.</value>
+  </data>
+  <data name="update_checking" xml:space="preserve">
+    <value>Denetleniyor…</value>
+  </data>
+  <data name="update_download_install" xml:space="preserve">
+    <value>İndir ve kur</value>
+  </data>
+  <data name="update_downloading" xml:space="preserve">
+    <value>İndiriliyor…</value>
+  </data>
+  <data name="update_install_failed" xml:space="preserve">
+    <value>Güncelleme indirilirken/kurulurken bir hata oluştu.</value>
+  </data>
+  <data name="update_installing" xml:space="preserve">
+    <value>Kuruluyor — uygulama kısa süre sonra yeniden başlayacak…</value>
+  </data>
+  <data name="update_no_asset_for_channel" xml:space="preserve">
+    <value>Bu sürüm için indirilebilir bir paket bulunamadı.</value>
+  </data>
+  <data name="update_section_header" xml:space="preserve">
+    <value>Güncellemeler</value>
+  </data>
+  <data name="update_up_to_date" xml:space="preserve">
+    <value>Güncel sürümü kullanıyorsunuz.</value>
+  </data>
+  <data name="update_view_notes" xml:space="preserve">
+    <value>Sürüm notlarını gör</value>
+  </data>
+  <data name="voice_auto_detect" xml:space="preserve">
+    <value>(otomatik algıla)</value>
+  </data>
+  <data name="voice_device" xml:space="preserve">
+    <value>Aygıt</value>
+  </data>
+  <data name="voice_enabled" xml:space="preserve">
+    <value>Etkin</value>
+  </data>
+  <data name="voice_language" xml:space="preserve">
+    <value>Dil</value>
+  </data>
+  <data name="voice_live_desc" xml:space="preserve">
+    <value>Bas-konuş kaydı ve yanıt okuma Python tarafında yürütülür; masaüstü kabuğunda kayıt düğmesi yoktur. Bu sayfa, diskteki gerçek ses yapılandırmasını değiştirmeden gösterir — düzenlemek için Ayarlar › Detaylı Mod'u kullan.</value>
+  </data>
+  <data name="voice_live_title" xml:space="preserve">
+    <value>Bu sayfa yalnızca bilgi gösterir</value>
+  </data>
+  <data name="voice_model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="voice_provider" xml:space="preserve">
+    <value>Sağlayıcı</value>
+  </data>
+  <data name="voice_recording_auto_tts" xml:space="preserve">
+    <value>Yanıtı otomatik seslendir</value>
+  </data>
+  <data name="voice_recording_beep" xml:space="preserve">
+    <value>Kayıt bip sesleri</value>
+  </data>
+  <data name="voice_recording_beep_desc" xml:space="preserve">
+    <value>Kayıt başlangıç/bitiş sinyali.</value>
+  </data>
+  <data name="voice_recording_key" xml:space="preserve">
+    <value>Kayıt kısayolu</value>
+  </data>
+  <data name="voice_recording_key_desc" xml:space="preserve">
+    <value>Bas-konuş kaydını başlatır/durdurur.</value>
+  </data>
+  <data name="voice_recording_max" xml:space="preserve">
+    <value>Azami kayıt süresi</value>
+  </data>
+  <data name="voice_recording_silence_duration" xml:space="preserve">
+    <value>Sessizlik süresi</value>
+  </data>
+  <data name="voice_recording_silence_duration_desc" xml:space="preserve">
+    <value>Sürekli (VAD) modda otomatik durdurma eşiği.</value>
+  </data>
+  <data name="voice_recording_silence_threshold" xml:space="preserve">
+    <value>Sessizlik eşiği</value>
+  </data>
+  <data name="voice_recording_silence_threshold_desc" xml:space="preserve">
+    <value>RMS bu değerin altındaysa sessizlik sayılır (0–32767).</value>
+  </data>
+  <data name="voice_seconds" xml:space="preserve">
+    <value>{0} sn</value>
+  </data>
+  <data name="voice_section_recording" xml:space="preserve">
+    <value>Kayıt davranışı</value>
+  </data>
+  <data name="voice_section_stt" xml:space="preserve">
+    <value>Konuşma tanıma (STT)</value>
+  </data>
+  <data name="voice_section_tts" xml:space="preserve">
+    <value>Metin okuma (TTS)</value>
+  </data>
+  <data name="voice_stt_model_options" xml:space="preserve">
+    <value>tiny / base / small / medium / large-v3</value>
+  </data>
+  <data name="voice_stt_options" xml:space="preserve">
+    <value>Seçenekler: local (faster-whisper, ücretsiz), groq, openai (Whisper API), mistral (Voxtral).</value>
+  </data>
+  <data name="voice_subtitle" xml:space="preserve">
+    <value>FETİH'in ses yetenekleri: metin okuma (TTS), konuşma tanıma (STT) ve bas-konuş kaydı. Değerler ~/.fetih/config.yaml dosyasından okunur.</value>
+  </data>
+  <data name="voice_title" xml:space="preserve">
+    <value>Ses</value>
+  </data>
+  <data name="voice_tts_options" xml:space="preserve">
+    <value>Seçenekler: edge (ücretsiz), elevenlabs, openai, xai, minimax, mistral, gemini, neutts / kittentts / piper (yerel).</value>
+  </data>
+  <data name="voice_undefined" xml:space="preserve">
+    <value>(tanımsız)</value>
+  </data>
+  <data name="voice_voice" xml:space="preserve">
+    <value>Ses</value>
+  </data>
+  <data name="voice_voice_id" xml:space="preserve">
+    <value>Ses kimliği</value>
+  </data>
+  <data name="yaml_child_keys" xml:space="preserve">
+    <value>({0} alt anahtar)</value>
+  </data>
+  <data name="yaml_empty_list" xml:space="preserve">
+    <value>(boş liste)</value>
+  </data>
+  <data name="yaml_empty_map" xml:space="preserve">
+    <value>(boş)</value>
+  </data>
+  <data name="yaml_nested" xml:space="preserve">
+    <value>(…)</value>
+  </data>
+  <data name="Chat_NewChat.Content" xml:space="preserve">
+    <value>Yeni sohbet</value>
+  </data>
+  <data name="Chat_PromptBox.PlaceholderText" xml:space="preserve">
+    <value>Mesajını yaz…</value>
+  </data>
+  <data name="Chat_SendButton.Content" xml:space="preserve">
+    <value>Gönder</value>
+  </data>
+  <data name="Chat_StopButton.Content" xml:space="preserve">
+    <value>Durdur</value>
+  </data>
+  <data name="Chat_EmptyStateTitle.Text" xml:space="preserve">
+    <value>Nasıl yardımcı olabilirim?</value>
+  </data>
+  <data name="Chat_EmptyStateDesc.Text" xml:space="preserve">
+    <value>Bir soru sorun, komut çalıştırın veya kod incelemesi isteyin.</value>
+  </data>
+</root>

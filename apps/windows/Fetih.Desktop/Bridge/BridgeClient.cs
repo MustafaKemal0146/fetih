@@ -39,6 +39,36 @@ public sealed record BridgeDone(string SessionId, string Text, int? ApiCalls, lo
 /// <summary>Bir turun başarısız bitişi.</summary>
 public sealed record BridgeErrorEvent(string SessionId, string Error, string? Partial);
 
+/// <summary>Oturum özeti.</summary>
+public sealed record SessionSummary(string SessionId, string Title, double UpdatedAt);
+
+/// <summary>Tehlikeli bir komut için kullanıcı onayı isteyen olayın yükü.</summary>
+public sealed record BridgeApprovalRequest(
+    string SessionId, string RequestId, string Command, string Description,
+    IReadOnlyList<string> PatternKeys);
+
+/// <summary>Oturum yükleme sonucu (geriye dönük deconstruct uyumlu).</summary>
+public sealed record BridgeSessionLoadResult(
+    string Title,
+    List<StoredItem> Items,
+    bool Running = false,
+    StoredItem? Pending = null)
+{
+    public void Deconstruct(out string title, out List<StoredItem> items)
+    {
+        title = Title;
+        items = Items;
+    }
+
+    public void Deconstruct(out string title, out List<StoredItem> items, out bool running, out StoredItem? pending)
+    {
+        title = Title;
+        items = Items;
+        running = Running;
+        pending = Pending;
+    }
+}
+
 /// <summary>
 /// Masaüstü Köprüsü'nün GERÇEK WebSocket / JSON-RPC 2.0 (NDJSON) istemcisi.
 /// Süreci <see cref="BridgeProcess"/> başlatır, token'ı el sıkışmadan alır,
@@ -64,6 +94,7 @@ public sealed class BridgeClient : IDisposable
     private int _protocolVersion = 1;
     private volatile bool _authenticated;
     private volatile bool _disposed;
+    private int _reconnecting;
 
     // ── Durum + olaylar ─────────────────────────────────────────────────────
 
@@ -79,7 +110,11 @@ public sealed class BridgeClient : IDisposable
     public event Action<BridgeToolResult>? SessionToolResult;
     public event Action<BridgeDone>? SessionDone;
     public event Action<BridgeErrorEvent>? SessionError;
+    public event Action<string /*sessionId*/, string /*title*/, double /*updatedAt*/>? SessionUpdated;
+    public event Action<string /*sessionId*/, string /*label*/>? ThoughtLabel;
     public event Action<JsonElement>? FindingDiscovered;
+    public event Action<BridgeApprovalRequest>? ApprovalRequested;
+    public event Action<string /*sessionId*/, string /*requestId*/>? ApprovalResolved;
     public event Action? ConnectionLost;
 
     // ── Bağlantı ────────────────────────────────────────────────────────────
@@ -145,7 +180,7 @@ public sealed class BridgeClient : IDisposable
             }
 
             Status.Update(BridgeConnectionState.Ready,
-                string.Format(Loc.T("bridge.detail.connected"), _protocolVersion, handshake.Pid));
+                Loc.Format("bridge.detail.connected", _protocolVersion, handshake.Pid));
         }
         catch (Exception ex)
         {
@@ -165,12 +200,12 @@ public sealed class BridgeClient : IDisposable
     private async Task ReceiveLoopAsync(ClientWebSocket ws, CancellationToken ct)
     {
         var buffer = new byte[64 * 1024];
-        var sb = new StringBuilder();
+        using var message = new MemoryStream();
         try
         {
             while (!ct.IsCancellationRequested && ws.State == WebSocketState.Open)
             {
-                sb.Clear();
+                message.SetLength(0);
                 WebSocketReceiveResult result;
                 do
                 {
@@ -180,13 +215,16 @@ public sealed class BridgeClient : IDisposable
                     {
                         throw new WebSocketException(Loc.T("bridge.detail.server_closed"));
                     }
-                    sb.Append(Encoding.UTF8.GetString(buffer, 0, result.Count));
+                    message.Write(buffer, 0, result.Count);
                 }
                 while (!result.EndOfMessage);
 
-                var frame = sb.ToString();
-                if (frame.Length > 0)
+                // Tüm mesaj biriktikten SONRA tek seferde çöz: çok baytlı bir
+                // karakter (ş, ğ, İ, emoji) 64 KB'lık parça sınırına denk
+                // gelirse parça parça çözmek onu U+FFFD'ye (�) çevirirdi.
+                if (message.Length > 0)
                 {
+                    var frame = Encoding.UTF8.GetString(message.GetBuffer(), 0, (int)message.Length);
                     DispatchFrame(frame);
                 }
             }
@@ -217,6 +255,62 @@ public sealed class BridgeClient : IDisposable
         Status.Update(BridgeConnectionState.Reconnecting,
             Loc.T("bridge.detail.reconnecting"));
         try { ConnectionLost?.Invoke(); } catch { }
+
+        // Proaktif yeniden bağlanma: eskiden durum yalnızca "Reconnecting"
+        // etiketinde kalıyor, bağlantı ancak bir sonraki kullanıcı isteğinde
+        // tembel kuruluyordu. Artık backoff ile otomatik denenir.
+        if (!_disposed)
+        {
+            _ = ReconnectLoopAsync();
+        }
+    }
+
+    /// <summary>
+    /// Bağlantı koptuğunda arka planda çalışan yeniden bağlanma döngüsü.
+    /// Backoff ile (1→60 sn, tavanlı) bağlanana veya süreç dispose edilene
+    /// kadar dener. Aynı anda yalnızca bir döngü koşar.
+    /// </summary>
+    private async Task ReconnectLoopAsync()
+    {
+        if (Interlocked.Exchange(ref _reconnecting, 1) == 1)
+        {
+            return;
+        }
+        try
+        {
+            var attempt = 0;
+            while (!_disposed && !IsConnected)
+            {
+                var delay = BridgeBackoff.ForAttempt(attempt);
+                Status.Update(BridgeConnectionState.Reconnecting,
+                    Loc.Format("bridge.detail.reconnecting_in", (int)delay.TotalSeconds));
+                try
+                {
+                    await Task.Delay(delay).ConfigureAwait(false);
+                }
+                catch
+                {
+                    // yoksay
+                }
+                if (_disposed)
+                {
+                    break;
+                }
+                try
+                {
+                    await EnsureConnectedAsync().ConfigureAwait(false);
+                    break; // bağlandı
+                }
+                catch
+                {
+                    attempt++;
+                }
+            }
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _reconnecting, 0);
+        }
     }
 
     private void DispatchFrame(string frame)
@@ -313,7 +407,24 @@ public sealed class BridgeClient : IDisposable
                 case "session.error":
                     SessionError?.Invoke(new BridgeErrorEvent(
                         Str(p, "session_id"), Str(p, "error"),
-                        p.TryGetProperty("partial", out var pt) ? pt.ToString() : null));
+                        p.TryGetProperty("partial", out var pt)
+                            && pt.ValueKind is JsonValueKind.True or JsonValueKind.False
+                            ? (pt.GetBoolean() ? "true" : "false")
+                            : null));
+                    break;
+
+                case "session.updated":
+                    SessionUpdated?.Invoke(
+                        Str(p, "session_id"),
+                        Str(p, "title"),
+                        p.TryGetProperty("updated_at", out var ua) && ua.ValueKind == JsonValueKind.Number ? ua.GetDouble() : 0.0);
+                    break;
+
+                // Köprü aynı etiketi hem "thought.label" hem
+                // "session.thought_label" olarak yayıyor; çift tetiklememek
+                // için yalnızca ad-uzaylı olanı işliyoruz.
+                case "session.thought_label":
+                    ThoughtLabel?.Invoke(Str(p, "session_id"), Str(p, "label"));
                     break;
 
                 case "findings.discovered":
@@ -321,6 +432,17 @@ public sealed class BridgeClient : IDisposable
                     {
                         FindingDiscovered?.Invoke(findingEl);
                     }
+                    break;
+
+                case "session.approval_request":
+                    ApprovalRequested?.Invoke(new BridgeApprovalRequest(
+                        Str(p, "session_id"), Str(p, "request_id"),
+                        Str(p, "command"), Str(p, "description"),
+                        StrList(p, "pattern_keys")));
+                    break;
+
+                case "session.approval_resolved":
+                    ApprovalResolved?.Invoke(Str(p, "session_id"), Str(p, "request_id"));
                     break;
             }
         }
@@ -389,6 +511,93 @@ public sealed class BridgeClient : IDisposable
         return Str(res, "session_id");
     }
 
+    public async Task<string> CreateSessionAsync(string? sessionId = null, string title = "", CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        var p = new Dictionary<string, object?>();
+        if (!string.IsNullOrEmpty(sessionId)) p["session_id"] = sessionId;
+        if (!string.IsNullOrEmpty(title)) p["title"] = title;
+        var res = await CallAsync("session.create", p, ct).ConfigureAwait(false);
+        return Str(res, "session_id");
+    }
+
+    public async Task<List<SessionSummary>> ListSessionsAsync(CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        var res = await CallAsync("session.list", null, ct).ConfigureAwait(false);
+        var list = new List<SessionSummary>();
+        if (res.TryGetProperty("sessions", out var arr) && arr.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var item in arr.EnumerateArray())
+            {
+                var sid = Str(item, "session_id");
+                var title = Str(item, "title");
+                var updated = item.TryGetProperty("updated_at", out var ua) && ua.ValueKind == JsonValueKind.Number ? ua.GetDouble() : 0.0;
+                list.Add(new SessionSummary(sid, string.IsNullOrWhiteSpace(title) ? "Yeni sohbet" : title, updated));
+            }
+        }
+        return list;
+    }
+
+    public async Task<BridgeSessionLoadResult> LoadSessionAsync(string sessionId, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        var p = new Dictionary<string, object?> { ["session_id"] = sessionId };
+        var res = await CallAsync("session.load", p, ct).ConfigureAwait(false);
+        var title = Str(res, "title");
+        var running = res.TryGetProperty("running", out var rEl) && rEl.ValueKind == JsonValueKind.True;
+        StoredItem? pending = null;
+        if (res.TryGetProperty("pending", out var pEl) && pEl.ValueKind == JsonValueKind.Object)
+        {
+            pending = ParseStoredItem(pEl);
+        }
+
+        var items = new List<StoredItem>();
+        if (res.TryGetProperty("items", out var arr) && arr.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var it in arr.EnumerateArray())
+            {
+                items.Add(ParseStoredItem(it));
+            }
+        }
+        return new BridgeSessionLoadResult(title, items, running, pending);
+    }
+
+    private static StoredItem ParseStoredItem(JsonElement it)
+    {
+        var kind = Str(it, "kind");
+        var text = it.TryGetProperty("text", out var t) ? t.GetString() : null;
+        var callId = it.TryGetProperty("call_id", out var cid) ? cid.GetString() : null;
+        var name = it.TryGetProperty("name", out var n) ? n.GetString() : null;
+        var args = it.TryGetProperty("args", out var a) ? (a.ValueKind == JsonValueKind.String ? a.GetString() : a.GetRawText()) : null;
+        var result = it.TryGetProperty("result", out var r) ? (r.ValueKind == JsonValueKind.String ? r.GetString() : r.GetRawText()) : null;
+        var dur = it.TryGetProperty("duration_ms", out var d) && d.ValueKind == JsonValueKind.Number ? d.GetDouble() : (double?)null;
+        var tsStart = it.TryGetProperty("ts_start", out var tss) && tss.ValueKind == JsonValueKind.Number ? tss.GetDouble() : (double?)null;
+        var tsEnd = it.TryGetProperty("ts_end", out var tse) && tse.ValueKind == JsonValueKind.Number ? tse.GetDouble() : (double?)null;
+        var label = it.TryGetProperty("label", out var l) ? l.GetString() : null;
+        return new StoredItem(kind, text, callId, name, args, result, dur, tsStart, tsEnd, label);
+    }
+
+    public async Task RenameSessionAsync(string sessionId, string title, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        var p = new Dictionary<string, object?> { ["session_id"] = sessionId, ["title"] = title };
+        await CallAsync("session.rename", p, ct).ConfigureAwait(false);
+    }
+
+    public async Task DeleteSessionAsync(string sessionId, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        var p = new Dictionary<string, object?> { ["session_id"] = sessionId };
+        await CallAsync("session.delete", p, ct).ConfigureAwait(false);
+    }
+
+    public async Task DeleteAllSessionsAsync(CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        await CallAsync("session.delete_all", null, ct).ConfigureAwait(false);
+    }
+
     /// <summary>
     /// <c>session.send</c> — ana metot. Tur boyunca olaylar akar; bu çağrı
     /// <c>session.done</c> sonucuyla döner. Hata → <see cref="BridgeRpcException"/>.
@@ -437,6 +646,22 @@ public sealed class BridgeClient : IDisposable
     {
         return await CallAsync("session.cancel",
             new Dictionary<string, object?> { ["session_id"] = sessionId }, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// <c>session.approve</c> — tehlikeli komut onayını yanıtlar.
+    /// <paramref name="choice"/>: <c>once</c> | <c>session</c> | <c>always</c> | <c>deny</c>.
+    /// </summary>
+    public async Task<JsonElement> ApproveAsync(
+        string sessionId, string choice, bool all = false, CancellationToken ct = default)
+    {
+        var p = new Dictionary<string, object?>
+        {
+            ["session_id"] = sessionId,
+            ["choice"] = choice,
+        };
+        if (all) p["all"] = true;
+        return await CallAsync("session.approve", p, ct).ConfigureAwait(false);
     }
 
     public async Task<JsonElement> ConfigGetAsync(string? key = null, CancellationToken ct = default)
@@ -626,6 +851,24 @@ public sealed class BridgeClient : IDisposable
             return v.ValueKind == JsonValueKind.String ? v.GetString() ?? "" : v.GetRawText();
         }
         return "";
+    }
+
+    private static IReadOnlyList<string> StrList(JsonElement e, string name)
+    {
+        var list = new List<string>();
+        if (e.ValueKind == JsonValueKind.Object && e.TryGetProperty(name, out var arr)
+            && arr.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var item in arr.EnumerateArray())
+            {
+                if (item.ValueKind == JsonValueKind.String)
+                {
+                    var s = item.GetString();
+                    if (!string.IsNullOrEmpty(s)) list.Add(s);
+                }
+            }
+        }
+        return list;
     }
 
     private static int? IntOrNull(JsonElement e, string name)

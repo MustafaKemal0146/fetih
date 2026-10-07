@@ -1,0 +1,51 @@
+name: Windows Desktop CI
+
+# PR/branch doğrulaması: masaüstü uygulamasını derler ve birim testlerini
+# çalıştırır. Release workflow'u (windows-desktop-release.yml) yalnızca
+# desktop-v* etiketinde paket üretir; burada ise her değişiklik build+test ile
+# korunur. Çözüm (Fetih.Windows.slnx) artık test projesini de içerir.
+on:
+  pull_request:
+    paths:
+      - 'apps/windows/**'
+      - 'fetih_desktop_bridge/**'
+      - '.github/workflows/windows-desktop-ci.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'apps/windows/**'
+      - 'fetih_desktop_bridge/**'
+      - '.github/workflows/windows-desktop-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-desktop-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: Build + test (win-x64)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9  # v4.3.1
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build solution (Debug)
+        shell: pwsh
+        run: dotnet build apps/windows/Fetih.Windows.slnx -c Debug --nologo
+
+      - name: Run desktop unit tests
+        shell: pwsh
+        run: >
+          dotnet test apps/windows/Fetih.Desktop.Tests/Fetih.Desktop.Tests.csproj
+          -c Debug --no-build --nologo

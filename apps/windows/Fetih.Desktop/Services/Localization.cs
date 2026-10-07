@@ -104,6 +104,20 @@ public static class Loc
         return key;
     }
 
+    /// <summary>Bir anahtarı etkin dile çevirip argümanlarla biçimlendirir.</summary>
+    public static string Format(string key, params object[] args)
+    {
+        var text = T(key);
+        try
+        {
+            return string.Format(text, args);
+        }
+        catch
+        {
+            return text;
+        }
+    }
+
     private static UiLanguage Resolve(string preference) => preference switch
     {
         "tr" => UiLanguage.Turkish,
@@ -233,15 +247,117 @@ public static class Loc
         ["settings.all"] = new("Detaylı Mod", "Advanced Mode"),
         ["settings.about"] = new("Hakkında", "About"),
 
+        // ── Ortak Diyaloglar ─────────────────────────────────────────────
+        ["dialog.save"] = new("Kaydet", "Save"),
+        ["dialog.cancel"] = new("İptal", "Cancel"),
+        ["dialog.confirm"] = new("Onayla", "Confirm"),
+        ["dialog.stop"] = new("Durdur", "Stop"),
+
         // ── Sohbet ───────────────────────────────────────────────────────
+        ["chat.default_title"] = new("Yeni sohbet", "New chat"),
         ["chat.placeholder"] = new(
             "Bir görev yaz… (ör. hedef alan adı için OSINT toplama)",
             "Type a task… (e.g. OSINT gathering for a target domain)"),
+        ["chat.prompt_placeholder"] = new(
+            "Mesajını yaz…",
+            "Type your message…"),
+        ["chat.new_chat"] = new("Yeni sohbet", "New chat"),
+        ["chat.empty_state"] = new("Nasıl yardımcı olabilirim?", "How can I help you?"),
+        ["chat.empty_state_title"] = new("Nasıl yardımcı olabilirim?", "How can I help you?"),
+        ["chat.empty_state_desc"] = new(
+            "Bir soru sorun, komut çalıştırın veya kod incelemesi isteyin.",
+            "Ask a question, run commands, or request a code review."),
+        ["chat.empty_prompt"] = new("FETİH siber güvenlik ve kodlama asistanınız hazır. Bir görev veya soru yazarak başlayın.", "FETİH cybersecurity and coding assistant is ready. Type a task or question to begin."),
+        ["chat.rename"] = new("Yeniden adlandır", "Rename"),
+        ["chat.delete"] = new("Sil", "Delete"),
+        ["chat.delete_all"] = new("Tüm sohbetleri sil", "Delete all chats"),
+        ["chat.delete_confirm_title"] = new("Sohbet silinsin mi?", "Delete chat?"),
+        ["chat.delete_confirm_body"] = new("\"{0}\" başlıklı sohbet kalıcı olarak silinecektir. Emin misiniz?", "Chat \"{0}\" will be permanently deleted. Are you sure?"),
+        ["chat.delete_all_confirm_title"] = new("Tüm sohbetler silinsin mi?", "Delete all chats?"),
+        ["chat.delete_all_confirm_body"] = new("Tüm kayıtlı sohbet geçmişi kalıcı olarak temizlenecektir. Bu işlem geri alınamaz. Emin misiniz?", "All saved chat history will be permanently cleared. This action cannot be undone. Are you sure?"),
+        ["chat.cancel_busy_confirm_title"] = new("Çalışan işlem durdurulsun mu?", "Stop active task?"),
+        ["chat.cancel_busy_confirm_body"] = new("Başka sohbete geçmek veya yeni sohbet açmak için devam eden işlem durdurulacak.", "The active task will be stopped to switch or create a new chat."),
         ["chat.hint"] = new(
             "Enter yeni satır · Ctrl+Enter gönderir",
             "Enter for a new line · Ctrl+Enter to send"),
+        ["chat.hint_default"] = new(
+            "Enter: Gönder · Shift+Enter: Yeni satır · Ctrl+N: Yeni sohbet",
+            "Enter: Send · Shift+Enter: New line · Ctrl+N: New chat"),
+        ["chat.hint_safety"] = new(
+            "Terminal komutları ve dosya yazma işlemleri otomatik onay mekanizmasıyla korunur",
+            "Terminal commands and file writes are protected with auto-approval checks"),
+        ["chat.hint_editing"] = new(
+            "Mesajı düzenliyorsunuz · Gönderildiğinde sonraki yanıtlar yenilenecek",
+            "Editing message · Submitting will regenerate subsequent responses"),
+        ["chat.session_timeout"] = new(
+            "Oturum zaman aşımına uğradı, yeni oturum açılıyor…",
+            "Session timed out, opening a new session…"),
         ["chat.send"] = new("Gönder", "Send"),
+        ["chat.stop"] = new("Durdur", "Stop"),
+        ["chat.cancelled"] = new("İşlem kullanıcı tarafından durduruldu.", "Operation cancelled by user."),
         ["chat.connecting"] = new("Bağlanıyor…", "Connecting…"),
+
+        // Aktivite Kartları & Durumlar
+        ["chat.activity.thinking"] = new("Düşünüyor…", "Thinking…"),
+        ["chat.activity.coding"] = new("Kodlanıyor…", "Writing code…"),
+        ["chat.activity.command"] = new("Komut çalıştırılıyor…", "Running command…"),
+        ["chat.activity.reading"] = new("Dosya okunuyor…", "Reading file…"),
+        ["chat.activity.running"] = new("Çalışıyor…", "Running…"),
+        ["chat.activity.thought_process"] = new("Düşünce süreci", "Thought process"),
+        ["chat.activity.actions"] = new("{0} işlem", "{0} actions"),
+        ["chat.activity.errors"] = new("{0} hata", "{0} errors"),
+        ["chat.activity.stopped"] = new("durduruldu", "stopped"),
+        ["unit.sec"] = new("sn", "s"),
+        ["unit.min"] = new("dk", "m"),
+
+        ["Activity_Thinking"] = new("Düşünüyor…", "Thinking…"),
+        ["Activity_Tool_write_file"] = new("{0} yazılıyor", "Writing {0}"),
+        ["Activity_Tool_write_to_file"] = new("{0} yazılıyor", "Writing {0}"),
+        ["Activity_Tool_edit_file"] = new("{0} düzenleniyor", "Editing {0}"),
+        ["Activity_Tool_terminal"] = new("Komut çalıştırılıyor: {0}", "Running command: {0}"),
+        ["Activity_Tool_execute_command"] = new("Komut çalıştırılıyor: {0}", "Running command: {0}"),
+        ["Activity_Tool_read_file"] = new("{0} okunuyor", "Reading {0}"),
+        ["Activity_Tool_view_file"] = new("{0} okunuyor", "Reading {0}"),
+        ["Activity_Tool_search_web"] = new("Web'de aranıyor: {0}", "Searching web: {0}"),
+        ["Activity_Tool_fetch_url"] = new("{0} getiriliyor", "Fetching {0}"),
+        ["Activity_Tool_Default"] = new("{0} çalıştırılıyor", "Running {0}"),
+        ["Activity_Action_One"] = new("1 işlem", "1 action"),
+        ["Activity_Actions_Many"] = new("{0} işlem", "{0} actions"),
+        ["Activity_Error_One"] = new("1 hata", "1 error"),
+        ["Activity_Errors"] = new("{0} hata", "{0} errors"),
+        ["Activity_Cancelled"] = new("durduruldu", "stopped"),
+        ["Unit_Sec"] = new("sn", "s"),
+        ["Unit_Min"] = new("dk", "m"),
+        ["Chat_Working"] = new("Çalışıyor", "Working"),
+
+        ["chat.status.running"] = new("Çalışıyor…", "Running…"),
+        ["chat.status.done"] = new("Tamamlandı", "Completed"),
+        ["chat.status.error"] = new("Hata", "Error"),
+        ["chat.status.denied"] = new("Reddedildi", "Denied"),
+        ["chat.status.stopped"] = new("Durduruldu", "Stopped"),
+
+        // Onay kartı (tehlikeli komut)
+        ["chat.approval.title"] = new(
+            "Bu komutu çalıştırmak için onay gerekiyor",
+            "This command needs your approval"),
+        ["chat.approval.allow_once"] = new("Bir kez izin ver", "Allow once"),
+        ["chat.approval.allow_session"] = new("Bu oturumda izin ver", "Allow this session"),
+        ["chat.approval.allow_always"] = new("Her zaman izin ver", "Always allow"),
+        ["chat.approval.deny"] = new("Reddet", "Deny"),
+        ["chat.approval.outcome_once"] = new("İzin verildi (bir kez)", "Allowed (once)"),
+        ["chat.approval.outcome_session"] = new(
+            "İzin verildi (bu oturum)", "Allowed (this session)"),
+        ["chat.approval.outcome_always"] = new(
+            "İzin verildi (her zaman)", "Allowed (always)"),
+        ["chat.approval.outcome_denied"] = new("Reddedildi", "Denied"),
+
+        // Araç Biçimlendirici (ToolFormatter)
+        ["tool.format.write_file"] = new("Dosya yaz · {0}", "Write file · {0}"),
+        ["tool.format.read_file"] = new("Dosya oku · {0}", "Read file · {0}"),
+        ["tool.format.denied"] = new(
+            "Bu işlem güvenlik veya onay kuralı nedeniyle reddedildi.\n\n",
+            "This operation was rejected by security or approval rules.\n\n"),
+        ["tool.format.exit_code"] = new("çıkış kodu: {0}", "exit code: {0}"),
         ["chat.role.user"] = new("Sen", "You"),
         ["chat.role.agent"] = new("FETİH", "FETİH"),
         ["chat.role.system"] = new("Sistem", "System"),
@@ -412,6 +528,9 @@ public static class Loc
         ["update.install_failed"] = new(
             "Güncelleme indirilirken/kurulurken bir hata oluştu.",
             "An error occurred while downloading/installing the update."),
+        ["update.hash_mismatch"] = new(
+            "İndirilen dosyanın SHA-256 özeti beklenenle eşleşmedi; güncelleme iptal edildi.",
+            "Downloaded file's SHA-256 did not match; update aborted."),
         ["update.channel.setup"] = new("Kurulum sürümü", "Installed via Setup"),
         ["update.channel.portable"] = new("Taşınabilir sürüm", "Portable version"),
 
@@ -439,6 +558,7 @@ public static class Loc
         ["diag.report_title"] = new("FETİH Masaüstü — tanılama raporu", "FETİH Desktop — diagnostics report"),
         ["diag.report_created"] = new("Oluşturma: ", "Created: "),
         ["diag.report_crash_log"] = new("Çökme günlüğü:", "Crash log:"),
+        ["diag.report_app_log"] = new("Uygulama günlüğü:", "Application log:"),
         ["diag.copied"] = new("Tanılama raporu panoya kopyalandı.", "Diagnostics report copied to clipboard."),
         ["diag.cleared"] = new("Çökme günlüğü temizlendi.", "Crash log cleared."),
         ["diag.no_log"] = new("Temizlenecek günlük yok.", "No log to clear."),
@@ -459,6 +579,7 @@ public static class Loc
         ["diag.row.sandbox"] = new("Sandbox klasörü", "Sandbox folder"),
         ["diag.row.repo"] = new("Depo kökü", "Repository root"),
         ["diag.row.crash_log"] = new("Çökme günlüğü", "Crash log"),
+        ["diag.row.app_log"] = new("Uygulama günlüğü", "Application log"),
         ["diag.present"] = new("Mevcut", "Present"),
         ["diag.missing"] = new("Yok", "Missing"),
         ["diag.file_missing"] = new("Dosya yok", "File not found"),
@@ -986,6 +1107,11 @@ public static class Loc
             "The Desktop Bridge is ready and the model returned a real response. You can go to the chat."),
         ["setup.cancelled"] = new("İptal edildi", "Cancelled"),
         ["setup.failed"] = new("Kurulum başarısız", "Setup failed"),
+        ["setup.lock.busy_title"] = new(
+            "Kurulum zaten çalışıyor", "Setup already running"),
+        ["setup.lock.busy_msg"] = new(
+            "Başka bir kurulum çalışması sürüyor. Lütfen tamamlanmasını bekleyin.",
+            "Another setup run is in progress. Please wait for it to finish."),
         ["setup.log_suffix"] = new("  ·  Günlük: ", "  ·  Log: "),
 
         // ── İlk kurulum: adım adları ve adım sonuçları ───────────────────
@@ -1072,6 +1198,9 @@ public static class Loc
         ["bridge.detail.reconnecting"] = new(
             "Bağlantı koptu; sonraki istekte yeniden bağlanılacak.",
             "The connection dropped; it will reconnect on the next request."),
+        ["bridge.detail.reconnecting_in"] = new(
+            "Bağlantı koptu; {0} sn içinde yeniden bağlanılıyor…",
+            "Connection dropped; reconnecting in {0}s…"),
         ["bridge.detail.not_connected"] = new(
             "Köprü bağlı değil.", "The bridge is not connected."),
         ["bridge.detail.send_failed"] = new(
