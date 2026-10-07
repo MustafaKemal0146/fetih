@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import sqlite3
+import threading
 import time
 import uuid
 from typing import Any, Dict, List, Optional
@@ -10,11 +11,20 @@ logger = logging.getLogger(__name__)
 
 
 class SessionStore:
-    """SQLite-backed persistent storage for desktop chat sessions and transcript items."""
+    """SQLite-backed persistent storage for desktop chat sessions and transcript items.
+
+    Concurrency: the bridge now dispatches requests concurrently and the agent
+    runs on worker threads, so the single ``check_same_thread=False`` connection
+    is reached from several threads at once (agent thread, ThoughtLabeler
+    thread, event loop).  Every access is serialized through ``_lock`` to avoid
+    interleaved statements and ``sqlite3.ProgrammingError``/``database is
+    locked`` races.
+    """
 
     def __init__(self, path: str):
         self.path = path
         os.makedirs(os.path.dirname(path), exist_ok=True)
+        self._lock = threading.RLock()
         self.db = sqlite3.connect(path, check_same_thread=False)
         self.db.row_factory = sqlite3.Row
         self.db.execute("PRAGMA foreign_keys=ON")
@@ -38,21 +48,24 @@ class SessionStore:
     def create(self, sid: Optional[str] = None, title: str = "") -> str:
         sid = sid or uuid.uuid4().hex
         now = time.time()
-        self.db.execute(
-            "INSERT OR REPLACE INTO sessions(id, title, created_at, updated_at) VALUES(?,?,?,?)",
-            (sid, title, now, now),
-        )
-        self.db.commit()
+        with self._lock:
+            self.db.execute(
+                "INSERT OR REPLACE INTO sessions(id, title, created_at, updated_at) VALUES(?,?,?,?)",
+                (sid, title, now, now),
+            )
+            self.db.commit()
         return sid
 
     def exists(self, sid: str) -> bool:
-        r = self.db.execute("SELECT 1 FROM sessions WHERE id=?", (sid,)).fetchone()
+        with self._lock:
+            r = self.db.execute("SELECT 1 FROM sessions WHERE id=?", (sid,)).fetchone()
         return r is not None
 
     def list(self) -> List[Dict[str, Any]]:
-        rows = self.db.execute(
-            "SELECT id, title, updated_at FROM sessions ORDER BY updated_at DESC"
-        ).fetchall()
+        with self._lock:
+            rows = self.db.execute(
+                "SELECT id, title, updated_at FROM sessions ORDER BY updated_at DESC"
+            ).fetchall()
         return [
             {
                 "session_id": r["id"],
@@ -63,29 +76,47 @@ class SessionStore:
         ]
 
     def title(self, sid: str) -> str:
-        r = self.db.execute("SELECT title FROM sessions WHERE id=?", (sid,)).fetchone()
+        with self._lock:
+            r = self.db.execute("SELECT title FROM sessions WHERE id=?", (sid,)).fetchone()
         return r["title"] if r else ""
 
     def rename(self, sid: str, title: str) -> None:
-        self.db.execute("UPDATE sessions SET title=?, updated_at=? WHERE id=?", (title, time.time(), sid))
-        self.db.commit()
+        with self._lock:
+            self.db.execute("UPDATE sessions SET title=?, updated_at=? WHERE id=?", (title, time.time(), sid))
+            self.db.commit()
 
     def append(self, sid: str, kind: str, payload: Dict[str, Any]) -> None:
         now = time.time()
-        # Ensure session exists
-        if not self.exists(sid):
-            self.create(sid=sid)
+        with self._lock:
+            # Ensure session exists
+            if not self._exists_locked(sid):
+                self._create_locked(sid=sid)
+            self.db.execute(
+                "INSERT INTO items(session_id, kind, payload, ts) VALUES(?,?,?,?)",
+                (sid, kind, json.dumps(payload, ensure_ascii=False), now),
+            )
+            self.db.execute("UPDATE sessions SET updated_at=? WHERE id=?", (now, sid))
+            self.db.commit()
+
+    def _exists_locked(self, sid: str) -> bool:
+        r = self.db.execute("SELECT 1 FROM sessions WHERE id=?", (sid,)).fetchone()
+        return r is not None
+
+    def _create_locked(self, sid: Optional[str] = None, title: str = "") -> str:
+        sid = sid or uuid.uuid4().hex
+        now = time.time()
         self.db.execute(
-            "INSERT INTO items(session_id, kind, payload, ts) VALUES(?,?,?,?)",
-            (sid, kind, json.dumps(payload, ensure_ascii=False), now),
+            "INSERT OR REPLACE INTO sessions(id, title, created_at, updated_at) VALUES(?,?,?,?)",
+            (sid, title, now, now),
         )
-        self.db.execute("UPDATE sessions SET updated_at=? WHERE id=?", (now, sid))
         self.db.commit()
+        return sid
 
     def items(self, sid: str) -> List[Dict[str, Any]]:
-        rows = self.db.execute(
-            "SELECT kind, payload FROM items WHERE session_id=? ORDER BY id ASC", (sid,)
-        ).fetchall()
+        with self._lock:
+            rows = self.db.execute(
+                "SELECT kind, payload FROM items WHERE session_id=? ORDER BY id ASC", (sid,)
+            ).fetchall()
         result: List[Dict[str, Any]] = []
         for r in rows:
             try:
@@ -98,29 +129,32 @@ class SessionStore:
     def update_last_thought_label(self, sid: str, label: str) -> None:
         if not label:
             return
-        row = self.db.execute(
-            "SELECT id, payload FROM items WHERE session_id=? AND kind='thought' ORDER BY id DESC LIMIT 1",
-            (sid,),
-        ).fetchone()
-        if row:
-            try:
-                data = json.loads(row["payload"])
-                data["label"] = label
-                self.db.execute(
-                    "UPDATE items SET payload=? WHERE id=?",
-                    (json.dumps(data, ensure_ascii=False), row["id"]),
-                )
-                self.db.commit()
-            except Exception as e:
-                logger.warning("Failed to update thought label: %s", e)
+        with self._lock:
+            row = self.db.execute(
+                "SELECT id, payload FROM items WHERE session_id=? AND kind='thought' ORDER BY id DESC LIMIT 1",
+                (sid,),
+            ).fetchone()
+            if row:
+                try:
+                    data = json.loads(row["payload"])
+                    data["label"] = label
+                    self.db.execute(
+                        "UPDATE items SET payload=? WHERE id=?",
+                        (json.dumps(data, ensure_ascii=False), row["id"]),
+                    )
+                    self.db.commit()
+                except Exception as e:
+                    logger.warning("Failed to update thought label: %s", e)
 
     def delete(self, sid: str) -> None:
-        self.db.execute("DELETE FROM sessions WHERE id=?", (sid,))
-        self.db.commit()
+        with self._lock:
+            self.db.execute("DELETE FROM sessions WHERE id=?", (sid,))
+            self.db.commit()
 
     def delete_all(self) -> None:
-        self.db.execute("DELETE FROM sessions")
-        self.db.commit()
+        with self._lock:
+            self.db.execute("DELETE FROM sessions")
+            self.db.commit()
 
 
 class TranscriptRecorder:

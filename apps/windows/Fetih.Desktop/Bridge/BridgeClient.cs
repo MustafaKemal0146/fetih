@@ -350,7 +350,10 @@ public sealed class BridgeClient : IDisposable
                 case "session.error":
                     SessionError?.Invoke(new BridgeErrorEvent(
                         Str(p, "session_id"), Str(p, "error"),
-                        p.TryGetProperty("partial", out var pt) ? pt.ToString() : null));
+                        p.TryGetProperty("partial", out var pt)
+                            && pt.ValueKind is JsonValueKind.True or JsonValueKind.False
+                            ? (pt.GetBoolean() ? "true" : "false")
+                            : null));
                     break;
 
                 case "session.updated":
@@ -360,7 +363,9 @@ public sealed class BridgeClient : IDisposable
                         p.TryGetProperty("updated_at", out var ua) && ua.ValueKind == JsonValueKind.Number ? ua.GetDouble() : 0.0);
                     break;
 
-                case "thought.label":
+                // Köprü aynı etiketi hem "thought.label" hem
+                // "session.thought_label" olarak yayıyor; çift tetiklememek
+                // için yalnızca ad-uzaylı olanı işliyoruz.
                 case "session.thought_label":
                     ThoughtLabel?.Invoke(Str(p, "session_id"), Str(p, "label"));
                     break;
