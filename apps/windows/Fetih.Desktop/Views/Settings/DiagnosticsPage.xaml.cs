@@ -162,6 +162,9 @@ public sealed partial class DiagnosticsPage : Page
             new(Loc.T("diag.row.repo"), FetihPaths.RepositoryRoot ?? Loc.T("diag.none"),
                 FetihPaths.RepositoryRoot is null ? Loc.T("diag.catalog_unreadable") : Loc.T("diag.present")),
             new(Loc.T("diag.row.crash_log"), FetihPaths.CrashLogPath, State(FetihPaths.CrashLogPath)),
+            new(Loc.T("diag.row.app_log"), Logger.LogFilePath ?? Loc.T("diag.none"),
+                Logger.LogFilePath is not null && FetihPaths.SafeExists(Logger.LogFilePath)
+                    ? Loc.T("diag.present") : Loc.T("diag.missing")),
         };
     }
 
@@ -246,6 +249,25 @@ public sealed partial class DiagnosticsPage : Page
         builder.AppendLine(new string('-', 60));
         builder.AppendLine(Loc.T("diag.report_crash_log"));
         builder.AppendLine(CrashLogText.Text);
-        return builder.ToString();
+
+        // Yapısal uygulama logunun sonunu da ekle (varsa).
+        var appLog = Logger.LogFilePath;
+        if (appLog is not null && File.Exists(appLog))
+        {
+            builder.AppendLine(new string('-', 60));
+            builder.AppendLine(Loc.T("diag.report_app_log"));
+            try
+            {
+                builder.AppendLine(ReadTail(appLog, MaxLogBytes));
+            }
+            catch (Exception ex)
+            {
+                builder.AppendLine(Loc.T("diag.log_read_failed") + ex.Message);
+            }
+        }
+
+        // KRİTİK: panoya/destek talebine giden metni gizli-bilgi redaksiyonundan
+        // geçir. Kopyalanan rapor bir sızıntı yüzeyi olmamalı (token vb.).
+        return LogFormatting.Sanitize(builder.ToString());
     }
 }
