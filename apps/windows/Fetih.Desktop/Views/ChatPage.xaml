@@ -47,14 +47,35 @@
             </Grid>
         </DataTemplate>
 
-        <!-- Assistant Message Template -->
+        <!-- Assistant Message Template — OpenClaw tarzı: sol avatar + saydam geniş kart -->
         <DataTemplate x:Key="AgentTemplate" x:DataType="models:ChatMessage">
-            <Grid Margin="16,4" HorizontalAlignment="Left" MaxWidth="780">
-                <Border Padding="14,10"
-                        CornerRadius="16,16,16,4"
-                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+            <Grid Margin="16,6" HorizontalAlignment="Left" MaxWidth="820" ColumnSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Avatar (marka baş harfi; glyph riski olmasın diye metin) -->
+                <Border Grid.Column="0"
+                        Width="32" Height="32"
+                        CornerRadius="16"
+                        VerticalAlignment="Top"
+                        Background="{ThemeResource AccentFillColorDefaultBrush}">
+                    <TextBlock Text="F"
+                               FontWeight="Bold"
+                               FontSize="16"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+                </Border>
+
+                <!-- Saydam geniş kart (baloncuk değil) -->
+                <Border Grid.Column="1"
+                        Padding="14,10"
+                        CornerRadius="12"
+                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
                         BorderThickness="1"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}">
                     <StackPanel Spacing="6">
                         <services:ChatMarkdownView Markdown="{x:Bind Text, Mode=OneWay}"
                                                    TextBrush="{ThemeResource TextFillColorPrimaryBrush}" />
@@ -62,8 +83,18 @@
                                       Width="14" Height="14"
                                       Visibility="{x:Bind IsStreaming, Mode=OneWay}"
                                       HorizontalAlignment="Left" />
-                        <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Right"
+
+                        <!-- Footer: saat · kopyala · yeniden dene (akış bitince) -->
+                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Left"
                                     Visibility="{x:Bind IsStreaming, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=invert}">
+                            <TextBlock Text="{x:Bind TimeLabel}"
+                                       FontSize="11"
+                                       VerticalAlignment="Center"
+                                       Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                            <TextBlock Text="·"
+                                       FontSize="11"
+                                       VerticalAlignment="Center"
+                                       Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
                             <Button Click="CopyMessage_Click"
                                     Padding="4,2"
                                     FontSize="11"
