@@ -325,6 +325,8 @@ public static class Loc
         ["chat.model.select"] = new("Model seç", "Select model"),
         ["chat.model.none"] = new("Bu sağlayıcı için model listesi yok", "No model list for this provider"),
         ["chat.model.changed"] = new("Model değiştirildi: {0}", "Switched model: {0}"),
+        ["chat.flag.header"] = new("🚩 Bayrak yakalandı", "🚩 Flag captured"),
+        ["chat.flag.copy"] = new("Kopyala", "Copy"),
         ["chat.agy.mode_notice"] = new(
             "Antigravity moduna geçildi: bu sohbeti artık Google Antigravity'nin ajanı yürütüyor (Pro kotan kullanılır). Bu modda FETİH'in araçları, komut onayı ve bulgular paneli çalışmaz. Antigravity varsayılan olarak komut çalıştıramaz; izin vermek için Ayarlar'da 'desktop.antigravity.allow_tools' seçeneğini açabilirsin (onay sormadan çalıştırır).",
             "Switched to Antigravity mode: Google Antigravity's agent now runs this chat (uses your Pro quota). FETİH's tools, command approval and findings panel don't apply in this mode. Antigravity can't run commands by default; to allow it, enable 'desktop.antigravity.allow_tools' in Settings (runs without asking)."),

@@ -111,6 +111,7 @@ public sealed class ChatConversationController
         _bridge.ThoughtLabel += OnThoughtLabel;
         _bridge.ApprovalRequested += OnApprovalRequested;
         _bridge.ApprovalResolved += OnApprovalResolved;
+        _bridge.FindingDiscovered += OnFindingDiscovered;
     }
 
     private static string StripDsml(string? text)
@@ -539,6 +540,49 @@ public sealed class ChatConversationController
         NotifyMessagesChanged();
         SystemMessageAdded?.Invoke(text);
         RequestScroll();
+    }
+
+    /// <summary>CTF bayrak kartı (issue #38): sohbette belirgin, kopyalanabilir kart.</summary>
+    public void AddFlag(string flag)
+    {
+        Messages.Add(new ChatMessage(ChatRole.Flag, flag));
+        NotifyMessagesChanged();
+        RequestScroll();
+    }
+
+    /// <summary>
+    /// Köprü bir bulgu yayınladığında: CTF bayrağıysa (ve bu oturuma aitse)
+    /// sohbete belirgin bir kart ekle. Diğer bulgular Bulgular panelinde görünür.
+    /// </summary>
+    private void OnFindingDiscovered(System.Text.Json.JsonElement el)
+    {
+        try
+        {
+            if (el.ValueKind != System.Text.Json.JsonValueKind.Object) return;
+            if (!el.TryGetProperty("finding", out var f) || f.ValueKind != System.Text.Json.JsonValueKind.Object)
+            {
+                f = el; // bazı yollar finding'i doğrudan gönderebilir
+            }
+            var reference = f.TryGetProperty("reference", out var rf) ? rf.GetString() ?? "" : "";
+            if (!string.Equals(reference, "CTF-FLAG", StringComparison.OrdinalIgnoreCase)) return;
+
+            var sid = f.TryGetProperty("session_id", out var se) ? se.GetString() ?? "" : "";
+            if (!string.IsNullOrEmpty(_currentSessionId) && !string.IsNullOrEmpty(sid) && sid != _currentSessionId) return;
+
+            var flag = f.TryGetProperty("evidence", out var ev) ? ev.GetString() ?? "" : "";
+            if (string.IsNullOrWhiteSpace(flag)) return;
+
+            _dispatcher.Run(() =>
+            {
+                // Aynı bayrağı iki kez kartlama.
+                if (Messages.Any(m => m.Role == ChatRole.Flag && m.Text == flag)) return;
+                AddFlag(flag);
+            });
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("ChatController.OnFindingDiscovered", ex, ex.Message);
+        }
     }
 
     public void NotifyMessagesChanged()

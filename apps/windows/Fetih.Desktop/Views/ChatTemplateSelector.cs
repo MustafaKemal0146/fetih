@@ -13,6 +13,7 @@ public sealed partial class ChatTemplateSelector : DataTemplateSelector
     public DataTemplate? Activity { get; set; }
     public DataTemplate? Approval { get; set; }
     public DataTemplate? System { get; set; }
+    public DataTemplate? Flag { get; set; }
 
     protected override DataTemplate? SelectTemplateCore(object item)
     {
@@ -26,6 +27,7 @@ public sealed partial class ChatTemplateSelector : DataTemplateSelector
                 ChatRole.Tool => Tool,
                 ChatRole.Activity => Activity,
                 ChatRole.Approval => Approval,
+                ChatRole.Flag => Flag,
                 _ => System
             };
         }

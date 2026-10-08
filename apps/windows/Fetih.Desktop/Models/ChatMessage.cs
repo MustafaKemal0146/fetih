@@ -15,7 +15,8 @@ public enum ChatRole
     System,
     Thought,
     Activity,
-    Approval
+    Approval,
+    Flag
 }
 
 /// <summary>Bir araç yürütme kartının durumu.</summary>
@@ -49,6 +50,10 @@ public class ChatMessage : INotifyPropertyChanged
     public ActivityGroup? ParentGroup { get; set; }
 
     public string ThoughtHeaderText => Loc.T("chat.activity.thought_process");
+
+    /// <summary>CTF bayrak kartı (issue #38) başlığı ve kopyala etiketi.</summary>
+    public string FlagHeader => Loc.T("chat.flag.header");
+    public string FlagCopyLabel => Loc.T("chat.flag.copy");
 
     private string _text = "";
     public string Text

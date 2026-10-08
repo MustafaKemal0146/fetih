@@ -627,6 +627,27 @@ public sealed partial class ChatPage : Page
 
     // ── Kaydırma ve UI Yardımcıları ──────────────────────────────────────────
 
+
+    private void FlagCopy_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is Button { Tag: string flag } && !string.IsNullOrWhiteSpace(flag))
+        {
+            try
+            {
+                var dp = new Windows.ApplicationModel.DataTransfer.DataPackage
+                {
+                    RequestedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Copy,
+                };
+                dp.SetText(flag);
+                Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(dp);
+            }
+            catch (Exception ex)
+            {
+                App.LogCrash("ChatPage.FlagCopy", ex, ex.Message);
+            }
+        }
+    }
+
     private void RunOnUi(Action action)
     {
         if (DispatcherQueue.HasThreadAccess) action();
