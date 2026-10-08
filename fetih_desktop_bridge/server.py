@@ -1596,11 +1596,9 @@ class BridgeServer:
         refreshed status. Returns at once with the id those events carry.
         """
         provider = str(params.get("provider") or "").strip()
-        if provider not in _BRIDGE_BACKGROUND_AUTH:
-            if provider == "anthropic":
-                raise BridgeError(
-                    INVALID_PARAMS, "use auth.begin / auth.complete for Anthropic"
-                )
+        # Anthropic is allowed here too: auth.login attempts the zero-paste
+        # loopback flow (with auth.begin/auth.complete as the paste fallback).
+        if provider != "anthropic" and provider not in _BRIDGE_BACKGROUND_AUTH:
             raise BridgeError(
                 INVALID_PARAMS, f"auth.login does not handle provider '{provider}'"
             )
@@ -1646,9 +1644,18 @@ class BridgeServer:
             # two of them cannot fight over sys.stdout at the same time.
             with self._auth_lock:
                 try:
-                    from fetih_cli.auth_commands import auth_add_command
                     with contextlib.redirect_stdout(_LineEmitter()):
-                        auth_add_command(args)
+                        if provider == "anthropic":
+                            # Zero-paste loopback attempt for Claude Pro/Max.
+                            from agent import anthropic_adapter
+                            from fetih_cli.auth_commands import persist_anthropic_oauth
+                            creds = anthropic_adapter.run_fetih_oauth_loopback_login(
+                                open_browser=True
+                            )
+                            persist_anthropic_oauth(creds)
+                        else:
+                            from fetih_cli.auth_commands import auth_add_command
+                            auth_add_command(args)
                 except SystemExit as exc:
                     ok, err = False, (str(exc) or "login aborted")
                 except Exception as exc:  # noqa: BLE001 - surfaced to the app

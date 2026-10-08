@@ -141,6 +141,16 @@
                             <Button x:Name="CliLoginCheckButton"
                                     AutomationProperties.AutomationId="setup_cli_login_check"
                                     Click="CliLoginCheck_Click" />
+                            <!-- Yalnızca Anthropic için: loopback başarısız olursa kodu elle gir. -->
+                            <Button x:Name="CliLoginPasteButton"
+                                    Visibility="Collapsed"
+                                    AutomationProperties.AutomationId="setup_cli_login_paste"
+                                    Click="CliLoginPaste_Click" />
+                            <ProgressRing x:Name="CliLoginRing"
+                                          Width="18" Height="18"
+                                          IsActive="False"
+                                          VerticalAlignment="Center"
+                                          AutomationProperties.AccessibilityView="Raw" />
                         </StackPanel>
                     </StackPanel>
 

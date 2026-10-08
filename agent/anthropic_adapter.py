@@ -1231,13 +1231,18 @@ def build_fetih_oauth_authorize_url() -> Dict[str, Any]:
 
 
 def exchange_fetih_oauth_code(
-    code: str, code_verifier: str, expected_state: str = ""
+    code: str,
+    code_verifier: str,
+    expected_state: str = "",
+    redirect_uri: str = _OAUTH_REDIRECT_URI,
 ) -> Optional[Dict[str, Any]]:
     """Exchange an authorization code for Claude Pro/Max tokens.
 
     ``code`` may be the bare code or the ``code#state`` shape Anthropic shows.
     When ``expected_state`` is given, the embedded state is validated against
-    it to prevent CSRF (RFC 6749 §10.12). Returns
+    it to prevent CSRF (RFC 6749 §10.12). ``redirect_uri`` must match the one
+    used to build the authorize URL (the console callback for the paste flow, a
+    ``http://localhost:<port>/callback`` for the loopback flow). Returns
     ``{access_token, refresh_token, expires_at_ms}`` or ``None`` on failure.
     """
     import time
@@ -1266,7 +1271,7 @@ def exchange_fetih_oauth_code(
             "client_id": _OAUTH_CLIENT_ID,
             "code": auth_code,
             "state": received_state or expected_state,
-            "redirect_uri": _OAUTH_REDIRECT_URI,
+            "redirect_uri": redirect_uri,
             "code_verifier": code_verifier,
         }).encode()
 
@@ -1341,6 +1346,110 @@ def run_fetih_oauth_login_pure() -> Optional[Dict[str, Any]]:
     if not creds:
         print("Token exchange failed.")
         return None
+    return creds
+
+
+def run_fetih_oauth_loopback_login(
+    *, timeout_seconds: float = 180.0, open_browser: bool = True
+) -> Optional[Dict[str, Any]]:
+    """Attempt a zero-paste Claude Pro/Max login via a localhost loopback.
+
+    Starts a one-shot ``http://localhost:<port>/callback`` server, opens the
+    authorize URL with that redirect, and captures the code automatically — no
+    copy/paste. NOTE: this only succeeds if Anthropic accepts a loopback
+    redirect for the public OAuth client; if it does not, the browser shows an
+    authorization error and this raises. Callers should fall back to the paste
+    flow (:func:`build_fetih_oauth_authorize_url` / :func:`exchange_fetih_oauth_code`).
+
+    Returns ``{access_token, refresh_token, expires_at_ms}`` or raises on
+    timeout / error.
+    """
+    import http.server
+    import secrets
+    import threading
+    import time
+    import urllib.parse
+    import webbrowser
+
+    verifier, challenge = _generate_pkce()
+    state = secrets.token_urlsafe(32)
+    captured: Dict[str, str] = {}
+
+    class _Handler(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):  # noqa: N802 - http.server API
+            parsed = urllib.parse.urlparse(self.path)
+            if parsed.path.rstrip("/") not in ("/callback", ""):
+                self.send_response(404)
+                self.end_headers()
+                return
+            qs = urllib.parse.parse_qs(parsed.query)
+            captured["code"] = (qs.get("code") or [""])[0]
+            captured["state"] = (qs.get("state") or [""])[0]
+            captured["error"] = (qs.get("error") or [""])[0]
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(
+                b"<html><body style='font-family:sans-serif;text-align:center;"
+                b"margin-top:80px'><h2>FETIH</h2><p>Giris tamamlandi. "
+                b"Bu sekmeyi kapatabilirsiniz.</p></body></html>"
+            )
+
+        def log_message(self, *args):  # noqa: A002 - silence default logging
+            pass
+
+    httpd = http.server.HTTPServer(("127.0.0.1", 0), _Handler)
+    port = httpd.server_address[1]
+    redirect_uri = f"http://localhost:{port}/callback"
+
+    params = {
+        "client_id": _OAUTH_CLIENT_ID,
+        "response_type": "code",
+        "redirect_uri": redirect_uri,
+        "scope": _OAUTH_SCOPES,
+        "code_challenge": challenge,
+        "code_challenge_method": "S256",
+        "state": state,
+    }
+    authorize_url = f"https://claude.ai/oauth/authorize?{urllib.parse.urlencode(params)}"
+
+    thread = threading.Thread(target=httpd.serve_forever, kwargs={"poll_interval": 0.2}, daemon=True)
+    thread.start()
+
+    print("Claude aboneliginizle yetkilendirmek icin bu baglantiyi acin:")
+    print(authorize_url)
+    print(f"Yaniti bekliyorum: {redirect_uri}")
+    if open_browser:
+        try:
+            webbrowser.open(authorize_url)
+        except Exception:
+            pass
+
+    try:
+        deadline = time.time() + max(30.0, timeout_seconds)
+        while time.time() < deadline and not captured.get("code") and not captured.get("error"):
+            time.sleep(0.2)
+    finally:
+        try:
+            httpd.shutdown()
+        except Exception:
+            pass
+        try:
+            thread.join(timeout=1.0)
+        except Exception:
+            pass
+
+    if captured.get("error"):
+        raise RuntimeError(f"Claude authorization failed: {captured['error']}")
+    code = captured.get("code")
+    if not code:
+        raise TimeoutError("Claude authorization timed out (no loopback callback).")
+    if captured.get("state") != state:
+        raise RuntimeError("Claude authorization failed: state mismatch.")
+
+    creds = exchange_fetih_oauth_code(code, verifier, state, redirect_uri=redirect_uri)
+    if not creds:
+        raise RuntimeError("Claude token exchange failed.")
     return creds
 
 

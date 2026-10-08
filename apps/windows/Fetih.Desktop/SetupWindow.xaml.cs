@@ -40,6 +40,9 @@ public sealed partial class SetupWindow : Window
     private CancellationTokenSource? _cts;
     private ProviderEntry? _selected;
 
+    /// <summary>Köprüdeki arka plan giriş akışının beklenen request_id'si (#54).</summary>
+    private string _authRequestId = "";
+
     /// <summary>Sihirbazın kaç görsel adımı var (nokta göstergesi bunu çizer).</summary>
     private const int TotalPhases = 3;
     private int _phase = 1;
@@ -72,6 +75,11 @@ public sealed partial class SetupWindow : Window
         // süreç sonlandırılmazsa arkada yetim python süreci kalıyordu; her
         // aç-kapa döngüsü kalıcı bir sızıntı bırakıyordu.
         Closed += OnWindowClosed;
+
+        // Sağlayıcı girişi artık köprü üzerinden uygulama içinde yürür (#54):
+        // ilerleme/sonuç olaylarına abone ol.
+        Bridge.BridgeClient.Shared.AuthProgress += OnAuthProgress;
+        Bridge.BridgeClient.Shared.AuthDone += OnAuthDone;
 
         RenderStepDots();
         PopulateProviders(ProviderRegistry.All);
@@ -122,6 +130,7 @@ public sealed partial class SetupWindow : Window
 
         SetButton(CliLoginButton, "setup.cli_login");
         SetButton(CliLoginCheckButton, "setup.cli_check");
+        SetButton(CliLoginPasteButton, "setup.cli.paste");
 
         AwsBar.Title = Loc.T("setup.aws.title");
         AwsBar.Message = Loc.T("setup.aws.message");
@@ -160,6 +169,8 @@ public sealed partial class SetupWindow : Window
         {
             Activated -= OnFirstActivated;
             Closed -= OnWindowClosed;
+            Bridge.BridgeClient.Shared.AuthProgress -= OnAuthProgress;
+            Bridge.BridgeClient.Shared.AuthDone -= OnAuthDone;
             _cts?.Cancel();
 
             // "Sohbete geç" akışında köprüyü YENİ pencere devralır
@@ -366,12 +377,8 @@ public sealed partial class SetupWindow : Window
 
             case ProviderKind.CliLogin:
             case ProviderKind.OAuthBrowser:
-                CliLoginSection.Visibility = Visibility.Visible;
-                CliLoginBar.Severity = InfoBarSeverity.Informational;
-                CliLoginBar.Title = Loc.T("setup.cli.title");
-                CliLoginBar.Message = string.Format(Loc.T("setup.cli.message"), p.Label);
+                ShowCliLogin(p);
                 KeyHint.Text = "";
-                _ = CheckCliLoginAsync(p, announceOnly: true);
                 break;
 
             case ProviderKind.AwsSdk:
@@ -389,6 +396,13 @@ public sealed partial class SetupWindow : Window
                     SignupLink.NavigateUri = new Uri(p.SignupUrl);
                     SignupLink.Content = string.Format(Loc.T("setup.signup_link.url"), p.SignupUrl);
                     SignupLink.Visibility = Visibility.Visible;
+                }
+                // Anthropic gibi hem anahtar hem ABONELİK desteği olan
+                // sağlayıcılarda anahtar kutusunun yanında giriş bölümünü de
+                // göster (#54): kullanıcı Claude Max ile giriş yapabilsin.
+                if (p.SupportsOAuthLogin)
+                {
+                    ShowCliLogin(p);
                 }
                 break;
         }
@@ -498,64 +512,204 @@ public sealed partial class SetupWindow : Window
     /// <c>providers.auth_status</c> ile DOĞRULARIZ — düğmeye basılmış olması
     /// tek başına başarı sayılmaz.</para>
     /// </summary>
+    /// <summary>Seçili sağlayıcı için giriş bölümünü kurar (düğme metinleri + durum).</summary>
+    private void ShowCliLogin(ProviderEntry p)
+    {
+        CliLoginSection.Visibility = Visibility.Visible;
+        CliLoginBar.Severity = InfoBarSeverity.Informational;
+        CliLoginBar.Title = Loc.T("setup.cli.title");
+        CliLoginBar.Message = string.Format(Loc.T("setup.cli.message"), p.Label);
+        CliLoginButton.Content = p.Id == "anthropic"
+            ? Loc.T("provider.oauth.login_claude")
+            : Loc.T("setup.cli_login");
+        // Elle kod yapıştırma yalnızca Anthropic'te anlamlı (loopback başarısızsa).
+        CliLoginPasteButton.Visibility = p.Id == "anthropic" ? Visibility.Visible : Visibility.Collapsed;
+        SetCliLoginBusy(false);
+        _ = CheckCliLoginAsync(p, announceOnly: true);
+    }
+
+    /// <summary>
+    /// Girişi KÖPRÜ üzerinden uygulama içinde başlatır (#54): tarayıcı/cihaz-kodu/
+    /// loopback akışı arka planda yürür, ilerleme <see cref="OnAuthProgress"/>,
+    /// sonuç <see cref="OnAuthDone"/> olaylarından gelir. Konsol penceresi yok.
+    /// </summary>
     private async void CliLogin_Click(object sender, RoutedEventArgs e)
     {
-        if (_selected is not ({ Kind: ProviderKind.CliLogin } or { Kind: ProviderKind.OAuthBrowser }))
-        {
-            return;
-        }
         var p = _selected;
-
-        if (!BridgeLauncherProbe.HasUsablePython(out var python))
+        if (p is null ||
+            !(p.SupportsOAuthLogin || p.Kind is ProviderKind.CliLogin or ProviderKind.OAuthBrowser))
         {
-            CliLoginBar.Severity = InfoBarSeverity.Error;
-            CliLoginBar.Title = Loc.T("setup.python_missing.title");
-            CliLoginBar.Message = Loc.T("setup.python_missing.msg");
             return;
         }
 
-        CliLoginButton.IsEnabled = false;
+        SetCliLoginBusy(true);
         CliLoginBar.Severity = InfoBarSeverity.Informational;
         CliLoginBar.Title = Loc.T("setup.login.opened.title");
         CliLoginBar.Message = Loc.T("setup.login.opened.msg");
 
         try
         {
-            var psi = new ProcessStartInfo
-            {
-                FileName = python,
-                UseShellExecute = true,       // kendi konsol penceresini açsın
-                WorkingDirectory = FetihPaths.RepoRootOrCurrent,
-            };
-            psi.ArgumentList.Add("-m");
-            psi.ArgumentList.Add("fetih_cli");
-            psi.ArgumentList.Add("auth");
-            psi.ArgumentList.Add("add");
-            psi.ArgumentList.Add(p.Id);
-
-            var proc = Process.Start(psi);
-            if (proc is not null)
-            {
-                await proc.WaitForExitAsync().ConfigureAwait(false);
-            }
+            _authRequestId = "";
+            var res = await Bridge.BridgeClient.Shared.AuthLoginAsync(p.Id).ConfigureAwait(true);
+            _authRequestId = res.TryGetProperty("request_id", out var ri) ? ri.GetString() ?? "" : "";
+            // Sonuç OnAuthDone'dan gelir; düğme orada tekrar etkinleşir.
         }
         catch (Exception ex)
         {
-            DispatcherQueue.TryEnqueue(() =>
+            CliLoginBar.Severity = InfoBarSeverity.Error;
+            CliLoginBar.Title = Loc.T("setup.login.failed.title");
+            CliLoginBar.Message = ex.Message;
+            SetCliLoginBusy(false);
+        }
+    }
+
+    /// <summary>Anthropic loopback başarısızsa: tarayıcı + elle kod yapıştırma.</summary>
+    private async void CliLoginPaste_Click(object sender, RoutedEventArgs e)
+    {
+        var p = _selected;
+        if (p is null || p.Id != "anthropic") return;
+
+        SetCliLoginBusy(true);
+        try
+        {
+            var begin = await Bridge.BridgeClient.Shared.AuthBeginAsync("anthropic").ConfigureAwait(true);
+            var url = JsonStr(begin, "authorize_url");
+            var token = JsonStr(begin, "flow_token");
+            if (string.IsNullOrEmpty(token))
             {
                 CliLoginBar.Severity = InfoBarSeverity.Error;
                 CliLoginBar.Title = Loc.T("setup.login.failed.title");
-                CliLoginBar.Message = ex.Message;
-            });
+                CliLoginBar.Message = Loc.T("provider.oauth.login_failed");
+                return;
+            }
+            await OpenUrlAsync(url);
+            var code = await PromptForCodeAsync(url);
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                return;
+            }
+            await Bridge.BridgeClient.Shared.AuthCompleteAsync("anthropic", token, code.Trim()).ConfigureAwait(true);
+            CliLoginBar.Severity = InfoBarSeverity.Success;
+            CliLoginBar.Title = Loc.T("setup.login.ok.title");
+            CliLoginBar.Message = string.Format(Loc.T("setup.login.ok.msg"), p.Label);
         }
+        catch (Exception ex)
+        {
+            CliLoginBar.Severity = InfoBarSeverity.Error;
+            CliLoginBar.Title = Loc.T("setup.login.failed.title");
+            CliLoginBar.Message = ex.Message;
+        }
+        finally
+        {
+            SetCliLoginBusy(false);
+            if (_selected is not null) await CheckCliLoginAsync(_selected, announceOnly: false).ConfigureAwait(false);
+        }
+    }
 
-        DispatcherQueue.TryEnqueue(() => CliLoginButton.IsEnabled = true);
-        await CheckCliLoginAsync(p, announceOnly: false).ConfigureAwait(false);
+    private void OnAuthProgress(Bridge.BridgeAuthProgress ap)
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (ap.RequestId != _authRequestId) return;
+            CliLoginBar.Severity = InfoBarSeverity.Informational;
+            CliLoginBar.Message = ap.Line;
+        });
+    }
+
+    private void OnAuthDone(Bridge.BridgeAuthDone d)
+    {
+        DispatcherQueue.TryEnqueue(async () =>
+        {
+            if (d.RequestId != _authRequestId) return;
+            _authRequestId = "";
+            SetCliLoginBusy(false);
+
+            if (d.Ok && d.LoggedIn)
+            {
+                CliLoginBar.Severity = InfoBarSeverity.Success;
+                CliLoginBar.Title = Loc.T("setup.login.ok.title");
+                CliLoginBar.Message = string.Format(Loc.T("setup.login.ok.msg"), _selected?.Label ?? d.Provider);
+            }
+            else
+            {
+                CliLoginBar.Severity = InfoBarSeverity.Warning;
+                CliLoginBar.Title = Loc.T("setup.login.failed.title");
+                CliLoginBar.Message = string.IsNullOrEmpty(d.Error)
+                    ? Loc.T("setup.login.pending.msg")
+                    : d.Error;
+                // Anthropic loopback başarısızsa 'Kodu elle gir' düğmesi zaten görünür.
+            }
+
+            if (_selected is not null)
+            {
+                await CheckCliLoginAsync(_selected, announceOnly: false).ConfigureAwait(false);
+            }
+        });
+    }
+
+    private void SetCliLoginBusy(bool busy)
+    {
+        CliLoginRing.IsActive = busy;
+        CliLoginButton.IsEnabled = !busy;
+        CliLoginPasteButton.IsEnabled = !busy;
+    }
+
+    private static string JsonStr(System.Text.Json.JsonElement e, string name)
+        => e.ValueKind == System.Text.Json.JsonValueKind.Object && e.TryGetProperty(name, out var v)
+           && v.ValueKind == System.Text.Json.JsonValueKind.String ? v.GetString() ?? "" : "";
+
+    private static async Task OpenUrlAsync(string url)
+    {
+        if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            try { await Windows.System.Launcher.LaunchUriAsync(uri); } catch { }
+        }
+    }
+
+    /// <summary>Anthropic kod yapıştırma diyaloğu (sihirbaz). İptal → null.</summary>
+    private async Task<string?> PromptForCodeAsync(string authorizeUrl)
+    {
+        var codeBox = new TextBox
+        {
+            PlaceholderText = Loc.T("provider.oauth.paste_placeholder"),
+            AcceptsReturn = false,
+            TextWrapping = TextWrapping.Wrap,
+        };
+        var body = new StackPanel { Spacing = 10 };
+        body.Children.Add(new TextBlock
+        {
+            Text = Loc.T("provider.oauth.paste_body"),
+            TextWrapping = TextWrapping.Wrap,
+        });
+        body.Children.Add(codeBox);
+
+        var dialog = new ContentDialog
+        {
+            Title = Loc.T("provider.oauth.paste_title"),
+            Content = body,
+            PrimaryButtonText = Loc.T("provider.oauth.paste_submit"),
+            SecondaryButtonText = Loc.T("provider.oauth.paste_open_browser"),
+            CloseButtonText = Loc.T("common.cancel"),
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = Content.XamlRoot,
+        };
+
+        while (true)
+        {
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Secondary)
+            {
+                await OpenUrlAsync(authorizeUrl);
+                continue;
+            }
+            return result == ContentDialogResult.Primary ? codeBox.Text : null;
+        }
     }
 
     private void CliLoginCheck_Click(object sender, RoutedEventArgs e)
     {
-        if (_selected is { Kind: ProviderKind.CliLogin or ProviderKind.OAuthBrowser } p)
+        if (_selected is { } p &&
+            (p.SupportsOAuthLogin || p.Kind is ProviderKind.CliLogin or ProviderKind.OAuthBrowser))
         {
             _ = CheckCliLoginAsync(p, announceOnly: false);
         }

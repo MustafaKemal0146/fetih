@@ -1099,6 +1099,7 @@ public static class Loc
         ["setup.local_install_link.url"] = new("Kurulum sayfası — {0}", "Installation page — {0}"),
         ["setup.cli_login"] = new("Oturum aç", "Sign in"),
         ["setup.cli_check"] = new("Durumu denetle", "Check status"),
+        ["setup.cli.paste"] = new("Kodu elle gir", "Enter code manually"),
         ["setup.aws.title"] = new("AWS kimlik zinciri", "AWS credential chain"),
         ["setup.aws.message"] = new(
             "Bu sağlayıcı anahtar istemez; AWS_PROFILE / IAM rolü gibi ortam kimlik bilgilerini kullanır.",
@@ -1234,6 +1235,9 @@ public static class Loc
             "Model yanıt verdi (boş metin) — kurulum tamam.",
             "The model responded (empty text) — setup is complete."),
         ["setup.step.verify.ok"] = new("Model yanıt verdi: ", "The model responded: "),
+        ["setup.step.verify.rate_limited"] = new(
+            "Giriş başarılı, sağlayıcı ulaşılabilir — ama hesabın kotası/oran sınırı şu an dolu (429). Kurulum tamam; kota yenilenince kullanabilirsin. ({0})",
+            "Signed in and the provider is reachable — but your account's quota/rate limit is currently exhausted (429). Setup is complete; it will work once your quota resets. ({0})"),
         ["setup.step.verify.fail"] = new(
             "Model yanıt vermedi ({0}): {1}  Sağlayıcıya dönüp anahtarı ya da modeli düzelt.",
             "The model did not respond ({0}): {1}  Go back to the provider and fix the key or the model."),

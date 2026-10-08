@@ -368,6 +368,16 @@ public sealed class VerifyEndToEndStep : SetupStep
         }
         catch (BridgeRpcException rpc)
         {
+            // Kota/oran sınırı (429) GERÇEK bir kurulum hatası değil: kimlik
+            // doğrulandı, sağlayıcı ve model çözüldü — yalnızca hesabın anlık
+            // kotası dolu. Bunu başarısızlık sayıp kullanıcıyı sihirbazda
+            // tıkamak yerine YUMUŞAK geçiş yapıyoruz (kurulum tamamlanır).
+            if (IsTransientModelLimit(rpc))
+            {
+                return StepResult.Ok(string.Format(
+                    Loc.T("setup.step.verify.rate_limited"), Shorten(rpc.Message, 200)));
+            }
+
             // Sağlayıcı/model hatasını BURADA yakala: kullanıcı sihirbazdan
             // çıkmadan düzeltebilsin, ilk mesajında sürprizle karşılaşmasın.
             return StepResult.Fail(string.Format(
@@ -377,6 +387,19 @@ public sealed class VerifyEndToEndStep : SetupStep
         {
             return StepResult.Fail(Loc.T("setup.step.verify.timeout"));
         }
+    }
+
+    /// <summary>429 / kota / oran-sınırı: kimlik doğru, sadece hesabın kotası dolu.</summary>
+    private static bool IsTransientModelLimit(BridgeRpcException rpc)
+    {
+        var m = rpc.Message ?? "";
+        return m.Contains("429", StringComparison.Ordinal)
+            || m.Contains("Resource has been exhausted", StringComparison.OrdinalIgnoreCase)
+            || m.Contains("RESOURCE_EXHAUSTED", StringComparison.OrdinalIgnoreCase)
+            || m.Contains("quota", StringComparison.OrdinalIgnoreCase)
+            || m.Contains("rate limit", StringComparison.OrdinalIgnoreCase)
+            || m.Contains("rate-limit", StringComparison.OrdinalIgnoreCase)
+            || m.Contains("too many requests", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string Shorten(string s, int max = 120)
