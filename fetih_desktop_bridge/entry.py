@@ -36,6 +36,32 @@ def _free_port() -> int:
         return s.getsockname()[1]
 
 
+def _start_warmup() -> None:
+    """İlk mesajın ~25 sn beklememesi için ağır işleri arka planda ısıt.
+
+    Soğuk başlangıç bedeli, kullanıcı daha hiçbir şey yazmadan ödensin:
+    - ``run_agent`` import zinciri (model_tools + tüm tools/* keşfi + agent/*),
+    - skill sistem-istem indeksi (``~/.fetih/skills`` ağacının taranması ve
+      snapshot'ın hazırlanması) — asıl 25 sn'nin büyük kısmı budur.
+    Hepsi daemon thread'de ve hatasız; başlatmayı asla bloklamaz.
+    """
+    import threading
+
+    def _work() -> None:
+        try:
+            import run_agent  # noqa: F401 — ağır import zincirini ısıt
+        except Exception:
+            pass
+        try:
+            from agent.prompt_builder import build_skills_system_prompt
+
+            build_skills_system_prompt()  # skill ağacını tara + snapshot'ı ısıt
+        except Exception:
+            pass
+
+    threading.Thread(target=_work, daemon=True).start()
+
+
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="fetih desktop-bridge",
@@ -72,6 +98,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     # ``session.approve``.  Without this the agent runs in a non-interactive
     # context and auto-approves.  It is a per-process policy, set once here.
     os.environ.setdefault("FETIH_EXEC_ASK", "1")
+
+    # Soğuk başlangıcı kullanıcı ilk mesajını yazmadan ısıt (fake model hariç).
+    if not fake_model:
+        _start_warmup()
 
     if args.stdio:
         # The parent process spawned us over a private pipe; it already holds

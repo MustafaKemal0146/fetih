@@ -362,11 +362,26 @@ public sealed partial class ChatPage : Page
             return;
         }
 
-        if (e.Key == VirtualKey.Enter && (ctrl || !shift))
+        if (e.Key == VirtualKey.Enter)
         {
+            // Ctrl+Enter'ı KeyboardAccelerator güvenilir biçimde ele alır —
+            // burada karışmayalım ki çift gönderim olmasın.
+            if (ctrl) return;
+            // Shift+Enter → yeni satır (varsayılan davranış, dokunma).
+            if (shift) return;
+            // Düz Enter → gönder.
             e.Handled = true;
             await SendAsync();
         }
+    }
+
+    private async void SendAccelerator_Invoked(
+        Microsoft.UI.Xaml.Input.KeyboardAccelerator sender,
+        Microsoft.UI.Xaml.Input.KeyboardAcceleratorInvokedEventArgs args)
+    {
+        // Ctrl+Enter → gönder (modifier okumasına bağlı değil).
+        args.Handled = true;
+        await SendAsync();
     }
 
     private void RefreshHint()

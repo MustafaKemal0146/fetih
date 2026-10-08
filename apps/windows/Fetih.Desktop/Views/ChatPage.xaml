@@ -462,7 +462,15 @@
                      MaxHeight="160"
                      ScrollViewer.VerticalScrollBarVisibility="Auto"
                      TextChanged="PromptBox_TextChanged"
-                     KeyDown="PromptBox_KeyDown" />
+                     KeyDown="PromptBox_KeyDown">
+                <TextBox.KeyboardAccelerators>
+                    <!-- Ctrl+Enter = gönder. Accelerator, modifier'ı KeyDown'daki
+                         GetKeyStateForCurrentThread okumasına göre daha güvenilir
+                         yakalar (odak/zamanlama sorunlarından etkilenmez). -->
+                    <KeyboardAccelerator Modifiers="Control" Key="Enter"
+                                         Invoked="SendAccelerator_Invoked" />
+                </TextBox.KeyboardAccelerators>
+            </TextBox>
 
             <Button x:Name="SendButton"
                     Grid.Row="0"

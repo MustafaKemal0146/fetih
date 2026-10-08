@@ -725,12 +725,17 @@ def skills_list(category: str = None, task_id: str = None) -> str:
             {s.get("category") for s in all_skills if s.get("category")}
         )
 
+        # count/categories are placed BEFORE the (potentially huge) skills
+        # array so they survive result truncation: with ~900 skills this JSON
+        # exceeds the tool-result preview cap and the tail gets dropped, which
+        # previously hid the count — so "how many skills do I have?" could not
+        # be answered from the preview.
         return json.dumps(
             {
                 "success": True,
-                "skills": all_skills,
-                "categories": categories,
                 "count": len(all_skills),
+                "categories": categories,
+                "skills": all_skills,
                 "hint": "Use skill_view(name) to see full content, tags, and linked files",
             },
             ensure_ascii=False,
