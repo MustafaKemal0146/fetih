@@ -28,6 +28,15 @@ public sealed partial class ProviderPage : Page
     /// <summary>Görev G: seçiciyi besleyen (etiket → id) sağlayıcı adayları.</summary>
     private List<(string Label, string Id)> _providerChoices = new();
 
+    // ── Abonelik/OAuth girişi (issue #54) ───────────────────────────────
+    /// <summary>Şu an seçili ve OAuth girişi destekleyen sağlayıcının kimliği.</summary>
+    private string _oauthProviderId = "";
+    /// <summary>Seçili sağlayıcının akış türü: paste_code | loopback | device_code | cli_session.</summary>
+    private string _oauthFlow = "";
+    /// <summary>Arka plan (auth.login) akışının beklenen request_id'si; olaylar bununla eşlenir.</summary>
+    private string _oauthActiveRequestId = "";
+    private bool _authEventsHooked;
+
     public ProviderPage()
     {
         InitializeComponent();
@@ -55,6 +64,11 @@ public sealed partial class ProviderPage : Page
         SearchBox.PlaceholderText = Loc.T("provider.search_placeholder");
         OnlyConfiguredBox.Content = Loc.T("provider.only_configured");
 
+        OAuthLogoutButton.Content = Loc.T("provider.oauth.logout");
+        OAuthRefreshButton.Content = Loc.T("provider.oauth.refresh");
+        // OAuthLoginButton metni sağlayıcıya göre değişir (Claude'a özel) ve
+        // UpdateOAuthLoginUiAsync içinde ayarlanır.
+
         // Ekran okuyucu adları: yukarıdaki etiketler ayrı TextBlock'lar olduğu
         // için UIA bunları denetimlerle kendiliğinden eşleştiremiyor; adları
         // açıkça kurmazsak alanlar adsız kalıyordu.
@@ -72,6 +86,12 @@ public sealed partial class ProviderPage : Page
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
         Loc.LanguageChanged += OnLanguageChanged;
+        if (!_authEventsHooked)
+        {
+            _bridge.AuthProgress += OnAuthProgress;
+            _bridge.AuthDone += OnAuthDone;
+            _authEventsHooked = true;
+        }
         Populate();
         _ = SeedSelectorAsync();
     }
@@ -79,6 +99,12 @@ public sealed partial class ProviderPage : Page
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
         Loc.LanguageChanged -= OnLanguageChanged;
+        if (_authEventsHooked)
+        {
+            _bridge.AuthProgress -= OnAuthProgress;
+            _bridge.AuthDone -= OnAuthDone;
+            _authEventsHooked = false;
+        }
     }
 
     private void OnLanguageChanged()
@@ -630,6 +656,9 @@ public sealed partial class ProviderPage : Page
             }
         }
 
+        // ── 1b. Abonelik/OAuth girişi (Claude Max, Codex, Gemini, Qwen, xAI) ──
+        await UpdateOAuthLoginUiAsync(entry, pid).ConfigureAwait(true);
+
         // ── 2. Model Listesi (Canlı + Çevrimdışı Katalog) ─────────────────────
         var curated = ProviderRegistry.GetCuratedModels(pid);
         var currentSelection = preferredModel ?? (ModelCombo.SelectedItem as string ?? ModelCombo.Text ?? "");
@@ -691,6 +720,317 @@ public sealed partial class ProviderPage : Page
             }
         }
     }
+
+    // ── Abonelik/OAuth girişi (issue #54) ───────────────────────────────
+
+    /// <summary>
+    /// Seçili sağlayıcı OAuth/abonelik girişi destekliyorsa giriş panelini
+    /// gösterip mevcut durumu yeniler; aksi hâlde paneli gizler.
+    /// </summary>
+    private async Task UpdateOAuthLoginUiAsync(ProviderEntry? entry, string pid)
+    {
+        if (entry is null || !entry.SupportsOAuthLogin)
+        {
+            _oauthProviderId = "";
+            _oauthFlow = "";
+            OAuthLoginPanel.Visibility = Visibility.Collapsed;
+            return;
+        }
+
+        _oauthProviderId = pid;
+        _oauthFlow = entry.OAuthFlow;
+        OAuthLoginPanel.Visibility = Visibility.Visible;
+        OAuthProgressText.Visibility = Visibility.Collapsed;
+        OAuthProgressText.Text = "";
+
+        // Claude'a özel çağrı metni; diğer sağlayıcılarda jenerik "Giriş yap".
+        OAuthLoginButton.Content = pid == "anthropic"
+            ? Loc.T("provider.oauth.login_claude")
+            : Loc.T("provider.oauth.login");
+        AutomationProperties.SetName(OAuthLoginButton, OAuthLoginButton.Content?.ToString() ?? "");
+
+        await RefreshOAuthStatusAsync(pid).ConfigureAwait(true);
+    }
+
+    /// <summary>providers.auth_status'u okuyup durum noktası/metnini günceller.</summary>
+    private async Task RefreshOAuthStatusAsync(string pid)
+    {
+        SetOAuthStatusText(Loc.T("provider.oauth.checking"), ok: false);
+        OAuthLogoutButton.IsEnabled = false;
+        try
+        {
+            var res = await _bridge.ProvidersAuthStatusAsync(pid).ConfigureAwait(true);
+            var loggedIn = res.ValueKind == JsonValueKind.Object
+                && res.TryGetProperty("logged_in", out var li)
+                && li.ValueKind == JsonValueKind.True;
+
+            if (loggedIn)
+            {
+                var text = Loc.T("provider.oauth.logged_in");
+                var detail = BuildStatusDetail(res);
+                if (!string.IsNullOrEmpty(detail)) text += " · " + detail;
+                SetOAuthStatusText(text, ok: true);
+                OAuthLogoutButton.IsEnabled = true;
+            }
+            else
+            {
+                SetOAuthStatusText(Loc.T("provider.oauth.logged_out"), ok: false);
+            }
+        }
+        catch
+        {
+            SetOAuthStatusText(Loc.T("provider.oauth.logged_out"), ok: false);
+        }
+    }
+
+    private static string BuildStatusDetail(JsonElement res)
+    {
+        if (res.ValueKind != JsonValueKind.Object) return "";
+        var parts = new List<string>();
+        foreach (var key in new[] { "email", "account", "plan" })
+        {
+            if (res.TryGetProperty(key, out var v) && v.ValueKind == JsonValueKind.String)
+            {
+                var s = v.GetString();
+                if (!string.IsNullOrWhiteSpace(s)) parts.Add(s!);
+            }
+        }
+        return string.Join(" · ", parts);
+    }
+
+    private void SetOAuthStatusText(string text, bool ok)
+    {
+        OAuthStatusText.Text = text;
+        var brushKey = ok ? "SystemFillColorSuccessBrush" : "SystemFillColorCautionBrush";
+        if (Application.Current.Resources.TryGetValue(brushKey, out var brush))
+        {
+            OAuthStatusDot.Fill = (Microsoft.UI.Xaml.Media.Brush)brush;
+            OAuthStatusText.Foreground = (Microsoft.UI.Xaml.Media.Brush)brush;
+        }
+    }
+
+    private void SetOAuthBusy(bool busy)
+    {
+        OAuthBusyRing.IsActive = busy;
+        OAuthLoginButton.IsEnabled = !busy;
+        OAuthRefreshButton.IsEnabled = !busy;
+        if (busy) OAuthLogoutButton.IsEnabled = false;
+    }
+
+    private async void OAuthLoginButton_Click(object sender, RoutedEventArgs e)
+    {
+        var pid = _oauthProviderId;
+        if (string.IsNullOrEmpty(pid)) return;
+        if (string.Equals(_oauthFlow, "paste_code", StringComparison.Ordinal))
+        {
+            await StartPasteLoginAsync(pid);
+        }
+        else
+        {
+            await StartBackgroundLoginAsync(pid);
+        }
+    }
+
+    /// <summary>Anthropic: auth.begin → tarayıcı → kod yapıştırma → auth.complete.</summary>
+    private async Task StartPasteLoginAsync(string pid)
+    {
+        SetOAuthBusy(true);
+        OAuthProgressText.Visibility = Visibility.Collapsed;
+        try
+        {
+            var begin = await _bridge.AuthBeginAsync(pid).ConfigureAwait(true);
+            var url = JsonStr(begin, "authorize_url");
+            var flowToken = JsonStr(begin, "flow_token");
+            if (string.IsNullOrEmpty(flowToken))
+            {
+                SetOAuthStatusText(Loc.T("provider.oauth.login_failed"), ok: false);
+                return;
+            }
+
+            await OpenUrlAsync(url);
+
+            var code = await PromptForCodeAsync(url);
+            if (string.IsNullOrWhiteSpace(code))
+            {
+                // Kullanıcı iptal etti → durumu olduğu gibi bırak.
+                await RefreshOAuthStatusAsync(pid).ConfigureAwait(true);
+                return;
+            }
+
+            await _bridge.AuthCompleteAsync(pid, flowToken, code.Trim()).ConfigureAwait(true);
+            FetihConfigService.Current.Reload();
+            await RefreshOAuthStatusAsync(pid).ConfigureAwait(true);
+            OAuthProgressText.Visibility = Visibility.Visible;
+            OAuthProgressText.Text = Loc.T("provider.oauth.login_ok");
+        }
+        catch (BridgeRpcException ex)
+        {
+            OAuthProgressText.Visibility = Visibility.Visible;
+            OAuthProgressText.Text = Loc.T("provider.oauth.login_failed") + " " + ex.Message;
+            await RefreshOAuthStatusAsync(pid).ConfigureAwait(true);
+        }
+        catch (Exception ex)
+        {
+            OAuthProgressText.Visibility = Visibility.Visible;
+            OAuthProgressText.Text = Loc.T("provider.oauth.login_failed") + " " + ex.Message;
+        }
+        finally
+        {
+            SetOAuthBusy(false);
+        }
+    }
+
+    /// <summary>xAI/Codex/Gemini/Qwen: köprüde arka plan girişi (auth.login) + olaylar.</summary>
+    private async Task StartBackgroundLoginAsync(string pid)
+    {
+        SetOAuthBusy(true);
+        OAuthProgressText.Visibility = Visibility.Visible;
+        OAuthProgressText.Text = "";
+        SetOAuthStatusText(Loc.T("provider.oauth.signing_in"), ok: false);
+        try
+        {
+            var res = await _bridge.AuthLoginAsync(pid).ConfigureAwait(true);
+            _oauthActiveRequestId = JsonStr(res, "request_id");
+            // Sonuç AuthDone olayından gelir; meşgul durumu orada çözülür.
+        }
+        catch (Exception ex)
+        {
+            _oauthActiveRequestId = "";
+            OAuthProgressText.Text = Loc.T("provider.oauth.login_failed") + " " + ex.Message;
+            SetOAuthBusy(false);
+            await RefreshOAuthStatusAsync(pid).ConfigureAwait(true);
+        }
+    }
+
+    private void OnAuthProgress(BridgeAuthProgress p)
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            if (p.RequestId != _oauthActiveRequestId) return;
+            OAuthProgressText.Visibility = Visibility.Visible;
+            // Cihaz kodu / yetkilendirme bağlantısı genelde son anlamlı satırdır.
+            OAuthProgressText.Text = p.Line;
+        });
+    }
+
+    private void OnAuthDone(BridgeAuthDone d)
+    {
+        DispatcherQueue.TryEnqueue(async () =>
+        {
+            if (d.RequestId != _oauthActiveRequestId) return;
+            _oauthActiveRequestId = "";
+            SetOAuthBusy(false);
+            FetihConfigService.Current.Reload();
+
+            OAuthProgressText.Visibility = Visibility.Visible;
+            OAuthProgressText.Text = d.Ok && d.LoggedIn
+                ? Loc.T("provider.oauth.login_ok")
+                : Loc.T("provider.oauth.login_failed")
+                  + (string.IsNullOrEmpty(d.Error) ? "" : " " + d.Error);
+
+            if (!string.IsNullOrEmpty(_oauthProviderId))
+            {
+                await RefreshOAuthStatusAsync(_oauthProviderId);
+            }
+        });
+    }
+
+    private async void OAuthLogoutButton_Click(object sender, RoutedEventArgs e)
+    {
+        var pid = _oauthProviderId;
+        if (string.IsNullOrEmpty(pid)) return;
+
+        var confirm = new ContentDialog
+        {
+            Title = Loc.T("provider.oauth.logout_confirm_title"),
+            Content = Loc.T("provider.oauth.logout_confirm_body"),
+            PrimaryButtonText = Loc.T("provider.oauth.logout"),
+            CloseButtonText = Loc.T("common.cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = XamlRoot,
+        };
+        if (await confirm.ShowAsync() != ContentDialogResult.Primary) return;
+
+        SetOAuthBusy(true);
+        try
+        {
+            await _bridge.AuthLogoutAsync(pid).ConfigureAwait(true);
+            FetihConfigService.Current.Reload();
+            OAuthProgressText.Visibility = Visibility.Visible;
+            OAuthProgressText.Text = Loc.T("provider.oauth.logout_ok");
+        }
+        catch (Exception ex)
+        {
+            OAuthProgressText.Visibility = Visibility.Visible;
+            OAuthProgressText.Text = ex.Message;
+        }
+        finally
+        {
+            SetOAuthBusy(false);
+            await RefreshOAuthStatusAsync(pid).ConfigureAwait(true);
+        }
+    }
+
+    private async void OAuthRefreshButton_Click(object sender, RoutedEventArgs e)
+    {
+        var pid = _oauthProviderId;
+        if (!string.IsNullOrEmpty(pid)) await RefreshOAuthStatusAsync(pid);
+    }
+
+    /// <summary>Anthropic kod yapıştırma diyaloğu. İptal → <c>null</c> döner.</summary>
+    private async Task<string?> PromptForCodeAsync(string authorizeUrl)
+    {
+        var codeBox = new TextBox
+        {
+            PlaceholderText = Loc.T("provider.oauth.paste_placeholder"),
+            AcceptsReturn = false,
+            TextWrapping = TextWrapping.Wrap,
+        };
+        AutomationProperties.SetName(codeBox, Loc.T("provider.oauth.paste_placeholder"));
+
+        var body = new StackPanel { Spacing = 10 };
+        body.Children.Add(new TextBlock
+        {
+            Text = Loc.T("provider.oauth.paste_body"),
+            TextWrapping = TextWrapping.Wrap,
+        });
+        body.Children.Add(codeBox);
+
+        var dialog = new ContentDialog
+        {
+            Title = Loc.T("provider.oauth.paste_title"),
+            Content = body,
+            PrimaryButtonText = Loc.T("provider.oauth.paste_submit"),
+            SecondaryButtonText = Loc.T("provider.oauth.paste_open_browser"),
+            CloseButtonText = Loc.T("common.cancel"),
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = XamlRoot,
+        };
+
+        // "Tarayıcıyı tekrar aç" diyaloğu kapatmasın: URL'yi açıp yeniden göster.
+        while (true)
+        {
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Secondary)
+            {
+                await OpenUrlAsync(authorizeUrl);
+                continue;
+            }
+            return result == ContentDialogResult.Primary ? codeBox.Text : null;
+        }
+    }
+
+    private static async Task OpenUrlAsync(string url)
+    {
+        if (!string.IsNullOrWhiteSpace(url) && Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            try { await Windows.System.Launcher.LaunchUriAsync(uri); } catch { }
+        }
+    }
+
+    private static string JsonStr(JsonElement e, string name)
+        => e.ValueKind == JsonValueKind.Object && e.TryGetProperty(name, out var v)
+           && v.ValueKind == JsonValueKind.String ? v.GetString() ?? "" : "";
 
     private void PopulateModelCombo(IReadOnlyList<string> models, string? preferred)
     {

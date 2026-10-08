@@ -1194,11 +1194,20 @@ def _generate_pkce() -> tuple:
     return verifier, challenge
 
 
-def run_fetih_oauth_login_pure() -> Optional[Dict[str, Any]]:
-    """Run FETIH-native OAuth PKCE flow and return credential state."""
+def build_fetih_oauth_authorize_url() -> Dict[str, Any]:
+    """Build the Claude Pro/Max OAuth authorize URL plus its PKCE material.
+
+    Returns ``{authorize_url, code_verifier, state}``. The caller opens the
+    URL, the user authorizes and copies the code Anthropic shows, and
+    :func:`exchange_fetih_oauth_code` turns that code into tokens. Split out
+    from :func:`run_fetih_oauth_login_pure` so the desktop app can drive the
+    flow with an in-app paste box instead of a blocking console prompt — the
+    Anthropic OAuth client is pinned to the ``console.anthropic.com`` callback
+    (not a loopback), so a copied code is unavoidable, but it need not live in
+    a terminal.
+    """
     import secrets
-    import time
-    import webbrowser
+    from urllib.parse import urlencode
 
     verifier, challenge = _generate_pkce()
     oauth_state = secrets.token_urlsafe(32)
@@ -1213,9 +1222,91 @@ def run_fetih_oauth_login_pure() -> Optional[Dict[str, Any]]:
         "code_challenge_method": "S256",
         "state": oauth_state,
     }
-    from urllib.parse import urlencode
+    authorize_url = f"https://claude.ai/oauth/authorize?{urlencode(params)}"
+    return {
+        "authorize_url": authorize_url,
+        "code_verifier": verifier,
+        "state": oauth_state,
+    }
 
-    auth_url = f"https://claude.ai/oauth/authorize?{urlencode(params)}"
+
+def exchange_fetih_oauth_code(
+    code: str, code_verifier: str, expected_state: str = ""
+) -> Optional[Dict[str, Any]]:
+    """Exchange an authorization code for Claude Pro/Max tokens.
+
+    ``code`` may be the bare code or the ``code#state`` shape Anthropic shows.
+    When ``expected_state`` is given, the embedded state is validated against
+    it to prevent CSRF (RFC 6749 §10.12). Returns
+    ``{access_token, refresh_token, expires_at_ms}`` or ``None`` on failure.
+    """
+    import time
+
+    raw = (code or "").strip()
+    if not raw:
+        return None
+
+    splits = raw.split("#")
+    auth_code = splits[0].strip()
+    received_state = splits[1].strip() if len(splits) > 1 else ""
+
+    # Validate state to prevent CSRF (RFC 6749 §10.12) when we have one.
+    if expected_state and received_state and received_state != expected_state:
+        logger.warning("OAuth state mismatch — possible CSRF, aborting")
+        return None
+
+    if not auth_code:
+        return None
+
+    try:
+        import urllib.request
+
+        exchange_data = json.dumps({
+            "grant_type": "authorization_code",
+            "client_id": _OAUTH_CLIENT_ID,
+            "code": auth_code,
+            "state": received_state or expected_state,
+            "redirect_uri": _OAUTH_REDIRECT_URI,
+            "code_verifier": code_verifier,
+        }).encode()
+
+        req = urllib.request.Request(
+            _OAUTH_TOKEN_URL,
+            data=exchange_data,
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": f"claude-cli/{_get_claude_code_version()} (external, cli)",
+            },
+            method="POST",
+        )
+
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            result = json.loads(resp.read().decode())
+    except Exception as e:
+        logger.warning("Anthropic OAuth token exchange failed: %s", e)
+        return None
+
+    access_token = result.get("access_token", "")
+    refresh_token = result.get("refresh_token", "")
+    expires_in = result.get("expires_in", 3600)
+
+    if not access_token:
+        return None
+
+    expires_at_ms = int(time.time() * 1000) + (expires_in * 1000)
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "expires_at_ms": expires_at_ms,
+    }
+
+
+def run_fetih_oauth_login_pure() -> Optional[Dict[str, Any]]:
+    """Run FETIH-native OAuth PKCE flow (console) and return credential state."""
+    import webbrowser
+
+    info = build_fetih_oauth_authorize_url()
+    auth_url = info["authorize_url"]
 
     print()
     print("Authorize FETIH with your Claude Pro/Max subscription.")
@@ -1246,57 +1337,11 @@ def run_fetih_oauth_login_pure() -> Optional[Dict[str, Any]]:
         print("No code entered.")
         return None
 
-    splits = auth_code.split("#")
-    code = splits[0]
-    received_state = splits[1] if len(splits) > 1 else ""
-
-    # Validate state to prevent CSRF (RFC 6749 §10.12)
-    if received_state != oauth_state:
-        logger.warning("OAuth state mismatch — possible CSRF, aborting")
+    creds = exchange_fetih_oauth_code(auth_code, info["code_verifier"], info["state"])
+    if not creds:
+        print("Token exchange failed.")
         return None
-
-    try:
-        import urllib.request
-
-        exchange_data = json.dumps({
-            "grant_type": "authorization_code",
-            "client_id": _OAUTH_CLIENT_ID,
-            "code": code,
-            "state": received_state,
-            "redirect_uri": _OAUTH_REDIRECT_URI,
-            "code_verifier": verifier,
-        }).encode()
-
-        req = urllib.request.Request(
-            _OAUTH_TOKEN_URL,
-            data=exchange_data,
-            headers={
-                "Content-Type": "application/json",
-                "User-Agent": f"claude-cli/{_get_claude_code_version()} (external, cli)",
-            },
-            method="POST",
-        )
-
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            result = json.loads(resp.read().decode())
-    except Exception as e:
-        print(f"Token exchange failed: {e}")
-        return None
-
-    access_token = result.get("access_token", "")
-    refresh_token = result.get("refresh_token", "")
-    expires_in = result.get("expires_in", 3600)
-
-    if not access_token:
-        print("No access token in response.")
-        return None
-
-    expires_at_ms = int(time.time() * 1000) + (expires_in * 1000)
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "expires_at_ms": expires_at_ms,
-    }
+    return creds
 
 
 def read_fetih_oauth_credentials() -> Optional[Dict[str, Any]]:

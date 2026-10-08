@@ -49,7 +49,9 @@ public sealed record ProviderEntry(
     string DefaultBaseUrl = "",
     string SignupUrl = "",
     string CliCommand = "",
-    string DisplayNameKey = "")
+    string DisplayNameKey = "",
+    bool SupportsOAuthLogin = false,
+    string OAuthFlow = "")
 {
     /// <summary>
     /// Arayüzde gösterilecek ad. <see cref="DisplayName"/> her zaman kanonik
@@ -105,10 +107,15 @@ public static class ProviderRegistry
             DefaultBaseUrl: "https://api.groq.com/openai/v1",
             SignupUrl: "https://console.groq.com/keys"),
 
+        // Anthropic hem API anahtarı hem de Claude Pro/Max ABONELİĞİ ile
+        // kullanılabilir. Kind CloudApiKey kalır (anahtar kutusu görünür),
+        // ayrıca SupportsOAuthLogin ile 'Claude ile giriş yap' düğmesi açılır
+        // (uygulama içi kod yapıştırma akışı — bkz. ProviderPage).
         new("anthropic", "Anthropic (Claude)", "anthropic_messages", "api_key",
             new[] { "ANTHROPIC_API_KEY", "ANTHROPIC_TOKEN", "CLAUDE_CODE_OAUTH_TOKEN" },
             "ANTHROPIC_BASE_URL",
-            SignupUrl: "https://console.anthropic.com/settings/keys"),
+            SignupUrl: "https://console.anthropic.com/settings/keys",
+            SupportsOAuthLogin: true, OAuthFlow: "paste_code"),
 
         new("openrouter", "OpenRouter", "openai_chat", "api_key",
             new[] { "OPENROUTER_API_KEY", "OPENAI_API_KEY" }, "OPENROUTER_BASE_URL",
@@ -120,10 +127,12 @@ public static class ProviderRegistry
             SignupUrl: "https://aistudio.google.com/apikey"),
 
         new("google-gemini-cli", "Gemini CLI (Code Assist)", "openai_chat", "oauth_external",
-            new string[0], Kind: ProviderKind.CliLogin, CliCommand: "gemini"),
+            new string[0], Kind: ProviderKind.CliLogin, CliCommand: "gemini",
+            SupportsOAuthLogin: true, OAuthFlow: "loopback"),
 
         new("openai-codex", "OpenAI Codex", "codex_responses", "oauth_external",
-            new string[0], Kind: ProviderKind.CliLogin, CliCommand: "codex", DisplayNameKey: "provider.name.codex"),
+            new string[0], Kind: ProviderKind.CliLogin, CliCommand: "codex", DisplayNameKey: "provider.name.codex",
+            SupportsOAuthLogin: true, OAuthFlow: "device_code"),
 
         // CLI kanonik kimliği "copilot" — "github-copilot" DEĞİL.
         new("copilot", "GitHub Copilot", "openai_chat", "api_key",
@@ -137,7 +146,8 @@ public static class ProviderRegistry
             new[] { "XAI_API_KEY" }, "XAI_BASE_URL"),
 
         new("xai-oauth", "xAI (OAuth)", "codex_responses", "oauth_external",
-            new string[0], "XAI_BASE_URL", Kind: ProviderKind.OAuthBrowser),
+            new string[0], "XAI_BASE_URL", Kind: ProviderKind.OAuthBrowser,
+            SupportsOAuthLogin: true, OAuthFlow: "loopback"),
 
         new("openai", "OpenAI", "openai_chat", "api_key",
             new[] { "OPENAI_API_KEY" }, "OPENAI_BASE_URL",
@@ -173,7 +183,7 @@ public static class ProviderRegistry
         // oturumunu yeniden kullanır.
         new("qwen-oauth", "Qwen Portal (OAuth)", "openai_chat", "oauth_external",
             new string[0], "FETIH_QWEN_BASE_URL", Kind: ProviderKind.CliLogin,
-            CliCommand: "qwen"),
+            CliCommand: "qwen", SupportsOAuthLogin: true, OAuthFlow: "cli_session"),
 
         new("stepfun", "StepFun Step Plan", "openai_chat", "api_key",
             new[] { "STEPFUN_API_KEY" }, "STEPFUN_BASE_URL"),

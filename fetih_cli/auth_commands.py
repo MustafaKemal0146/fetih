@@ -166,6 +166,36 @@ def _format_exhausted_status(entry) -> str:
     return f" {label}{reason_text}{code} ({wait} left)"
 
 
+def persist_anthropic_oauth(creds: dict, *, label: str | None = None) -> str:
+    """Persist FETIH-native Anthropic (Claude Pro/Max) OAuth creds into the pool.
+
+    Mirrors the ``fetih auth add anthropic`` persistence so an out-of-band
+    flow — e.g. the desktop bridge completing an in-app paste — lands the same
+    pooled OAuth credential the CLI would. ``creds`` is the dict returned by
+    :func:`agent.anthropic_adapter.exchange_fetih_oauth_code`. Returns the
+    stored credential's label.
+    """
+    pool = load_pool("anthropic")
+    final_label = (label or "").strip() or label_from_token(
+        creds["access_token"],
+        _oauth_default_label("anthropic", len(pool.entries()) + 1),
+    )
+    entry = PooledCredential(
+        provider="anthropic",
+        id=uuid.uuid4().hex[:6],
+        label=final_label,
+        auth_type=AUTH_TYPE_OAUTH,
+        priority=0,
+        source=f"{SOURCE_MANUAL}:fetih_pkce",
+        access_token=creds["access_token"],
+        refresh_token=creds.get("refresh_token"),
+        expires_at_ms=creds.get("expires_at_ms"),
+        base_url=_provider_base_url("anthropic"),
+    )
+    pool.add_entry(entry)
+    return entry.label
+
+
 def auth_add_command(args) -> None:
     provider = _normalize_provider(getattr(args, "provider", ""))
     if provider not in PROVIDER_REGISTRY and provider != "openrouter" and not provider.startswith(CUSTOM_POOL_PREFIX):
@@ -232,24 +262,10 @@ def auth_add_command(args) -> None:
         creds = anthropic_mod.run_fetih_oauth_login_pure()
         if not creds:
             raise SystemExit("Anthropic OAuth login did not return credentials.")
-        label = (getattr(args, "label", None) or "").strip() or label_from_token(
-            creds["access_token"],
-            _oauth_default_label(provider, len(pool.entries()) + 1),
+        stored_label = persist_anthropic_oauth(
+            creds, label=(getattr(args, "label", None) or "").strip() or None
         )
-        entry = PooledCredential(
-            provider=provider,
-            id=uuid.uuid4().hex[:6],
-            label=label,
-            auth_type=AUTH_TYPE_OAUTH,
-            priority=0,
-            source=f"{SOURCE_MANUAL}:fetih_pkce",
-            access_token=creds["access_token"],
-            refresh_token=creds.get("refresh_token"),
-            expires_at_ms=creds.get("expires_at_ms"),
-            base_url=_provider_base_url(provider),
-        )
-        pool.add_entry(entry)
-        print(f'Added {provider} OAuth credential #{len(pool.entries())}: "{entry.label}"')
+        print(f'Added {provider} OAuth credential #{len(pool.entries())}: "{stored_label}"')
         return
 
     if provider == "openai-codex":

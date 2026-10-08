@@ -49,6 +49,19 @@ public sealed record BridgeApprovalRequest(
     string SessionId, string RequestId, string Command, string Description,
     IReadOnlyList<string> PatternKeys);
 
+/// <summary>
+/// Arka planda yürüyen bir OAuth/abonelik girişinin (xAI, Codex, Gemini CLI,
+/// Qwen) konsol çıktısından gelen tek satır — cihaz kodu ya da yetkilendirme
+/// bağlantısı burada akar. <c>RequestId</c> ile <see cref="BridgeAuthDone"/>'a
+/// eşlenir.
+/// </summary>
+public sealed record BridgeAuthProgress(string RequestId, string Provider, string Line);
+
+/// <summary>Bir OAuth/abonelik giriş akışının sonucu (başarı + tazelenmiş durum).</summary>
+public sealed record BridgeAuthDone(
+    string RequestId, string Provider, bool Ok, string Error, bool LoggedIn,
+    string Email, string Plan, string ExpiresAt);
+
 /// <summary>Oturum yükleme sonucu (geriye dönük deconstruct uyumlu).</summary>
 public sealed record BridgeSessionLoadResult(
     string Title,
@@ -117,6 +130,8 @@ public sealed class BridgeClient : IDisposable
     public event Action<JsonElement>? FindingDiscovered;
     public event Action<BridgeApprovalRequest>? ApprovalRequested;
     public event Action<string /*sessionId*/, string /*requestId*/>? ApprovalResolved;
+    public event Action<BridgeAuthProgress>? AuthProgress;
+    public event Action<BridgeAuthDone>? AuthDone;
     public event Action? ConnectionLost;
 
     // ── Bağlantı ────────────────────────────────────────────────────────────
@@ -453,6 +468,18 @@ public sealed class BridgeClient : IDisposable
                 case "session.approval_resolved":
                     ApprovalResolved?.Invoke(Str(p, "session_id"), Str(p, "request_id"));
                     break;
+
+                case "auth.progress":
+                    AuthProgress?.Invoke(new BridgeAuthProgress(
+                        Str(p, "request_id"), Str(p, "provider"), Str(p, "line")));
+                    break;
+
+                case "auth.done":
+                    AuthDone?.Invoke(new BridgeAuthDone(
+                        Str(p, "request_id"), Str(p, "provider"),
+                        Bool(p, "ok"), Str(p, "error"), Bool(p, "logged_in"),
+                        Str(p, "email"), Str(p, "plan"), Str(p, "expires_at")));
+                    break;
             }
         }
         catch
@@ -738,6 +765,56 @@ public sealed class BridgeClient : IDisposable
             new Dictionary<string, object?> { ["provider"] = provider }, ct).ConfigureAwait(false);
     }
 
+    /// <summary>OAuth/abonelik girişi destekleyen sağlayıcılar ve akış türleri.</summary>
+    public async Task<JsonElement> AuthProvidersAsync(CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("auth.providers", null, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Anthropic (Claude Pro/Max) uygulama içi yapıştırma akışını başlatır:
+    /// tarayıcıda açılacak yetkilendirme URL'si + opak <c>flow_token</c> döner.
+    /// </summary>
+    public async Task<JsonElement> AuthBeginAsync(string provider, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("auth.begin",
+            new Dictionary<string, object?> { ["provider"] = provider }, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>Yapıştırma akışını tamamlar: kodu takas edip jetonu saklar.</summary>
+    public async Task<JsonElement> AuthCompleteAsync(
+        string provider, string flowToken, string code, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("auth.complete", new Dictionary<string, object?>
+        {
+            ["provider"] = provider,
+            ["flow_token"] = flowToken,
+            ["code"] = code,
+        }, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Tarayıcı/cihaz-kodu/CLI-oturumu akışını köprü sürecinde başlatır; ilerleme
+    /// <see cref="AuthProgress"/>, sonuç <see cref="AuthDone"/> olaylarından gelir.
+    /// </summary>
+    public async Task<JsonElement> AuthLoginAsync(string provider, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("auth.login",
+            new Dictionary<string, object?> { ["provider"] = provider }, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>Bir sağlayıcının saklanan kimlik durumunu temizler.</summary>
+    public async Task<JsonElement> AuthLogoutAsync(string provider, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("auth.logout",
+            new Dictionary<string, object?> { ["provider"] = provider }, ct).ConfigureAwait(false);
+    }
+
     public async Task<JsonElement> SkillsListAsync(
         string? category = null, string? search = null, int limit = 100, int offset = 0,
         CancellationToken ct = default)
@@ -891,6 +968,10 @@ public sealed class BridgeClient : IDisposable
     private static int? IntOrNull(JsonElement e, string name)
         => e.ValueKind == JsonValueKind.Object && e.TryGetProperty(name, out var v)
            && v.ValueKind == JsonValueKind.Number ? v.GetInt32() : null;
+
+    private static bool Bool(JsonElement e, string name)
+        => e.ValueKind == JsonValueKind.Object && e.TryGetProperty(name, out var v)
+           && v.ValueKind == JsonValueKind.True;
 
     private static long? LongOrNull(JsonElement e, string name)
         => e.ValueKind == JsonValueKind.Object && e.TryGetProperty(name, out var v)

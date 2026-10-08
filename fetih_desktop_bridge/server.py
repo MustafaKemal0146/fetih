@@ -26,6 +26,7 @@ import json
 import os
 import platform
 import sys
+import threading
 import time
 import uuid
 from pathlib import Path
@@ -56,6 +57,30 @@ _SECRET_HINTS = ("api_key", "apikey", "token", "secret", "password", "passwd", "
 
 #: Methods callable before ``bridge.authenticate`` succeeds.
 _PREAUTH_METHODS = {"bridge.authenticate", "bridge.ping", "bridge.capabilities"}
+
+#: Providers whose OAuth/subscription login completes WITHOUT stdin — a browser
+#: loopback callback, a device-code poll, or reusing a local CLI session — so
+#: the bridge can run the real ``fetih auth add`` path in a daemon thread.
+#: Anthropic is excluded on purpose: its OAuth client is pinned to the
+#: ``console.anthropic.com`` callback, so the user must copy a code. That flow
+#: is driven by ``auth.begin`` / ``auth.complete`` with an in-app paste box.
+_BRIDGE_BACKGROUND_AUTH = {
+    "xai-oauth",
+    "openai-codex",
+    "google-gemini-cli",
+    "qwen-oauth",
+    "minimax-oauth",
+}
+
+#: Advisory flow hint per provider so the desktop app can pick its login UI.
+_AUTH_FLOW_KIND = {
+    "anthropic": "paste_code",
+    "xai-oauth": "loopback",
+    "openai-codex": "device_code",
+    "google-gemini-cli": "loopback",
+    "qwen-oauth": "cli_session",
+    "minimax-oauth": "loopback",
+}
 
 
 def _looks_secret(key: str) -> bool:
@@ -293,6 +318,13 @@ class BridgeServer:
         self._methods: Dict[str, Callable[..., Any]] = {}
         self._findings: List[Dict[str, Any]] = []
         self._started = time.time()
+        # Pending Anthropic paste flows: flow_token -> {provider, code_verifier,
+        # state, ts}. PKCE material stays server-side between auth.begin and
+        # auth.complete and is never sent to the client.
+        self._auth_pending: Dict[str, Dict[str, Any]] = {}
+        # redirect_stdout (used to stream login console output) is process
+        # global, so only one in-bridge login may capture stdout at a time.
+        self._auth_lock = threading.Lock()
 
         from fetih_constants import get_fetih_home
         from fetih_desktop_bridge.session_store import SessionStore
@@ -411,6 +443,11 @@ class BridgeServer:
                 "providers.models": self._m_providers_models,
                 "providers.probe_local": self._m_providers_probe_local,
                 "providers.auth_status": self._m_providers_auth_status,
+                "auth.providers": self._m_auth_providers,
+                "auth.begin": self._m_auth_begin,
+                "auth.complete": self._m_auth_complete,
+                "auth.login": self._m_auth_login,
+                "auth.logout": self._m_auth_logout,
                 "skills.list": self._m_skills_list,
                 "findings.list": self._m_findings_list,
                 "findings.scan": self._m_findings_scan,
@@ -1307,6 +1344,217 @@ class BridgeServer:
                 out[key] = status[key]
         out["logged_in"] = bool(status.get("logged_in") or status.get("configured"))
         return out
+
+    # ── auth.* ──────────────────────────────────────────────────────────
+
+    def _m_auth_providers(self, conn, params):
+        """List OAuth/subscription-capable providers and each one's flow kind.
+
+        Lets the desktop decide which login UI to show (an in-app paste box
+        for Anthropic vs. a browser/device flow the bridge drives) without
+        hardcoding the canonical set on the C# side. Read-only, no secrets.
+        """
+        try:
+            from fetih_cli.auth_commands import _OAUTH_CAPABLE_PROVIDERS
+            capable = sorted(_OAUTH_CAPABLE_PROVIDERS)
+        except Exception:
+            capable = sorted(_AUTH_FLOW_KIND)
+        providers = [
+            {
+                "provider": pid,
+                "flow": _AUTH_FLOW_KIND.get(pid, "background"),
+                "in_process": pid == "anthropic" or pid in _BRIDGE_BACKGROUND_AUTH,
+            }
+            for pid in capable
+        ]
+        return {"providers": providers}
+
+    def _m_auth_begin(self, conn, params):
+        """Start the Anthropic (Claude Pro/Max) in-app paste login.
+
+        Returns the authorize URL the app opens in a browser plus an opaque
+        ``flow_token``. The user copies the code Anthropic shows and the app
+        calls ``auth.complete``. The PKCE verifier and state stay server-side.
+        """
+        provider = str(params.get("provider") or "anthropic").strip()
+        if provider != "anthropic":
+            raise BridgeError(
+                INVALID_PARAMS,
+                "auth.begin drives the Anthropic paste flow only; "
+                "use auth.login for browser/device providers",
+            )
+        from agent import anthropic_adapter
+        info = anthropic_adapter.build_fetih_oauth_authorize_url()
+
+        now = time.time()
+        # Evict stale pending flows (older than 15 min) so the map can't grow.
+        for stale in [t for t, v in self._auth_pending.items() if now - v.get("ts", now) > 900]:
+            self._auth_pending.pop(stale, None)
+
+        flow_token = uuid.uuid4().hex
+        self._auth_pending[flow_token] = {
+            "provider": provider,
+            "code_verifier": info["code_verifier"],
+            "state": info["state"],
+            "ts": now,
+        }
+        return {
+            "provider": provider,
+            "flow": "paste_code",
+            "authorize_url": info["authorize_url"],
+            "flow_token": flow_token,
+        }
+
+    def _m_auth_complete(self, conn, params):
+        """Finish the Anthropic paste flow: exchange the code and store tokens."""
+        provider = str(params.get("provider") or "anthropic").strip()
+        flow_token = str(params.get("flow_token") or "").strip()
+        code = str(params.get("code") or "").strip()
+        if not code:
+            raise BridgeError(INVALID_PARAMS, "'code' is required")
+
+        pending = self._auth_pending.pop(flow_token, None)
+        if pending is None:
+            raise BridgeError(
+                INVALID_PARAMS,
+                "unknown or expired 'flow_token' — start again with auth.begin",
+            )
+
+        from agent import anthropic_adapter
+        creds = anthropic_adapter.exchange_fetih_oauth_code(
+            code, pending["code_verifier"], pending.get("state", "")
+        )
+        if not creds:
+            raise BridgeError(
+                CONFIG_ERROR,
+                "token exchange failed — the code may be wrong or expired",
+            )
+        try:
+            from fetih_cli.auth_commands import persist_anthropic_oauth
+            label = persist_anthropic_oauth(creds)
+        except Exception as exc:
+            raise BridgeError(
+                INTERNAL_ERROR,
+                f"failed to store credential: {type(exc).__name__}: {exc}",
+            )
+        return {"provider": provider, "logged_in": True, "label": label}
+
+    async def _m_auth_login(self, conn, params):
+        """Run a browser/device/CLI-session OAuth login inside the bridge.
+
+        For providers whose flow completes without stdin (a loopback callback,
+        a device-code poll, or reusing a local CLI session) the real
+        ``fetih auth add <provider>`` path runs in a daemon thread. Its console
+        output is streamed as ``auth.progress`` events (so the app can show the
+        device code / URL), and a final ``auth.done`` carries the outcome and a
+        refreshed status. Returns at once with the id those events carry.
+        """
+        provider = str(params.get("provider") or "").strip()
+        if provider not in _BRIDGE_BACKGROUND_AUTH:
+            if provider == "anthropic":
+                raise BridgeError(
+                    INVALID_PARAMS, "use auth.begin / auth.complete for Anthropic"
+                )
+            raise BridgeError(
+                INVALID_PARAMS, f"auth.login does not handle provider '{provider}'"
+            )
+
+        loop = self.loop_for(conn) or asyncio.get_running_loop()
+        request_id = uuid.uuid4().hex[:12]
+
+        def _run() -> None:
+            import contextlib
+            import io
+            from types import SimpleNamespace
+
+            class _LineEmitter(io.TextIOBase):
+                def writable(self) -> bool:
+                    return True
+
+                def write(self, s) -> int:
+                    for line in str(s).splitlines():
+                        if line.strip():
+                            conn.emit_threadsafe(
+                                loop,
+                                event(
+                                    "auth.progress",
+                                    {
+                                        "request_id": request_id,
+                                        "provider": provider,
+                                        "line": line,
+                                    },
+                                ),
+                            )
+                    return len(s)
+
+            args = SimpleNamespace(
+                provider=provider,
+                auth_type=None,
+                label=None,
+                api_key=None,
+                no_browser=False,
+                timeout=None,
+            )
+            ok, err = True, ""
+            # redirect_stdout is process-global; the lock serializes logins so
+            # two of them cannot fight over sys.stdout at the same time.
+            with self._auth_lock:
+                try:
+                    from fetih_cli.auth_commands import auth_add_command
+                    with contextlib.redirect_stdout(_LineEmitter()):
+                        auth_add_command(args)
+                except SystemExit as exc:
+                    ok, err = False, (str(exc) or "login aborted")
+                except Exception as exc:  # noqa: BLE001 - surfaced to the app
+                    ok, err = False, f"{type(exc).__name__}: {exc}"
+
+            status: Dict[str, Any] = {}
+            try:
+                from fetih_cli.auth import get_auth_status
+                status = get_auth_status(provider) or {}
+            except Exception:
+                status = {}
+
+            conn.emit_threadsafe(
+                loop,
+                event(
+                    "auth.done",
+                    {
+                        "request_id": request_id,
+                        "provider": provider,
+                        "ok": ok,
+                        "error": err,
+                        "logged_in": bool(
+                            status.get("logged_in") or status.get("configured")
+                        ),
+                        "email": status.get("email"),
+                        "plan": status.get("plan"),
+                        "expires_at": status.get("expires_at"),
+                    },
+                ),
+            )
+
+        threading.Thread(
+            target=_run, name=f"auth-login-{provider}", daemon=True
+        ).start()
+        return {
+            "started": True,
+            "request_id": request_id,
+            "provider": provider,
+            "flow": _AUTH_FLOW_KIND.get(provider, "background"),
+        }
+
+    def _m_auth_logout(self, conn, params):
+        """Clear a provider's stored auth (pool + legacy state). Never a token."""
+        provider = str(params.get("provider") or "").strip()
+        if not provider:
+            raise BridgeError(INVALID_PARAMS, "'provider' is required")
+        try:
+            from fetih_cli.auth import clear_provider_auth
+            cleared = bool(clear_provider_auth(provider))
+        except Exception as exc:
+            raise BridgeError(CONFIG_ERROR, f"{type(exc).__name__}: {exc}")
+        return {"provider": provider, "logged_out": cleared}
 
     # ── skills.* ────────────────────────────────────────────────────────
 

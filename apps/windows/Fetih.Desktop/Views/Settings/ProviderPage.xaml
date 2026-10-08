@@ -116,6 +116,49 @@
                                  IsOpen="False"
                                  IsClosable="False"
                                  Margin="0,2,0,0" />
+
+                        <!--
+                            Abonelik/OAuth girişi (issue #54): Claude Pro/Max,
+                            Codex, Gemini CLI, Qwen, xAI. anthropic'te API anahtarı
+                            kutusunun ALTINDA görünür (ikisi de kullanılabilir);
+                            saf OAuth sağlayıcılarda anahtar kutusu gizli olur ve
+                            yalnızca bu panel görünür. Görünürlük kod-arkasında
+                            ProviderEntry.SupportsOAuthLogin'e göre ayarlanır.
+                        -->
+                        <StackPanel x:Name="OAuthLoginPanel"
+                                    Spacing="6"
+                                    Visibility="Collapsed"
+                                    Margin="0,8,0,0">
+                            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <Ellipse x:Name="OAuthStatusDot"
+                                         Width="8" Height="8"
+                                         VerticalAlignment="Center"
+                                         AutomationProperties.AccessibilityView="Raw" />
+                                <TextBlock x:Name="OAuthStatusText"
+                                           FontSize="12" FontWeight="SemiBold"
+                                           VerticalAlignment="Center" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Button x:Name="OAuthLoginButton"
+                                        AutomationProperties.AutomationId="provider_oauth_login"
+                                        Style="{StaticResource AccentButtonStyle}"
+                                        Click="OAuthLoginButton_Click" />
+                                <Button x:Name="OAuthLogoutButton"
+                                        AutomationProperties.AutomationId="provider_oauth_logout"
+                                        Click="OAuthLogoutButton_Click" />
+                                <Button x:Name="OAuthRefreshButton"
+                                        AutomationProperties.AutomationId="provider_oauth_refresh"
+                                        Click="OAuthRefreshButton_Click" />
+                                <ProgressRing x:Name="OAuthBusyRing"
+                                              IsActive="False"
+                                              Width="18" Height="18"
+                                              VerticalAlignment="Center" />
+                            </StackPanel>
+                            <TextBlock x:Name="OAuthProgressText"
+                                       FontSize="11" FontFamily="Consolas" Opacity="0.75"
+                                       TextWrapping="Wrap"
+                                       Visibility="Collapsed" />
+                        </StackPanel>
                     </StackPanel>
 
                     <StackPanel Grid.Row="3" Grid.Column="1"
