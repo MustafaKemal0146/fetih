@@ -164,6 +164,7 @@ public sealed partial class MainWindow : Window
             _menuItems.Add(_chatItem);
             _menuItems.Add(CreateItem(Loc.T("nav.skills"), NavTags.Skills, Symbol.Library));
             _menuItems.Add(CreateItem(Loc.T("nav.findings"), NavTags.Findings, Symbol.Flag));
+            _menuItems.Add(CreateItem(Loc.T("nav.targets"), NavTags.Targets, Symbol.World));
             _menuItems.Add(CreateItem(Loc.T("nav.files"), NavTags.Files, Symbol.Folder));
             _menuItems.Add(CreateItem(Loc.T("nav.timeline"), NavTags.Timeline, Symbol.Clock));
 
@@ -962,6 +963,7 @@ public sealed partial class MainWindow : Window
         NavTags.Chat => (typeof(ChatPage), null),
         NavTags.Skills => (typeof(SkillsPage), null),
         NavTags.Findings => (typeof(FindingsPage), null),
+        NavTags.Targets => (typeof(TargetsPage), null),
         NavTags.Files => (typeof(FilesPage), null),
         NavTags.Timeline => (typeof(TimelinePage), null),
         NavTags.Diagnostics => (typeof(DiagnosticsPage), null),
@@ -1007,6 +1009,7 @@ internal static class NavTags
     public const string ChatClearAll = "nav_chat_clear_all";
     public const string Skills = "nav_skills";
     public const string Findings = "nav_findings";
+    public const string Targets = "nav_targets";
     public const string Files = "nav_files";
     public const string Timeline = "nav_timeline";
     public const string Diagnostics = "nav_diagnostics";
