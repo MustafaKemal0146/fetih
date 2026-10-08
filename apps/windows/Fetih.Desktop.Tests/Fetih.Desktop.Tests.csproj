@@ -30,6 +30,8 @@
     <Compile Include="..\Fetih.Desktop\Services\IUiDispatcher.cs" Link="Services\IUiDispatcher.cs" />
     <Compile Include="..\Fetih.Desktop\Services\ChatHistoryTrimmer.cs" Link="Services\ChatHistoryTrimmer.cs" />
     <Compile Include="..\Fetih.Desktop\Services\LogFormatting.cs" Link="Services\LogFormatting.cs" />
+    <Compile Include="..\Fetih.Desktop\Services\ICredentialProtector.cs" Link="Services\ICredentialProtector.cs" />
+    <Compile Include="..\Fetih.Desktop\Services\CredentialStore.cs" Link="Services\CredentialStore.cs" />
     <Compile Include="..\Fetih.Desktop\Setup\SetupPipeline.cs" Link="Setup\SetupPipeline.cs" />
     <Compile Include="..\Fetih.Desktop\Setup\TransactionJournal.cs" Link="Setup\TransactionJournal.cs" />
     <Compile Include="..\Fetih.Desktop\Setup\SetupRunLock.cs" Link="Setup\SetupRunLock.cs" />
