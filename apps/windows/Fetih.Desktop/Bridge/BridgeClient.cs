@@ -848,6 +848,30 @@ public sealed class BridgeClient : IDisposable
             new Dictionary<string, object?> { ["provider"] = provider }, ct).ConfigureAwait(false);
     }
 
+    /// <summary>Çalışma alanı ağacının bir dizin seviyesi (issue #43).</summary>
+    public async Task<JsonElement> FileTreeAsync(string path = "", CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("file.tree",
+            new Dictionary<string, object?> { ["path"] = path }, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>Bir çalışma alanı dosyasının metni (boyut sınırlı, UTF-8).</summary>
+    public async Task<JsonElement> FileReadAsync(string path, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("file.read",
+            new Dictionary<string, object?> { ["path"] = path }, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>Bir dosya (veya tüm ağaç) için birleşik git diff.</summary>
+    public async Task<JsonElement> FileDiffAsync(string path = "", CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("file.diff",
+            new Dictionary<string, object?> { ["path"] = path }, ct).ConfigureAwait(false);
+    }
+
     public async Task<JsonElement> SkillsListAsync(
         string? category = null, string? search = null, int limit = 100, int offset = 0,
         CancellationToken ct = default)

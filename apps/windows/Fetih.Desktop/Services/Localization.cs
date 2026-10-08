@@ -216,6 +216,17 @@ public static class Loc
         ["nav.chat"] = new("Sohbet", "Chat"),
         ["nav.skills"] = new("Yetenekler", "Skills"),
         ["nav.findings"] = new("Bulgular", "Findings"),
+        ["nav.files"] = new("Dosyalar", "Files"),
+        // ── Dosya ağacı + diff (issue #43) ───────────────────────────────
+        ["files.title"] = new("Çalışma alanı", "Workspace"),
+        ["files.reload"] = new("Yenile", "Reload"),
+        ["files.preview"] = new("Önizleme", "Preview"),
+        ["files.diff"] = new("Değişiklik", "Diff"),
+        ["files.empty_selection"] = new("Önizlemek için soldan bir dosya seçin.", "Select a file on the left to preview."),
+        ["files.binary"] = new("İkili dosya — önizlenemez.", "Binary file — cannot preview."),
+        ["files.truncated"] = new("Büyük dosya — ilk 512 KB gösteriliyor.", "Large file — showing the first 512 KB."),
+        ["files.no_diff"] = new("Bu dosyada değişiklik yok.", "No changes in this file."),
+        ["files.diff_unavailable"] = new("Diff alınamadı (git deposu değil).", "Diff unavailable (not a git repository)."),
         ["nav.diagnostics"] = new("Tanılama", "Diagnostics"),
         ["nav.settings"] = new("Ayarlar", "Settings"),
 

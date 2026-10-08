@@ -456,6 +456,9 @@ class BridgeServer:
                 "auth.login": self._m_auth_login,
                 "auth.logout": self._m_auth_logout,
                 "skills.list": self._m_skills_list,
+                "file.tree": self._m_file_tree,
+                "file.read": self._m_file_read,
+                "file.diff": self._m_file_diff,
                 "findings.list": self._m_findings_list,
                 "findings.scan": self._m_findings_scan,
                 "findings.export": self._m_findings_export,
@@ -1698,6 +1701,123 @@ class BridgeServer:
         except Exception as exc:
             raise BridgeError(CONFIG_ERROR, f"{type(exc).__name__}: {exc}")
         return {"provider": provider, "logged_out": cleared}
+
+    # ── file.* ──────────────────────────────────────────────────────────
+
+    #: Çalışma alanı ağacında gizlenen gürültülü dizinler.
+    _FILE_TREE_SKIP = {
+        ".git", "__pycache__", "node_modules", ".venv", "venv",
+        ".mypy_cache", ".pytest_cache", ".ruff_cache", ".idea", ".vs",
+        "bin", "obj", "dist", "build", ".next", ".turbo",
+    }
+
+    def _workspace_root(self) -> str:
+        return os.path.realpath(os.getcwd())
+
+    def _resolve_in_workspace(self, rel: str):
+        """Resolve a workspace-relative path, refusing anything that escapes it.
+
+        The file browser is scoped to the bridge's working directory so the
+        desktop can't walk the whole filesystem through these RPCs.
+        """
+        root = self._workspace_root()
+        target = os.path.realpath(os.path.join(root, rel or ""))
+        if target != root and not target.startswith(root + os.sep):
+            raise BridgeError(INVALID_PARAMS, "path escapes the workspace")
+        return root, target
+
+    def _m_file_tree(self, conn, params):
+        """List one directory level of the workspace (lazy tree). Dirs first."""
+        rel = str(params.get("path") or "")
+        root, base = self._resolve_in_workspace(rel)
+        if not os.path.isdir(base):
+            raise BridgeError(INVALID_PARAMS, "not a directory")
+
+        entries: List[Dict[str, Any]] = []
+        try:
+            for name in os.listdir(base):
+                if name in self._FILE_TREE_SKIP:
+                    continue
+                full = os.path.join(base, name)
+                is_dir = os.path.isdir(full)
+                item: Dict[str, Any] = {
+                    "name": name,
+                    "path": os.path.relpath(full, root).replace(os.sep, "/"),
+                    "is_dir": is_dir,
+                }
+                if not is_dir:
+                    try:
+                        item["size"] = os.path.getsize(full)
+                    except OSError:
+                        item["size"] = 0
+                entries.append(item)
+                if len(entries) >= 4000:
+                    break
+        except OSError as exc:
+            raise BridgeError(INTERNAL_ERROR, f"{type(exc).__name__}: {exc}")
+
+        entries.sort(key=lambda e: (not e["is_dir"], e["name"].lower()))
+        return {
+            "root": root,
+            "path": rel.replace(os.sep, "/"),
+            "entries": entries,
+        }
+
+    def _m_file_read(self, conn, params):
+        """Return a workspace file's UTF-8 text (size-capped; binary → flagged)."""
+        rel = str(params.get("path") or "")
+        if not rel:
+            raise BridgeError(INVALID_PARAMS, "'path' is required")
+        root, target = self._resolve_in_workspace(rel)
+        if not os.path.isfile(target):
+            raise BridgeError(INVALID_PARAMS, "not a file")
+
+        max_bytes = 512 * 1024
+        try:
+            size = os.path.getsize(target)
+            with open(target, "rb") as fh:
+                raw = fh.read(max_bytes + 1)
+        except OSError as exc:
+            raise BridgeError(INTERNAL_ERROR, f"{type(exc).__name__}: {exc}")
+
+        truncated = len(raw) > max_bytes
+        raw = raw[:max_bytes]
+        if b"\x00" in raw:
+            return {"path": rel, "binary": True, "size": size, "content": "", "truncated": False}
+        return {
+            "path": rel,
+            "binary": False,
+            "size": size,
+            "truncated": truncated,
+            "content": raw.decode("utf-8", errors="replace"),
+        }
+
+    def _m_file_diff(self, conn, params):
+        """Unified ``git diff`` (working tree vs HEAD) for a file or the whole tree."""
+        import subprocess
+
+        rel = str(params.get("path") or "")
+        root = self._workspace_root()
+        if rel:
+            root, _ = self._resolve_in_workspace(rel)
+            root = self._workspace_root()  # diff runs at the repo root
+
+        args = ["git", "-C", root, "diff", "--no-color"]
+        if rel:
+            args += ["--", rel]
+        try:
+            proc = subprocess.run(
+                args, capture_output=True, text=True, timeout=15, encoding="utf-8", errors="replace"
+            )
+        except FileNotFoundError:
+            return {"path": rel, "available": False, "reason": "git not found", "diff": ""}
+        except Exception as exc:  # noqa: BLE001 - reported to the app
+            return {"path": rel, "available": False, "reason": f"{type(exc).__name__}: {exc}", "diff": ""}
+
+        if proc.returncode not in (0, 1):
+            reason = (proc.stderr or "").strip()[:200] or "not a git repository"
+            return {"path": rel, "available": False, "reason": reason, "diff": ""}
+        return {"path": rel, "available": True, "diff": proc.stdout}
 
     # ── skills.* ────────────────────────────────────────────────────────
 
