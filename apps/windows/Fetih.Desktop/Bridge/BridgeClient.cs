@@ -782,6 +782,14 @@ public sealed class BridgeClient : IDisposable
         return await CallAsync("findings.list", p, ct).ConfigureAwait(false);
     }
 
+    /// <summary><c>findings.export</c> — Bulguları Markdown (<c>md</c>) ya da <c>html</c> rapor olarak döndürür.</summary>
+    public async Task<JsonElement> FindingsExportAsync(string format = "md", CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("findings.export",
+            new Dictionary<string, object?> { ["format"] = format }, ct).ConfigureAwait(false);
+    }
+
     /// <summary><c>findings.scan</c> — Yetenekleri veya hedef dizini güvenlik açıklarına karşı tarar.</summary>
     public async Task<JsonElement> FindingsScanAsync(string? target = null, CancellationToken ct = default)
     {

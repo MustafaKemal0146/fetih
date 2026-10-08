@@ -737,6 +737,44 @@ def test_session_approve_unblocks_dangerous_command(monkeypatch):
         ap.unregister_gateway_notify(sid)
 
 
+def test_findings_export_md_and_html():
+    server = BridgeServer(require_auth=False)
+    conn = FakeConn(authenticated=True)
+    server._findings.append({
+        "id": "abc", "title": "SQL Injection", "target": "http://x/login",
+        "severity": "critical", "evidence": "' OR 1=1 --",
+        "recommendation": "Parametreli sorgu kullan", "reference": "CWE-89",
+    })
+    server._findings.append({
+        "id": "def", "title": "Bilgi sızıntısı", "target": "http://x/debug",
+        "severity": "low", "evidence": "stack trace",
+    })
+
+    md = drive(server, conn, "findings.export", {"format": "md"})["result"]
+    assert md["format"] == "md" and md["count"] == 2
+    assert "# FETİH Güvenlik Raporu" in md["content"]
+    assert "Kritik (1)" in md["content"] and "Düşük (1)" in md["content"]
+    assert "SQL Injection" in md["content"] and "CWE-89" in md["content"]
+    # Kritik, düşükten önce gelmeli (ciddiyet sırası).
+    assert md["content"].index("Kritik") < md["content"].index("Düşük")
+
+    html = drive(server, conn, "findings.export", {"format": "html"})["result"]
+    assert html["format"] == "html"
+    assert html["content"].startswith("<!doctype html>")
+    assert "SQL Injection" in html["content"]
+
+    bad = drive(server, conn, "findings.export", {"format": "pdf"})
+    assert bad["error"]["code"] == INVALID_PARAMS
+
+
+def test_findings_export_empty():
+    server = BridgeServer(require_auth=False)
+    conn = FakeConn(authenticated=True)
+    out = drive(server, conn, "findings.export", {"format": "md"})["result"]
+    assert out["count"] == 0
+    assert "Henüz bulgu yok" in out["content"]
+
+
 def test_session_store_wal_and_concurrent_append(tmp_path):
     """Store açılışta WAL moduna geçmeli ve çok iş parçacıklı append güvenli
     olmalı (eşzamanlı dispatch'e geçtikten sonra kritik)."""

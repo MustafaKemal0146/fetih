@@ -77,6 +77,82 @@ def _redact(value: Any, key: str = "") -> Any:
     return value
 
 
+#: Ciddiyet sıralaması (rapor + liste için).
+_SEVERITY_ORDER = ["critical", "high", "medium", "low", "info"]
+_SEVERITY_TR = {
+    "critical": "Kritik", "high": "Yüksek", "medium": "Orta",
+    "low": "Düşük", "info": "Bilgi",
+}
+
+
+def _build_findings_report(findings: List[Dict[str, Any]], fmt: str = "md") -> str:
+    """Bulguları Markdown ya da HTML rapora dönüştürür. Saf/IO'suz → test edilebilir."""
+    import html as _html
+
+    fmt = "html" if str(fmt).lower() == "html" else "md"
+    buckets: Dict[str, List[Dict[str, Any]]] = {}
+    for f in findings:
+        sev = (f.get("severity") or "info").lower()
+        buckets.setdefault(sev, []).append(f)
+    ordered = [s for s in _SEVERITY_ORDER if s in buckets]
+    ordered += [s for s in buckets if s not in _SEVERITY_ORDER]
+    ts = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime())
+
+    def _sev_label(s: str) -> str:
+        return _SEVERITY_TR.get(s, s.capitalize())
+
+    if fmt == "md":
+        out = [f"# FETİH Güvenlik Raporu", "",
+               f"Oluşturulma: {ts} · Toplam bulgu: {len(findings)}", ""]
+        if not findings:
+            out.append("_Henüz bulgu yok._")
+        for sev in ordered:
+            out.append(f"## {_sev_label(sev)} ({len(buckets[sev])})")
+            out.append("")
+            for f in buckets[sev]:
+                out.append(f"### {f.get('title') or '(başlıksız)'}")
+                if f.get("target"):
+                    out.append(f"- **Hedef:** {f['target']}")
+                if f.get("evidence"):
+                    out.append(f"- **Kanıt:** {f['evidence']}")
+                if f.get("recommendation"):
+                    out.append(f"- **Öneri:** {f['recommendation']}")
+                if f.get("reference"):
+                    out.append(f"- **Referans:** {f['reference']}")
+                if f.get("discovered_at"):
+                    out.append(f"- **Zaman:** {f['discovered_at']}")
+                out.append("")
+        return "\n".join(out).rstrip() + "\n"
+
+    # HTML
+    def esc(v: Any) -> str:
+        return _html.escape(str(v or ""))
+
+    rows = []
+    for sev in ordered:
+        rows.append(f"<h2>{esc(_sev_label(sev))} ({len(buckets[sev])})</h2>")
+        for f in buckets[sev]:
+            rows.append(f"<div class='f sev-{esc(sev)}'><h3>{esc(f.get('title') or '(başlıksız)')}</h3><ul>")
+            for key, lbl in (("target", "Hedef"), ("evidence", "Kanıt"),
+                             ("recommendation", "Öneri"), ("reference", "Referans"),
+                             ("discovered_at", "Zaman")):
+                if f.get(key):
+                    rows.append(f"<li><b>{lbl}:</b> {esc(f[key])}</li>")
+            rows.append("</ul></div>")
+    body = "\n".join(rows) if findings else "<p><em>Henüz bulgu yok.</em></p>"
+    return (
+        "<!doctype html><html lang='tr'><head><meta charset='utf-8'>"
+        "<title>FETİH Güvenlik Raporu</title><style>"
+        "body{font-family:Segoe UI,Arial,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem}"
+        "h1{border-bottom:2px solid #444}.f{border-left:4px solid #888;padding:.2rem 1rem;margin:.6rem 0}"
+        ".sev-critical{border-color:#d13438}.sev-high{border-color:#f7630c}"
+        ".sev-medium{border-color:#ffb900}.sev-low{border-color:#0078d4}.sev-info{border-color:#888}"
+        "ul{margin:.3rem 0}</style></head><body>"
+        f"<h1>FETİH Güvenlik Raporu</h1><p>Oluşturulma: {esc(ts)} · Toplam bulgu: {len(findings)}</p>"
+        f"{body}</body></html>"
+    )
+
+
 class BridgeSession:
     """One conversation, backed by a live ``AIAgent`` instance."""
 
@@ -338,6 +414,7 @@ class BridgeServer:
                 "skills.list": self._m_skills_list,
                 "findings.list": self._m_findings_list,
                 "findings.scan": self._m_findings_scan,
+                "findings.export": self._m_findings_export,
                 "diagnostics.info": self._m_diagnostics_info,
                 "shell.status": self._m_shell_status,
                 "shell.ensure_user": self._m_shell_ensure_user,
@@ -1274,6 +1351,18 @@ class BridgeServer:
             "total": len(self._findings),
             "filtered": len(findings),
             "findings": findings,
+        }
+
+    def _m_findings_export(self, conn, params):
+        """Bulguları Markdown ya da HTML rapor olarak döndürür."""
+        fmt = str(params.get("format") or "md").lower()
+        if fmt not in {"md", "markdown", "html"}:
+            raise BridgeError(INVALID_PARAMS, "format must be 'md' or 'html'")
+        content = _build_findings_report(list(self._findings), fmt)
+        return {
+            "format": "html" if fmt == "html" else "md",
+            "content": content,
+            "count": len(self._findings),
         }
 
     def _m_findings_scan(self, conn, params):

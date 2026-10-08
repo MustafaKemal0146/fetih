@@ -11,6 +11,7 @@ using Fetih.Desktop.Services;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace Fetih.Desktop.Views;
 
@@ -41,7 +42,9 @@ public sealed partial class FindingsPage : Page
         PageTitleText.Text = Loc.T("findings.title");
         SummaryText.Text = Loc.T("findings.summary");
         ScanButton.Content = Loc.T("findings.scan_button");
+        ExportButton.Content = Loc.T("findings.export_button");
         AutomationProperties.SetName(ScanButton, Loc.T("findings.scan_button"));
+        AutomationProperties.SetName(ExportButton, Loc.T("findings.export_button"));
         AutomationProperties.SetName(SeverityBox, Loc.T("findings.severity_label"));
         AutomationProperties.SetName(FindingList, Loc.T("findings.title"));
         EmptyTitleText.Text = Loc.T("findings.empty_title");
@@ -156,6 +159,52 @@ public sealed partial class FindingsPage : Page
             ScanRing.IsActive = false;
             ScanRing.Visibility = Visibility.Collapsed;
             ScanButton.IsEnabled = true;
+        }
+    }
+
+    private async void ExportButton_Click(object sender, RoutedEventArgs e)
+    {
+        ExportButton.IsEnabled = false;
+        try
+        {
+            var md = await BridgeClient.Shared.FindingsExportAsync("md").ConfigureAwait(true);
+            var html = await BridgeClient.Shared.FindingsExportAsync("html").ConfigureAwait(true);
+            var mdText = md.TryGetProperty("content", out var mc) ? mc.GetString() ?? "" : "";
+            var htmlText = html.TryGetProperty("content", out var hc) ? hc.GetString() ?? "" : "";
+
+            var dir = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "FETIH-Raporlar");
+            System.IO.Directory.CreateDirectory(dir);
+            var stamp = DateTime.Now.ToString("yyyyMMdd-HHmmss");
+            var mdPath = System.IO.Path.Combine(dir, $"fetih-rapor-{stamp}.md");
+            var htmlPath = System.IO.Path.Combine(dir, $"fetih-rapor-{stamp}.html");
+            System.IO.File.WriteAllText(mdPath, mdText);
+            System.IO.File.WriteAllText(htmlPath, htmlText);
+
+            // Markdown'ı panoya da kopyala.
+            try
+            {
+                var dp = new DataPackage { RequestedOperation = DataPackageOperation.Copy };
+                dp.SetText(mdText);
+                Clipboard.SetContent(dp);
+            }
+            catch { /* pano erişimi başarısızsa sorun değil */ }
+
+            await new ContentDialog
+            {
+                Title = Loc.T("findings.export.done_title"),
+                Content = string.Format(Loc.T("findings.export.done_body"), dir),
+                CloseButtonText = Loc.T("dialog.ok"),
+                XamlRoot = this.XamlRoot,
+            }.ShowAsync();
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("FindingsPage.Export", ex, ex.Message);
+        }
+        finally
+        {
+            ExportButton.IsEnabled = true;
         }
     }
 

@@ -250,6 +250,7 @@ public static class Loc
         // ── Ortak Diyaloglar ─────────────────────────────────────────────
         ["dialog.save"] = new("Kaydet", "Save"),
         ["dialog.cancel"] = new("İptal", "Cancel"),
+        ["dialog.ok"] = new("Tamam", "OK"),
         ["dialog.confirm"] = new("Onayla", "Confirm"),
         ["dialog.stop"] = new("Durdur", "Stop"),
 
@@ -643,6 +644,11 @@ public static class Loc
         ["findings.title"] = new("Bulgular", "Findings"),
         ["findings.summary"] = new("Ajan tarafından üretilen güvenlik bulguları burada toplanır.", "Security findings produced by the agent are collected here."),
         ["findings.scan_button"] = new("Güvenlik Taraması Başlat", "Start Security Scan"),
+        ["findings.export_button"] = new("Rapor Dışa Aktar", "Export Report"),
+        ["findings.export.done_title"] = new("Rapor kaydedildi", "Report saved"),
+        ["findings.export.done_body"] = new(
+            "Markdown ve HTML raporlar şuraya kaydedildi:\n{0}\n(Markdown panoya da kopyalandı.)",
+            "Markdown and HTML reports saved to:\n{0}\n(Markdown also copied to clipboard.)"),
         ["findings.empty_title"] = new("Henüz bulgu yok", "No findings yet"),
         ["findings.empty_desc"] = new(
             "Bir tarama veya görev tamamlandığında bulgular burada listelenecek. Masaüstü Köprüsü üzerinden yetenek ve çalışma alanı güvenlik taraması gerçekleştirilebilir.",

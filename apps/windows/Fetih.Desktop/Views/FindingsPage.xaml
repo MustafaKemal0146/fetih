@@ -40,6 +40,8 @@
                        Style="{StaticResource MutedTextStyle}" />
             <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8">
                 <ProgressRing x:Name="ScanRing" Width="16" Height="16" IsActive="False" Visibility="Collapsed" />
+                <Button x:Name="ExportButton"
+                        Click="ExportButton_Click" />
                 <Button x:Name="ScanButton"
                         Click="ScanButton_Click" />
             </StackPanel>
