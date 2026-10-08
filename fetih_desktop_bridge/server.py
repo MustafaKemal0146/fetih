@@ -763,7 +763,46 @@ class BridgeServer:
             "provider": session.provider,
         }
         await conn.send_frame(event("session.done", done))
+
+        # İlk tur bitince ham ilk-mesaj başlığının yerine kısa, anlamlı bir
+        # başlık üret (ChatGPT tarzı). Arka planda — turu/yanıtı GECİKTİRMEZ.
+        if session.turns == 1 and done["text"] and not self.fake_model:
+            self._maybe_auto_title(conn, loop, session, message, done["text"])
+
         return done
+
+    def _maybe_auto_title(self, conn, loop, session, user_msg: str, assistant_text: str) -> None:
+        """İlk alışverişten kısa bir başlık türetip sessizce kaydeder ve UI'ya
+        ``session.updated`` yayar. Ağ/model hatası başlığı ham haliyle bırakır."""
+        import threading
+
+        def _work() -> None:
+            try:
+                from agent.title_generator import generate_title
+
+                # main_runtime=None → yardımcı (ucuz/hızlı) model kullanılır.
+                title = generate_title(user_msg, assistant_text, main_runtime=None)
+            except Exception:
+                title = None
+            if not title:
+                return
+            try:
+                self.store.rename(session.id, title)
+                conn.emit_threadsafe(
+                    loop,
+                    event(
+                        "session.updated",
+                        {
+                            "session_id": session.id,
+                            "title": title,
+                            "updated_at": time.time(),
+                        },
+                    ),
+                )
+            except Exception:
+                pass
+
+        threading.Thread(target=_work, daemon=True).start()
 
     def _m_session_cancel(self, conn, params):
         sid = str(params.get("session_id") or "")
