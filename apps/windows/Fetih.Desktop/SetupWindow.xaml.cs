@@ -547,6 +547,15 @@ public sealed partial class SetupWindow : Window
         CliLoginBar.Title = Loc.T("setup.login.opened.title");
         CliLoginBar.Message = Loc.T("setup.login.opened.msg");
 
+        // Antigravity CLI: giriş agy'nin KENDİ etkileşimli ekranında yapılır
+        // (tarayıcıyla). Köprü bunu yürütemez; agy'yi görünür bir pencerede
+        // aç, kullanıcı kapatınca oturumu yeniden denetle.
+        if (p.Id == "antigravity-cli")
+        {
+            await RunAgySignInAsync(p).ConfigureAwait(true);
+            return;
+        }
+
         try
         {
             _authRequestId = "";
@@ -652,6 +661,48 @@ public sealed partial class SetupWindow : Window
                 await CheckCliLoginAsync(_selected, announceOnly: false).ConfigureAwait(false);
             }
         });
+    }
+
+    /// <summary>
+    /// Antigravity CLI'ı (agy) etkileşimli olarak açar; kullanıcı Google
+    /// hesabıyla giriş yapıp pencereyi kapatınca oturum durumu denetlenir.
+    /// </summary>
+    private async Task RunAgySignInAsync(ProviderEntry p)
+    {
+        CliLoginBar.Title = Loc.T("setup.agy.signin.title");
+        CliLoginBar.Message = Loc.T("setup.agy.signin.msg");
+        try
+        {
+            var localAgy = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "agy", "bin", "agy.exe");
+            var psi = new ProcessStartInfo
+            {
+                // Varsayılan kurulum yolu yoksa PATH'teki agy denenir.
+                FileName = System.IO.File.Exists(localAgy) ? localAgy : "agy",
+                UseShellExecute = true, // kendi konsol penceresi
+            };
+            var proc = Process.Start(psi);
+            if (proc is not null)
+            {
+                await proc.WaitForExitAsync().ConfigureAwait(true);
+            }
+        }
+        catch (Exception ex)
+        {
+            CliLoginBar.Severity = InfoBarSeverity.Error;
+            CliLoginBar.Title = Loc.T("setup.agy.missing.title");
+            CliLoginBar.Message = Loc.T("setup.agy.missing.msg") + " " + ex.Message;
+            SetCliLoginBusy(false);
+            return;
+        }
+
+        SetCliLoginBusy(false);
+        await CheckCliLoginAsync(p, announceOnly: false).ConfigureAwait(true);
+        if (_selected is not null)
+        {
+            _ = LoadModelsAsync(_selected);
+        }
     }
 
     private void SetCliLoginBusy(bool busy)

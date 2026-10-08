@@ -32,7 +32,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
-from . import PROTOCOL_VERSION
+from . import PROTOCOL_VERSION, agy_backend
 from .protocol import (
     AGENT_ERROR,
     CANCELLED,
@@ -71,6 +71,11 @@ _BRIDGE_BACKGROUND_AUTH = {
     "qwen-oauth",
     "minimax-oauth",
 }
+
+#: Providers the desktop bridge serves itself rather than through the CLI's
+#: provider resolver. They may appear in providers.catalog even though
+#: ``fetih_cli.auth.resolve_provider`` rejects them (it explains why instead).
+DESKTOP_ONLY_PROVIDERS = frozenset({agy_backend.PROVIDER_ID})
 
 #: Advisory flow hint per provider so the desktop app can pick its login UI.
 _AUTH_FLOW_KIND = {
@@ -1331,6 +1336,26 @@ class BridgeServer:
                 }
             )
 
+        # Google Antigravity CLI: a desktop-only backend (see agy_backend),
+        # offered only when Google's official `agy` binary is installed here.
+        if agy_backend.PROVIDER_ID not in seen and _safe(agy_backend.find_agy):
+            out.append(
+                {
+                    "id": agy_backend.PROVIDER_ID,
+                    "name": "Google Antigravity CLI",
+                    "aliases": ["agy", "antigravity"],
+                    "auth_type": "external_process",
+                    "api_key_env_vars": [],
+                    "base_url_env_var": "",
+                    "base_url": "",
+                    "api_mode": "external_process",
+                    "display_name": "Google Antigravity CLI (Pro aboneliği)",
+                    "signup_url": "https://antigravity.google",
+                    "is_local": False,
+                    "kind": "cli_login",
+                }
+            )
+
         out.sort(key=lambda r: r["id"])
         return {"providers": out, "count": len(out)}
 
@@ -1354,6 +1379,16 @@ class BridgeServer:
         # lags real releases — it was missing the whole Claude 5 family while
         # the live endpoint returns it. Falls back to the catalog on any error
         # or when not signed in.
+        # Antigravity CLI: whatever the signed-in `agy` account offers.
+        if pid == agy_backend.PROVIDER_ID:
+            agy_models = _safe(agy_backend.list_models, default=None) or []
+            return {
+                "provider": pid,
+                "models": agy_models,
+                "source": "live" if agy_models else "fallback",
+                "recommended": agy_models[0] if agy_models else "",
+            }
+
         if pid == "anthropic":
             live_anthropic = _safe(_anthropic_live_model_ids, default=None)
             if live_anthropic:
@@ -1480,6 +1515,15 @@ class BridgeServer:
         pid = str(params.get("provider") or "").strip()
         if not pid:
             raise BridgeError(INVALID_PARAMS, "'provider' is required")
+
+        # Desktop-only backend: "signed in" means the official `agy` can list
+        # models under the user's own Antigravity login.
+        if pid == agy_backend.PROVIDER_ID:
+            return _safe(agy_backend.status, default=None) or {
+                "provider": pid,
+                "logged_in": False,
+                "auth_type": "external_process",
+            }
 
         from fetih_cli.auth import get_auth_status
 
@@ -2184,6 +2228,28 @@ class BridgeServer:
 
         effective_model = (model or "").strip() or cfg_model
         effective_provider = (provider or "").strip() or cfg_provider or None
+
+        # Desktop-only Antigravity CLI backend. The CLI's provider resolver does
+        # not know this id, so it is intercepted here: each turn runs Google's
+        # official `agy -p` under the user's own Antigravity login.
+        if effective_provider == agy_backend.PROVIDER_ID:
+            agy_cfg = (cfg.get("desktop") or {}).get("antigravity") or {}
+            work_dir = str(cwd) if cwd else os.getcwd()
+            history: List[Dict[str, Any]] = []
+            if session_id and self.store.exists(session_id):
+                history = _items_to_history(self.store.items(session_id))
+            return BridgeSession(
+                effective_sid,
+                agy_backend.AgyCliAgent(
+                    model=effective_model,
+                    cwd=work_dir,
+                    allow_tools=bool(agy_cfg.get("allow_tools", False)),
+                ),
+                model=effective_model,
+                provider=agy_backend.PROVIDER_ID,
+                cwd=work_dir,
+                history=history,
+            )
 
         try:
             runtime = resolve_runtime_provider(

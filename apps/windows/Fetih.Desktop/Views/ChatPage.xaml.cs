@@ -125,21 +125,75 @@ public sealed partial class ChatPage : Page
 
     // ── Hızlı model değiştirici (issue #55) ─────────────────────────────
 
+    /// <summary>Antigravity CLI arka ucunun sağlayıcı kimliği (masaüstüne özel).</summary>
+    private const string AgyProvider = "antigravity-cli";
+
+    /// <summary>config.yaml'daki varsayılan sağlayıcı — agy'den geri dönüş hedefi.</summary>
+    private string _defaultProvider = "";
+
+    /// <summary>Sağlayıcı → canlı model listesi (köprüden; yoksa statik katalog).</summary>
+    private readonly Dictionary<string, IReadOnlyList<string>> _modelCache =
+        new(StringComparer.OrdinalIgnoreCase);
+
     /// <summary>Etkin sağlayıcı/modeli config'den okuyup düğmeye yazar.</summary>
     private void RefreshActiveModel()
     {
         try
         {
+            // Önbellek değil DİSK: sihirbaz config.yaml'ı az önce yazmış
+            // olabilir; önbellekteki boş config "model listesi yok" gösteriyordu.
+            FetihConfigService.Current.Reload();
             var cfg = FetihConfigService.Current.Config;
             _chatProvider = cfg.GetString("model.provider") ?? "";
             _chatModel = cfg.GetString("model.default") ?? "";
+            _defaultProvider = _chatProvider;
         }
         catch
         {
             // Config okunamazsa düğme yine de görünür; seçince güncellenir.
         }
         UpdateModelButton();
+        _ = PrefetchModelsAsync(_chatProvider);
+        _ = PrefetchModelsAsync(AgyProvider);
     }
+
+    /// <summary>Bir sağlayıcının canlı model listesini köprüden çekip önbelleğe alır.</summary>
+    private async Task PrefetchModelsAsync(string provider)
+    {
+        if (string.IsNullOrWhiteSpace(provider)) return;
+        try
+        {
+            var res = await _bridge.ProvidersModelsAsync(provider).ConfigureAwait(true);
+            var list = new List<string>();
+            if (res.ValueKind == System.Text.Json.JsonValueKind.Object &&
+                res.TryGetProperty("models", out var ms) &&
+                ms.ValueKind == System.Text.Json.JsonValueKind.Array)
+            {
+                foreach (var m in ms.EnumerateArray())
+                {
+                    var s = m.GetString();
+                    if (!string.IsNullOrWhiteSpace(s)) list.Add(s);
+                }
+            }
+            if (list.Count > 0)
+            {
+                _modelCache[provider] = list;
+            }
+        }
+        catch
+        {
+            // Köprü yoksa menü statik kataloğa düşer.
+        }
+    }
+
+    /// <summary>Önbellekteki canlı liste; yoksa statik katalog.</summary>
+    private IReadOnlyList<string> ModelsFor(string provider)
+        => _modelCache.TryGetValue(provider, out var cached)
+            ? cached
+            : ProviderRegistry.GetCuratedModels(provider);
+
+    private static string ProviderLabel(string provider)
+        => ProviderRegistry.ById(provider)?.Label ?? provider;
 
     private void UpdateModelButton()
     {
@@ -154,50 +208,81 @@ public sealed partial class ChatPage : Page
         AutomationProperties.SetName(ModelSwitchButton, text);
     }
 
+    /// <summary>
+    /// Menü bölümleri: önce mevcut sağlayıcının modelleri; ardından diğer
+    /// geçiş hedefi — ana sağlayıcıdaysan Antigravity CLI (Pro), agy'deysen
+    /// ana sağlayıcına dönüş. Listeler köprüden önceden çekilmiş canlı
+    /// listelerdir (yoksa statik katalog).
+    /// </summary>
     private void OnModelMenuOpening(object? sender, object e)
     {
         ModelMenu.Items.Clear();
-        var models = ProviderRegistry.GetCuratedModels(_chatProvider);
-        if (models.Count == 0)
+
+        var otherProvider = _chatProvider == AgyProvider ? _defaultProvider : AgyProvider;
+        var otherModels = string.IsNullOrWhiteSpace(otherProvider) || otherProvider == _chatProvider
+            ? Array.Empty<string>()
+            : ModelsFor(otherProvider);
+
+        var current = ModelsFor(_chatProvider);
+        var sectioned = otherModels.Count > 0;
+
+        if (sectioned)
         {
-            ModelMenu.Items.Add(new MenuFlyoutItem
-            {
-                Text = Loc.T("chat.model.none"),
-                IsEnabled = false,
-            });
-            return;
+            ModelMenu.Items.Add(SectionHeader(ProviderLabel(_chatProvider)));
         }
-        foreach (var m in models)
+        if (current.Count == 0)
         {
-            var captured = m;
-            var item = new MenuFlyoutItem
-            {
-                Text = m,
-                Icon = string.Equals(m, _chatModel, StringComparison.OrdinalIgnoreCase)
-                    ? new SymbolIcon(Symbol.Accept)
-                    : null,
-            };
-            item.Click += async (_, _) => await SwitchModelAsync(captured);
-            ModelMenu.Items.Add(item);
+            ModelMenu.Items.Add(new MenuFlyoutItem { Text = Loc.T("chat.model.none"), IsEnabled = false });
         }
+        foreach (var m in current)
+        {
+            ModelMenu.Items.Add(ModelItem(_chatProvider, m,
+                selected: string.Equals(m, _chatModel, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        if (sectioned)
+        {
+            ModelMenu.Items.Add(new MenuFlyoutSeparator());
+            ModelMenu.Items.Add(SectionHeader(ProviderLabel(otherProvider)));
+            foreach (var m in otherModels)
+            {
+                ModelMenu.Items.Add(ModelItem(otherProvider, m, selected: false));
+            }
+        }
+
+        // Liste henüz gelmediyse bir sonraki açılış için tazele.
+        if (!_modelCache.ContainsKey(_chatProvider)) _ = PrefetchModelsAsync(_chatProvider);
     }
 
-    private async Task SwitchModelAsync(string model)
+    private static MenuFlyoutItem SectionHeader(string text)
+        => new() { Text = text, IsEnabled = false, FontWeight = Microsoft.UI.Text.FontWeights.SemiBold };
+
+    private MenuFlyoutItem ModelItem(string provider, string model, bool selected)
+    {
+        var item = new MenuFlyoutItem
+        {
+            Text = model,
+            Icon = selected ? new SymbolIcon(Symbol.Accept) : null,
+        };
+        item.Click += async (_, _) => await SwitchModelAsync(provider, model);
+        return item;
+    }
+
+    private async Task SwitchModelAsync(string provider, string model)
     {
         var sid = Controller.CurrentSessionId;
         if (string.IsNullOrEmpty(sid) || string.IsNullOrWhiteSpace(model)) return;
-        if (string.Equals(model, _chatModel, StringComparison.OrdinalIgnoreCase)) return;
+        if (string.Equals(provider, _chatProvider, StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(model, _chatModel, StringComparison.OrdinalIgnoreCase)) return;
         try
         {
-            await _bridge.SessionSetModelAsync(sid, _chatProvider, model).ConfigureAwait(true);
-            // Kesin güncelleme session.model_changed olayından gelir; yine de
-            // düğmeyi hemen iyimser güncelle.
-            _chatModel = model;
-            UpdateModelButton();
+            await _bridge.SessionSetModelAsync(sid, provider, model).ConfigureAwait(true);
+            // Kesin güncelleme session.model_changed olayından gelir.
         }
         catch (Exception ex)
         {
             App.LogCrash("ChatPage.SwitchModel", ex, ex.Message);
+            Controller.AddSystem(ProviderErrorText.Humanize(ex.Message));
         }
     }
 
@@ -209,10 +294,19 @@ public sealed partial class ChatPage : Page
             {
                 return;
             }
+            var previous = _chatProvider;
             if (!string.IsNullOrWhiteSpace(provider)) _chatProvider = provider;
             if (!string.IsNullOrWhiteSpace(model)) _chatModel = model;
             UpdateModelButton();
             Controller.AddSystem(string.Format(Loc.T("chat.model.changed"), _chatModel));
+
+            // agy'ye geçişte ne değiştiğini açıkça söyle: turu artık
+            // Antigravity'nin ajanı yürütüyor, FETİH'in araçları değil.
+            if (_chatProvider == AgyProvider && previous != AgyProvider)
+            {
+                Controller.AddSystem(Loc.T("chat.agy.mode_notice"));
+            }
+            if (!_modelCache.ContainsKey(_chatProvider)) _ = PrefetchModelsAsync(_chatProvider);
         });
     }
 

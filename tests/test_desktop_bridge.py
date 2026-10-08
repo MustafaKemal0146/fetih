@@ -333,9 +333,28 @@ def test_providers_catalog_serves_the_canonical_registry():
     groq = next(p for p in res["providers"] if p["id"] == "groq")
     assert "groqcloud" in groq["aliases"]
 
-    # Every advertised id must be one the resolver accepts.
+    # Every advertised id must be one the resolver accepts — except backends
+    # the desktop bridge declares it serves itself (e.g. Antigravity CLI).
+    from fetih_desktop_bridge.server import DESKTOP_ONLY_PROVIDERS
+
     for pid in ids:
-        assert pid in PROVIDER_REGISTRY or pid in {"openrouter", "custom", "local"}
+        assert (
+            pid in PROVIDER_REGISTRY
+            or pid in {"openrouter", "custom", "local"}
+            or pid in DESKTOP_ONLY_PROVIDERS
+        )
+
+
+def test_desktop_only_provider_gets_clear_cli_error():
+    # If a desktop-only id ends up in config.yaml, the terminal CLI must say
+    # why it can't use it rather than a bare "unknown provider".
+    from fetih_cli.auth import AuthError, resolve_provider
+    from fetih_desktop_bridge.server import DESKTOP_ONLY_PROVIDERS
+
+    for pid in DESKTOP_ONLY_PROVIDERS:
+        with pytest.raises(AuthError) as exc:
+            resolve_provider(pid)
+        assert "desktop-app-only" in str(exc.value)
 
 
 def test_providers_catalog_classifies_setup_flow():

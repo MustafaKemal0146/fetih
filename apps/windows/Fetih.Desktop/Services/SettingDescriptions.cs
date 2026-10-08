@@ -278,6 +278,11 @@ public static class SettingDescriptions
             "Kapalıyken ajanın 127.0.0.1, 10.x, 192.168.x, .local gibi özel/iç ağ adreslerine istek atması engellenir — bu, klasik SSRF korumasıdır. Yalnızca kendi laboratuvar ağını taratırken aç ve iş bitince kapat.",
             "While off, the agent is blocked from requesting private/internal addresses such as 127.0.0.1, 10.x, 192.168.x or .local — the classic SSRF guard. Turn it on only to scan your own lab network, then turn it back off.",
             GlyphNetwork),
+        ["desktop.antigravity.allow_tools"] = new(
+            "Antigravity'nin komut çalıştırmasına izin ver", "Let Antigravity run commands",
+            "Antigravity CLI modunda (Google AI Pro, API anahtarı yok) sohbeti Google'ın ajanı yürütür. Kapalıyken Antigravity sohbet eder ama komut çalıştırmak istediğinde istek reddedilir. Açıkken her komutu ONAY SORMADAN çalıştırır ve FETİH'in komut onayı akışının tamamen dışında kalır. Yalnızca neyi çalıştıracağına güvendiğin işlerde aç.",
+            "In Antigravity CLI mode (Google AI Pro, no API key) Google's agent runs the chat. While off, Antigravity chats but any command it wants to run is denied. While on, it runs every command WITHOUT ASKING, entirely outside FETİH's command-approval flow. Turn it on only for work you trust it to execute.",
+            GlyphLock),
         ["security.redact_secrets"] = new("Gizli verileri maskele", "Redact secrets",
             "Araç çıktısı, günlükler ve sohbet yanıtları modele veya ekrana ulaşmadan önce API anahtarı, token ve parola görünümlü diziler maskelenir. Kapatmak yakalanan bir anahtarın oturum geçmişine ve günlük dosyalarına düz metin yazılmasına yol açar; yalnızca redaksiyon motorunu geliştirirken kapat.",
             "Strings that look like API keys, tokens and passwords are masked in tool output, logs and chat responses before the model or the screen ever sees them. Turning it off writes a captured key in plain text into session history and log files; only disable it while developing the redactor itself.",

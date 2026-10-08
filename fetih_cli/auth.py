@@ -1381,6 +1381,15 @@ def _get_config_hint_for_unknown_provider(provider_name: str) -> str:
     Checks for common config.yaml mistakes (malformed custom_providers, etc.)
     and returns a human-readable diagnostic, or empty string if nothing found.
     """
+    # Desktop-only backend: the Windows app runs Google's `agy` for this id,
+    # but the terminal CLI has no such provider. Say so instead of a bare
+    # "unknown provider".
+    if provider_name in ("antigravity-cli", "agy", "antigravity"):
+        return (
+            "'antigravity-cli' (Google Antigravity CLI) is a desktop-app-only "
+            "backend; the terminal CLI cannot use it. Pick another provider "
+            "with 'fetih model', or use the FETİH desktop app."
+        )
     try:
         from fetih_cli.config import validate_config_structure
         issues = validate_config_structure()

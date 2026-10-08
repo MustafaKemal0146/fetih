@@ -130,6 +130,16 @@ public static class ProviderRegistry
             new string[0], Kind: ProviderKind.CliLogin, CliCommand: "gemini",
             SupportsOAuthLogin: true, OAuthFlow: "loopback"),
 
+        // Google'ın resmi Antigravity CLI'ı (agy). Masaüstüne özel arka uç:
+        // köprü her turu kullanıcının KENDİ agy girişiyle `agy -p` olarak
+        // çalıştırır — API anahtarı yok, Google AI Pro/Ultra kotası kullanılır.
+        // Bu modda turu Antigravity'nin ajanı yürütür (FETİH araçları devre
+        // dışı). Giriş, agy'nin kendi konsolunda yapılır (CliCommand).
+        new("antigravity-cli", "Google Antigravity CLI", "external_process", "external_process",
+            new string[0], Kind: ProviderKind.CliLogin, CliCommand: "agy",
+            SignupUrl: "https://antigravity.google",
+            DisplayNameKey: "provider.name.antigravity"),
+
         new("openai-codex", "OpenAI Codex", "codex_responses", "oauth_external",
             new string[0], Kind: ProviderKind.CliLogin, CliCommand: "codex", DisplayNameKey: "provider.name.codex",
             SupportsOAuthLogin: true, OAuthFlow: "device_code"),

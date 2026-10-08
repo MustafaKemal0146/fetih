@@ -1754,6 +1754,18 @@ DEFAULT_CONFIG = {
         "retries": 2,
     },
 
+    # Desktop app (Windows) settings.
+    "desktop": {
+        # Google Antigravity CLI backend (provider "antigravity-cli"): the
+        # desktop runs the official `agy -p` under the user's own login.
+        "antigravity": {
+            # Headless `agy` auto-denies any tool that needs a permission
+            # prompt. True passes --dangerously-skip-permissions: Antigravity
+            # then runs commands WITHOUT asking, outside FETİH's approval flow.
+            "allow_tools": False,
+        },
+    },
+
     # Config schema version - bump this when adding new required fields
     "_config_version": 23,
 }

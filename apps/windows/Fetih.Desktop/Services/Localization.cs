@@ -325,6 +325,17 @@ public static class Loc
         ["chat.model.select"] = new("Model seç", "Select model"),
         ["chat.model.none"] = new("Bu sağlayıcı için model listesi yok", "No model list for this provider"),
         ["chat.model.changed"] = new("Model değiştirildi: {0}", "Switched model: {0}"),
+        ["chat.agy.mode_notice"] = new(
+            "Antigravity moduna geçildi: bu sohbeti artık Google Antigravity'nin ajanı yürütüyor (Pro kotan kullanılır). Bu modda FETİH'in araçları, komut onayı ve bulgular paneli çalışmaz. Antigravity varsayılan olarak komut çalıştıramaz; izin vermek için Ayarlar'da 'desktop.antigravity.allow_tools' seçeneğini açabilirsin (onay sormadan çalıştırır).",
+            "Switched to Antigravity mode: Google Antigravity's agent now runs this chat (uses your Pro quota). FETİH's tools, command approval and findings panel don't apply in this mode. Antigravity can't run commands by default; to allow it, enable 'desktop.antigravity.allow_tools' in Settings (runs without asking)."),
+        ["setup.agy.signin.title"] = new("Antigravity girişi", "Antigravity sign-in"),
+        ["setup.agy.signin.msg"] = new(
+            "Açılan Antigravity penceresinde Google hesabınla giriş yap, sonra pencereyi kapat. Oturum otomatik denetlenecek.",
+            "Sign in with your Google account in the Antigravity window that opened, then close it. The session will be checked automatically."),
+        ["setup.agy.missing.title"] = new("Antigravity CLI açılamadı", "Couldn't open Antigravity CLI"),
+        ["setup.agy.missing.msg"] = new(
+            "agy bulunamadı. Antigravity CLI'ı antigravity.google adresinden kur.",
+            "agy was not found. Install Antigravity CLI from antigravity.google."),
 
         // Aktivite Kartları & Durumlar
         ["chat.activity.thinking"] = new("Düşünüyor…", "Thinking…"),
@@ -1348,6 +1359,9 @@ public static class Loc
 
         // ── Sağlayıcı adları (marka adı olmayanlar) ──────────────────────
         ["provider.name.codex"] = new("OpenAI Codex (ChatGPT girişi)", "OpenAI Codex (ChatGPT sign-in)"),
+        ["provider.name.antigravity"] = new(
+            "Google Antigravity CLI (Pro aboneliği, API anahtarı yok)",
+            "Google Antigravity CLI (Pro subscription, no API key)"),
         ["provider.name.kimi_cn"] = new("Kimi (Çin)", "Kimi (China)"),
         ["provider.name.minimax_cn"] = new("MiniMax (Çin)", "MiniMax (China)"),
         ["provider.name.ai_gateway"] = new("Vercel AI (model yönlendirici)", "Vercel AI (model router)"),
