@@ -33,8 +33,10 @@ public sealed record BridgeToolCall(string SessionId, string Id, string Name, st
 /// <summary>Bir araç sonucu olayının yükü.</summary>
 public sealed record BridgeToolResult(string SessionId, string Id, string Name, string ResultText);
 
-/// <summary>Bir turun başarıyla bitişi.</summary>
-public sealed record BridgeDone(string SessionId, string Text, int? ApiCalls, long? ElapsedMs, string? Thought = null);
+/// <summary>Bir turun başarıyla bitişi. Token alanları oturum boyunca kümülatiftir.</summary>
+public sealed record BridgeDone(
+    string SessionId, string Text, int? ApiCalls, long? ElapsedMs, string? Thought = null,
+    int? TotalTokens = null, int? PromptTokens = null, int? CompletionTokens = null);
 
 /// <summary>Bir turun başarısız bitişi.</summary>
 public sealed record BridgeErrorEvent(string SessionId, string Error, string? Partial);
@@ -398,10 +400,17 @@ public sealed class BridgeClient : IDisposable
                     break;
 
                 case "session.done":
+                    int? totTok = null, prmTok = null, cmpTok = null;
+                    if (p.TryGetProperty("tokens", out var tk) && tk.ValueKind == JsonValueKind.Object)
+                    {
+                        totTok = IntOrNull(tk, "total");
+                        prmTok = IntOrNull(tk, "prompt");
+                        cmpTok = IntOrNull(tk, "completion");
+                    }
                     SessionDone?.Invoke(new BridgeDone(
                         Str(p, "session_id"), Str(p, "text"),
                         IntOrNull(p, "api_calls"), LongOrNull(p, "elapsed_ms"),
-                        Str(p, "thought")));
+                        Str(p, "thought"), totTok, prmTok, cmpTok));
                     break;
 
                 case "session.error":

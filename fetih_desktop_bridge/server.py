@@ -752,6 +752,13 @@ class BridgeServer:
             raise BridgeError(AGENT_ERROR, detail["error"], detail)
 
         session.turns += 1
+        # Oturum boyunca kümülatif token kullanımı (ajan sayaçlarından).
+        _agent = session.agent
+        tokens = {
+            "total": int(getattr(_agent, "session_total_tokens", 0) or 0),
+            "prompt": int(getattr(_agent, "session_prompt_tokens", 0) or 0),
+            "completion": int(getattr(_agent, "session_completion_tokens", 0) or 0),
+        }
         done = {
             "session_id": session.id,
             "text": outcome.get("final_response") or "",
@@ -759,6 +766,7 @@ class BridgeServer:
             "elapsed_ms": elapsed_ms,
             "api_calls": outcome.get("api_calls"),
             "tool_calls": tool_calls,
+            "tokens": tokens,
             "model": session.model,
             "provider": session.provider,
         }

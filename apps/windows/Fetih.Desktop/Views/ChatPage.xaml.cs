@@ -42,6 +42,7 @@ public sealed partial class ChatPage : Page
         Controller.BusyChanged += OnControllerBusyChanged;
         Controller.ScrollRequested += OnControllerScrollRequested;
         Controller.MessagesChanged += OnControllerMessagesChanged;
+        Controller.TokensUpdated += OnTokensUpdated;
 
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
@@ -92,6 +93,23 @@ public sealed partial class ChatPage : Page
         Controller.BusyChanged -= OnControllerBusyChanged;
         Controller.ScrollRequested -= OnControllerScrollRequested;
         Controller.MessagesChanged -= OnControllerMessagesChanged;
+        Controller.TokensUpdated -= OnTokensUpdated;
+    }
+
+    private void OnTokensUpdated(int total)
+    {
+        RunOnUi(() =>
+        {
+            if (total > 0)
+            {
+                TokenText.Text = $"≈ {total:N0} token";
+                TokenText.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                TokenText.Visibility = Visibility.Collapsed;
+            }
+        });
     }
 
     private void ApplyLanguage()

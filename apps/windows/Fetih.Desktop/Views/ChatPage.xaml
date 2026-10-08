@@ -389,6 +389,7 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <Ellipse x:Name="StatusDot"
@@ -404,7 +405,16 @@
                            TextTrimming="CharacterEllipsis"
                            Text="{x:Bind Status.Detail, Mode=OneWay}" />
 
-                <ProgressRing Grid.Column="2"
+                <!-- Oturum token sayacı (kümülatif) -->
+                <TextBlock x:Name="TokenText"
+                           Grid.Column="2"
+                           VerticalAlignment="Center"
+                           FontSize="11"
+                           Opacity="0.7"
+                           Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                           Visibility="Collapsed" />
+
+                <ProgressRing Grid.Column="3"
                               Width="16"
                               Height="16"
                               IsActive="{x:Bind Status.IsBusy, Mode=OneWay}" />

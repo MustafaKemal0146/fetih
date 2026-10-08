@@ -659,6 +659,12 @@ def test_fake_model_flow():
     assert "session.tool_result" in methods
     assert "session.delta" in methods
 
+    # session.done token kullanımını taşımalı (fake ajanda sayaç yok → 0'lar).
+    done = next(f for f in conn.sent if f.get("method") == "session.done")
+    tok = done["params"]["tokens"]
+    assert set(tok) == {"total", "prompt", "completion"}
+    assert all(isinstance(v, int) for v in tok.values())
+
 
 # ── approval flow ──────────────────────────────────────────────────────────
 

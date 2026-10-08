@@ -91,6 +91,12 @@ public sealed class ChatConversationController
     public event Action<string>? SystemMessageAdded;
     public event Action? MessagesChanged;
 
+    /// <summary>Oturum boyunca kümülatif token toplamı değişince tetiklenir.</summary>
+    public event Action<int /*total*/>? TokensUpdated;
+
+    /// <summary>Son bilinen kümülatif token toplamı (oturum).</summary>
+    public int LastTokenTotal { get; private set; }
+
     // ── Köprü Olayları (Kalıcı Abonelik) ─────────────────────────────────────
 
     private void HookBridgeEvents()
@@ -234,6 +240,11 @@ public sealed class ChatConversationController
 
         _dispatcher.Run(() =>
         {
+            if (done.TotalTokens is { } total)
+            {
+                LastTokenTotal = total;
+                TokensUpdated?.Invoke(total);
+            }
             EndTurn();
         });
     }
@@ -736,6 +747,8 @@ public sealed class ChatConversationController
         _activity = null;
         _thoughtStep = null;
         EditTarget = null;
+        LastTokenTotal = 0;
+        TokensUpdated?.Invoke(0);
         NotifyMessagesChanged();
     }
 
