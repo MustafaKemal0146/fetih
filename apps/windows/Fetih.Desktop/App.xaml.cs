@@ -82,8 +82,69 @@ public partial class App : Application
     /// <summary>Uygulamanın şu anda açık olan ana penceresi.</summary>
     public static Window? MainAppWindow { get; internal set; }
 
+    /// <summary>
+    /// Zaten çalışan bir FETİH örneği varsa aktivasyonu ona yönlendirir ve
+    /// <c>true</c> döner (bu örnek kapanmalı). Biz birincil örneksek, ikinci
+    /// bir örnek bizi uyandırdığında pencereyi öne getirmek için Activated'a
+    /// abone olur ve <c>false</c> döneriz. Hata → <c>false</c> (fail-safe).
+    /// </summary>
+    private bool TryRedirectToPrimaryInstance()
+    {
+        try
+        {
+            var primary = Microsoft.Windows.AppLifecycle.AppInstance
+                .FindOrRegisterForKey("FETIH.Desktop.Main");
+            if (primary.IsCurrent)
+            {
+                primary.Activated += OnInstanceActivated;
+                return false;
+            }
+            var activatedArgs = Microsoft.Windows.AppLifecycle.AppInstance
+                .GetCurrent().GetActivatedEventArgs();
+            primary.RedirectActivationToAsync(activatedArgs).AsTask().Wait(TimeSpan.FromSeconds(3));
+            return true;
+        }
+        catch (Exception ex)
+        {
+            LogCrash("App.SingleInstance", ex, ex.Message);
+            return false;
+        }
+    }
+
+    private void OnInstanceActivated(object? sender, Microsoft.Windows.AppLifecycle.AppActivationArguments e)
+    {
+        // Activated arka plan iş parçacığından gelir; pencereyi UI iş
+        // parçacığında öne getir.
+        var window = MainAppWindow;
+        window?.DispatcherQueue?.TryEnqueue(() =>
+        {
+            try
+            {
+                window.Activate();
+                if (window.AppWindow is { } aw)
+                {
+                    aw.Show();
+                    aw.MoveInZOrderAtTop();
+                }
+            }
+            catch
+            {
+                // Öne getirme başarısızsa sorun değil.
+            }
+        });
+    }
+
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        // Tek örnek: zaten bir FETİH açıksa onu öne getirip bu ikinci örneği
+        // kapat (iki köprü süreci doğmasın). Fail-safe: herhangi bir hata
+        // olursa normal açılışa devam edilir.
+        if (TryRedirectToPrimaryInstance())
+        {
+            try { Exit(); } catch { }
+            return;
+        }
+
         // Açılışta, ÖNCEKİ oturumlardan (çökme, Görev Yöneticisi'nden
         // sonlandırma) yetim kalmış köprü süreçlerini topla. Arka planda ve
         // hatasız çalışır; açılışı hiçbir koşulda durdurmaz. Bu oturumun
