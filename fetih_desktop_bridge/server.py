@@ -201,6 +201,11 @@ class BridgeSession:
         self.turns = 0
         self.thread_id: Optional[int] = None
         self.history: List[Dict[str, Any]] = list(history) if history else []
+        # A model switch requested while a turn was running (session.set_model);
+        # applied at the start of the next send so an agent is never swapped
+        # mid-turn (prompt-cache rule). None when there is nothing pending.
+        self.pending_model: Optional[str] = None
+        self.pending_provider: Optional[str] = None
 
     def snapshot(self) -> Dict[str, Any]:
         return {
@@ -436,6 +441,7 @@ class BridgeServer:
                 "session.send": self._m_session_send,
                 "session.cancel": self._m_session_cancel,
                 "session.approve": self._m_session_approve,
+                "session.set_model": self._m_session_set_model,
                 "config.get": self._m_config_get,
                 "config.set": self._m_config_set,
                 "providers.list": self._m_providers_list,
@@ -607,6 +613,15 @@ class BridgeServer:
 
         if session.busy:
             raise BridgeError(SESSION_BUSY, f"session {session.id} is already running a turn")
+
+        # Apply a model switch requested mid-turn (session.set_model while busy)
+        # now, at the top of the next turn — never swapping an agent in flight.
+        if session.pending_model or session.pending_provider:
+            self._apply_model_switch(
+                conn, session,
+                session.pending_model or session.model,
+                session.pending_provider or session.provider,
+            )
 
         from fetih_desktop_bridge.session_store import TranscriptRecorder
         from fetih_desktop_bridge.thought_labeler import ThoughtLabeler
@@ -1007,6 +1022,87 @@ class BridgeServer:
             pass
 
         return {"resolved": resolved, "choice": choice, "session_id": sid}
+
+    def _apply_model_switch(self, conn, session, model: str, provider: str) -> None:
+        """Rebuild a session's agent for a new provider/model, preserving history.
+
+        Must only be called when the session is NOT running a turn. Rebuilds
+        from the stored transcript so the conversation continues under the new
+        model, clears any pending switch, and emits ``session.model_changed``
+        so the chat can draw a 'switched to <model>' divider.
+        """
+        rebuilt = self._build_session(
+            session_id=session.id,
+            model=(model or "").strip() or session.model,
+            provider=(provider or "").strip() or session.provider,
+        )
+        session.agent = rebuilt.agent
+        session.model = rebuilt.model
+        session.provider = rebuilt.provider
+        session.pending_model = None
+        session.pending_provider = None
+
+        loop = self.loop_for(conn) or asyncio.get_running_loop()
+        conn.emit_threadsafe(
+            loop,
+            event(
+                "session.model_changed",
+                {
+                    "session_id": session.id,
+                    "provider": session.provider,
+                    "model": session.model,
+                },
+            ),
+        )
+
+    def _m_session_set_model(self, conn, params):
+        """Switch an existing session's provider/model (issue #55).
+
+        Idle session → the agent is rebuilt now and the next turn uses the new
+        model. Busy session → the switch is remembered and applied at the start
+        of the next turn (an agent is never swapped mid-turn). Session-scoped:
+        the global ``config.yaml`` default is left untouched.
+        """
+        sid = str(params.get("session_id") or "").strip()
+        if not sid:
+            raise BridgeError(INVALID_PARAMS, "'session_id' is required")
+        provider = str(params.get("provider") or "").strip()
+        model = str(params.get("model") or "").strip()
+        if not provider and not model:
+            raise BridgeError(INVALID_PARAMS, "provide 'provider' and/or 'model'")
+
+        session = self.sessions.get(sid)
+        if session is None:
+            if not self.store.exists(sid):
+                raise BridgeError(SESSION_NOT_FOUND, f"no such session: {sid}")
+            # Materialize a live session so the override has somewhere to live.
+            session = self._build_session(session_id=sid)
+            self.sessions[sid] = session
+
+        if session.busy:
+            session.pending_model = model or session.model
+            session.pending_provider = provider or session.provider
+            return {
+                "session_id": sid,
+                "applied": "next_turn",
+                "provider": session.pending_provider,
+                "model": session.pending_model,
+            }
+
+        try:
+            self._apply_model_switch(conn, session, model, provider)
+        except BridgeError:
+            raise
+        except Exception as exc:
+            raise BridgeError(
+                AGENT_ERROR, f"model switch failed: {type(exc).__name__}: {exc}"
+            )
+        return {
+            "session_id": sid,
+            "applied": "now",
+            "provider": session.provider,
+            "model": session.model,
+        }
 
     # ── config.* ────────────────────────────────────────────────────────
 

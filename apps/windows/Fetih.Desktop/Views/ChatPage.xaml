@@ -390,6 +390,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <Ellipse x:Name="StatusDot"
@@ -405,16 +406,33 @@
                            TextTrimming="CharacterEllipsis"
                            Text="{x:Bind Status.Detail, Mode=OneWay}" />
 
+                <!--
+                    Hızlı model değiştirici (issue #55): etkin modeli gösterir,
+                    tıklanınca o sağlayıcının modellerinden biri seçilince oturum
+                    içi değişir (session.set_model). Başlıktaki tam seçici #41.
+                -->
+                <DropDownButton x:Name="ModelSwitchButton"
+                                Grid.Column="2"
+                                Padding="8,2"
+                                FontSize="11"
+                                VerticalAlignment="Center"
+                                AutomationProperties.AutomationId="chat_model_switch"
+                                Visibility="Collapsed">
+                    <DropDownButton.Flyout>
+                        <MenuFlyout x:Name="ModelMenu" Placement="Bottom" />
+                    </DropDownButton.Flyout>
+                </DropDownButton>
+
                 <!-- Oturum token sayacı (kümülatif) -->
                 <TextBlock x:Name="TokenText"
-                           Grid.Column="2"
+                           Grid.Column="3"
                            VerticalAlignment="Center"
                            FontSize="11"
                            Opacity="0.7"
                            Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                            Visibility="Collapsed" />
 
-                <ProgressRing Grid.Column="3"
+                <ProgressRing Grid.Column="4"
                               Width="16"
                               Height="16"
                               IsActive="{x:Bind Status.IsBusy, Mode=OneWay}" />

@@ -37,6 +37,14 @@ public sealed partial class ProviderPage : Page
     private string _oauthActiveRequestId = "";
     private bool _authEventsHooked;
 
+    /// <summary>
+    /// Sağlayıcı seçim sırası. Her seçim bunu artırır; geç gelen (önceki
+    /// sağlayıcıya ait) model listesi yanıtları, kendi sıraları artık güncel
+    /// değilse yok sayılır — yoksa listede yanlış sağlayıcının modelleri kalır
+    /// (#55'teki yarış).
+    /// </summary>
+    private int _providerStateSeq;
+
     public ProviderPage()
     {
         InitializeComponent();
@@ -562,6 +570,9 @@ public sealed partial class ProviderPage : Page
             return;
         }
 
+        // Bu seçimin sıra numarası; geç dönen async yanıtlar bununla doğrulanır.
+        var seq = ++_providerStateSeq;
+
         var resolved = _providerChoices.FirstOrDefault(c =>
             string.Equals(c.Label, providerId, StringComparison.OrdinalIgnoreCase) ||
             string.Equals(c.Id, providerId, StringComparison.OrdinalIgnoreCase));
@@ -677,6 +688,13 @@ public sealed partial class ProviderPage : Page
         try
         {
             var res = await _bridge.ProvidersModelsAsync(pid).ConfigureAwait(true);
+            // Kullanıcı bu yanıt dönene kadar başka bir sağlayıcı seçtiyse, bu
+            // (artık eski) model listesini uygulama — yoksa combo'da yanlış
+            // sağlayıcının modelleri kalır.
+            if (seq != _providerStateSeq)
+            {
+                return;
+            }
             if (res.ValueKind == JsonValueKind.Object &&
                 res.TryGetProperty("models", out var ms) &&
                 ms.ValueKind == JsonValueKind.Array)

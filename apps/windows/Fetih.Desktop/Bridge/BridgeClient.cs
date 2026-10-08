@@ -132,6 +132,7 @@ public sealed class BridgeClient : IDisposable
     public event Action<string /*sessionId*/, string /*requestId*/>? ApprovalResolved;
     public event Action<BridgeAuthProgress>? AuthProgress;
     public event Action<BridgeAuthDone>? AuthDone;
+    public event Action<string /*sessionId*/, string /*provider*/, string /*model*/>? SessionModelChanged;
     public event Action? ConnectionLost;
 
     // ── Bağlantı ────────────────────────────────────────────────────────────
@@ -480,6 +481,11 @@ public sealed class BridgeClient : IDisposable
                         Bool(p, "ok"), Str(p, "error"), Bool(p, "logged_in"),
                         Str(p, "email"), Str(p, "plan"), Str(p, "expires_at")));
                     break;
+
+                case "session.model_changed":
+                    SessionModelChanged?.Invoke(
+                        Str(p, "session_id"), Str(p, "provider"), Str(p, "model"));
+                    break;
             }
         }
         catch
@@ -763,6 +769,22 @@ public sealed class BridgeClient : IDisposable
         await EnsureConnectedAsync(ct).ConfigureAwait(false);
         return await CallAsync("providers.auth_status",
             new Dictionary<string, object?> { ["provider"] = provider }, ct).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Var olan bir oturumun sağlayıcı/modelini değiştirir (issue #55). Oturum
+    /// boştaysa anında, tur sürüyorsa bir sonraki turun başında uygulanır.
+    /// </summary>
+    public async Task<JsonElement> SessionSetModelAsync(
+        string sessionId, string provider, string model, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("session.set_model", new Dictionary<string, object?>
+        {
+            ["session_id"] = sessionId,
+            ["provider"] = provider,
+            ["model"] = model,
+        }, ct).ConfigureAwait(false);
     }
 
     /// <summary>OAuth/abonelik girişi destekleyen sağlayıcılar ve akış türleri.</summary>

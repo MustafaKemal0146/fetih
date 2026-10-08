@@ -10,6 +10,7 @@ using Fetih.Desktop.Services;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Windows.ApplicationModel.DataTransfer;
@@ -27,6 +28,10 @@ public sealed partial class ChatPage : Page
     private readonly BridgeClient _bridge = BridgeClient.Shared;
     private bool _stickToBottom = true;
     private UiLanguage? _lastLanguage;
+
+    // ── Hızlı model değiştirici (issue #55) ─────────────────────────────
+    private string _chatProvider = "";
+    private string _chatModel = "";
 
     public ChatPage()
     {
@@ -60,6 +65,10 @@ public sealed partial class ChatPage : Page
         Status.PropertyChanged += OnStatusChanged;
         ChatSessionService.Shared.NewChatRequested += OnServiceNewChatRequested;
         ChatSessionService.Shared.SessionOpenRequested += OnServiceSessionOpenRequested;
+        _bridge.SessionModelChanged += OnSessionModelChanged;
+        ModelMenu.Opening += OnModelMenuOpening;
+
+        RefreshActiveModel();
 
         _ = ChatSessionService.Shared.RefreshAsync();
 
@@ -90,6 +99,8 @@ public sealed partial class ChatPage : Page
         Status.PropertyChanged -= OnStatusChanged;
         ChatSessionService.Shared.NewChatRequested -= OnServiceNewChatRequested;
         ChatSessionService.Shared.SessionOpenRequested -= OnServiceSessionOpenRequested;
+        _bridge.SessionModelChanged -= OnSessionModelChanged;
+        ModelMenu.Opening -= OnModelMenuOpening;
         Controller.BusyChanged -= OnControllerBusyChanged;
         Controller.ScrollRequested -= OnControllerScrollRequested;
         Controller.MessagesChanged -= OnControllerMessagesChanged;
@@ -109,6 +120,99 @@ public sealed partial class ChatPage : Page
             {
                 TokenText.Visibility = Visibility.Collapsed;
             }
+        });
+    }
+
+    // ── Hızlı model değiştirici (issue #55) ─────────────────────────────
+
+    /// <summary>Etkin sağlayıcı/modeli config'den okuyup düğmeye yazar.</summary>
+    private void RefreshActiveModel()
+    {
+        try
+        {
+            var cfg = FetihConfigService.Current.Config;
+            _chatProvider = cfg.GetString("model.provider") ?? "";
+            _chatModel = cfg.GetString("model.default") ?? "";
+        }
+        catch
+        {
+            // Config okunamazsa düğme yine de görünür; seçince güncellenir.
+        }
+        UpdateModelButton();
+    }
+
+    private void UpdateModelButton()
+    {
+        var text = string.IsNullOrWhiteSpace(_chatModel)
+            ? Loc.T("chat.model.select")
+            : _chatModel;
+        ModelSwitchButton.Content = text;
+        ModelSwitchButton.Visibility = Visibility.Visible;
+        ToolTipService.SetToolTip(
+            ModelSwitchButton,
+            string.IsNullOrWhiteSpace(_chatProvider) ? text : $"{_chatProvider} · {text}");
+        AutomationProperties.SetName(ModelSwitchButton, text);
+    }
+
+    private void OnModelMenuOpening(object? sender, object e)
+    {
+        ModelMenu.Items.Clear();
+        var models = ProviderRegistry.GetCuratedModels(_chatProvider);
+        if (models.Count == 0)
+        {
+            ModelMenu.Items.Add(new MenuFlyoutItem
+            {
+                Text = Loc.T("chat.model.none"),
+                IsEnabled = false,
+            });
+            return;
+        }
+        foreach (var m in models)
+        {
+            var captured = m;
+            var item = new MenuFlyoutItem
+            {
+                Text = m,
+                Icon = string.Equals(m, _chatModel, StringComparison.OrdinalIgnoreCase)
+                    ? new SymbolIcon(Symbol.Accept)
+                    : null,
+            };
+            item.Click += async (_, _) => await SwitchModelAsync(captured);
+            ModelMenu.Items.Add(item);
+        }
+    }
+
+    private async Task SwitchModelAsync(string model)
+    {
+        var sid = Controller.CurrentSessionId;
+        if (string.IsNullOrEmpty(sid) || string.IsNullOrWhiteSpace(model)) return;
+        if (string.Equals(model, _chatModel, StringComparison.OrdinalIgnoreCase)) return;
+        try
+        {
+            await _bridge.SessionSetModelAsync(sid, _chatProvider, model).ConfigureAwait(true);
+            // Kesin güncelleme session.model_changed olayından gelir; yine de
+            // düğmeyi hemen iyimser güncelle.
+            _chatModel = model;
+            UpdateModelButton();
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("ChatPage.SwitchModel", ex, ex.Message);
+        }
+    }
+
+    private void OnSessionModelChanged(string sessionId, string provider, string model)
+    {
+        RunOnUi(() =>
+        {
+            if (!string.Equals(sessionId, Controller.CurrentSessionId, StringComparison.Ordinal))
+            {
+                return;
+            }
+            if (!string.IsNullOrWhiteSpace(provider)) _chatProvider = provider;
+            if (!string.IsNullOrWhiteSpace(model)) _chatModel = model;
+            UpdateModelButton();
+            Controller.AddSystem(string.Format(Loc.T("chat.model.changed"), _chatModel));
         });
     }
 

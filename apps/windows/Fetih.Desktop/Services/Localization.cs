@@ -297,6 +297,10 @@ public static class Loc
         ["chat.stop"] = new("Durdur", "Stop"),
         ["chat.cancelled"] = new("İşlem kullanıcı tarafından durduruldu.", "Operation cancelled by user."),
         ["chat.connecting"] = new("Bağlanıyor…", "Connecting…"),
+        // ── Hızlı model değiştirici (issue #55) ──────────────────────────
+        ["chat.model.select"] = new("Model seç", "Select model"),
+        ["chat.model.none"] = new("Bu sağlayıcı için model listesi yok", "No model list for this provider"),
+        ["chat.model.changed"] = new("Model değiştirildi: {0}", "Switched model: {0}"),
 
         // Aktivite Kartları & Durumlar
         ["chat.activity.thinking"] = new("Düşünüyor…", "Thinking…"),
