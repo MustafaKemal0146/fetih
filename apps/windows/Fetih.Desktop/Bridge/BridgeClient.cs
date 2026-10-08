@@ -924,6 +924,23 @@ public sealed class BridgeClient : IDisposable
             new Dictionary<string, object?> { ["format"] = format }, ct).ConfigureAwait(false);
     }
 
+    /// <summary><c>findings.delete</c> — Tek bir bulguyu kalıcı depodan siler.</summary>
+    public async Task<JsonElement> FindingsDeleteAsync(string id, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("findings.delete",
+            new Dictionary<string, object?> { ["id"] = id }, ct).ConfigureAwait(false);
+    }
+
+    /// <summary><c>findings.clear</c> — Tüm bulguları (ya da bir oturumunkileri) siler.</summary>
+    public async Task<JsonElement> FindingsClearAsync(string? sessionId = null, CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        var p = new Dictionary<string, object?>();
+        if (!string.IsNullOrEmpty(sessionId)) p["session_id"] = sessionId;
+        return await CallAsync("findings.clear", p, ct).ConfigureAwait(false);
+    }
+
     /// <summary><c>findings.scan</c> — Yetenekleri veya hedef dizini güvenlik açıklarına karşı tarar.</summary>
     public async Task<JsonElement> FindingsScanAsync(string? target = null, CancellationToken ct = default)
     {

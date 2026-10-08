@@ -43,6 +43,16 @@ public sealed partial class FindingsPage : Page
         SummaryText.Text = Loc.T("findings.summary");
         ScanButton.Content = Loc.T("findings.scan_button");
         ExportButton.Content = Loc.T("findings.export_button");
+        ClearButton.Content = Loc.T("findings.clear_button");
+        SearchBox.PlaceholderText = Loc.T("findings.search_placeholder");
+        SessionOnlyBox.Content = Loc.T("findings.session_only");
+        AutomationProperties.SetName(ClearButton, Loc.T("findings.clear_button"));
+        AutomationProperties.SetName(SearchBox, Loc.T("findings.search_placeholder"));
+        var prevSort = SortBox.SelectedIndex;
+        SortBox.Items.Clear();
+        SortBox.Items.Add(new ComboBoxItem { Content = Loc.T("findings.sort.severity"), Tag = "severity" });
+        SortBox.Items.Add(new ComboBoxItem { Content = Loc.T("findings.sort.time"), Tag = "time" });
+        SortBox.SelectedIndex = prevSort >= 0 ? prevSort : 0;
         AutomationProperties.SetName(ScanButton, Loc.T("findings.scan_button"));
         AutomationProperties.SetName(ExportButton, Loc.T("findings.export_button"));
         AutomationProperties.SetName(SeverityBox, Loc.T("findings.severity_label"));
@@ -218,6 +228,8 @@ public sealed partial class FindingsPage : Page
             var evidence = el.TryGetProperty("evidence", out var ev) ? ev.GetString() ?? "" : "";
             var rec = el.TryGetProperty("recommendation", out var rc) ? rc.GetString() ?? "" : "";
             var refStr = el.TryGetProperty("reference", out var rf) ? rf.GetString() ?? "" : "";
+            var id = el.TryGetProperty("id", out var idEl) ? idEl.GetString() ?? "" : "";
+            var sid = el.TryGetProperty("session_id", out var sidEl) ? sidEl.GetString() ?? "" : "";
 
             var severity = sevStr.ToLowerInvariant() switch
             {
@@ -227,7 +239,7 @@ public sealed partial class FindingsPage : Page
                 "low" => FindingSeverity.Low,
                 _ => FindingSeverity.Info,
             };
-            return new Finding(title, target, severity, evidence, rec, refStr);
+            return new Finding(title, target, severity, evidence, rec, refStr, id, sid);
         }
         catch
         {
@@ -237,9 +249,54 @@ public sealed partial class FindingsPage : Page
 
     private void SeverityBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        if (_filterReady)
+        if (_filterReady) ApplyFilter();
+    }
+
+    private void SortBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_filterReady) ApplyFilter();
+    }
+
+    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e) => ApplyFilter();
+
+    private void SessionOnly_Changed(object sender, RoutedEventArgs e) => ApplyFilter();
+
+    private async void DeleteFinding_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string id } || string.IsNullOrEmpty(id)) return;
+        try
         {
-            ApplyFilter();
+            await BridgeClient.Shared.FindingsDeleteAsync(id).ConfigureAwait(true);
+            var row = Findings.FirstOrDefault(f => f.Id == id);
+            if (row is not null) Findings.Remove(row);
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("FindingsPage.Delete", ex, ex.Message);
+        }
+    }
+
+    private async void ClearButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (Findings.Count == 0) return;
+        var confirm = new ContentDialog
+        {
+            Title = Loc.T("findings.clear_confirm_title"),
+            Content = Loc.T("findings.clear_confirm_body"),
+            PrimaryButtonText = Loc.T("findings.clear_button"),
+            CloseButtonText = Loc.T("common.cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = this.XamlRoot,
+        };
+        if (await confirm.ShowAsync() != ContentDialogResult.Primary) return;
+        try
+        {
+            await BridgeClient.Shared.FindingsClearAsync().ConfigureAwait(true);
+            Findings.Clear();
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("FindingsPage.Clear", ex, ex.Message);
         }
     }
 
@@ -254,9 +311,26 @@ public sealed partial class FindingsPage : Page
                 query = query.Where(f => f.Severity == sev);
             }
 
-            var filtered = query
-                .OrderByDescending(f => f.Severity)
-                .ThenByDescending(f => f.DiscoveredAt)
+            if (SessionOnlyBox.IsChecked == true)
+            {
+                var sid = ChatConversationController.Shared.CurrentSessionId ?? "";
+                query = query.Where(f => f.SessionId == sid);
+            }
+
+            var term = (SearchBox.Text ?? "").Trim();
+            if (term.Length > 0)
+            {
+                query = query.Where(f =>
+                    (f.Title?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+                    || (f.Target?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+                    || (f.Evidence?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false)
+                    || (f.Reference?.Contains(term, StringComparison.OrdinalIgnoreCase) ?? false));
+            }
+
+            var byTime = SortBox.SelectedItem is ComboBoxItem { Tag: "time" };
+            var filtered = (byTime
+                ? query.OrderByDescending(f => f.DiscoveredAt).ThenByDescending(f => f.Severity)
+                : query.OrderByDescending(f => f.Severity).ThenByDescending(f => f.DiscoveredAt))
                 .ToList();
 
             FindingList.ItemsSource = filtered;

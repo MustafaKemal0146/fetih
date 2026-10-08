@@ -26,8 +26,12 @@ public sealed class Finding
         FindingSeverity severity,
         string evidence = "",
         string recommendation = "",
-        string reference = "")
+        string reference = "",
+        string id = "",
+        string sessionId = "")
     {
+        Id = id;
+        SessionId = sessionId;
         Title = title;
         Target = target;
         Severity = severity;
@@ -36,6 +40,12 @@ public sealed class Finding
         Reference = reference;
         DiscoveredAt = DateTimeOffset.Now;
     }
+
+    /// <summary>Köprüdeki kalıcı bulgu kimliği (silme için). Boş olabilir.</summary>
+    public string Id { get; }
+
+    /// <summary>Bulguyu üreten oturum (oturum süzgeci için). Boş olabilir.</summary>
+    public string SessionId { get; }
 
     /// <summary>Bulgunun başlığı.</summary>
     public string Title { get; }
@@ -78,4 +88,9 @@ public sealed class Finding
     public string TimeLabel => DiscoveredAt.ToString("dd.MM.yyyy HH:mm");
 
     public bool HasReference => !string.IsNullOrWhiteSpace(Reference);
+
+    /// <summary>Silme düğmesi yalnızca köprüde kalıcı kaydı olan bulgularda görünür.</summary>
+    public bool HasId => !string.IsNullOrWhiteSpace(Id);
+
+    public string DeleteTooltip => Loc.T("findings.delete_tooltip");
 }

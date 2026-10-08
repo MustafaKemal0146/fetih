@@ -727,6 +727,15 @@ public static class Loc
         ["findings.summary"] = new("Ajan tarafından üretilen güvenlik bulguları burada toplanır.", "Security findings produced by the agent are collected here."),
         ["findings.scan_button"] = new("Güvenlik Taraması Başlat", "Start Security Scan"),
         ["findings.export_button"] = new("Rapor Dışa Aktar", "Export Report"),
+        // ── Bulgu paneli: arama/sıralama/sil (issue #33) ─────────────────
+        ["findings.clear_button"] = new("Temizle", "Clear"),
+        ["findings.search_placeholder"] = new("Bulgu ara (başlık, hedef, kanıt, referans)…", "Search findings (title, target, evidence, reference)…"),
+        ["findings.session_only"] = new("Yalnızca bu oturum", "This session only"),
+        ["findings.sort.severity"] = new("Ciddiyete göre", "By severity"),
+        ["findings.sort.time"] = new("Zamana göre (yeni)", "By time (newest)"),
+        ["findings.delete_tooltip"] = new("Bulguyu sil", "Delete finding"),
+        ["findings.clear_confirm_title"] = new("Tüm bulgular silinsin mi?", "Clear all findings?"),
+        ["findings.clear_confirm_body"] = new("Kalıcı depodaki tüm bulgular silinecek. Bu işlem geri alınamaz.", "All findings in the persistent store will be deleted. This cannot be undone."),
         ["findings.export.done_title"] = new("Rapor kaydedildi", "Report saved"),
         ["findings.export.done_body"] = new(
             "Markdown ve HTML raporlar şuraya kaydedildi:\n{0}\n(Markdown panoya da kopyalandı.)",

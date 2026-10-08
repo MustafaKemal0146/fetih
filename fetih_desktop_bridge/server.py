@@ -326,7 +326,6 @@ class BridgeServer:
         self._connections: Dict[int, asyncio.AbstractEventLoop] = {}
         self._conn_objs: List[Any] = []
         self._methods: Dict[str, Callable[..., Any]] = {}
-        self._findings: List[Dict[str, Any]] = []
         self._started = time.time()
         # Pending Anthropic paste flows: flow_token -> {provider, code_verifier,
         # state, ts}. PKCE material stays server-side between auth.begin and
@@ -337,9 +336,13 @@ class BridgeServer:
         self._auth_lock = threading.Lock()
 
         from fetih_constants import get_fetih_home
+        from fetih_desktop_bridge.findings_store import FindingsStore
         from fetih_desktop_bridge.session_store import SessionStore
         db_path = os.path.join(get_fetih_home(), "desktop_sessions.db")
         self.store = SessionStore(db_path)
+        # Bulgular kalıcı (issue #33): uygulama kapanınca kaybolmaz; oturum
+        # silinse de silinmez (ayrı veritabanı).
+        self.findings = FindingsStore(os.path.join(get_fetih_home(), "desktop_findings.db"))
 
         self._register_methods()
 
@@ -467,6 +470,8 @@ class BridgeServer:
                 "findings.list": self._m_findings_list,
                 "findings.scan": self._m_findings_scan,
                 "findings.export": self._m_findings_export,
+                "findings.delete": self._m_findings_delete,
+                "findings.clear": self._m_findings_clear,
                 "diagnostics.info": self._m_diagnostics_info,
                 "shell.status": self._m_shell_status,
                 "shell.ensure_user": self._m_shell_ensure_user,
@@ -787,11 +792,7 @@ class BridgeServer:
                     "reference": "CTF-FLAG",
                     "discovered_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                 }
-                self._findings.append(finding_dict)
-                conn.emit_threadsafe(
-                    loop,
-                    event("findings.discovered", {"finding": finding_dict}),
-                )
+                self._record_finding(conn, loop, finding_dict, session.id)
 
         agent = session.agent
         agent.stream_delta_callback = on_delta if stream else None
@@ -1919,27 +1920,56 @@ class BridgeServer:
 
     # ── findings.* ──────────────────────────────────────────────────────
 
-    def _m_findings_list(self, conn, params):
-        severity = (params.get("severity") or "").strip().lower()
-        findings = list(self._findings)
-        if severity and severity not in {"all", "tüm", "tüm ciddiyet seviyeleri"}:
-            findings = [f for f in findings if (f.get("severity") or "").lower() == severity]
+    def _record_finding(self, conn, loop, finding: Dict[str, Any], session_id: str = "") -> bool:
+        """Persist a finding and announce it. Duplicates are stored once and not re-announced."""
+        row = self.findings.add(finding, session_id=session_id)
+        if row is None:
+            return False
+        conn.emit_threadsafe(loop, event("findings.discovered", {"finding": row}))
+        return True
+
+    @staticmethod
+    def _findings_filters(params) -> Dict[str, Any]:
+        severity = str(params.get("severity") or "").strip()
+        if severity.lower() in {"", "all", "tüm", "tüm ciddiyet seviyeleri"}:
+            severity = ""
+        sort = str(params.get("sort") or "severity").strip().lower()
         return {
-            "total": len(self._findings),
+            "severity": severity or None,
+            "session_id": str(params.get("session_id") or "").strip() or None,
+            "query": str(params.get("query") or "").strip() or None,
+            "sort": "time" if sort == "time" else "severity",
+        }
+
+    def _m_findings_list(self, conn, params):
+        findings = self.findings.list(**self._findings_filters(params))
+        return {
+            "total": self.findings.count(),
             "filtered": len(findings),
             "findings": findings,
         }
 
+    def _m_findings_delete(self, conn, params):
+        fid = str(params.get("id") or "").strip()
+        if not fid:
+            raise BridgeError(INVALID_PARAMS, "'id' is required")
+        return {"deleted": self.findings.delete(fid), "id": fid}
+
+    def _m_findings_clear(self, conn, params):
+        sid = str(params.get("session_id") or "").strip() or None
+        return {"cleared": self.findings.clear(sid), "session_id": sid}
+
     def _m_findings_export(self, conn, params):
-        """Bulguları Markdown ya da HTML rapor olarak döndürür."""
+        """Bulguları Markdown ya da HTML rapor olarak döndürür (filtreler uygulanır)."""
         fmt = str(params.get("format") or "md").lower()
         if fmt not in {"md", "markdown", "html"}:
             raise BridgeError(INVALID_PARAMS, "format must be 'md' or 'html'")
-        content = _build_findings_report(list(self._findings), fmt)
+        findings = self.findings.list(**self._findings_filters(params))
+        content = _build_findings_report(findings, fmt)
         return {
             "format": "html" if fmt == "html" else "md",
             "content": content,
-            "count": len(self._findings),
+            "count": len(findings),
         }
 
     def _m_findings_scan(self, conn, params):
@@ -1980,20 +2010,16 @@ class BridgeServer:
                         "reference": f.pattern_id,
                         "discovered_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                     }
-                    new_findings.append(finding_dict)
-                    self._findings.append(finding_dict)
-                    conn.emit_threadsafe(
-                        loop,
-                        event("findings.discovered", {"finding": finding_dict}),
-                    )
+                    if self._record_finding(conn, loop, finding_dict):
+                        new_findings.append(finding_dict)
             except Exception:
                 continue
 
         return {
             "scanned": len(dirs_to_scan),
             "new_findings": len(new_findings),
-            "total_findings": len(self._findings),
-            "findings": self._findings,
+            "total_findings": self.findings.count(),
+            "findings": self.findings.list(),
         }
 
     # ── shell.* (Windows: Git Bash / WSL kabuk seçimi) ──────────────────

@@ -20,26 +20,43 @@
             <TextBlock x:Name="SummaryText" Style="{StaticResource MutedTextStyle}" />
         </StackPanel>
 
-        <!-- Ciddiyet süzgeci ve Güvenlik Taraması -->
-        <Grid Grid.Row="1">
+        <!-- Süzgeç (ciddiyet + sıralama + arama) ve aksiyonlar -->
+        <Grid Grid.Row="1" ColumnSpacing="8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <ComboBox Grid.Column="0"
-                      x:Name="SeverityBox"
-                      MinWidth="200"
-                      AutomationProperties.AutomationId="findings_severity"
-                      SelectionChanged="SeverityBox_SelectionChanged" />
-            <TextBlock Grid.Column="1"
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <ComboBox x:Name="SeverityBox"
+                          MinWidth="160"
+                          AutomationProperties.AutomationId="findings_severity"
+                          SelectionChanged="SeverityBox_SelectionChanged" />
+                <ComboBox x:Name="SortBox"
+                          MinWidth="150"
+                          AutomationProperties.AutomationId="findings_sort"
+                          SelectionChanged="SortBox_SelectionChanged" />
+                <CheckBox x:Name="SessionOnlyBox"
+                          AutomationProperties.AutomationId="findings_session_only"
+                          Checked="SessionOnly_Changed"
+                          Unchecked="SessionOnly_Changed" />
+            </StackPanel>
+            <TextBox Grid.Column="1"
+                     x:Name="SearchBox"
+                     MinWidth="200"
+                     VerticalAlignment="Center"
+                     AutomationProperties.AutomationId="findings_search"
+                     TextChanged="SearchBox_TextChanged" />
+            <TextBlock Grid.Column="2"
                        x:Name="CountText"
                        Margin="12,0,0,0"
                        VerticalAlignment="Center"
                        Style="{StaticResource MutedTextStyle}" />
             <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8">
                 <ProgressRing x:Name="ScanRing" Width="16" Height="16" IsActive="False" Visibility="Collapsed" />
+                <Button x:Name="ClearButton"
+                        Click="ClearButton_Click" />
                 <Button x:Name="ExportButton"
                         Click="ExportButton_Click" />
                 <Button x:Name="ScanButton"
@@ -93,8 +110,15 @@
                                 BorderThickness="1"
                                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
                             <StackPanel Spacing="6">
-                                <StackPanel Orientation="Horizontal" Spacing="10">
-                                    <Border Padding="8,2"
+                                <Grid ColumnSpacing="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Border Grid.Column="0"
+                                            Padding="8,2"
                                             CornerRadius="4"
                                             VerticalAlignment="Center"
                                             Background="{x:Bind SeverityBrushKey, Converter={StaticResource ThemeBrushConverter}}">
@@ -102,15 +126,28 @@
                                                    FontSize="11"
                                                    FontWeight="SemiBold" />
                                     </Border>
-                                    <TextBlock Text="{x:Bind Title}"
+                                    <TextBlock Grid.Column="1"
+                                               Text="{x:Bind Title}"
                                                FontWeight="SemiBold"
                                                VerticalAlignment="Center"
                                                TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Text="{x:Bind TimeLabel}"
+                                    <TextBlock Grid.Column="2"
+                                               Text="{x:Bind TimeLabel}"
                                                FontSize="11"
                                                Opacity="0.5"
                                                VerticalAlignment="Center" />
-                                </StackPanel>
+                                    <Button Grid.Column="3"
+                                            Padding="6,2"
+                                            FontSize="12"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Tag="{x:Bind Id}"
+                                            Click="DeleteFinding_Click"
+                                            ToolTipService.ToolTip="{x:Bind DeleteTooltip}"
+                                            Visibility="{x:Bind HasId, Converter={StaticResource BoolToVisibilityConverter}}">
+                                        <FontIcon Glyph="&#xE74D;" FontSize="14" />
+                                    </Button>
+                                </Grid>
 
                                 <TextBlock Text="{x:Bind Target}"
                                            FontFamily="Consolas"

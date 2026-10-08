@@ -759,12 +759,12 @@ def test_session_approve_unblocks_dangerous_command(monkeypatch):
 def test_findings_export_md_and_html():
     server = BridgeServer(require_auth=False)
     conn = FakeConn(authenticated=True)
-    server._findings.append({
+    server.findings.add({
         "id": "abc", "title": "SQL Injection", "target": "http://x/login",
         "severity": "critical", "evidence": "' OR 1=1 --",
         "recommendation": "Parametreli sorgu kullan", "reference": "CWE-89",
     })
-    server._findings.append({
+    server.findings.add({
         "id": "def", "title": "Bilgi sızıntısı", "target": "http://x/debug",
         "severity": "low", "evidence": "stack trace",
     })
