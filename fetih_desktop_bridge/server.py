@@ -444,6 +444,7 @@ class BridgeServer:
                 "session.set_model": self._m_session_set_model,
                 "config.get": self._m_config_get,
                 "config.set": self._m_config_set,
+                "config.schema": self._m_config_schema,
                 "providers.list": self._m_providers_list,
                 "providers.catalog": self._m_providers_catalog,
                 "providers.models": self._m_providers_models,
@@ -1123,6 +1124,52 @@ class BridgeServer:
             "path": str(get_config_path()),
             "env_path": str(get_env_path()),
         }
+
+    def _m_config_schema(self, conn, params):
+        """Describe config.yaml leaves from DEFAULT_CONFIG: path, type, default.
+
+        Lets the desktop editor render the right control for keys whose live
+        value is null/empty (type can't be inferred from JSON null) and offer
+        reset-to-default. Secret-shaped leaves are typed but their default is
+        withheld — defaults never carry credential material.
+        """
+        from fetih_cli.config import DEFAULT_CONFIG
+
+        def _type_of(v):
+            if isinstance(v, bool):
+                return "bool"
+            if isinstance(v, int):
+                return "int"
+            if isinstance(v, float):
+                return "float"
+            if isinstance(v, list):
+                return "list"
+            if isinstance(v, dict):
+                return "object"
+            if v is None:
+                return "null"
+            return "string"
+
+        fields: List[Dict[str, Any]] = []
+
+        def _walk(prefix: str, obj: Any) -> None:
+            if not isinstance(obj, dict):
+                return
+            for key, value in obj.items():
+                path = f"{prefix}.{key}" if prefix else str(key)
+                if isinstance(value, dict):
+                    _walk(path, value)
+                    continue
+                leaf: Dict[str, Any] = {"path": path, "type": _type_of(value)}
+                if _looks_secret(str(key)):
+                    leaf["secret"] = True
+                    leaf["default"] = None
+                else:
+                    leaf["default"] = value
+                fields.append(leaf)
+
+        _walk("", DEFAULT_CONFIG)
+        return {"fields": fields, "version": DEFAULT_CONFIG.get("_config_version")}
 
     def _m_config_set(self, conn, params):
         key = params.get("key")

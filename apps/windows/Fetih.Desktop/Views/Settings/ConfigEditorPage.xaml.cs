@@ -41,6 +41,19 @@ public sealed partial class ConfigEditorPage : Page
     /// <summary>Sayfa başlığı; gezinme parametresi vermezse genel Ayarlar adı.</summary>
     private string _title = Loc.T("settings.all");
 
+    // ── Şema + arama (issue #47) ────────────────────────────────────────
+    /// <summary>DEFAULT_CONFIG'ten alan tanımı: tür + varsayılan (sıfırlama için).</summary>
+    private sealed record SchemaLeaf(string Type, JsonElement Default, bool HasDefault, bool Secret);
+
+    /// <summary>yol → şema yaprağı. config.schema'dan doldurulur.</summary>
+    private readonly Dictionary<string, SchemaLeaf> _schema = new(StringComparer.Ordinal);
+
+    /// <summary>Aktif arama metni (küçük harfe çevrili).</summary>
+    private string _filter = "";
+
+    /// <summary>Her bölümün dış kabı + aranabilir metni (arama filtresi için).</summary>
+    private readonly List<(FrameworkElement Container, string Search)> _sections = new();
+
     public ConfigEditorPage()
     {
         InitializeComponent();
@@ -80,6 +93,7 @@ public sealed partial class ConfigEditorPage : Page
         AdvancedWarning.IsOpen = isAdvancedMode;
 
         ReloadButton.Content = Loc.T("config.reload");
+        SearchBox.PlaceholderText = Loc.T("config.search_placeholder");
         EmptyText.Text = Loc.T("config.empty");
         _ = LoadAsync();
     }
@@ -90,11 +104,16 @@ public sealed partial class ConfigEditorPage : Page
     {
         SetBusy(true);
         FieldsHost.Children.Clear();
+        _sections.Clear();
         EmptyText.Visibility = Visibility.Collapsed;
 
         // Not: arayüz dili seçicisi artık burada değil, sadeleştirilmiş
         // "Görünüm" sayfasındadır (SimpleSettingsCatalog → appearance).
         // Detaylı Mod yalnızca config.yaml'daki ham anahtarları gösterir.
+
+        // Şema (tür + varsayılan) config'ten ÖNCE yüklenir: sıfırlama ve arama
+        // tüm bilinen anahtarları kapsasın.
+        await LoadSchemaAsync();
 
         try
         {
@@ -126,16 +145,24 @@ public sealed partial class ConfigEditorPage : Page
 
                 any = true;
 
-                // Tek bölümlük bir sayfada bölüm başlığı, sayfa başlığının
-                // aynısı olurdu; onun yerine kategori özetini alt başlığın
-                // altına taşıyıp başlığı atlıyoruz.
+                // Her bölüm, başlık + kart + 'varsayılanlara sıfırla'yı tek bir
+                // kapta toplar; arama filtresi bu kabı toptan gösterip gizler.
+                var container = new StackPanel { Spacing = 0 };
+
+                var headerRow = new Grid();
+                headerRow.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+                headerRow.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+                FrameworkElement headerContent;
+                // Tek bölümlük bir sayfada bölüm başlığı, sayfa başlığının aynısı
+                // olurdu; onun yerine kategori özetini gösterip başlığı atlıyoruz.
                 if (_rootFilter.Length == 1 &&
                     string.Equals(SettingDescriptions.SectionTitle(root.Name), _title, StringComparison.Ordinal))
                 {
                     var summary = SettingDescriptions.SectionDescription(root.Name);
-                    if (!string.IsNullOrEmpty(summary))
-                    {
-                        FieldsHost.Children.Add(new TextBlock
+                    headerContent = string.IsNullOrEmpty(summary)
+                        ? new TextBlock { Visibility = Visibility.Collapsed }
+                        : new TextBlock
                         {
                             Text = summary,
                             FontSize = 13,
@@ -144,20 +171,30 @@ public sealed partial class ConfigEditorPage : Page
                             HorizontalAlignment = HorizontalAlignment.Left,
                             TextWrapping = TextWrapping.Wrap,
                             Margin = new Thickness(0, 0, 0, 10),
-                        });
-                    }
+                        };
                 }
                 else
                 {
-                    FieldsHost.Children.Add(SectionHeader(root.Name));
+                    headerContent = SectionHeader(root.Name);
                 }
+                Grid.SetColumn(headerContent, 0);
+                headerRow.Children.Add(headerContent);
 
-                FieldsHost.Children.Add(SectionCard(sectionFields));
+                var resetBtn = SectionResetButton(root.Name);
+                Grid.SetColumn(resetBtn, 1);
+                headerRow.Children.Add(resetBtn);
+
+                container.Children.Add(headerRow);
+                container.Children.Add(SectionCard(sectionFields));
+
+                _sections.Add((container, BuildSectionSearchText(root.Name)));
+                FieldsHost.Children.Add(container);
             }
 
             EmptyText.Visibility = any || FieldsHost.Children.Count > 0
                 ? Visibility.Collapsed
                 : Visibility.Visible;
+            ApplyFilter();
             HideStatus();
         }
         catch (BridgeRpcException rpc)
@@ -171,6 +208,170 @@ public sealed partial class ConfigEditorPage : Page
         finally
         {
             SetBusy(false);
+        }
+    }
+
+    // ── Şema / arama / sıfırlama (issue #47) ──────────────────────────────────
+
+    /// <summary>config.schema'yı okuyup yol→{tür, varsayılan} haritasını kurar.</summary>
+    private async Task LoadSchemaAsync()
+    {
+        _schema.Clear();
+        try
+        {
+            var res = await _bridge.ConfigSchemaAsync().ConfigureAwait(true);
+            if (res.ValueKind == JsonValueKind.Object &&
+                res.TryGetProperty("fields", out var fields) &&
+                fields.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var f in fields.EnumerateArray())
+                {
+                    var path = f.TryGetProperty("path", out var p) ? p.GetString() ?? "" : "";
+                    if (string.IsNullOrEmpty(path)) continue;
+                    var type = f.TryGetProperty("type", out var t) ? t.GetString() ?? "" : "";
+                    var secret = f.TryGetProperty("secret", out var s) && s.ValueKind == JsonValueKind.True;
+                    var hasDef = f.TryGetProperty("default", out var d) &&
+                                 d.ValueKind != JsonValueKind.Undefined;
+                    // Klonla: döndüren JsonDocument çağrıdan sonra elden çıkabilir.
+                    _schema[path] = new SchemaLeaf(type, hasDef ? d.Clone() : default, hasDef, secret);
+                }
+            }
+        }
+        catch
+        {
+            // Şema alınamazsa editör yine çalışır; yalnızca sıfırlama/arama zayıflar.
+        }
+    }
+
+    /// <summary>Bir bölüm için aranabilir metin: kök + başlık + tüm alan yolları + etiketleri.</summary>
+    private string BuildSectionSearchText(string rootKey)
+    {
+        var parts = new List<string> { rootKey, SettingDescriptions.SectionTitle(rootKey) };
+        foreach (var path in _schema.Keys)
+        {
+            if (path == rootKey || path.StartsWith(rootKey + ".", StringComparison.Ordinal))
+            {
+                parts.Add(path);
+                parts.Add(SettingDescriptions.LabelFor(path));
+            }
+        }
+        return string.Join(" ", parts).ToLowerInvariant();
+    }
+
+    private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        _filter = (SearchBox.Text ?? "").Trim().ToLowerInvariant();
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        var visible = 0;
+        foreach (var (container, search) in _sections)
+        {
+            var match = _filter.Length == 0 || search.Contains(_filter, StringComparison.Ordinal);
+            container.Visibility = match ? Visibility.Visible : Visibility.Collapsed;
+            if (match) visible++;
+        }
+        if (_sections.Count > 0)
+        {
+            EmptyText.Visibility = visible == 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+    }
+
+    private Button SectionResetButton(string rootKey)
+    {
+        var button = new Button
+        {
+            Content = Loc.T("config.reset_section"),
+            FontSize = 12,
+            Padding = new Thickness(8, 4, 8, 4),
+            VerticalAlignment = VerticalAlignment.Top,
+            Margin = new Thickness(0, 16, 0, 0),
+        };
+        Microsoft.UI.Xaml.Automation.AutomationProperties.SetAutomationId(
+            button, "cfgreset_" + rootKey.Replace('.', '_'));
+        button.Click += async (_, _) => await ResetSectionAsync(rootKey);
+        return button;
+    }
+
+    /// <summary>Bir bölümün tüm (gizli olmayan) alanlarını DEFAULT_CONFIG değerine döndürür.</summary>
+    private async Task ResetSectionAsync(string rootKey)
+    {
+        var confirm = new ContentDialog
+        {
+            Title = Loc.T("config.reset_section.confirm_title"),
+            Content = string.Format(
+                Loc.T("config.reset_section.confirm_body"),
+                SettingDescriptions.SectionTitle(rootKey)),
+            PrimaryButtonText = Loc.T("config.reset_section"),
+            CloseButtonText = Loc.T("common.cancel"),
+            DefaultButton = ContentDialogButton.Close,
+            XamlRoot = XamlRoot,
+        };
+        if (await confirm.ShowAsync() != ContentDialogResult.Primary) return;
+
+        SetBusy(true);
+        var failed = 0;
+        try
+        {
+            foreach (var kv in _schema)
+            {
+                var path = kv.Key;
+                var leaf = kv.Value;
+                if (!(path == rootKey || path.StartsWith(rootKey + ".", StringComparison.Ordinal)))
+                {
+                    continue;
+                }
+                // Gizli alanlar, varsayılanı olmayanlar ve iç anahtarlar atlanır.
+                if (leaf.Secret || !leaf.HasDefault || path.StartsWith("_", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+                try
+                {
+                    await _bridge.ConfigSetAsync(path, JsonToObject(leaf.Default)).ConfigureAwait(true);
+                }
+                catch
+                {
+                    failed++;
+                }
+            }
+        }
+        finally
+        {
+            SetBusy(false);
+        }
+
+        await LoadAsync();
+        if (failed > 0)
+        {
+            ShowStatus(string.Format(Loc.T("config.reset_section.partial"), failed), InfoBarSeverity.Warning);
+        }
+    }
+
+    /// <summary>Bir şema varsayılanını config.set'e uygun bir .NET değerine dönüştürür.</summary>
+    private static object? JsonToObject(JsonElement e)
+    {
+        switch (e.ValueKind)
+        {
+            case JsonValueKind.True: return true;
+            case JsonValueKind.False: return false;
+            case JsonValueKind.String: return e.GetString();
+            case JsonValueKind.Number:
+                return e.TryGetInt64(out var l) ? l : e.GetDouble();
+            case JsonValueKind.Array:
+                var list = new List<object?>();
+                foreach (var item in e.EnumerateArray())
+                {
+                    list.Add(JsonToObject(item));
+                }
+                return list;
+            case JsonValueKind.Null:
+            case JsonValueKind.Undefined:
+                return null;
+            default:
+                return e.GetRawText();
         }
     }
 

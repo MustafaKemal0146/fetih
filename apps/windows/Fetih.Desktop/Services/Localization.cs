@@ -710,6 +710,16 @@ public static class Loc
             "Bir değeri değiştirdiğinde ~/.fetih/config.yaml dosyasına anında yazılır. Her satırın altındaki açıklama o ayarın ne yaptığını ve değiştirilirse ne olacağını anlatır.",
             "Changing a value writes it to ~/.fetih/config.yaml immediately. The note under each row explains what that setting does and what changes if you touch it."),
         ["config.reload"] = new("Yeniden yükle", "Reload"),
+        // ── Şema editörü: arama + sıfırlama (issue #47) ──────────────────
+        ["config.search_placeholder"] = new("Ayar ara (anahtar veya ad)…", "Search settings (key or name)…"),
+        ["config.reset_section"] = new("Varsayılanlara sıfırla", "Reset to defaults"),
+        ["config.reset_section.confirm_title"] = new("Bölüm sıfırlansın mı?", "Reset section?"),
+        ["config.reset_section.confirm_body"] = new(
+            "'{0}' bölümündeki tüm (gizli olmayan) ayarlar varsayılan değerlerine döndürülecek. Bu işlem diske yazılır.",
+            "All (non-secret) settings in '{0}' will be returned to their defaults. This writes to disk."),
+        ["config.reset_section.partial"] = new(
+            "{0} ayar sıfırlanamadı (yönetilen veya reddedilen anahtarlar).",
+            "{0} setting(s) could not be reset (managed or rejected keys)."),
         ["config.saving"] = new("kaydediliyor…", "saving…"),
         ["config.saved"] = new("✓ kaydedildi", "✓ saved"),
         ["config.revert"] = new("Yüklenen değere dön", "Revert to the loaded value"),

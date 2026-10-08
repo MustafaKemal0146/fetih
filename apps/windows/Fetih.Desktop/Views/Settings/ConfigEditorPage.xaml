@@ -48,6 +48,10 @@
                 <Button x:Name="ReloadButton"
                         AutomationProperties.AutomationId="config_reload"
                         Click="ReloadButton_Click" />
+                <TextBox x:Name="SearchBox"
+                         MinWidth="260"
+                         AutomationProperties.AutomationId="config_search"
+                         TextChanged="SearchBox_TextChanged" />
                 <ProgressRing x:Name="BusyRing"
                               Width="18" Height="18"
                               IsActive="False"

@@ -717,6 +717,17 @@ public sealed class BridgeClient : IDisposable
         return await CallAsync("config.get", p, ct).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// config.yaml alanlarının şeması (yol, tür, varsayılan) — DEFAULT_CONFIG'ten.
+    /// Boş/null değerli alanlar için doğru kontrolü seçmeye ve varsayılana
+    /// sıfırlamaya yarar (issue #47).
+    /// </summary>
+    public async Task<JsonElement> ConfigSchemaAsync(CancellationToken ct = default)
+    {
+        await EnsureConnectedAsync(ct).ConfigureAwait(false);
+        return await CallAsync("config.schema", null, ct).ConfigureAwait(false);
+    }
+
     public async Task<JsonElement> ConfigSetAsync(string key, object? value, CancellationToken ct = default)
     {
         await EnsureConnectedAsync(ct).ConfigureAwait(false);
