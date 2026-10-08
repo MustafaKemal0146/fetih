@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Fetih.Desktop.Views.EvidencePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <!--
+        Kanıt klasörü (issue #36): yerel dosyalar (ekran görüntüsü, çıktı, vb.)
+        tek yerde, native önizlemeli. Kök: Belgeler\FETIH-Kanit. Köprü gerekmez.
+    -->
+    <Grid Padding="24,16,24,16" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock x:Name="PageTitleText" Style="{StaticResource PageTitleTextStyle}" />
+            <TextBlock x:Name="SubtitleText" Style="{StaticResource MutedTextStyle}" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Column="0" x:Name="CountText" VerticalAlignment="Center" Style="{StaticResource MutedTextStyle}" />
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                <Button x:Name="AddButton" Click="AddButton_Click" Style="{StaticResource AccentButtonStyle}" />
+                <Button x:Name="OpenFolderButton" Click="OpenFolderButton_Click" />
+                <Button x:Name="ReloadButton" Click="ReloadButton_Click" />
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="2" ColumnSpacing="14">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0">
+                <TextBlock x:Name="EmptyText"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Opacity="0.55" TextAlignment="Center" TextWrapping="Wrap" />
+                <ListView x:Name="FileList"
+                          AutomationProperties.AutomationId="evidence_list"
+                          SelectionMode="Single"
+                          SelectionChanged="FileList_SelectionChanged"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto" />
+            </Grid>
+
+            <Grid Grid.Column="1">
+                <TextBlock x:Name="SelectHintText"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Opacity="0.5" TextAlignment="Center" TextWrapping="Wrap" />
+                <TextBlock x:Name="NoteText"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Opacity="0.55" TextAlignment="Center" TextWrapping="Wrap"
+                           Visibility="Collapsed" />
+                <ScrollViewer x:Name="ImageScroller"
+                              Visibility="Collapsed"
+                              HorizontalScrollBarVisibility="Auto"
+                              VerticalScrollBarVisibility="Auto"
+                              ZoomMode="Enabled">
+                    <Image x:Name="PreviewImage" Stretch="None" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                </ScrollViewer>
+                <TextBox x:Name="PreviewText"
+                         Visibility="Collapsed"
+                         IsReadOnly="True"
+                         IsSpellCheckEnabled="False"
+                         FontFamily="Consolas"
+                         FontSize="12.5"
+                         AcceptsReturn="True"
+                         TextWrapping="NoWrap"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto" />
+            </Grid>
+        </Grid>
+    </Grid>
+</Page>
