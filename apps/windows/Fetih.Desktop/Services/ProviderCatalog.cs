@@ -126,7 +126,13 @@ public static class ProviderCatalog
                 Kind: KindFrom(Str(p, "kind"), local?.Kind ?? ProviderKind.CloudApiKey),
                 DefaultBaseUrl: Str(p, "base_url", local?.DefaultBaseUrl ?? ""),
                 SignupUrl: Str(p, "signup_url", local?.SignupUrl ?? ""),
-                CliCommand: local?.CliCommand ?? ""));
+                CliCommand: local?.CliCommand ?? "",
+                DisplayNameKey: local?.DisplayNameKey ?? "",
+                // Abonelik/OAuth bayrakları Python katalogunda YOK — yerel
+                // kayıttan taşınır, yoksa sihirbazda Claude vb. için giriş
+                // düğmesi hiç görünmez (#54).
+                SupportsOAuthLogin: local?.SupportsOAuthLogin ?? false,
+                OAuthFlow: local?.OAuthFlow ?? ""));
         }
 
         return list;
