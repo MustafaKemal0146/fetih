@@ -18,6 +18,7 @@
     <Grid KeyboardAcceleratorPlacementMode="Hidden">
         <Grid.KeyboardAccelerators>
             <KeyboardAccelerator Key="N" Modifiers="Control" Invoked="NewChatAccelerator_Invoked" />
+            <KeyboardAccelerator Key="K" Modifiers="Control" Invoked="CommandPaletteAccelerator_Invoked" />
         </Grid.KeyboardAccelerators>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

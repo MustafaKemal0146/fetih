@@ -217,6 +217,10 @@ public static class Loc
         ["nav.skills"] = new("Yetenekler", "Skills"),
         ["nav.findings"] = new("Bulgular", "Findings"),
         ["nav.files"] = new("Dosyalar", "Files"),
+        // ── Komut paleti (Ctrl+K, issue #50) ─────────────────────────────
+        ["palette.title"] = new("Komut paleti", "Command palette"),
+        ["palette.placeholder"] = new("Sayfa ya da komut ara…  (Ctrl+K)", "Search a page or command…  (Ctrl+K)"),
+        ["palette.new_chat"] = new("Yeni sohbet", "New chat"),
         // ── Dosya ağacı + diff (issue #43) ───────────────────────────────
         ["files.title"] = new("Çalışma alanı", "Workspace"),
         ["files.reload"] = new("Yenile", "Reload"),

@@ -555,6 +555,170 @@ public sealed partial class MainWindow : Window
         ChatSessionService.Shared.RequestNewChat();
     }
 
+    // ── Komut paleti (Ctrl+K, issue #50) ────────────────────────────────────
+
+    private bool _paletteOpen;
+
+    private sealed record PaletteCommand(string Label, Action Run)
+    {
+        public override string ToString() => Label;
+    }
+
+    private void CommandPaletteAccelerator_Invoked(
+        KeyboardAccelerator sender, KeyboardAcceleratorInvokedEventArgs args)
+    {
+        args.Handled = true;
+        _ = ShowCommandPaletteAsync();
+    }
+
+    private System.Collections.Generic.List<PaletteCommand> BuildPaletteCommands()
+    {
+        var list = new System.Collections.Generic.List<PaletteCommand>();
+        void Nav(string label, string tag) => list.Add(new PaletteCommand(label, () => PaletteNavigate(tag)));
+        string S(string key) => Loc.T("nav.settings") + " › " + Loc.T(key);
+
+        // Eylemler önce (en sık kullanılan).
+        list.Add(new PaletteCommand(Loc.T("palette.new_chat"), () =>
+        {
+            PaletteNavigate(NavTags.Chat);
+            ChatSessionService.Shared.RequestNewChat();
+        }));
+
+        Nav(Loc.T("nav.chat"), NavTags.Chat);
+        Nav(Loc.T("nav.skills"), NavTags.Skills);
+        Nav(Loc.T("nav.findings"), NavTags.Findings);
+        Nav(Loc.T("nav.files"), NavTags.Files);
+        Nav(Loc.T("nav.diagnostics"), NavTags.Diagnostics);
+
+        Nav(S("settings.bridge"), NavTags.SettingsBridge);
+        Nav(S("settings.provider"), NavTags.SettingsProvider);
+        Nav(S("settings.tools"), NavTags.SettingsTools);
+        Nav(S("settings.agent"), NavTags.SettingsAgent);
+        Nav(S("settings.voice"), NavTags.SettingsVoice);
+        Nav(S("settings.permissions"), NavTags.SettingsPermissions);
+        Nav(S("settings.security"), NavTags.SettingsSecurity);
+        Nav(S("settings.sandbox"), NavTags.SettingsSandbox);
+        Nav(S("settings.shell"), NavTags.SettingsShell);
+        Nav(S("settings.channels"), NavTags.SettingsChannels);
+        Nav(S("settings.memory"), NavTags.SettingsMemory);
+        Nav(S("settings.automation"), NavTags.SettingsAutomation);
+        Nav(S("settings.appearance"), NavTags.SettingsAppearance);
+        Nav(S("settings.system"), NavTags.SettingsSystem);
+        Nav(S("settings.about"), NavTags.SettingsAbout);
+        Nav(S("settings.all"), NavTags.SettingsAll);
+        return list;
+    }
+
+    /// <summary>Palet navigasyonu: gerekiyorsa mod değiştir, sonra ögeyi seç/gezin.</summary>
+    private void PaletteNavigate(string tag)
+    {
+        var wantsSettings = tag.StartsWith("nav_settings", StringComparison.Ordinal);
+        if (wantsSettings && _mode != ShellMode.Settings) BuildSettingsMenu();
+        else if (!wantsSettings && _mode != ShellMode.Normal) BuildNormalMenu();
+
+        foreach (var candidate in _menuItems.Concat(_footerItems))
+        {
+            if (candidate is NavigationViewItem { Tag: string t } item &&
+                string.Equals(t, tag, StringComparison.Ordinal))
+            {
+                RootNavigation.SelectedItem = item; // SelectionChanged navigasyonu tetikler
+                return;
+            }
+        }
+        NavigateTo(tag);
+    }
+
+    private async Task ShowCommandPaletteAsync()
+    {
+        if (_paletteOpen) return;
+        _paletteOpen = true;
+        try
+        {
+            var all = BuildPaletteCommands();
+            PaletteCommand? chosen = null;
+
+            var search = new TextBox
+            {
+                PlaceholderText = Loc.T("palette.placeholder"),
+                AcceptsReturn = false,
+            };
+            AutomationProperties.SetName(search, Loc.T("palette.placeholder"));
+            var list = new ListView
+            {
+                SelectionMode = ListViewSelectionMode.Single,
+                IsItemClickEnabled = true,
+                MaxHeight = 380,
+                ItemsSource = all,
+            };
+            if (all.Count > 0) list.SelectedIndex = 0;
+
+            var panel = new StackPanel { Spacing = 8, MinWidth = 460 };
+            panel.Children.Add(search);
+            panel.Children.Add(list);
+
+            var dialog = new ContentDialog
+            {
+                Title = Loc.T("palette.title"),
+                Content = panel,
+                CloseButtonText = Loc.T("common.cancel"),
+                XamlRoot = Content.XamlRoot,
+            };
+
+            void Filter()
+            {
+                var term = (search.Text ?? "").Trim();
+                var items = term.Length == 0
+                    ? all
+                    : all.Where(c => c.Label.Contains(term, StringComparison.OrdinalIgnoreCase)).ToList();
+                list.ItemsSource = items;
+                if (items.Count > 0) list.SelectedIndex = 0;
+            }
+
+            void Run(PaletteCommand? cmd)
+            {
+                if (cmd is null) return;
+                chosen = cmd;
+                dialog.Hide();
+            }
+
+            search.TextChanged += (_, _) => Filter();
+            search.KeyDown += (_, e) =>
+            {
+                var items = list.ItemsSource as System.Collections.Generic.IReadOnlyList<PaletteCommand>
+                            ?? (System.Collections.Generic.IReadOnlyList<PaletteCommand>)all;
+                if (e.Key == Windows.System.VirtualKey.Enter)
+                {
+                    e.Handled = true;
+                    Run(list.SelectedItem as PaletteCommand ?? (items.Count > 0 ? items[0] : null));
+                }
+                else if (e.Key == Windows.System.VirtualKey.Down)
+                {
+                    e.Handled = true;
+                    if (items.Count > 0) list.SelectedIndex = Math.Min(list.SelectedIndex + 1, items.Count - 1);
+                }
+                else if (e.Key == Windows.System.VirtualKey.Up)
+                {
+                    e.Handled = true;
+                    if (items.Count > 0) list.SelectedIndex = Math.Max(list.SelectedIndex - 1, 0);
+                }
+            };
+            list.ItemClick += (_, e) => Run(e.ClickedItem as PaletteCommand);
+            dialog.Opened += (_, _) => search.Focus(FocusState.Programmatic);
+
+            await dialog.ShowAsync();
+            chosen?.Run();
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("MainWindow.CommandPalette", ex, ex.Message);
+        }
+        finally
+        {
+            _paletteOpen = false;
+        }
+    }
+
+
     // Sol menü (pane) genişliğini sürükleyerek ayarla — sol sohbet listesini
     // genişletip uzun adları tam görebilmek için. Üzerine gelmek bir şey
     // yapmaz; yalnızca sürükleme OpenPaneLength'i değiştirir (180–480 aralığı).
