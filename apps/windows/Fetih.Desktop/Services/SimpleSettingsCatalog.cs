@@ -1113,6 +1113,52 @@ public static class SimpleSettingsCatalog
                     },
                 },
             },
+            new SimpleSection
+            {
+                Title = new("Bildirimler", "Notifications"),
+                Glyph = GWarn,
+                Controls = new[]
+                {
+                    new SimpleControl
+                    {
+                        Kind = SimpleKind.Toggle,
+                        Key = "desktop.notifications.enabled",
+                        Title = new("Masaüstü bildirimlerini göster", "Show desktop notifications"),
+                        Glyph = GWarn,
+                        Description = new(
+                            "Pencere arkada ya da simge durumundayken Windows bildirimi gönderilir. Bildirime tıklayınca uygulama öne gelir. Pencere önünde iken bildirim gösterilmez.",
+                            "When the window is in the background or minimized, a Windows notification is sent. Clicking it brings the app to the front. No notification is shown while the window is focused."),
+                    },
+                    new SimpleControl
+                    {
+                        Kind = SimpleKind.Toggle,
+                        Key = "desktop.notifications.turn_done",
+                        Title = new("Yanıt hazır olunca", "When a reply is ready"),
+                        Glyph = GChat,
+                    },
+                    new SimpleControl
+                    {
+                        Kind = SimpleKind.Toggle,
+                        Key = "desktop.notifications.approval",
+                        Title = new("Onay beklenirken", "When approval is needed"),
+                        Glyph = GShield,
+                    },
+                    new SimpleControl
+                    {
+                        Kind = SimpleKind.Toggle,
+                        Key = "desktop.notifications.flag",
+                        Title = new("Bayrak yakalanınca", "When a flag is captured"),
+                        Glyph = GCheck,
+                    },
+                    new SimpleControl
+                    {
+                        Kind = SimpleKind.Toggle,
+                        Key = "desktop.notifications.error",
+                        Title = new("Hata oluşunca", "When an error occurs"),
+                        Glyph = GWarn,
+                    },
+                },
+            },
         },
     };
 

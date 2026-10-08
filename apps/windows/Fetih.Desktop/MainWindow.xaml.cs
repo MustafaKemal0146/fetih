@@ -71,6 +71,10 @@ public sealed partial class MainWindow : Window
 
         ToolTipService.SetToolTip(ActivityToggleButton, Loc.T("activity.toggle"));
 
+        // Toast'lar yalnızca pencere ön planda DEĞİLKEN gösterilsin (issue #49).
+        Activated += (_, e) =>
+            Services.ToastService.IsForeground = e.WindowActivationState != WindowActivationState.Deactivated;
+
         // İlk seçimi kurucuda yapmak WinUI'de kontrol henüz yüklenmediği için
         // "tutmuyor" ve yükleme sırasında yerleşik Ayarlar ögesi kendiliğinden
         // seçilip Ayarlar moduna geçebiliyor. Bu yüzden ilk menüyü NavigationView
@@ -924,6 +928,27 @@ public sealed partial class MainWindow : Window
     }
 
     // ── Gezinme ─────────────────────────────────────────────────────────────
+
+    /// <summary>Bir toast tıklamasından gelen yönlendirme (issue #49).</summary>
+    public void NavigateFromToast(string route)
+    {
+        try
+        {
+            var tag = route switch
+            {
+                "findings" => NavTags.Findings,
+                "targets" => NavTags.Targets,
+                "files" => NavTags.Files,
+                "timeline" => NavTags.Timeline,
+                _ => NavTags.Chat,
+            };
+            PaletteNavigate(tag);
+        }
+        catch (Exception ex)
+        {
+            App.LogCrash("MainWindow.NavigateFromToast", ex, ex.Message);
+        }
+    }
 
     private void NavigateTo(string tag)
     {

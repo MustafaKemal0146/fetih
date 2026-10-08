@@ -225,6 +225,12 @@ public static class Loc
         ["targets.count"] = new("{0} bulgu", "{0} findings"),
         ["targets.select_hint"] = new("Soldan bir hedef seç.", "Select a target on the left."),
         ["nav.timeline"] = new("Zaman Çizelgesi", "Timeline"),
+        // ── Toast bildirimleri (issue #49) ───────────────────────────────
+        ["toast.turn_done.title"] = new("FETİH yanıt verdi", "FETİH replied"),
+        ["toast.approval.title"] = new("Onay bekleniyor", "Approval needed"),
+        ["toast.approval.body"] = new("Bir komut çalıştırmak için onayın gerekiyor.", "A command needs your approval to run."),
+        ["toast.flag.title"] = new("🚩 Bayrak yakalandı", "🚩 Flag captured"),
+        ["toast.error.title"] = new("FETİH — hata", "FETİH — error"),
         ["nav.evidence"] = new("Kanıtlar", "Evidence"),
         ["evidence.title"] = new("Kanıt klasörü", "Evidence folder"),
         ["evidence.subtitle"] = new("Ekran görüntüsü, çıktı, dosya — tek yerde, önizlemeli. Klasör: Belgeler › FETIH-Kanit", "Screenshots, output, files — in one place with preview. Folder: Documents › FETIH-Evidence"),

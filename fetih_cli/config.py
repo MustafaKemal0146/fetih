@@ -1764,6 +1764,14 @@ DEFAULT_CONFIG = {
             # then runs commands WITHOUT asking, outside FETİH's approval flow.
             "allow_tools": False,
         },
+        # Windows toast bildirimleri (yalnızca pencere ön planda değilken).
+        "notifications": {
+            "enabled": True,
+            "turn_done": True,
+            "approval": True,
+            "flag": True,
+            "error": True,
+        },
     },
 
     # Config schema version - bump this when adding new required fields

@@ -247,6 +247,7 @@ public sealed class ChatConversationController
                 TokensUpdated?.Invoke(total);
             }
             EndTurn();
+            ToastService.NotifyTurnDone(string.IsNullOrWhiteSpace(done.Text) ? null : done.Text);
         });
     }
 
@@ -297,6 +298,7 @@ public sealed class ChatConversationController
             Messages.Add(card);
             NotifyMessagesChanged();
             RequestScroll();
+            ToastService.NotifyApproval();
         });
     }
 
@@ -518,6 +520,7 @@ public sealed class ChatConversationController
             // indirilmiş ham hata (çok satırlı JSON sohbete basılmasın).
             AddSystem(ProviderErrorText.Friendly(error)
                       ?? "Hata: " + ProviderErrorText.Shorten(error, 400));
+            ToastService.NotifyError(ProviderErrorText.Friendly(error) ?? error);
         }
 
         // Tur bitti — akan segment/aktivite yok; en eski öğeleri güvenle kırp.
@@ -577,6 +580,7 @@ public sealed class ChatConversationController
                 // Aynı bayrağı iki kez kartlama.
                 if (Messages.Any(m => m.Role == ChatRole.Flag && m.Text == flag)) return;
                 AddFlag(flag);
+                ToastService.NotifyFlag(flag);
             });
         }
         catch (Exception ex)

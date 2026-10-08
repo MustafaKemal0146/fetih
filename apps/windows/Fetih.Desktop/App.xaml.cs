@@ -33,7 +33,10 @@ public partial class App : Application
 
         // Süreç kapanışında bekleyen log satırlarını diske akıt.
         AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+        {
+            Fetih.Desktop.Services.ToastService.Unregister();
             Fetih.Desktop.Services.Logger.Shutdown();
+        };
 
         // WinUI3/XAML dispatcher'ında yakalanmayan istisna: varsayılan davranış
         // pencereyi sessizce kapatmaktır. e.Handled = true YAPMIYORUZ (uygulamayı
@@ -174,6 +177,10 @@ public partial class App : Application
 
         MainAppWindow = _window;
         _window.Activate();
+
+        // Toast bildirim altyapısını kaydet (issue #49). Başarısızsa sessizce
+        // devre dışı kalır; uygulama etkilenmez.
+        Fetih.Desktop.Services.ToastService.Register();
 
         // Açılıştan hemen sonra, arka planda ve sessizce: günde en fazla bir
         // kez GitHub Releases'e bakar. Bulursa Hakkında sayfası bir sonraki
