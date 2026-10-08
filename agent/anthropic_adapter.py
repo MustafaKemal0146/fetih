@@ -1175,8 +1175,12 @@ def run_oauth_setup_token() -> Optional[str]:
 # Stores credentials in ~/.fetih/.anthropic_oauth.json (our own file).
 
 _OAUTH_CLIENT_ID = "9d1c250a-e61b-44d9-88ed-5944d1962f5e"
-_OAUTH_TOKEN_URL = "https://console.anthropic.com/v1/oauth/token"
-_OAUTH_REDIRECT_URI = "https://console.anthropic.com/oauth/code/callback"
+# Token endpoint moved to platform.claude.com; the old console.anthropic.com
+# host now 404s (verified live), which silently broke the code exchange for
+# BOTH the loopback and paste flows (and `fetih auth add anthropic`). The new
+# host returns a proper OAuth error shape (invalid_grant for a bad code).
+_OAUTH_TOKEN_URL = "https://platform.claude.com/v1/oauth/token"
+_OAUTH_REDIRECT_URI = "https://platform.claude.com/oauth/code/callback"
 _OAUTH_SCOPES = "org:create_api_key user:profile user:inference"
 _FETIH_OAUTH_FILE = get_fetih_home() / ".anthropic_oauth.json"
 
