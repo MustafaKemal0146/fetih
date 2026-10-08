@@ -378,6 +378,14 @@ public sealed class VerifyEndToEndStep : SetupStep
                     Loc.T("setup.step.verify.rate_limited"), Shorten(rpc.Message, 200)));
             }
 
+            // Gemini Code Assist (bireysel) Google tarafından kapatıldı (403
+            // "no longer supported"). Bu GERÇEK bir engel — soft-pass YANLIŞ
+            // olurdu (her mesaj patlar). Ama ham JSON yerine net yönlendirme ver.
+            if (IsDeprecatedCodeAssist(rpc))
+            {
+                return StepResult.Fail(Loc.T("setup.step.verify.code_assist_deprecated"));
+            }
+
             // Sağlayıcı/model hatasını BURADA yakala: kullanıcı sihirbazdan
             // çıkmadan düzeltebilsin, ilk mesajında sürprizle karşılaşmasın.
             return StepResult.Fail(string.Format(
@@ -400,6 +408,16 @@ public sealed class VerifyEndToEndStep : SetupStep
             || m.Contains("rate limit", StringComparison.OrdinalIgnoreCase)
             || m.Contains("rate-limit", StringComparison.OrdinalIgnoreCase)
             || m.Contains("too many requests", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>Gemini Code Assist (bireysel) Google tarafından kapatıldı — 403 / "no longer supported".</summary>
+    private static bool IsDeprecatedCodeAssist(BridgeRpcException rpc)
+    {
+        var m = rpc.Message ?? "";
+        return m.Contains("no longer supported", StringComparison.OrdinalIgnoreCase)
+            || m.Contains("Antigravity", StringComparison.OrdinalIgnoreCase)
+            || (m.Contains("Code Assist", StringComparison.OrdinalIgnoreCase)
+                && m.Contains("403", StringComparison.Ordinal));
     }
 
     private static string Shorten(string s, int max = 120)

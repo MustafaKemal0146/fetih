@@ -1235,6 +1235,9 @@ public static class Loc
             "Model yanıt verdi (boş metin) — kurulum tamam.",
             "The model responded (empty text) — setup is complete."),
         ["setup.step.verify.ok"] = new("Model yanıt verdi: ", "The model responded: "),
+        ["setup.step.verify.code_assist_deprecated"] = new(
+            "Gemini Code Assist (bireysel) Google tarafından kapatıldı; bu istemci artık çalışmıyor. 'Sağlayıcıya dön' deyip Gemini için AI Studio (gemini) anahtarı kullan ya da Claude (anthropic) gibi başka bir sağlayıcı seç.",
+            "Google has shut down Gemini Code Assist for individuals; this client no longer works. Click 'Back to provider' and use an AI Studio key (gemini) for Gemini, or pick another provider such as Claude (anthropic)."),
         ["setup.step.verify.rate_limited"] = new(
             "Giriş başarılı, sağlayıcı ulaşılabilir — ama hesabın kotası/oran sınırı şu an dolu (429). Kurulum tamam; kota yenilenince kullanabilirsin. ({0})",
             "Signed in and the provider is reachable — but your account's quota/rate limit is currently exhausted (429). Setup is complete; it will work once your quota resets. ({0})"),
