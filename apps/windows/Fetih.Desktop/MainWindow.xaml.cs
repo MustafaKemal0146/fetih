@@ -165,6 +165,7 @@ public sealed partial class MainWindow : Window
             _menuItems.Add(CreateItem(Loc.T("nav.skills"), NavTags.Skills, Symbol.Library));
             _menuItems.Add(CreateItem(Loc.T("nav.findings"), NavTags.Findings, Symbol.Flag));
             _menuItems.Add(CreateItem(Loc.T("nav.files"), NavTags.Files, Symbol.Folder));
+            _menuItems.Add(CreateItem(Loc.T("nav.timeline"), NavTags.Timeline, Symbol.Clock));
 
             _footerItems.Add(CreateItem(Loc.T("nav.diagnostics"), NavTags.Diagnostics, Symbol.Repair));
             _footerItems.Add(CreateItem(Loc.T("nav.settings"), NavTags.SettingsRoot, Symbol.Setting));
@@ -962,6 +963,7 @@ public sealed partial class MainWindow : Window
         NavTags.Skills => (typeof(SkillsPage), null),
         NavTags.Findings => (typeof(FindingsPage), null),
         NavTags.Files => (typeof(FilesPage), null),
+        NavTags.Timeline => (typeof(TimelinePage), null),
         NavTags.Diagnostics => (typeof(DiagnosticsPage), null),
         NavTags.SettingsBridge => (typeof(BridgePage), null),
         NavTags.SettingsProvider => (typeof(ProviderPage), null),
@@ -1006,6 +1008,7 @@ internal static class NavTags
     public const string Skills = "nav_skills";
     public const string Findings = "nav_findings";
     public const string Files = "nav_files";
+    public const string Timeline = "nav_timeline";
     public const string Diagnostics = "nav_diagnostics";
     public const string SettingsRoot = "nav_settings_root";
     public const string SettingsBridge = "nav_settings_bridge";

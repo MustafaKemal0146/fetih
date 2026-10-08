@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="Fetih.Desktop.Views.TimelinePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:models="using:Fetih.Desktop.Models"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <!--
+        Operasyon zaman çizelgesi (issue #35): seçili oturumda çalışan araçlar,
+        tool_call/tool_result kayıtlarından/olaylarından. Canlı günceller.
+    -->
+    <Grid Padding="24,16,24,16" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Spacing="4">
+            <TextBlock x:Name="PageTitleText" Style="{StaticResource PageTitleTextStyle}" />
+            <TextBlock x:Name="SubtitleText" Style="{StaticResource MutedTextStyle}" />
+        </StackPanel>
+
+        <Grid Grid.Row="1" ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <ComboBox Grid.Column="0"
+                      x:Name="SessionBox"
+                      MinWidth="260"
+                      AutomationProperties.AutomationId="timeline_session"
+                      SelectionChanged="SessionBox_SelectionChanged" />
+            <TextBlock Grid.Column="1"
+                       x:Name="CountText"
+                       Margin="12,0,0,0"
+                       VerticalAlignment="Center"
+                       Style="{StaticResource MutedTextStyle}" />
+            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8">
+                <ProgressRing x:Name="BusyRing" Width="16" Height="16" IsActive="False" VerticalAlignment="Center" />
+                <Button x:Name="ExportButton" Click="ExportButton_Click" />
+                <Button x:Name="ReloadButton" Click="ReloadButton_Click" />
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="2">
+            <TextBlock x:Name="EmptyText"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"
+                       Opacity="0.55"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap" />
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="TimelineItems">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="models:TimelineEntry">
+                            <Grid Margin="0,0,0,2" ColumnSpacing="10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="64" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBlock Grid.Column="0"
+                                           Text="{x:Bind TimeLabel}"
+                                           FontFamily="Consolas"
+                                           FontSize="11"
+                                           Opacity="0.6"
+                                           VerticalAlignment="Top"
+                                           Margin="0,10,0,0" />
+
+                                <Ellipse Grid.Column="1"
+                                         Width="10" Height="10"
+                                         VerticalAlignment="Top"
+                                         Margin="0,13,0,0"
+                                         Fill="{x:Bind StatusBrushKey, Converter={StaticResource ThemeBrushConverter}}" />
+
+                                <Border Grid.Column="2"
+                                        Padding="12,10"
+                                        CornerRadius="8"
+                                        Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                                    <StackPanel Spacing="4">
+                                        <Grid ColumnSpacing="8">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+                                            <FontIcon Grid.Column="0" Glyph="{x:Bind Glyph}" FontSize="14" VerticalAlignment="Center" Opacity="0.85" />
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{x:Bind Name}"
+                                                       FontWeight="SemiBold"
+                                                       VerticalAlignment="Center"
+                                                       TextTrimming="CharacterEllipsis" />
+                                            <Border Grid.Column="2"
+                                                    Padding="6,1"
+                                                    CornerRadius="4"
+                                                    VerticalAlignment="Center"
+                                                    Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                                    Visibility="{x:Bind HasExit, Converter={StaticResource BoolToVisibilityConverter}}">
+                                                <TextBlock Text="{x:Bind ExitLabel}" FontSize="11" FontFamily="Consolas" />
+                                            </Border>
+                                            <TextBlock Grid.Column="3"
+                                                       Text="{x:Bind DurationLabel}"
+                                                       FontSize="11"
+                                                       Opacity="0.6"
+                                                       VerticalAlignment="Center" />
+                                        </Grid>
+                                        <TextBlock Text="{x:Bind ArgsSummary}"
+                                                   FontFamily="Consolas"
+                                                   FontSize="11.5"
+                                                   Opacity="0.7"
+                                                   TextWrapping="Wrap"
+                                                   MaxLines="2"
+                                                   TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Page>
