@@ -1349,6 +1349,21 @@ class BridgeServer:
         source = "fallback"
         models: List[str] = []
 
+        # Anthropic: ask the account's OWN /v1/models endpoint when a token is
+        # available (OAuth subscription or API key). The static CLI catalog
+        # lags real releases — it was missing the whole Claude 5 family while
+        # the live endpoint returns it. Falls back to the catalog on any error
+        # or when not signed in.
+        if pid == "anthropic":
+            live_anthropic = _safe(_anthropic_live_model_ids, default=None)
+            if live_anthropic:
+                return {
+                    "provider": pid,
+                    "models": live_anthropic,
+                    "source": "live",
+                    "recommended": live_anthropic[0] if live_anthropic else "",
+                }
+
         try:
             from providers import get_provider_profile
 
@@ -2396,6 +2411,62 @@ def _provider_model_ids_for(pid: str) -> List[str]:
     from fetih_cli.models import provider_model_ids
 
     return [str(m) for m in (provider_model_ids(pid) or [])]
+
+
+def _rank_anthropic_models(ids: List[str]) -> List[str]:
+    """Flagship-first ordering so the wizard's default (models[0]) is sensible.
+
+    Newest version family first; within a version, Sonnet ahead of Opus, Haiku
+    and Fable. This makes the default a balanced current model (e.g. the latest
+    Sonnet) rather than whatever order the API happened to return.
+    """
+    import re
+
+    def key(model: str):
+        ml = model.lower()
+        fam = 0 if "sonnet" in ml else 1 if "opus" in ml else 2 if "haiku" in ml else 3
+        nums = re.findall(r"\d+", ml)
+        major = int(nums[0]) if nums else 0
+        minor = int(nums[1]) if len(nums) > 1 else 0
+        # Negative → higher version sorts first.
+        return (-(major * 100 + minor), fam, model)
+
+    return sorted(ids, key=key)
+
+
+def _anthropic_live_model_ids() -> List[str]:
+    """Current Claude model ids from Anthropic's own ``/v1/models`` endpoint.
+
+    Uses the resolved subscription/API token (OAuth ``sk-ant-oat*`` → Bearer,
+    API key ``sk-ant-api*`` → x-api-key). Returns ``[]`` on any failure or when
+    not signed in, so the caller falls back to the static catalog.
+    """
+    import json as _json
+    import urllib.request
+
+    from fetih_cli.runtime_provider import resolve_runtime_provider
+
+    rt = resolve_runtime_provider(requested="anthropic", target_model=None)
+    token = str(rt.get("api_key") or "").strip()
+    base = str(rt.get("base_url") or "https://api.anthropic.com").strip().rstrip("/")
+    if not token:
+        return []
+
+    if token.startswith("sk-ant-api"):
+        headers = {"x-api-key": token, "anthropic-version": "2023-06-01"}
+    else:
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "anthropic-version": "2023-06-01",
+            "anthropic-beta": "oauth-2025-04-20",
+            "User-Agent": "claude-cli (external, cli)",
+        }
+
+    req = urllib.request.Request(f"{base}/v1/models?limit=100", headers=headers)
+    with urllib.request.urlopen(req, timeout=8) as resp:
+        data = _json.loads(resp.read().decode())
+    ids = [str(m.get("id")) for m in data.get("data", []) if m.get("id")]
+    return _rank_anthropic_models(ids)
 
 
 #: Hosts that mean "this inference endpoint never leaves the machine".

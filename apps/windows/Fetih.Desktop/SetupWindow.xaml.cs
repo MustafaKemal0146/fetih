@@ -592,6 +592,7 @@ public sealed partial class SetupWindow : Window
             CliLoginBar.Severity = InfoBarSeverity.Success;
             CliLoginBar.Title = Loc.T("setup.login.ok.title");
             CliLoginBar.Message = string.Format(Loc.T("setup.login.ok.msg"), p.Label);
+            _ = LoadModelsAsync(p);
         }
         catch (Exception ex)
         {
@@ -629,6 +630,12 @@ public sealed partial class SetupWindow : Window
                 CliLoginBar.Severity = InfoBarSeverity.Success;
                 CliLoginBar.Title = Loc.T("setup.login.ok.title");
                 CliLoginBar.Message = string.Format(Loc.T("setup.login.ok.msg"), _selected?.Label ?? d.Provider);
+                // Giriş sonrası model listesini tazele: artık hesabın CANLI
+                // modelleri (örn. Claude 5 ailesi) listelenebilir.
+                if (_selected is not null)
+                {
+                    _ = LoadModelsAsync(_selected);
+                }
             }
             else
             {
@@ -849,11 +856,38 @@ public sealed partial class SetupWindow : Window
         _ctx.ApiKey = p.Kind == ProviderKind.CloudApiKey ? (KeyBox.Password ?? "") : "";
         _ctx.Model = ModelCombo.SelectedItem as string ?? "";
 
-        // Yalnızca gerçekten anahtar isteyen sağlayıcıda anahtar zorunlu.
+        // Anahtar girilmediyse: OAuth girişi destekleyen sağlayıcıda (anthropic
+        // gibi) oturum AÇIKSA anahtara gerek yok — kimlik havuzdaki OAuth
+        // kaydından gelir. Aksi hâlde anahtar iste (ve varsa girişe yönlendir).
         if (p.Kind == ProviderKind.CloudApiKey && string.IsNullOrWhiteSpace(_ctx.ApiKey))
         {
-            KeyHint.Text = Loc.T("setup.key.required");
-            return;
+            var oauthActive = false;
+            if (p.SupportsOAuthLogin)
+            {
+                try
+                {
+                    var st = await Bridge.BridgeClient.Shared
+                        .ProvidersAuthStatusAsync(p.Id).ConfigureAwait(true);
+                    oauthActive = st.TryGetProperty("logged_in", out var li) && li.GetBoolean();
+                }
+                catch
+                {
+                    // Köprü yanıt vermezse anahtar isteme davranışına düş.
+                }
+            }
+
+            if (!oauthActive)
+            {
+                KeyHint.Text = Loc.T("setup.key.required");
+                if (p.SupportsOAuthLogin)
+                {
+                    CliLoginBar.Severity = InfoBarSeverity.Warning;
+                    CliLoginBar.Title = Loc.T("setup.needs_login.title");
+                    CliLoginBar.Message = string.Format(Loc.T("setup.needs_login.msg"), p.Label);
+                }
+                return;
+            }
+            // OAuth oturumu açık → anahtar gerekmez; kuruluma devam.
         }
 
         // OAuth sağlayıcılarında ön denetim: Henüz oturum açılmamışsa kullanıcıyı uyar ve giriş akışını tetikle
