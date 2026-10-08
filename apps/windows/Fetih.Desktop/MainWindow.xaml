@@ -62,6 +62,23 @@
                        Opacity="0.6" />
 
             <!--
+                Etkinlik paneli aç/kapat (issue #53). Orta (esnek) sütunda sağa
+                yaslı; durum rozetinin solunda durur.
+            -->
+            <Button Grid.Column="2"
+                    x:Name="ActivityToggleButton"
+                    HorizontalAlignment="Right"
+                    Margin="0,0,10,0"
+                    Padding="8,3"
+                    VerticalAlignment="Center"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    AutomationProperties.AutomationId="activity_toggle"
+                    Click="ActivityToggleButton_Click">
+                <FontIcon Glyph="&#xE8A0;" FontSize="14" />
+            </Button>
+
+            <!--
                 Durum rozeti. Nokta artık sabit sarı değil: BadgeBrushKey'den
                 gelir (yeşil=bağlı, sarı=bağlanıyor, kırmızı=model/taşıma
                 hatası). Hata durumunda rozet TIKLANABİLİR ve kullanıcıyı
@@ -101,18 +118,43 @@
             Böylece "Ayarlar"a basıldığında sol menünün tamamı Ayarlar alt
             bölümleriyle değiştirilebilir, geri tuşuyla normal moda dönülür.
         -->
-        <muxc:NavigationView x:Name="RootNavigation"
-                             Grid.Row="1"
-                             IsSettingsVisible="True"
-                             IsBackButtonVisible="Collapsed"
-                             IsPaneToggleButtonVisible="True"
-                             PaneDisplayMode="Left"
-                             OpenPaneLength="240"
-                             ItemInvoked="RootNavigation_ItemInvoked"
-                             SelectionChanged="RootNavigation_SelectionChanged"
-                             BackRequested="RootNavigation_BackRequested">
-            <Frame x:Name="ContentFrame" />
-        </muxc:NavigationView>
+        <!--
+            İçerik alanı: sol menü + ana içerik (NavigationView) ve SAĞ TARAFTA
+            açılır etkinlik paneli (issue #53). Panel sütunu varsayılan 0'dır
+            (gizli); başlık çubuğundaki düğme açıp kapatır, aradaki tutamaç
+            genişliğini ayarlar. Panel sohbeti daraltır ama üzerine binmez.
+        -->
+        <Grid x:Name="ContentArea" Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition x:Name="ActivityPanelColumn" Width="0" />
+            </Grid.ColumnDefinitions>
+
+            <muxc:NavigationView x:Name="RootNavigation"
+                                 Grid.Column="0"
+                                 IsSettingsVisible="True"
+                                 IsBackButtonVisible="Collapsed"
+                                 IsPaneToggleButtonVisible="True"
+                                 PaneDisplayMode="Left"
+                                 OpenPaneLength="240"
+                                 ItemInvoked="RootNavigation_ItemInvoked"
+                                 SelectionChanged="RootNavigation_SelectionChanged"
+                                 BackRequested="RootNavigation_BackRequested">
+                <Frame x:Name="ContentFrame" />
+            </muxc:NavigationView>
+
+            <primitives:Thumb x:Name="ActivitySizer"
+                              Grid.Column="1"
+                              Width="6"
+                              HorizontalAlignment="Left"
+                              VerticalAlignment="Stretch"
+                              Background="Transparent"
+                              Visibility="Collapsed"
+                              DragDelta="ActivitySizer_DragDelta" />
+
+            <views:ActivityPanel x:Name="ActivityPanel" Grid.Column="2" />
+        </Grid>
 
         <!--
             Pane genişlik tutamacı: sol menünün SAĞ kenarında ince, görünmez

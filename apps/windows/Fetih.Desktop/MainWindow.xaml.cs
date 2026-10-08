@@ -69,6 +69,8 @@ public sealed partial class MainWindow : Window
         RootNavigation.MenuItemsSource = _menuItems;
         RootNavigation.FooterMenuItemsSource = _footerItems;
 
+        ToolTipService.SetToolTip(ActivityToggleButton, Loc.T("activity.toggle"));
+
         // İlk seçimi kurucuda yapmak WinUI'de kontrol henüz yüklenmediği için
         // "tutmuyor" ve yükleme sırasında yerleşik Ayarlar ögesi kendiliğinden
         // seçilip Ayarlar moduna geçebiliyor. Bu yüzden ilk menüyü NavigationView
@@ -563,6 +565,35 @@ public sealed partial class MainWindow : Window
         var newLen = Math.Clamp(RootNavigation.OpenPaneLength + e.HorizontalChange, PaneMinWidth, PaneMaxWidth);
         RootNavigation.OpenPaneLength = newLen;
         PaneSizer.Margin = new Thickness(newLen - PaneSizer.Width, 48, 0, 0);
+    }
+
+    // ── Sağ etkinlik paneli (issue #53): aç/kapat + genişlik sürükleme ──────────
+    private const double ActivityMinWidth = 260;
+    private const double ActivityMaxWidth = 640;
+    private double _activityPanelWidth = 320;
+
+    private bool ActivityPanelOpen => ActivityPanelColumn.Width.Value > 0;
+
+    private void ActivityToggleButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (ActivityPanelOpen)
+        {
+            ActivityPanelColumn.Width = new GridLength(0);
+            ActivitySizer.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+            ActivityPanelColumn.Width = new GridLength(_activityPanelWidth);
+            ActivitySizer.Visibility = Visibility.Visible;
+        }
+    }
+
+    private void ActivitySizer_DragDelta(object sender, Microsoft.UI.Xaml.Controls.Primitives.DragDeltaEventArgs e)
+    {
+        // Tutamaç panelin SOL kenarında; sola sürükleyince panel genişler.
+        var next = Math.Clamp(_activityPanelWidth - e.HorizontalChange, ActivityMinWidth, ActivityMaxWidth);
+        _activityPanelWidth = next;
+        ActivityPanelColumn.Width = new GridLength(next);
     }
 
     private async void RootNavigation_ItemInvoked(
