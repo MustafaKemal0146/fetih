@@ -513,7 +513,10 @@ public sealed class ChatConversationController
         }
         else if (!string.IsNullOrEmpty(error))
         {
-            AddSystem("Hata: " + error);
+            // Bilinen sağlayıcı durumlarında açıklama; değilse tek satıra
+            // indirilmiş ham hata (çok satırlı JSON sohbete basılmasın).
+            AddSystem(ProviderErrorText.Friendly(error)
+                      ?? "Hata: " + ProviderErrorText.Shorten(error, 400));
         }
 
         // Tur bitti — akan segment/aktivite yok; en eski öğeleri güvenle kırp.

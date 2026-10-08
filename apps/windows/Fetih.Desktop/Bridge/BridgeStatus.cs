@@ -197,7 +197,11 @@ public sealed class BridgeStatus : INotifyPropertyChanged
     /// </summary>
     public void ReportModelFault(int code, string message)
         => Update(BridgeConnectionState.ModelError,
-                  Services.Loc.T("bridge.detail.model_error") + " (" + code + ") " + message);
+                  // Bilinen durumlarda (kota, ek kullanım, kapatılmış istemci…)
+                  // ham JSON yerine ne yapılacağını söyleyen tek cümle.
+                  Services.ProviderErrorText.Friendly(message)
+                  ?? Services.Loc.T("bridge.detail.model_error") + " (" + code + ") "
+                     + Services.ProviderErrorText.Shorten(message));
 
     /// <summary>
     /// Bir tur modele ulaşıp tamamlandı — model hatası varsa temizle.

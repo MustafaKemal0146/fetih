@@ -14,10 +14,16 @@ public enum StepOutcome
     Failed,
 }
 
-/// <summary>Bir adımın çalışma sonucu + isteğe bağlı mesaj.</summary>
-public sealed record StepResult(StepOutcome Outcome, string Message = "")
+/// <summary>
+/// Bir adımın çalışma sonucu + isteğe bağlı mesaj. <see cref="IsWarning"/>,
+/// adımın TAMAMLANDIĞINI ama kullanıcının bilmesi gereken bir şey olduğunu
+/// söyler (ör. giriş doğru ama hesabın kotası dolu) — kurulum durmaz, son
+/// ekran başarı yerine uyarı gösterir.
+/// </summary>
+public sealed record StepResult(StepOutcome Outcome, string Message = "", bool IsWarning = false)
 {
     public static StepResult Ok(string message = "") => new(StepOutcome.Completed, message);
+    public static StepResult Warn(string message) => new(StepOutcome.Completed, message, IsWarning: true);
     public static StepResult Skip(string reason) => new(StepOutcome.Skipped, reason);
     public static StepResult Fail(string message) => new(StepOutcome.Failed, message);
 }
@@ -68,7 +74,12 @@ public enum PipelineOutcome
     Cancelled,
 }
 
-public sealed record PipelineResult(PipelineOutcome Outcome, string? FailedStepId, string Message);
+/// <summary>
+/// Pipeline sonucu. <see cref="Warning"/>, başarılı bir çalışmada uyarıyla
+/// biten son adımın mesajıdır (yoksa <c>null</c>).
+/// </summary>
+public sealed record PipelineResult(
+    PipelineOutcome Outcome, string? FailedStepId, string Message, string? Warning = null);
 
 /// <summary>Adım ilerlemesini UI'ya bildirir.</summary>
 public sealed record StepProgress(int Index, int Total, string StepId, string DisplayName, StepOutcome? Outcome, string Message);
@@ -95,6 +106,7 @@ public sealed class SetupPipeline
     {
         _journal.Write("pipeline_started", new() { ["steps"] = _steps.Count });
         var completed = new List<SetupStep>();
+        string? warning = null;
 
         for (var i = 0; i < _steps.Count; i++)
         {
@@ -129,11 +141,20 @@ public sealed class SetupPipeline
                     return new PipelineResult(PipelineOutcome.Failed, step.Id, result.Message);
                 }
 
-                _journal.Write("step_completed", new() { ["id"] = step.Id, ["outcome"] = result.Outcome.ToString() });
+                _journal.Write("step_completed", new()
+                {
+                    ["id"] = step.Id,
+                    ["outcome"] = result.Outcome.ToString(),
+                    ["warning"] = result.IsWarning,
+                });
                 Report(i, step, result.Outcome, result.Message);
                 if (result.Outcome == StepOutcome.Completed)
                 {
                     completed.Add(step);
+                }
+                if (result.IsWarning)
+                {
+                    warning = result.Message;
                 }
             }
             catch (OperationCanceledException)
@@ -152,8 +173,8 @@ public sealed class SetupPipeline
             }
         }
 
-        _journal.Write("pipeline_completed", new());
-        return new PipelineResult(PipelineOutcome.Success, null, Loc.T("setup.pipeline.done"));
+        _journal.Write("pipeline_completed", new() { ["warning"] = warning is not null });
+        return new PipelineResult(PipelineOutcome.Success, null, Loc.T("setup.pipeline.done"), warning);
     }
 
     private async Task RollbackAsync(SetupContext ctx, List<SetupStep> completed)

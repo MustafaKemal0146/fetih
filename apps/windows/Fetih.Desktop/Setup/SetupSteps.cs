@@ -372,52 +372,33 @@ public sealed class VerifyEndToEndStep : SetupStep
             // doğrulandı, sağlayıcı ve model çözüldü — yalnızca hesabın anlık
             // kotası dolu. Bunu başarısızlık sayıp kullanıcıyı sihirbazda
             // tıkamak yerine YUMUŞAK geçiş yapıyoruz (kurulum tamamlanır).
-            if (IsTransientModelLimit(rpc))
+            switch (ProviderErrorText.Classify(rpc.Message))
             {
-                return StepResult.Ok(string.Format(
-                    Loc.T("setup.step.verify.rate_limited"), Shorten(rpc.Message, 200)));
+                // Hesap tarafı durumlar: kimlik doğru, sağlayıcı ve model
+                // çözüldü — sorun hesabın bakiyesi/kotası. Kurulumu tıkamak
+                // yanlış olur (çözüm sihirbazda değil, hesap ayarında); kurulum
+                // tamamlanır ama son ekran başarı yerine UYARI gösterir.
+                case ProviderErrorKind.QuotaExhausted:
+                case ProviderErrorKind.AnthropicExtraUsage:
+                    return StepResult.Warn(ProviderErrorText.Friendly(rpc.Message)!);
+
+                // Gerçek engeller: bu sağlayıcı/model/kimlikle hiçbir mesaj
+                // gitmez. Başarısız say, ama ham JSON yerine ne yapılacağını söyle.
+                case ProviderErrorKind.CodeAssistDeprecated:
+                case ProviderErrorKind.InvalidModel:
+                case ProviderErrorKind.Unauthorized:
+                    return StepResult.Fail(ProviderErrorText.Friendly(rpc.Message)!);
             }
 
-            // Gemini Code Assist (bireysel) Google tarafından kapatıldı (403
-            // "no longer supported"). Bu GERÇEK bir engel — soft-pass YANLIŞ
-            // olurdu (her mesaj patlar). Ama ham JSON yerine net yönlendirme ver.
-            if (IsDeprecatedCodeAssist(rpc))
-            {
-                return StepResult.Fail(Loc.T("setup.step.verify.code_assist_deprecated"));
-            }
-
-            // Sağlayıcı/model hatasını BURADA yakala: kullanıcı sihirbazdan
-            // çıkmadan düzeltebilsin, ilk mesajında sürprizle karşılaşmasın.
+            // Tanınmayan sağlayıcı/model hatası: kullanıcı sihirbazdan çıkmadan
+            // düzeltebilsin; tanı için kısaltılmış ham metin korunur.
             return StepResult.Fail(string.Format(
-                Loc.T("setup.step.verify.fail"), rpc.Code, Shorten(rpc.Message, 260)));
+                Loc.T("setup.step.verify.fail"), rpc.Code, ProviderErrorText.Shorten(rpc.Message, 260)));
         }
         catch (OperationCanceledException) when (!ct.IsCancellationRequested)
         {
             return StepResult.Fail(Loc.T("setup.step.verify.timeout"));
         }
-    }
-
-    /// <summary>429 / kota / oran-sınırı: kimlik doğru, sadece hesabın kotası dolu.</summary>
-    private static bool IsTransientModelLimit(BridgeRpcException rpc)
-    {
-        var m = rpc.Message ?? "";
-        return m.Contains("429", StringComparison.Ordinal)
-            || m.Contains("Resource has been exhausted", StringComparison.OrdinalIgnoreCase)
-            || m.Contains("RESOURCE_EXHAUSTED", StringComparison.OrdinalIgnoreCase)
-            || m.Contains("quota", StringComparison.OrdinalIgnoreCase)
-            || m.Contains("rate limit", StringComparison.OrdinalIgnoreCase)
-            || m.Contains("rate-limit", StringComparison.OrdinalIgnoreCase)
-            || m.Contains("too many requests", StringComparison.OrdinalIgnoreCase);
-    }
-
-    /// <summary>Gemini Code Assist (bireysel) Google tarafından kapatıldı — 403 / "no longer supported".</summary>
-    private static bool IsDeprecatedCodeAssist(BridgeRpcException rpc)
-    {
-        var m = rpc.Message ?? "";
-        return m.Contains("no longer supported", StringComparison.OrdinalIgnoreCase)
-            || m.Contains("Antigravity", StringComparison.OrdinalIgnoreCase)
-            || (m.Contains("Code Assist", StringComparison.OrdinalIgnoreCase)
-                && m.Contains("403", StringComparison.Ordinal));
     }
 
     private static string Shorten(string s, int max = 120)

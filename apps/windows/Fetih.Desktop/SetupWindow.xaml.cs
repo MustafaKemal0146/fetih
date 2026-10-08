@@ -974,9 +974,21 @@ public sealed partial class SetupWindow : Window
 
         if (result.Outcome == PipelineOutcome.Success)
         {
-            ResultBar.Severity = InfoBarSeverity.Success;
-            ResultBar.Title = Loc.T("setup.done.title");
-            ResultBar.Message = Loc.T("setup.done.msg");
+            // Uyarıyla biten bir adım varsa (ör. giriş doğru ama hesabın kotası
+            // ya da ek kullanım bakiyesi yok) "model yanıt verdi" demek yanlış
+            // olur: sarı uyarıyla bitir ve ne yapılacağını göster.
+            if (!string.IsNullOrEmpty(result.Warning))
+            {
+                ResultBar.Severity = InfoBarSeverity.Warning;
+                ResultBar.Title = Loc.T("setup.done_warn.title");
+                ResultBar.Message = result.Warning;
+            }
+            else
+            {
+                ResultBar.Severity = InfoBarSeverity.Success;
+                ResultBar.Title = Loc.T("setup.done.title");
+                ResultBar.Message = Loc.T("setup.done.msg");
+            }
             ResultBar.IsOpen = true;
             GoToChatButton.Visibility = Visibility.Visible;
         }

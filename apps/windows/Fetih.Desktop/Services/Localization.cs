@@ -659,6 +659,24 @@ public static class Loc
         ["provider.get_key"] = new("Anahtar al ↗", "Get key ↗"),
         ["provider.local_no_key"] = new("Yerel sunucu — API anahtarı gerekmez.", "Local server — no API key required."),
         ["provider.cli_auth_required"] = new("Bu sağlayıcı CLI veya OAuth oturumu gerektirir.", "This provider requires CLI or OAuth login."),
+        // ── Sağlayıcı hatalarının insan dilindeki karşılıkları ───────────
+        // (bkz. Services/ProviderErrorText.cs — ham JSON yerine bunlar gösterilir)
+        ["provider.err.extra_usage"] = new(
+            "Claude aboneliğine giriş başarılı, ancak Anthropic, FETİH gibi üçüncü taraf uygulamalardaki kullanımı plan limitinden değil ek kullanım bakiyesinden düşüyor ve hesabında bakiye yok. Ek kullanımı claude.ai/settings/usage sayfasından ekleyebilir ya da Claude için API anahtarı kullanabilirsin.",
+            "You are signed in to your Claude subscription, but Anthropic bills usage in third-party apps like FETİH to extra usage rather than your plan limits, and your account has no extra-usage balance. Add extra usage at claude.ai/settings/usage, or use an API key for Claude."),
+        ["provider.err.quota"] = new(
+            "Sağlayıcı hesabının kotası ya da hız sınırı şu an dolu. Biraz sonra tekrar dene ya da başka bir model veya sağlayıcı seç.",
+            "Your provider account's quota or rate limit is currently exhausted. Try again later, or pick another model or provider."),
+        ["provider.err.code_assist"] = new(
+            "Google, Gemini Code Assist'i bireysel hesaplar için kapattı; bu giriş yolu artık çalışmıyor. Gemini için Google AI Studio (gemini) API anahtarı kullan ya da başka bir sağlayıcı seç.",
+            "Google has shut down Gemini Code Assist for personal accounts; this sign-in path no longer works. Use a Google AI Studio (gemini) API key for Gemini, or pick another provider."),
+        ["provider.err.invalid_model"] = new(
+            "Seçilen model bu sağlayıcıda bulunamadı. Ayarlar › Model ve Sağlayıcı'dan güncel bir model seç.",
+            "The selected model was not found at this provider. Pick a current model in Settings › Model & Provider."),
+        ["provider.err.unauthorized"] = new(
+            "Sağlayıcı kimlik bilgilerini reddetti (anahtar geçersiz ya da oturumun süresi dolmuş). Ayarlar › Model ve Sağlayıcı'dan yeniden giriş yap ya da anahtarı güncelle.",
+            "The provider rejected your credentials (invalid key or expired session). Sign in again or update the key in Settings › Model & Provider."),
+        ["setup.done_warn.title"] = new("Kurulum tamamlandı — bir uyarı var", "Setup complete — one warning"),
         // ── Abonelik / OAuth girişi (issue #54) ──────────────────────────
         ["provider.oauth.section"] = new("Abonelik ile giriş", "Sign in with subscription"),
         ["provider.oauth.login"] = new("Giriş yap", "Sign in"),
@@ -1235,12 +1253,6 @@ public static class Loc
             "Model yanıt verdi (boş metin) — kurulum tamam.",
             "The model responded (empty text) — setup is complete."),
         ["setup.step.verify.ok"] = new("Model yanıt verdi: ", "The model responded: "),
-        ["setup.step.verify.code_assist_deprecated"] = new(
-            "Gemini Code Assist (bireysel) Google tarafından kapatıldı; bu istemci artık çalışmıyor. 'Sağlayıcıya dön' deyip Gemini için AI Studio (gemini) anahtarı kullan ya da Claude (anthropic) gibi başka bir sağlayıcı seç.",
-            "Google has shut down Gemini Code Assist for individuals; this client no longer works. Click 'Back to provider' and use an AI Studio key (gemini) for Gemini, or pick another provider such as Claude (anthropic)."),
-        ["setup.step.verify.rate_limited"] = new(
-            "Giriş başarılı, sağlayıcı ulaşılabilir — ama hesabın kotası/oran sınırı şu an dolu (429). Kurulum tamam; kota yenilenince kullanabilirsin. ({0})",
-            "Signed in and the provider is reachable — but your account's quota/rate limit is currently exhausted (429). Setup is complete; it will work once your quota resets. ({0})"),
         ["setup.step.verify.fail"] = new(
             "Model yanıt vermedi ({0}): {1}  Sağlayıcıya dönüp anahtarı ya da modeli düzelt.",
             "The model did not respond ({0}): {1}  Go back to the provider and fix the key or the model."),

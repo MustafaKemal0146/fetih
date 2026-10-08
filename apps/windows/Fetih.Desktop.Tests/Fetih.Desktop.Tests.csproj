@@ -27,6 +27,7 @@
     <Compile Include="..\Fetih.Desktop\Views\TranscriptBuilder.cs" Link="Views\TranscriptBuilder.cs" />
     <Compile Include="..\Fetih.Desktop\Views\ToolFormatter.cs" Link="Views\ToolFormatter.cs" />
     <Compile Include="..\Fetih.Desktop\Services\Localization.cs" Link="Services\Localization.cs" />
+    <Compile Include="..\Fetih.Desktop\Services\ProviderErrorText.cs" Link="Services\ProviderErrorText.cs" />
     <Compile Include="..\Fetih.Desktop\Services\IUiDispatcher.cs" Link="Services\IUiDispatcher.cs" />
     <Compile Include="..\Fetih.Desktop\Services\ChatHistoryTrimmer.cs" Link="Services\ChatHistoryTrimmer.cs" />
     <Compile Include="..\Fetih.Desktop\Services\LogFormatting.cs" Link="Services\LogFormatting.cs" />
