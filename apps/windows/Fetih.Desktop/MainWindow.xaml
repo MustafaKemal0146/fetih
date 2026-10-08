@@ -4,6 +4,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
+    xmlns:primitives="using:Microsoft.UI.Xaml.Controls.Primitives"
     xmlns:views="using:Fetih.Desktop.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -112,5 +113,21 @@
                              BackRequested="RootNavigation_BackRequested">
             <Frame x:Name="ContentFrame" />
         </muxc:NavigationView>
+
+        <!--
+            Pane genişlik tutamacı: sol menünün SAĞ kenarında ince, görünmez
+            bir sürükleme şeridi. Üzerine gelince bir şey olmaz; yalnızca
+            sürükleyince RootNavigation.OpenPaneLength değişir (sol sohbet
+            listesini genişletip tam adları görebilmek için). Margin, pane
+            genişliğiyle birlikte kod-arkasında güncellenir.
+        -->
+        <primitives:Thumb x:Name="PaneSizer"
+                          Grid.Row="1"
+                          HorizontalAlignment="Left"
+                          VerticalAlignment="Stretch"
+                          Width="6"
+                          Margin="234,48,0,0"
+                          Background="Transparent"
+                          DragDelta="PaneSizer_DragDelta" />
     </Grid>
 </Window>

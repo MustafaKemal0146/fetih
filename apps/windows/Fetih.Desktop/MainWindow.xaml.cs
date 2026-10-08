@@ -552,6 +552,19 @@ public sealed partial class MainWindow : Window
         ChatSessionService.Shared.RequestNewChat();
     }
 
+    // Sol menü (pane) genişliğini sürükleyerek ayarla — sol sohbet listesini
+    // genişletip uzun adları tam görebilmek için. Üzerine gelmek bir şey
+    // yapmaz; yalnızca sürükleme OpenPaneLength'i değiştirir (180–480 aralığı).
+    private const double PaneMinWidth = 180;
+    private const double PaneMaxWidth = 480;
+
+    private void PaneSizer_DragDelta(object sender, Microsoft.UI.Xaml.Controls.Primitives.DragDeltaEventArgs e)
+    {
+        var newLen = Math.Clamp(RootNavigation.OpenPaneLength + e.HorizontalChange, PaneMinWidth, PaneMaxWidth);
+        RootNavigation.OpenPaneLength = newLen;
+        PaneSizer.Margin = new Thickness(newLen - PaneSizer.Width, 48, 0, 0);
+    }
+
     private async void RootNavigation_ItemInvoked(
         NavigationView sender,
         NavigationViewItemInvokedEventArgs args)
