@@ -252,3 +252,36 @@ def test_reset_for_turn_clears_bounded_guardrail_state():
 
     assert controller.before_call("web_search", {"query": "same"}).action == "allow"
     assert controller.before_call("read_file", {"path": "/tmp/x"}).action == "allow"
+
+
+def test_repeated_mutating_call_warns_on_consecutive_calls():
+    controller = ToolCallGuardrailController(
+        ToolCallGuardrailConfig(repeated_mutating_warn_after=3)
+    )
+    args = {"command": "echo hello"}
+
+    d1 = controller.after_call("terminal", args, '{"output":"hello"}', failed=False)
+    assert d1.action == "allow"
+    assert d1.count == 1
+
+    d2 = controller.after_call("terminal", args, '{"output":"hello"}', failed=False)
+    assert d2.action == "allow"
+    assert d2.count == 2
+
+    # 3rd identical call triggers warning
+    d3 = controller.after_call("terminal", args, '{"output":"hello"}', failed=False)
+    assert d3.action == "warn"
+    assert d3.code == "repeated_mutating_call"
+    assert d3.count == 3
+
+    # Different arguments start new count
+    d_diff = controller.after_call("terminal", {"command": "echo world"}, '{"output":"world"}', failed=False)
+    assert d_diff.action == "allow"
+    assert d_diff.count == 1
+
+    # Reset clears counts
+    controller.reset_for_turn()
+    d_reset = controller.after_call("terminal", args, '{"output":"hello"}', failed=False)
+    assert d_reset.action == "allow"
+    assert d_reset.count == 1
+

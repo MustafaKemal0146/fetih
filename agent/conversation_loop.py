@@ -739,6 +739,23 @@ def run_conversation(
                 agent.session_id or "-",
             )
 
+        # Prune old tool results if enabled and above threshold (#64)
+        _prune_active = getattr(agent, "prune_enabled", False) or getattr(agent, "is_desktop_bridge", False)
+        _compressor = getattr(agent, "context_compressor", None)
+        if _prune_active and _compressor and hasattr(_compressor, "prune_only"):
+            _ctx_thresh = getattr(_compressor, "threshold_tokens", None)
+            if _ctx_thresh is None:
+                _ctx_len = getattr(_compressor, "context_length", 128000)
+                _ctx_thresh = int(_ctx_len * getattr(_compressor, "threshold_percent", 0.50))
+            _est_tokens = estimate_request_tokens_rough(
+                messages,
+                system_prompt=active_system_prompt or "",
+                tools=agent.tools or None,
+            )
+            if _est_tokens > 0.60 * _ctx_thresh:
+                messages, _pruned_count = _compressor.prune_only(messages)
+                logger.info("prune: %d tool results pruned (approx tokens: %d)", _pruned_count, _est_tokens)
+
         api_messages = []
         for idx, msg in enumerate(messages):
             api_msg = msg.copy()

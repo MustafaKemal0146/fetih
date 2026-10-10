@@ -39,6 +39,10 @@ from agent.file_safety import (
     build_write_denied_prefixes,
     get_safe_write_root as _shared_get_safe_write_root,
     is_write_denied as _shared_is_write_denied,
+    is_system_write_denied,
+    is_outside_safe_root,
+    is_sensitive_read_denied,
+    get_sensitive_read_error,
 )
 
 
@@ -689,6 +693,10 @@ class ShellFileOperations(FileOperations):
         """
         # Expand ~ and other shell paths
         path = self._expand_path(path)
+
+        read_err = get_sensitive_read_error(path)
+        if read_err:
+            return ReadResult(error=read_err)
         
         offset, limit = normalize_read_pagination(offset, limit)
         
@@ -826,6 +834,9 @@ class ShellFileOperations(FileOperations):
         Uses cat so the full file is returned regardless of size.
         """
         path = self._expand_path(path)
+        read_err = get_sensitive_read_error(path)
+        if read_err:
+            return ReadResult(error=read_err)
         stat_cmd = f"wc -c < {self._escape_shell_arg(path)} 2>/dev/null"
         stat_result = self._exec(stat_cmd)
         if stat_result.exit_code != 0:
@@ -855,8 +866,17 @@ class ShellFileOperations(FileOperations):
     def delete_file(self, path: str) -> WriteResult:
         """Delete a file via rm."""
         path = self._expand_path(path)
-        if _is_write_denied(path):
+        if is_system_write_denied(path):
             return WriteResult(error=f"Delete denied: {path} is a protected path")
+        if is_outside_safe_root(path):
+            from tools.approval import request_action_approval
+            choice = request_action_approval(
+                action=path,
+                description=f"Çalışma klasörü dışına yazma: {path}",
+                allow_permanent=False,
+            )
+            if choice not in ("once", "session", "always"):
+                return WriteResult(error=f"Delete denied: '{path}' is outside the workspace safe root and user denied approval.")
         result = self._exec(f"rm -f {self._escape_shell_arg(path)}")
         if result.exit_code != 0:
             return WriteResult(error=f"Failed to delete {path}: {result.stdout}")
@@ -867,8 +887,17 @@ class ShellFileOperations(FileOperations):
         src = self._expand_path(src)
         dst = self._expand_path(dst)
         for p in (src, dst):
-            if _is_write_denied(p):
+            if is_system_write_denied(p):
                 return WriteResult(error=f"Move denied: {p} is a protected path")
+            if is_outside_safe_root(p):
+                from tools.approval import request_action_approval
+                choice = request_action_approval(
+                    action=p,
+                    description=f"Çalışma klasörü dışına yazma: {p}",
+                    allow_permanent=False,
+                )
+                if choice not in ("once", "session", "always"):
+                    return WriteResult(error=f"Move denied: '{p}' is outside the workspace safe root and user denied approval.")
         result = self._exec(
             f"mv {self._escape_shell_arg(src)} {self._escape_shell_arg(dst)}"
         )
@@ -906,8 +935,18 @@ class ShellFileOperations(FileOperations):
         path = self._expand_path(path)
 
         # Block writes to sensitive paths
-        if _is_write_denied(path):
+        if is_system_write_denied(path):
             return WriteResult(error=f"Write denied: '{path}' is a protected system/credential file.")
+
+        if is_outside_safe_root(path):
+            from tools.approval import request_action_approval
+            choice = request_action_approval(
+                action=path,
+                description=f"Çalışma klasörü dışına yazma: {path}",
+                allow_permanent=False,
+            )
+            if choice not in ("once", "session", "always"):
+                return WriteResult(error=f"Write denied: '{path}' is outside the workspace safe root and user denied approval.")
 
         # Capture pre-write content.  Two consumers want it:
         #
@@ -1017,33 +1056,77 @@ class ShellFileOperations(FileOperations):
         path = self._expand_path(path)
 
         # Block writes to sensitive paths
-        if _is_write_denied(path):
+        if is_system_write_denied(path):
             return PatchResult(error=f"Write denied: '{path}' is a protected system/credential file.")
 
-        # Read current content
-        read_cmd = f"cat {self._escape_shell_arg(path)} 2>/dev/null"
-        read_result = self._exec(read_cmd)
-        
-        if read_result.exit_code != 0:
-            return PatchResult(error=f"Failed to read file: {path}")
-        
-        content = read_result.stdout
-        
+        if is_outside_safe_root(path):
+            from tools.approval import request_action_approval
+            choice = request_action_approval(
+                action=path,
+                description=f"Çalışma klasörü dışına yazma: {path}",
+                allow_permanent=False,
+            )
+            if choice not in ("once", "session", "always"):
+                return PatchResult(error=f"Write denied: '{path}' is outside the workspace safe root and user denied approval.")
+
+        # Check if local file exists to read raw bytes accurately (detect BOM and CRLF)
+        raw_bytes = None
+        candidate_path = path if os.path.isabs(path) else os.path.join(self.cwd, path)
+        if os.path.isfile(candidate_path):
+            try:
+                with open(candidate_path, "rb") as f:
+                    raw_bytes = f.read()
+            except Exception:
+                raw_bytes = None
+
+        if raw_bytes is None:
+            # Fallback to shell read
+            read_cmd = f"cat {self._escape_shell_arg(path)} 2>/dev/null"
+            read_result = self._exec(read_cmd)
+            if read_result.exit_code != 0:
+                return PatchResult(error=f"Failed to read file: {path}")
+            raw_bytes = read_result.stdout.encode("utf-8")
+
+        has_bom = raw_bytes.startswith(b"\xef\xbb\xbf")
+        if has_bom:
+            raw_content = raw_bytes[3:].decode("utf-8", errors="replace")
+        else:
+            raw_content = raw_bytes.decode("utf-8", errors="replace")
+
+        # Detect dominant line ending
+        crlf_count = raw_bytes.count(b"\r\n")
+        lf_count = raw_bytes.count(b"\n") - crlf_count
+        is_crlf = crlf_count > lf_count
+
+        # Normalize content, old_string, and new_string to LF
+        normalized_content = raw_content.replace("\r\n", "\n")
+        normalized_old = old_string.replace("\r\n", "\n")
+        normalized_new = new_string.replace("\r\n", "\n")
+
         # Import and use fuzzy matching
         from tools.fuzzy_match import fuzzy_find_and_replace
-        
+
         new_content, match_count, _strategy, error = fuzzy_find_and_replace(
-            content, old_string, new_string, replace_all
+            normalized_content, normalized_old, normalized_new, replace_all
         )
-        
+
         if error or match_count == 0:
             err_msg = error or f"Could not find match for old_string in {path}"
             try:
                 from tools.fuzzy_match import format_no_match_hint
-                err_msg += format_no_match_hint(err_msg, match_count, old_string, content)
+                err_msg += format_no_match_hint(err_msg, match_count, normalized_old, normalized_content)
             except Exception:
                 pass
             return PatchResult(error=err_msg)
+
+        # Re-apply dominant line endings
+        if is_crlf:
+            new_content = new_content.replace("\r\n", "\n").replace("\n", "\r\n")
+
+        # Re-apply BOM
+        if has_bom:
+            new_content = "\ufeff" + new_content
+
         # Write back
         write_result = self.write_file(path, new_content)
         if write_result.error:
@@ -1065,8 +1148,8 @@ class ShellFileOperations(FileOperations):
         # every patch on Windows returns a bogus "wrote 39, read 42"
         # false-negative even though the edit landed correctly.  POSIX
         # backends don't translate, so this is a no-op there.
-        _verify_stdout_normalized = verify_result.stdout.replace("\r\n", "\n").replace("\r", "\n")
-        _new_content_normalized = new_content.replace("\r\n", "\n").replace("\r", "\n")
+        _verify_stdout_normalized = verify_result.stdout.replace("\r\n", "\n").replace("\r", "\n").lstrip("\ufeff")
+        _new_content_normalized = new_content.replace("\r\n", "\n").replace("\r", "\n").lstrip("\ufeff")
         if _verify_stdout_normalized != _new_content_normalized:
             return PatchResult(error=(
                 f"Post-write verification failed for {path}: on-disk content "
@@ -1077,12 +1160,12 @@ class ShellFileOperations(FileOperations):
             ))
 
         # Generate diff
-        diff = self._unified_diff(content, new_content, path)
+        diff = self._unified_diff(raw_content, new_content.lstrip("\ufeff"), path)
 
         # Auto-lint with delta refinement: only surface errors introduced
         # by this patch, filtering out pre-existing lint failures so the
         # agent isn't distracted by problems that were already there.
-        lint_result = self._check_lint_delta(path, pre_content=content, post_content=new_content)
+        lint_result = self._check_lint_delta(path, pre_content=raw_content, post_content=new_content)
 
         return PatchResult(
             success=True,
@@ -1448,6 +1531,9 @@ class ShellFileOperations(FileOperations):
 
         # Expand ~ and other shell paths
         path = self._expand_path(path)
+
+        if is_sensitive_read_denied(path):
+            return SearchResult(error=f"Read denied: '{path}' is a protected credential/environment file.")
         
         # Validate that the path exists before searching
         check = self._exec(f"test -e {self._escape_shell_arg(path)} && echo exists || echo not_found")
@@ -1605,6 +1691,7 @@ class ShellFileOperations(FileOperations):
             result = self._exec(cmd_plain, timeout=60)
             all_files = [f for f in result.stdout.strip().split('\n') if f]
 
+        all_files = [f for f in all_files if not is_sensitive_read_denied(f)]
         page = all_files[offset:offset + limit]
 
         return SearchResult(

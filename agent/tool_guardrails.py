@@ -77,6 +77,7 @@ class ToolCallGuardrailConfig:
     same_tool_failure_halt_after: int = 8
     no_progress_warn_after: int = 2
     no_progress_block_after: int = 5
+    repeated_mutating_warn_after: int = 0
     idempotent_tools: frozenset[str] = field(default_factory=lambda: IDEMPOTENT_TOOL_NAMES)
     mutating_tools: frozenset[str] = field(default_factory=lambda: MUTATING_TOOL_NAMES)
 
@@ -108,6 +109,10 @@ class ToolCallGuardrailConfig:
             no_progress_warn_after=_positive_int(
                 warn_after.get("idempotent_no_progress", data.get("no_progress_warn_after")),
                 defaults.no_progress_warn_after,
+            ),
+            repeated_mutating_warn_after=_positive_int(
+                warn_after.get("repeated_mutating", data.get("repeated_mutating_warn_after")),
+                defaults.repeated_mutating_warn_after,
             ),
             exact_failure_block_after=_positive_int(
                 hard_stop_after.get("exact_failure", data.get("exact_failure_block_after")),
@@ -232,6 +237,7 @@ class ToolCallGuardrailController:
         self._exact_failure_counts: dict[ToolCallSignature, int] = {}
         self._same_tool_failure_counts: dict[str, int] = {}
         self._no_progress: dict[ToolCallSignature, tuple[str, int]] = {}
+        self._mutating_call_counts: dict[ToolCallSignature, int] = {}
         self._halt_decision: ToolGuardrailDecision | None = None
 
     @property
@@ -352,6 +358,26 @@ class ToolCallGuardrailController:
 
         if not self._is_idempotent(tool_name):
             self._no_progress.pop(signature, None)
+            if tool_name in self.config.mutating_tools:
+                mutating_count = self._mutating_call_counts.get(signature, 0) + 1
+                self._mutating_call_counts[signature] = mutating_count
+                if (
+                    self.config.warnings_enabled
+                    and self.config.repeated_mutating_warn_after > 0
+                    and mutating_count >= self.config.repeated_mutating_warn_after
+                ):
+                    return ToolGuardrailDecision(
+                        action="warn",
+                        code="repeated_mutating_call",
+                        message=(
+                            f"{tool_name} was called {mutating_count} times with identical arguments. "
+                            "This looks like a loop; check whether this mutating call needs to be repeated."
+                        ),
+                        tool_name=tool_name,
+                        count=mutating_count,
+                        signature=signature,
+                    )
+                return ToolGuardrailDecision(tool_name=tool_name, count=mutating_count, signature=signature)
             return ToolGuardrailDecision(tool_name=tool_name, signature=signature)
 
         result_hash = _result_hash(result)

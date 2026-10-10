@@ -93,6 +93,26 @@ def fuzzy_find_and_replace(content: str, old_string: str, new_string: str,
                     f"Provide more context to make it unique, or use replace_all=True."
                 )
 
+            # Oversized fuzzy match guard (OpenCode inspired):
+            # When strategy is not exact, reject matches where the matched slice is
+            # disproportionately large compared to old_string (length > 3x or line count diff > 50%).
+            if strategy_name != "exact":
+                old_lines = len(old_string.splitlines()) or 1
+                old_len = len(old_string)
+                for start, end in matches:
+                    matched_slice = content[start:end]
+                    m_lines = len(matched_slice.splitlines()) or 1
+                    m_len = len(matched_slice)
+                    line_diff_ratio = abs(m_lines - old_lines) / max(old_lines, 1)
+                    if (old_len > 0 and m_len > 3 * old_len) or line_diff_ratio > 0.5:
+                        hint = find_closest_lines(old_string, content)
+                        hint_msg = f"\n\nClosest matching lines:\n{hint}" if hint else ""
+                        return content, 0, None, (
+                            f"Fuzzy match rejected: matched region differs significantly from old_string "
+                            f"(length {m_len} vs {old_len}, lines {m_lines} vs {old_lines}). "
+                            f"Provide more exact context to avoid ambiguous matching.{hint_msg}"
+                        )
+
             # Escape-drift guard: when the matched strategy is NOT `exact`,
             # we matched via some form of normalization. If new_string
             # contains shell/JSON-style escape sequences (\' or \") that

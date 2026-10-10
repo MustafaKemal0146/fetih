@@ -283,7 +283,15 @@ class FakeModelAgent:
 class BridgeServer:
     """Transport-agnostic JSON-RPC dispatcher."""
 
-    def __init__(self, *, token: str = "", require_auth: bool = True, fake_model: bool = False):
+    def __init__(
+        self,
+        *,
+        token: str = "",
+        require_auth: bool = True,
+        fake_model: bool = False,
+        store_path: Optional[str] = None,
+        store: Optional[Any] = None,
+    ):
         self.token = token
         self.require_auth = require_auth
         self.fake_model = fake_model or bool(os.getenv("FETIH_FAKE_MODEL"))
@@ -294,10 +302,14 @@ class BridgeServer:
         self._findings: List[Dict[str, Any]] = []
         self._started = time.time()
 
-        from fetih_constants import get_fetih_home
-        from fetih_desktop_bridge.session_store import SessionStore
-        db_path = os.path.join(get_fetih_home(), "desktop_sessions.db")
-        self.store = SessionStore(db_path)
+        if store is not None:
+            self.store = store
+        else:
+            from fetih_constants import get_fetih_home
+            from fetih_desktop_bridge.session_store import SessionStore
+
+            db_path = str(store_path) if store_path else os.path.join(get_fetih_home(), "desktop_sessions.db")
+            self.store = SessionStore(db_path)
 
         self._register_methods()
 
@@ -404,6 +416,7 @@ class BridgeServer:
                 "session.send": self._m_session_send,
                 "session.cancel": self._m_session_cancel,
                 "session.approve": self._m_session_approve,
+                "session.compress": self._m_session_compress,
                 "config.get": self._m_config_get,
                 "config.set": self._m_config_set,
                 "providers.list": self._m_providers_list,
@@ -420,6 +433,7 @@ class BridgeServer:
                 "shell.ensure_user": self._m_shell_ensure_user,
                 "system.reset_configuration": self._m_system_reset_configuration,
                 "system.wipe_all_data": self._m_system_wipe_all_data,
+                "system.store_cleanup": self._m_system_store_cleanup,
             }
         )
 
@@ -739,6 +753,31 @@ class BridgeServer:
         agent.tool_start_callback = on_tool_start
         agent.tool_complete_callback = on_tool_complete
 
+        loop_guard_emitted = False
+
+        def on_status_callback(channel: str, message: Any) -> None:
+            nonlocal loop_guard_emitted
+            if "Tool guardrail halted" in str(message):
+                loop_guard_emitted = True
+                halt = getattr(agent, "_tool_guardrail_halt_decision", None)
+                t_name = halt.tool_name if halt else ""
+                cnt = halt.count if halt else 0
+                conn.emit_threadsafe(
+                    loop,
+                    event(
+                        "session.status",
+                        {
+                            "session_id": session.id,
+                            "kind": "loop_guard",
+                            "tool": t_name,
+                            "count": cnt,
+                            "text": f"Ajan aynı işlemi {cnt} kez tekrarladı; durduruldu",
+                        },
+                    ),
+                )
+
+        agent.status_callback = on_status_callback
+
         def _run() -> Dict[str, Any]:
             import threading
 
@@ -772,6 +811,22 @@ class BridgeServer:
 
         try:
             outcome = await asyncio.to_thread(_run)
+            if not loop_guard_emitted:
+                halt_decision = getattr(agent, "_tool_guardrail_halt_decision", None)
+                if halt_decision is not None and halt_decision.should_halt:
+                    conn.emit_threadsafe(
+                        loop,
+                        event(
+                            "session.status",
+                            {
+                                "session_id": session.id,
+                                "kind": "loop_guard",
+                                "tool": halt_decision.tool_name,
+                                "count": halt_decision.count,
+                                "text": f"Ajan aynı işlemi {halt_decision.count} kez tekrarladı; durduruldu",
+                            },
+                        ),
+                    )
         except Exception as exc:
             session.busy = False
             payload = {
@@ -946,6 +1001,25 @@ class BridgeServer:
             from tools.approval import resolve_gateway_approval
 
             resolved = resolve_gateway_approval(sid, choice, resolve_all=resolve_all)
+
+            if choice == "always":
+                cmd = str(params.get("command") or "").strip()
+                pat = str(params.get("pattern") or "").strip()
+                if not pat and cmd:
+                    first_tok = cmd.split()[0]
+                    pat = f"{first_tok} *"
+                if pat:
+                    try:
+                        from fetih_cli.config import load_config, save_config_value
+                        cfg = load_config()
+                        perms = cfg.get("permissions") or {}
+                        rules = list(perms.get("rules") or [])
+                        new_r = {"tool": str(params.get("tool") or "terminal"), "match": pat, "action": "allow"}
+                        if new_r not in rules:
+                            rules.append(new_r)
+                            save_config_value("permissions.rules", rules)
+                    except Exception as ex:
+                        logger.warning("Could not persist permission rule: %s", ex)
         except Exception as exc:
             raise BridgeError(INTERNAL_ERROR, f"approval resolve failed: {exc}")
 
@@ -970,6 +1044,53 @@ class BridgeServer:
             pass
 
         return {"resolved": resolved, "choice": choice, "session_id": sid}
+
+    def _m_session_compress(self, conn, params):
+        sid = str(params.get("session_id") or "")
+        if not sid:
+            raise BridgeError(INVALID_PARAMS, "missing 'session_id'")
+        session = self.sessions.get(sid)
+        if session is None:
+            if self.store.exists(sid):
+                p = _session_params(params)
+                p["session_id"] = sid
+                session = self._build_session(**p)
+                self.sessions[session.id] = session
+            else:
+                raise BridgeError(SESSION_NOT_FOUND, f"no such session: {sid}")
+
+        agent = getattr(session, "agent", None)
+        compressor = getattr(agent, "context_compressor", None)
+        if compressor is None:
+            from agent.context_compressor import ContextCompressor
+            compressor = ContextCompressor(
+                model=getattr(session, "model", "default") or "default",
+                quiet_mode=True,
+            )
+
+        protect_tail = params.get("protect_tail_tokens")
+        if protect_tail is not None:
+            try:
+                protect_tail = int(protect_tail)
+            except (ValueError, TypeError):
+                protect_tail = None
+
+        messages = getattr(session, "history", [])
+        if not messages and hasattr(agent, "_session_messages"):
+            messages = agent._session_messages or []
+
+        from agent.model_metadata import estimate_messages_tokens_rough
+        pruned_msgs, pruned_count = compressor.prune_only(messages, protect_tail_tokens=protect_tail)
+        session.history = pruned_msgs
+        if hasattr(agent, "_session_messages"):
+            agent._session_messages = pruned_msgs
+
+        tokens_after = estimate_messages_tokens_rough(pruned_msgs)
+        return {
+            "session_id": sid,
+            "pruned_count": pruned_count,
+            "tokens_after": tokens_after,
+        }
 
     # ── config.* ────────────────────────────────────────────────────────
 
@@ -1548,6 +1669,46 @@ class BridgeServer:
         result["restart_required"] = True
         return result
 
+    def _m_system_store_cleanup(self, conn, params):
+        retention_days = params.get("retention_days")
+        max_db_mb = params.get("max_db_mb")
+
+        cfg = {}
+        try:
+            from fetih_cli.config import load_config
+            cfg = load_config()
+        except Exception:
+            pass
+        desktop_cfg = cfg.get("desktop") or {}
+        store_cfg = desktop_cfg.get("store") or {}
+
+        if retention_days is None:
+            retention_days = store_cfg.get("retention_days", 30)
+        try:
+            retention_days = int(retention_days)
+        except (ValueError, TypeError):
+            retention_days = 30
+
+        if max_db_mb is None:
+            max_db_mb = store_cfg.get("max_db_mb", 100)
+        try:
+            max_db_mb = int(max_db_mb)
+        except (ValueError, TypeError):
+            max_db_mb = 100
+
+        active_ids = set(self.sessions.keys())
+        initial_bytes = self.store._get_db_size_bytes()
+        deleted_by_age = self.store.prune_by_age(retention_days, active_session_ids=active_ids)
+        cap_res = self.store.enforce_size_cap(max_db_mb, active_session_ids=active_ids)
+        total_deleted = deleted_by_age + cap_res.get("deleted_sessions", 0)
+        final_bytes = self.store._get_db_size_bytes()
+        freed_mb = max(0.0, (initial_bytes - final_bytes) / (1024 * 1024))
+
+        return {
+            "deleted_sessions": total_deleted,
+            "freed_mb": round(freed_mb, 2),
+        }
+
     # ── diagnostics.* ───────────────────────────────────────────────────
 
     def _m_diagnostics_info(self, conn, params):
@@ -1683,6 +1844,12 @@ class BridgeServer:
             session_db = None
 
         work_dir = str(cwd) if cwd else os.getcwd()
+        try:
+            from fetih_desktop_bridge.workspace import apply_workspace
+
+            apply_workspace(work_dir)
+        except Exception:
+            pass
         effective_sid = session_id or uuid.uuid4().hex[:12]
 
         if os.getenv("FETIH_BRIDGE_MOCK_AGENT") == "1":
@@ -1738,6 +1905,23 @@ class BridgeServer:
 
         agent.suppress_status_output = True
         agent.tool_gen_callback = None
+        agent.is_desktop_bridge = True
+        agent.prune_enabled = True
+
+        # Enable hard-stop loop guard by default for desktop bridge sessions
+        try:
+            from dataclasses import replace
+            from agent.tool_guardrails import ToolCallGuardrailController
+
+            desktop_cfg = cfg.get("desktop") or {}
+            loop_guard_enabled = bool(desktop_cfg.get("loop_guard_enabled", True))
+            if loop_guard_enabled and hasattr(agent, "_tool_guardrails"):
+                curr_cfg = agent._tool_guardrails.config
+                agent._tool_guardrails = ToolCallGuardrailController(
+                    replace(curr_cfg, hard_stop_enabled=True)
+                )
+        except Exception:
+            pass
 
         # Reconstruct history from store if available
         history: List[Dict[str, Any]] = []

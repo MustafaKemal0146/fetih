@@ -1323,8 +1323,9 @@ def init_agent(
             provider=agent.provider,
             api_mode=agent.api_mode,
             abort_on_summary_failure=compression_abort_on_summary_failure,
-        )
     agent.compression_enabled = compression_enabled
+    agent.prune_enabled = str(_ctx_cfg.get("prune_enabled", False)).lower() in {"true", "1", "yes"}
+    agent.is_desktop_bridge = False
 
     # Reject models whose context window is below the minimum required
     # for reliable tool-calling workflows (64K tokens).

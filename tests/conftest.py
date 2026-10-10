@@ -323,6 +323,7 @@ def _hermetic_environment(tmp_path, monkeypatch):
     (fake_fetih_home / "cron").mkdir()
     (fake_fetih_home / "memories").mkdir()
     (fake_fetih_home / "skills").mkdir()
+    (fake_fetih_home / ".tirith-install-failed").write_text("hermetic_test_env")
     monkeypatch.setenv("FETIH_HOME", str(fake_fetih_home))
 
     # 4. Deterministic locale / timezone / hashseed. CI runs in UTC with
@@ -408,6 +409,14 @@ def _reset_module_state():
         # falls through to the env var / default path, matching a fresh
         # process.
         _approval_mod._approval_session_key.set("")
+    except Exception:
+        pass
+
+    # --- tools.tirith_security ---
+    try:
+        from tools import tirith_security as _ts_mod
+        _ts_mod._resolved_path = None
+        _ts_mod._install_failure_reason = ""
     except Exception:
         pass
 

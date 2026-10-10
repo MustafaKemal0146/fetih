@@ -1905,6 +1905,21 @@ def terminal_tool(
                     "error": workdir_error,
                     "status": "blocked"
                 }, ensure_ascii=False)
+            from agent.file_safety import is_outside_safe_root
+            if is_outside_safe_root(workdir):
+                from tools.approval import request_action_approval
+                choice = request_action_approval(
+                    action=f"terminal workdir: {workdir}",
+                    description=f"Çalışma klasörü dışına çıkma: {workdir}",
+                    allow_permanent=False,
+                )
+                if choice not in ("once", "session", "always"):
+                    return json.dumps({
+                        "output": "",
+                        "exit_code": -1,
+                        "error": f"Workdir denied: '{workdir}' is outside the workspace safe root.",
+                        "status": "blocked",
+                    }, ensure_ascii=False)
 
         # Prepare command for execution
         pty_disabled_reason = None

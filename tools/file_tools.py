@@ -8,7 +8,11 @@ import os
 import threading
 from pathlib import Path
 
-from agent.file_safety import get_read_block_error
+from agent.file_safety import (
+    get_read_block_error,
+    get_sensitive_read_error,
+    is_sensitive_read_denied,
+)
 from tools.binary_extensions import has_binary_extension
 from tools.file_operations import (
     ShellFileOperations,
@@ -478,6 +482,11 @@ def read_file_tool(path: str, offset: int = 1, limit: int = 500, task_id: str = 
         block_error = get_read_block_error(path)
         if block_error:
             return json.dumps({"error": block_error})
+
+        # ── Sensitive credential guard ───────────────────────────────
+        sens_error = get_sensitive_read_error(path)
+        if sens_error:
+            return json.dumps({"error": sens_error})
 
         # ── Dedup check ───────────────────────────────────────────────
         # If we already read this exact (path, offset, limit) and the
@@ -949,6 +958,10 @@ def search_tool(pattern: str, target: str = "content", path: str = ".",
                 task_id: str = "default") -> str:
     """Search for content or files."""
     try:
+        if is_sensitive_read_denied(path):
+            return json.dumps({
+                "error": f"Read denied: '{path}' is a protected credential/environment file."
+            })
         offset, limit = normalize_search_pagination(offset, limit)
 
         # Track searches to detect *consecutive* repeated search loops.

@@ -329,6 +329,42 @@ def _strip_historical_media(messages: List[Dict[str, Any]]) -> List[Dict[str, An
     return result if changed else messages
 
 
+def _summarize_args_for_prune(tool_name: str, args_input: Any) -> str:
+    """Summarize tool arguments for prune_only output."""
+    if not args_input:
+        return ""
+    if isinstance(args_input, str):
+        try:
+            parsed = json.loads(args_input) if args_input.strip() else {}
+        except Exception:
+            return args_input[:40]
+    elif isinstance(args_input, dict):
+        parsed = args_input
+    else:
+        return str(args_input)[:40]
+
+    if not isinstance(parsed, dict) or not parsed:
+        return ""
+
+    if tool_name == "terminal" and "command" in parsed:
+        cmd = str(parsed["command"])
+        return cmd[:60] + "..." if len(cmd) > 60 else cmd
+    if tool_name in {"read_file", "write_file", "patch"} and "path" in parsed:
+        return str(parsed["path"])
+    if tool_name == "web_search" and "query" in parsed:
+        return f"query={parsed['query']}"
+    if tool_name in {"skill_view", "skill_manage"} and "name" in parsed:
+        return str(parsed["name"])
+
+    parts = []
+    for k, v in list(parsed.items())[:2]:
+        val = str(v)
+        if len(val) > 30:
+            val = val[:27] + "..."
+        parts.append(f"{k}={val}")
+    return " ".join(parts)
+
+
 def _summarize_tool_result(tool_name: str, tool_args: str, tool_content: str) -> str:
     """Create an informative 1-line summary of a tool call + result.
 
@@ -511,7 +547,7 @@ class ContextCompressor(ContextEngine):
 
     def __init__(
         self,
-        model: str,
+        model: str = "default",
         threshold_percent: float = 0.50,
         protect_first_n: int = 3,
         protect_last_n: int = 20,
@@ -801,6 +837,103 @@ class ContextCompressor(ContextEngine):
                 new_tcs.append(tc)
             if modified:
                 result[i] = {**msg, "tool_calls": new_tcs}
+
+        return result, pruned
+
+    def prune_only(
+        self,
+        messages: List[Dict[str, Any]],
+        protect_tail_tokens: int | None = None,
+    ) -> tuple[List[Dict[str, Any]], int]:
+        """Prune old tool outputs without full LLM summarization (#64).
+
+        Protects the last 2 user turns + protect_tail_tokens (if provided),
+        preserves skill_view outputs, replaces pruned tool results with:
+            [Eski araç çıktısı temizlendi: <tool> <args_summary>, <N> karakter]
+        and maintains tool_call_id parity.
+        """
+        if not messages:
+            return messages, 0
+
+        result = [m.copy() for m in messages]
+        pruned = 0
+
+        # Build index: tool_call_id -> (tool_name, arguments_str)
+        call_id_to_tool: Dict[str, tuple[str, str]] = {}
+        for msg in result:
+            if msg.get("role") == "assistant":
+                for tc in msg.get("tool_calls") or []:
+                    if isinstance(tc, dict):
+                        cid = tc.get("id", "")
+                        fn = tc.get("function", {})
+                        call_id_to_tool[cid] = (fn.get("name", "unknown"), fn.get("arguments", ""))
+                    else:
+                        cid = getattr(tc, "id", "") or ""
+                        fn = getattr(tc, "function", None)
+                        name = getattr(fn, "name", "unknown") if fn else "unknown"
+                        args_str = getattr(fn, "arguments", "") if fn else ""
+                        call_id_to_tool[cid] = (name, args_str)
+
+        # Protect the last 2 user turns
+        user_indices = [i for i, m in enumerate(result) if m.get("role") == "user"]
+        if len(user_indices) >= 2:
+            last_2_user_start = user_indices[-2]
+        elif len(user_indices) == 1:
+            last_2_user_start = user_indices[0]
+        else:
+            last_2_user_start = len(result)
+
+        # Also protect tail tokens if provided
+        if protect_tail_tokens is not None and protect_tail_tokens > 0:
+            accumulated = 0
+            tail_tokens_start = len(result)
+            for i in range(len(result) - 1, -1, -1):
+                msg = result[i]
+                raw_content = msg.get("content") or ""
+                content_len = _content_length_for_budget(raw_content)
+                msg_tokens = content_len // _CHARS_PER_TOKEN + 10
+                for tc in msg.get("tool_calls") or []:
+                    if isinstance(tc, dict):
+                        args = tc.get("function", {}).get("arguments", "")
+                        msg_tokens += len(args) // _CHARS_PER_TOKEN
+                if accumulated + msg_tokens > protect_tail_tokens:
+                    tail_tokens_start = i + 1
+                    break
+                accumulated += msg_tokens
+                tail_tokens_start = i
+            prune_boundary = min(last_2_user_start, tail_tokens_start)
+        else:
+            prune_boundary = last_2_user_start
+
+        for i in range(prune_boundary):
+            msg = result[i]
+            if msg.get("role") != "tool":
+                continue
+
+            call_id = msg.get("tool_call_id", "")
+            tool_name, tool_args = call_id_to_tool.get(call_id, ("", ""))
+            if not tool_name:
+                tool_name = msg.get("name") or "tool"
+
+            # Preserves skill_view outputs
+            if tool_name == "skill_view" or msg.get("name") == "skill_view":
+                continue
+
+            content = msg.get("content", "")
+            if isinstance(content, str) and content.startswith("[Eski araç çıktısı temizlendi:"):
+                continue
+
+            char_count = len(content) if isinstance(content, str) else len(str(content or ""))
+            args_summary = _summarize_args_for_prune(tool_name, tool_args)
+            if args_summary:
+                desc = f"{tool_name} {args_summary}"
+            else:
+                desc = tool_name
+            placeholder = f"[Eski araç çıktısı temizlendi: {desc}, {char_count} karakter]"
+
+            # Maintains tool_call_id parity
+            result[i] = {**msg, "content": placeholder}
+            pruned += 1
 
         return result, pruned
 

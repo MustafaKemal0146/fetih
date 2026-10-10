@@ -810,6 +810,110 @@ def prompt_dangerous_approval(command: str, description: str,
         sys.stdout.flush()
 
 
+def request_action_approval(
+    action: str,
+    description: str,
+    pattern_key: str | None = None,
+    allow_permanent: bool = False,
+    timeout_seconds: int | None = None,
+) -> str:
+    """Request approval for a discrete action (e.g. writing outside workspace safe root).
+
+    Routes through the bridge/gateway async approval queue if a session notify callback
+    is registered, otherwise prompts via CLI.
+    Returns: 'once', 'session', 'always', or 'deny'.
+    """
+    key = pattern_key or action
+    session_key = get_current_session_key(default="")
+    if key and is_approved(session_key, key):
+        return "session"
+
+    with _lock:
+        notify_cb = _gateway_notify_cbs.get(session_key)
+
+    if notify_cb is not None:
+        approval_data = {
+            "command": action,
+            "pattern_key": key,
+            "pattern_keys": [key],
+            "description": description,
+        }
+        entry = _ApprovalEntry(approval_data)
+        with _lock:
+            _gateway_queues.setdefault(session_key, []).append(entry)
+
+        _fire_approval_hook(
+            "pre_approval_request",
+            command=action,
+            description=description,
+            pattern_key=key,
+            pattern_keys=[key],
+            session_key=session_key,
+            surface="gateway",
+        )
+
+        try:
+            notify_cb(approval_data)
+        except Exception as exc:
+            logger.warning("Gateway approval notify failed: %s", exc)
+            with _lock:
+                queue = _gateway_queues.get(session_key, [])
+                if entry in queue:
+                    queue.remove(entry)
+                if not queue:
+                    _gateway_queues.pop(session_key, None)
+            return "deny"
+
+        timeout = timeout_seconds or _get_approval_config().get("gateway_timeout", 300)
+        try:
+            timeout = int(timeout)
+        except (ValueError, TypeError):
+            timeout = 300
+
+        resolved = entry.event.wait(timeout=max(timeout, 0))
+
+        with _lock:
+            queue = _gateway_queues.get(session_key, [])
+            if entry in queue:
+                queue.remove(entry)
+            if not queue:
+                _gateway_queues.pop(session_key, None)
+
+        choice = entry.result if resolved else "deny"
+        _outcome = "timeout" if not resolved else (choice if choice else "timeout")
+        _fire_approval_hook(
+            "post_approval_response",
+            command=action,
+            description=description,
+            pattern_key=key,
+            pattern_keys=[key],
+            session_key=session_key,
+            surface="gateway",
+            choice=_outcome,
+        )
+
+        if choice in ("session", "always"):
+            approve_session(session_key, key)
+            if choice == "always" and allow_permanent:
+                approve_permanent(key)
+                save_permanent_allowlist(_permanent_approved)
+        return choice or "deny"
+
+    # CLI fallback
+    choice = prompt_dangerous_approval(
+        command=action,
+        description=description,
+        timeout_seconds=timeout_seconds,
+        allow_permanent=allow_permanent,
+    )
+    if choice in ("session", "always"):
+        approve_session(session_key, key)
+        if choice == "always" and allow_permanent:
+            approve_permanent(key)
+            save_permanent_allowlist(_permanent_approved)
+    return choice
+
+
 def _normalize_approval_mode(mode) -> str:
     """Normalize approval mode values loaded from YAML/config.
 
@@ -1072,6 +1176,25 @@ def check_all_command_guards(command: str, env_type: str,
         logger.warning("Sudo stdin guard block: %s (command: %s)",
                        sudo_guess_desc, command[:200])
         return _sudo_stdin_block_result(sudo_guess_desc)
+
+    # == User-defined permission rules (#59) ==
+    try:
+        from tools.permission_rules import evaluate as evaluate_permission
+        perm_action = evaluate_permission("terminal", command)
+        if perm_action == "deny":
+            logger.warning("Permission rule blocked command: %s", command[:200])
+            return {
+                "approved": False,
+                "message": f"Kullanıcı izin kuralı bu komutu engelledi: {command}",
+            }
+        elif perm_action == "allow":
+            # If user explicitly allowed, check if it's not a dangerous pattern
+            is_dangerous, _pk, _desc = detect_dangerous_command(command)
+            if not is_dangerous:
+                return {"approved": True, "message": None}
+            # If dangerous, fall through so user is still asked for dangerous patterns
+    except Exception as e:
+        logger.debug("Permission rule evaluation failed: %s", e)
 
     # --yolo or approvals.mode=off: bypass all approval prompts.
     # Gateway /yolo is session-scoped; CLI --yolo remains process-scoped.
