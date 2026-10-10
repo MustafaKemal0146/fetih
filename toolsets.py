@@ -294,6 +294,12 @@ TOOLSETS = {
         "includes": []
     },
 
+    "capability_map": {
+        "description": "Unified bridge tool for extended tools and skills without context bloat (#75)",
+        "tools": ["use_tool"],
+        "includes": []
+    },
+
 
     # Scenario-specific toolsets
     

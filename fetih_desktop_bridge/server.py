@@ -311,6 +311,16 @@ class BridgeServer:
             db_path = str(store_path) if store_path else os.path.join(get_fetih_home(), "desktop_sessions.db")
             self.store = SessionStore(db_path)
 
+        try:
+            from fetih_cli.config import load_config
+            cfg = load_config()
+            store_cfg = (cfg.get("desktop") or {}).get("store") or {}
+            ret_days = int(store_cfg.get("retention_days", 0) or 0)
+            if ret_days > 0:
+                self.store.prune_by_age(ret_days)
+        except Exception:
+            pass
+
         self._register_methods()
 
     # ── connection bookkeeping ──────────────────────────────────────────
@@ -425,6 +435,8 @@ class BridgeServer:
                 "providers.probe_local": self._m_providers_probe_local,
                 "providers.auth_status": self._m_providers_auth_status,
                 "skills.list": self._m_skills_list,
+                "skills.map": self._m_skills_map,
+                "capabilities.map": self._m_capabilities_map,
                 "findings.list": self._m_findings_list,
                 "findings.scan": self._m_findings_scan,
                 "findings.export": self._m_findings_export,
@@ -1461,6 +1473,41 @@ class BridgeServer:
             "skills": skills[offset : offset + limit],
         }
 
+    def _m_skills_map(self, conn, params):
+        skills = _collect_skills()
+        by_category: Dict[str, List[Dict[str, str]]] = {}
+        for s in skills:
+            cat = s.get("category") or "other"
+            by_category.setdefault(cat, []).append({
+                "name": s.get("name") or "",
+                "description": s.get("description") or "",
+                "source": s.get("source") or "bundled",
+            })
+        return {
+            "total": len(skills),
+            "categories": {
+                cat: {"count": len(items), "skills": items}
+                for cat, items in sorted(by_category.items())
+            },
+        }
+
+    def _m_capabilities_map(self, conn, params):
+        from tools.capability_map import build_capability_map
+
+        tool_map = build_capability_map()
+        skills = _collect_skills()
+        skill_cats: Dict[str, int] = {}
+        for s in skills:
+            cat = s.get("category") or "other"
+            skill_cats[cat] = skill_cats.get(cat, 0) + 1
+        return {
+            "tools": tool_map,
+            "skills": {
+                "total": len(skills),
+                "categories": skill_cats,
+            },
+        }
+
     # ── findings.* ──────────────────────────────────────────────────────
 
     def _m_findings_list(self, conn, params):
@@ -1683,18 +1730,18 @@ class BridgeServer:
         store_cfg = desktop_cfg.get("store") or {}
 
         if retention_days is None:
-            retention_days = store_cfg.get("retention_days", 30)
+            retention_days = store_cfg.get("retention_days", 0)
         try:
             retention_days = int(retention_days)
         except (ValueError, TypeError):
-            retention_days = 30
+            retention_days = 0
 
         if max_db_mb is None:
-            max_db_mb = store_cfg.get("max_db_mb", 100)
+            max_db_mb = store_cfg.get("max_db_mb", 500)
         try:
             max_db_mb = int(max_db_mb)
         except (ValueError, TypeError):
-            max_db_mb = 100
+            max_db_mb = 500
 
         active_ids = set(self.sessions.keys())
         initial_bytes = self.store._get_db_size_bytes()
@@ -1918,7 +1965,7 @@ class BridgeServer:
             if loop_guard_enabled and hasattr(agent, "_tool_guardrails"):
                 curr_cfg = agent._tool_guardrails.config
                 agent._tool_guardrails = ToolCallGuardrailController(
-                    replace(curr_cfg, hard_stop_enabled=True)
+                    replace(curr_cfg, hard_stop_enabled=True, repeated_mutating_warn_after=3)
                 )
         except Exception:
             pass

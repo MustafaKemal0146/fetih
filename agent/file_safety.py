@@ -133,7 +133,7 @@ def is_sensitive_read_denied(path: str) -> bool:
         else:
             return True
 
-    if "id_rsa" in name or name.endswith(".pem"):
+    if name.startswith("id_rsa") or name.endswith(".pem"):
         return True
 
     try:

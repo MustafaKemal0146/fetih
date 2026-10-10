@@ -23,7 +23,9 @@ class SessionStore:
 
     def __init__(self, path: str):
         self.path = path
-        os.makedirs(os.path.dirname(path), exist_ok=True)
+        dir_name = os.path.dirname(path)
+        if dir_name:
+            os.makedirs(dir_name, exist_ok=True)
         self._lock = threading.RLock()
         self.db = sqlite3.connect(path, check_same_thread=False)
         self.db.row_factory = sqlite3.Row
@@ -187,6 +189,8 @@ class SessionStore:
         """Deletes unpinned non-active sessions older than retention_days.
         Returns the number of deleted sessions.
         """
+        if retention_days <= 0:
+            return 0
         cutoff = time.time() - (retention_days * 86400)
         active_set = set(active_session_ids or [])
         deleted = 0

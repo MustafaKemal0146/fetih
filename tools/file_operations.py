@@ -279,7 +279,7 @@ class FileOperations(ABC):
         ...
 
     @abstractmethod
-    def write_file(self, path: str, content: str) -> WriteResult:
+    def write_file(self, path: str, content: str, _skip_safe_root_check: bool = False) -> WriteResult:
         """Write content to a file, creating directories as needed."""
         ...
 
@@ -909,7 +909,7 @@ class ShellFileOperations(FileOperations):
     # WRITE Implementation
     # =========================================================================
 
-    def write_file(self, path: str, content: str) -> WriteResult:
+    def write_file(self, path: str, content: str, _skip_safe_root_check: bool = False) -> WriteResult:
         """
         Write content to a file, creating parent directories as needed.
 
@@ -938,7 +938,7 @@ class ShellFileOperations(FileOperations):
         if is_system_write_denied(path):
             return WriteResult(error=f"Write denied: '{path}' is a protected system/credential file.")
 
-        if is_outside_safe_root(path):
+        if not _skip_safe_root_check and is_outside_safe_root(path):
             from tools.approval import request_action_approval
             choice = request_action_approval(
                 action=path,
@@ -1128,7 +1128,7 @@ class ShellFileOperations(FileOperations):
             new_content = "\ufeff" + new_content
 
         # Write back
-        write_result = self.write_file(path, new_content)
+        write_result = self.write_file(path, new_content, _skip_safe_root_check=True)
         if write_result.error:
             return PatchResult(error=f"Failed to write changes: {write_result.error}")
 
